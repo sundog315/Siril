@@ -378,7 +378,10 @@ int seq_load_image(sequence *seq, int index, fits *dest, gboolean load_it) {
 			set_cutoff_sliders_values();	// update values for contrast sliders for this image
 			set_display_mode();		// display the display mode in the combo box
 		}
-		redraw(com.cvport, REMAP_ALL);	// redraw and display image
+		if (copy_rendering_settings_when_chained(TRUE))
+			redraw(com.cvport, REMAP_ALL);
+		else
+			redraw(com.cvport, REMAP_ONLY);
 		redraw_previews();		// redraw registration preview areas
 		display_filename();		// display filename in gray window
 		adjust_reginfo();		// change registration displayed/editable values
