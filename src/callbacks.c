@@ -1437,7 +1437,7 @@ gboolean on_maxscale_release(GtkWidget *widget, GdkEvent *event,
 		com.sliders = USER;
 		sliders_mode_set_state(com.sliders);
 	}
-	if (copy_rendering_settings_when_chained(FALSE))
+	if (copy_rendering_settings_when_chained(TRUE))
 		redraw(com.cvport, REMAP_ALL);
 	else
 		redraw(com.cvport, REMAP_ONLY);
