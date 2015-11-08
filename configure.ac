@@ -56,7 +56,12 @@ dnl check fftw3
 PKG_CHECK_MODULES(FFTW, [fftw3])
 
 dnl check GNU Scientific Library
-PKG_CHECK_MODULES(GSL, [gsl])
+PKG_CHECK_MODULES(GSL, [gsl < 2],
+		  [AC_DEFINE([HAVE_GSL_1], [1], [Use GSL 1])],
+		  [PKG_CHECK_MODULES(GSL, [gsl >= 2],
+				     [AC_DEFINE([HAVE_GSL_2], [1], [Use GSL 2])
+				     ])
+		  ])
 
 dnl check cfitsio
 PKG_CHECK_MODULES(CFITSIO, [cfitsio])
