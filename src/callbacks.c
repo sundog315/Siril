@@ -2553,7 +2553,7 @@ void calculate_fwhm(GtkWidget *widget) {
 				double roundness;
 				double fwhm_val;
 
-				fwhm_val = get_fwhm(&gfit, layer, &roundness);
+				fwhm_val = psf_get_fwhm(&gfit, layer, &roundness);
 				g_snprintf(buf, sizeof(buf), "fwhm = %.2f, r = %.2f", fwhm_val,
 						roundness);
 			} else
@@ -4974,7 +4974,7 @@ void on_menu_gray_psf_activate(GtkMenuItem *menuitem, gpointer user_data) {
 				"Warning", "gtk-dialog-warning");
 		return;
 	}
-	result = get_Minimisation(&gfit, layer, &com.selection);
+	result = psf_get_minimisation(&gfit, layer, &com.selection);
 	if (!result)
 		return;
 	g_snprintf(msg, sizeof(msg),

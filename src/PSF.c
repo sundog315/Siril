@@ -42,110 +42,8 @@
 
 const double radian_conversion = ((3600.0 * 180.0) / M_PI) / 1.0E3;
 
-/* Returns the largest FWHM.
- * The optional output parameter roundness is the ratio between the two axis FWHM */
-double get_fwhm(fits *fit, int layer, double *roundness) {
-	fitted_PSF *result = get_Minimisation(fit, layer, &com.selection);
-	if (result == NULL) {
-		*roundness = 0.0;
-		return 0.0;
-	}
-	double retval;
-	retval = result->fwhmx;
-	if (roundness)
-		*roundness = result->fwhmy / result->fwhmx;
-	free(result);
-	return retval;
-}
-
-/* Computes the FWHM on data in the selection rectangle of image fit.
- * Selection rectangle is passed as third argument.
- * Return value is a structure, type fitted_PSF, that has to be freed after use.
- */
-fitted_PSF *get_Minimisation(fits *fit, int layer, rectangle *area) {
-	WORD *from;
-	int stridefrom, i, j;
-	fitted_PSF *result;
-	double bg = background(fit, layer, area);
-	//~ fprintf(stdout, "background: %g\n", bg);
-
-	// create the matrix with values from the selected rectangle
-	gsl_matrix *z = gsl_matrix_alloc(area->h, area->w);
-	from = fit->pdata[layer] + (fit->ry - area->y - area->h) * fit->rx
-			+ area->x;
-	stridefrom = fit->rx - area->w;
-
-	for (i = 0; i < area->h; i++) {
-		for (j = 0; j < area->w; j++) {
-			gsl_matrix_set(z, i, j, (double) *from);
-			from++;
-		}
-		from += stridefrom;
-	}
-	result = global_Minimisation(z, bg, layer, TRUE);
-	if (result)
-		update_units(fit, &result);
-	gsl_matrix_free(z);
-	return result;
-}
-
-/* This function is the global minimisation. Every call to the minimisation
- * must come over here. It will check if the difference between Sx and Sy is
- * larger than or equal to 0.01 pixel.
- * In this case, Dynamic PSF fits additional angle parameter wich is the
- * rotation angle of the X axis with respect to the centroid coordinates: so,
- * by design we set Sx>Sy.
- * If the difference is smaller OR if fit_Angle is equal to FALSE (in the case
- * of the star_finder algorithm), no angle parameter is fitted.
- * The function returns NULL if values look bizarre.
- */
-fitted_PSF *global_Minimisation(gsl_matrix* z, double bg, int layer,
-		gboolean fit_Angle) {
-	fitted_PSF *psf;
-
-	// To compute good starting values, we first compute with no angle
-	if ((psf = minimiz_no_angle(z, bg, layer)) != NULL) {
-		if (fit_Angle && fabs(psf->sx - psf->sy) >= EPSILON) {
-			fitted_PSF *tmp_psf;
-			if ((tmp_psf = minimiz_angle(z, psf)) == NULL) {
-				free(psf);
-				return NULL;
-			}
-			free(psf);
-			psf = tmp_psf;
-		}
-		// Solve symmetry problem in order to have Sx>Sy in any case !!!
-		if (psf->sy > psf->sx) {
-			swap_param(&psf->sx, &psf->sy);
-			swap_param(&psf->fwhmx, &psf->fwhmy);
-			if (fit_Angle && psf->angle != 0.0) {
-				if (psf->angle > 0.0)
-					psf->angle = -90.0 + psf->angle;
-				else
-					psf->angle = 90.0 + psf->angle;
-			}
-		}
-
-		/* We normalize B, A and the RMSE for the output */
-		WORD norm = get_normalized_value(&gfit);
-		psf->B = psf->B / (double) norm;
-		psf->A = psf->A / (double) norm;
-		psf->rmse = psf->rmse / (double) norm;
-
-//		/* We quickly test the result. If it is bad we return NULL */
-		if (!isfinite(psf->fwhmx) || !isfinite(psf->fwhmy) || psf->fwhmx <= 0.0
-				|| psf->fwhmy <= 0.0) {
-			free(psf);
-			psf = NULL;
-		}
-	}
-	/* When the first minimization gives NULL value, it's probably because the selected
-	 * area was not big enough: we need more samples than parameters to fit the area */
-	return psf;
-}
-
 /* Compute initial values for the algorithm from data in the pixel value matrix */
-gsl_vector* init_z(gsl_matrix* z, double bg) {
+static gsl_vector* psf_init_data(gsl_matrix* z, double bg) {
 	gsl_vector * MaxV = gsl_vector_alloc(5);
 	double max;
 	size_t NbRows = z->size1;
@@ -191,7 +89,7 @@ gsl_vector* init_z(gsl_matrix* z, double bg) {
 	return MaxV;
 }
 
-double get_Magnitude(gsl_matrix* z, double B) {
+static double psf_get_mag(gsl_matrix* z, double B) {
 	double intensity = 0.0, magnitude;
 	size_t NbRows = z->size1;
 	size_t NbCols = z->size2;
@@ -206,7 +104,7 @@ double get_Magnitude(gsl_matrix* z, double B) {
 }
 
 /* No angle */
-int Gaussian_f(const gsl_vector * x, void *PSF_data, gsl_vector * f) {
+static int psf_Gaussian_f(const gsl_vector * x, void *PSF_data, gsl_vector * f) {
 	size_t NbRows = ((struct PSF_data *) PSF_data)->NbRows;
 	size_t NbCols = ((struct PSF_data *) PSF_data)->NbCols;
 	size_t i, j;
@@ -235,7 +133,7 @@ int Gaussian_f(const gsl_vector * x, void *PSF_data, gsl_vector * f) {
 	return GSL_SUCCESS;
 }
 
-int Gaussian_df(const gsl_vector * x, void *PSF_data, gsl_matrix * J) {
+static int psf_Gaussian_df(const gsl_vector * x, void *PSF_data, gsl_matrix * J) {
 	size_t NbRows = ((struct PSF_data *) PSF_data)->NbRows;
 	size_t NbCols = ((struct PSF_data *) PSF_data)->NbCols;
 	size_t i, j;
@@ -268,15 +166,16 @@ int Gaussian_df(const gsl_vector * x, void *PSF_data, gsl_matrix * J) {
 	return GSL_SUCCESS;
 }
 
-int Gaussian_fdf(const gsl_vector * x, void *PSF_data, gsl_vector * f,
+int psf_Gaussian_fdf(const gsl_vector * x, void *PSF_data, gsl_vector * f,
 		gsl_matrix * J) {
-	Gaussian_f(x, PSF_data, f);
-	Gaussian_df(x, PSF_data, J);
+	psf_Gaussian_f(x, PSF_data, f);
+	psf_Gaussian_df(x, PSF_data, J);
 	return GSL_SUCCESS;
 }
 
 /* Angle */
-int Gaussian_f_An(const gsl_vector * x, void *PSF_data, gsl_vector * f) {
+static int psf_Gaussian_f_an(const gsl_vector * x, void *PSF_data,
+		gsl_vector * f) {
 	size_t NbRows = ((struct PSF_data *) PSF_data)->NbRows;
 	size_t NbCols = ((struct PSF_data *) PSF_data)->NbCols;
 	size_t n = ((struct PSF_data *) PSF_data)->n;
@@ -289,13 +188,13 @@ int Gaussian_f_An(const gsl_vector * x, void *PSF_data, gsl_vector * f) {
 	double y0 = gsl_vector_get(x, 3);
 	double SX = gsl_vector_get(x, 4);
 	double SY = gsl_vector_get(x, 5);
-	double An = gsl_vector_get(x, 6);
+	double alpha = gsl_vector_get(x, 6);
 	double tmpx, tmpy, tmpc, sumres = 0.;
 
 	for (i = 0; i < NbRows; i++) {
 		for (j = 0; j < NbCols; j++) {
-			tmpx = cos(An) * (j + 1 - x0) - sin(An) * (i + 1 - y0) + x0;
-			tmpy = sin(An) * (j + 1 - x0) + cos(An) * (i + 1 - y0) + y0;
+			tmpx = cos(alpha) * (j + 1 - x0) - sin(alpha) * (i + 1 - y0) + x0;
+			tmpy = sin(alpha) * (j + 1 - x0) + cos(alpha) * (i + 1 - y0) + y0;
 			tmpc = exp(-(SQR(tmpx-x0) / SX + SQR(tmpy-y0) / SY));
 			gsl_vector_set(f, NbCols * i + j,
 					(B + A * tmpc - y[NbCols * i + j]) / sigma[NbCols * i + j]);
@@ -307,7 +206,8 @@ int Gaussian_f_An(const gsl_vector * x, void *PSF_data, gsl_vector * f) {
 	return GSL_SUCCESS;
 }
 
-int Gaussian_df_An(const gsl_vector * x, void *PSF_data, gsl_matrix * J) {
+static int psf_Gaussian_df_an(const gsl_vector * x, void *PSF_data,
+		gsl_matrix * J) {
 	size_t NbRows = ((struct PSF_data *) PSF_data)->NbRows;
 	size_t NbCols = ((struct PSF_data *) PSF_data)->NbCols;
 	size_t i, j;
@@ -317,28 +217,28 @@ int Gaussian_df_An(const gsl_vector * x, void *PSF_data, gsl_matrix * J) {
 	double y0 = gsl_vector_get(x, 3);
 	double SX = gsl_vector_get(x, 4);
 	double SY = gsl_vector_get(x, 5);
-	double An = gsl_vector_get(x, 6);
+	double alpha = gsl_vector_get(x, 6);
 	double tmpx, tmpy, tmpc, tmpd, tmpderxr, tmpderyr;
 	double s;
 
 	for (i = 0; i < NbRows; i++) {
 		for (j = 0; j < NbCols; j++) {
-			tmpx = cos(An) * (j + 1 - x0) - sin(An) * (i + 1 - y0) + x0;
-			tmpy = sin(An) * (j + 1 - x0) + cos(An) * (i + 1 - y0) + y0;
+			tmpx = cos(alpha) * (j + 1 - x0) - sin(alpha) * (i + 1 - y0) + x0;
+			tmpy = sin(alpha) * (j + 1 - x0) + cos(alpha) * (i + 1 - y0) + y0;
 			s = sigma[NbCols * i + j];
 			tmpc = exp(-(SQR(tmpx-x0) / SX + SQR(tmpy-y0) / SY));
 			gsl_matrix_set(J, NbCols * i + j, 0, 1. / s);
 			gsl_matrix_set(J, NbCols * i + j, 1, tmpc / s);
-			tmpd = A * tmpc * 2 * (tmpx - x0) / SX * cos(An);
+			tmpd = A * tmpc * 2 * (tmpx - x0) / SX * cos(alpha);
 			gsl_matrix_set(J, NbCols * i + j, 2, tmpd / s);
-			tmpd = A * tmpc * 2 * (tmpy - y0) / SY * cos(An);
+			tmpd = A * tmpc * 2 * (tmpy - y0) / SY * cos(alpha);
 			gsl_matrix_set(J, NbCols * i + j, 3, tmpd / s);
 			tmpd = A * tmpc * SQR(tmpx - x0) / SQR(SX);
 			gsl_matrix_set(J, NbCols * i + j, 4, tmpd / s);
 			tmpd = A * tmpc * SQR(tmpy - y0) / SQR(SY);
 			gsl_matrix_set(J, NbCols * i + j, 5, tmpd / s);
-			tmpderxr = -sin(An) * (j + 1 - x0) - cos(An) * (i + 1 - y0);
-			tmpderyr = cos(An) * (j + 1 - x0) - sin(An) * (i + 1 - y0);
+			tmpderxr = -sin(alpha) * (j + 1 - x0) - cos(alpha) * (i + 1 - y0);
+			tmpderyr = cos(alpha) * (j + 1 - x0) - sin(alpha) * (i + 1 - y0);
 			tmpd = -A * tmpc
 					* (2 * (tmpx - x0) / SX * tmpderxr
 							+ 2 * (tmpy - y0) / SY * tmpderyr);
@@ -348,24 +248,25 @@ int Gaussian_df_An(const gsl_vector * x, void *PSF_data, gsl_matrix * J) {
 	return GSL_SUCCESS;
 }
 
-int Gaussian_fdf_An(const gsl_vector * x, void *PSF_data, gsl_vector * f,
-		gsl_matrix * J) {
-	Gaussian_f_An(x, PSF_data, f);
-	Gaussian_df_An(x, PSF_data, J);
+static int psf_Gaussian_fdf_an(const gsl_vector * x, void *PSF_data,
+		gsl_vector * f, gsl_matrix * J) {
+	psf_Gaussian_f_an(x, PSF_data, f);
+	psf_Gaussian_df_an(x, PSF_data, J);
 	return GSL_SUCCESS;
 }
 
-/* The function returns the fitted parameters without angle. However it 
- * returns NULL if the number of parameters is => to the pixel number. 
+/* The function returns the fitted parameters without angle. However it
+ * returns NULL if the number of parameters is => to the pixel number.
  */
-fitted_PSF *minimiz_no_angle(gsl_matrix* z, double background, int layer) {
+static fitted_PSF *psf_minimiz_no_angle(gsl_matrix* z, double background,
+		int layer) {
 	size_t i, j;
 	size_t NbRows = z->size1; //characteristics of the selection : height and width
 	size_t NbCols = z->size2;
 	const size_t p = 6;			// Number of parameters fitted
 	const size_t n = NbRows * NbCols;
 	fitted_PSF *psf = malloc(sizeof(fitted_PSF));
-	gsl_vector *MaxV = init_z(z, background);
+	gsl_vector *MaxV = psf_init_data(z, background);
 	int status;
 	unsigned int iter = 0;
 	gsl_matrix *covar = gsl_matrix_alloc(p, p);
@@ -387,9 +288,9 @@ fitted_PSF *minimiz_no_angle(gsl_matrix* z, double background, int layer) {
 	type = gsl_rng_default;
 	r = gsl_rng_alloc(type);
 
-	f.f = &Gaussian_f;
-	f.df = &Gaussian_df;
-	f.fdf = &Gaussian_fdf;
+	f.f = &psf_Gaussian_f;
+	f.df = &psf_Gaussian_df;
+	f.fdf = &psf_Gaussian_fdf;
 	f.n = n;
 	if (n <= p) {
 		free(psf);
@@ -448,7 +349,7 @@ fitted_PSF *minimiz_no_angle(gsl_matrix* z, double background, int layer) {
 	//Units
 	psf->units = "px";
 	//Magnitude
-	psf->mag = get_Magnitude(z, FIT(0));
+	psf->mag = psf_get_mag(z, FIT(0));
 	//Layer: not fitted
 	psf->layer = layer;
 	//RMSE
@@ -477,7 +378,7 @@ fitted_PSF *minimiz_no_angle(gsl_matrix* z, double background, int layer) {
  * NULL if the number of parameters is => to the pixel number.
  * This should not happend because this case is already treated by the
  * minimiz_no_angle function */
-fitted_PSF *minimiz_angle(gsl_matrix* z, fitted_PSF *psf) {
+static fitted_PSF *psf_minimiz_angle(gsl_matrix* z, fitted_PSF *psf) {
 	size_t i, j;
 	size_t NbRows = z->size1; //characteristics of the selection : height and width
 	size_t NbCols = z->size2;
@@ -490,7 +391,7 @@ fitted_PSF *minimiz_angle(gsl_matrix* z, fitted_PSF *psf) {
 	double *y = malloc(n * sizeof(double));
 	double *sigma = malloc(n * sizeof(double));
 	struct PSF_data d = { n, y, sigma, NbRows, NbCols, 0 };
-	gsl_multifit_function_fdf f_An;
+	gsl_multifit_function_fdf f_angle;
 	double x_init[7] = { psf->B, psf->A, psf->x0, psf->y0, psf->sx, psf->sy, 0 };
 	gsl_vector_view x = gsl_vector_view_array(x_init, p);
 	const gsl_rng_type * type;
@@ -503,12 +404,12 @@ fitted_PSF *minimiz_angle(gsl_matrix* z, fitted_PSF *psf) {
 	type = gsl_rng_default;
 	r = gsl_rng_alloc(type);
 
-	f_An.f = &Gaussian_f_An;
-	f_An.df = &Gaussian_df_An;
-	f_An.fdf = &Gaussian_fdf_An;
-	f_An.n = n;
-	f_An.p = p;
-	f_An.params = &d;
+	f_angle.f = &psf_Gaussian_f_an;
+	f_angle.df = &psf_Gaussian_df_an;
+	f_angle.fdf = &psf_Gaussian_fdf_an;
+	f_angle.n = n;
+	f_angle.p = p;
+	f_angle.params = &d;
 
 	for (i = 0; i < NbRows; i++) {
 		for (j = 0; j < NbCols; j++) {
@@ -519,7 +420,7 @@ fitted_PSF *minimiz_angle(gsl_matrix* z, fitted_PSF *psf) {
 
 	T = gsl_multifit_fdfsolver_lmsder;
 	s = gsl_multifit_fdfsolver_alloc(T, n, p);
-	gsl_multifit_fdfsolver_set(s, &f_An, &x.vector);
+	gsl_multifit_fdfsolver_set(s, &f_angle, &x.vector);
 
 	do {
 		iter++;
@@ -569,7 +470,7 @@ fitted_PSF *minimiz_angle(gsl_matrix* z, fitted_PSF *psf) {
 	//Units
 	psf_angle->units = "px";
 	//Magnitude
-	psf_angle->mag = get_Magnitude(z, FIT(0));//we take the un-normalized value of B
+	psf_angle->mag = psf_get_mag(z, FIT(0));//we take the un-normalized value of B
 	//Layer: not fitted
 	psf_angle->layer = psf->layer;
 	//RMSE
@@ -592,7 +493,108 @@ fitted_PSF *minimiz_angle(gsl_matrix* z, fitted_PSF *psf) {
 	return psf_angle;
 }
 
-void DisplayResult(fitted_PSF *result, rectangle *area) {
+/******************************************************************************/
+
+/* Returns the largest FWHM.
+ * The optional output parameter roundness is the ratio between the two axis FWHM */
+double psf_get_fwhm(fits *fit, int layer, double *roundness) {
+	fitted_PSF *result = psf_get_minimisation(fit, layer, &com.selection);
+	if (result == NULL) {
+		*roundness = 0.0;
+		return 0.0;
+	}
+	double retval;
+	retval = result->fwhmx;
+	if (roundness)
+		*roundness = result->fwhmy / result->fwhmx;
+	free(result);
+	return retval;
+}
+
+/* Computes the FWHM on data in the selection rectangle of image fit.
+ * Selection rectangle is passed as third argument.
+ * Return value is a structure, type fitted_PSF, that has to be freed after use.
+ */
+fitted_PSF *psf_get_minimisation(fits *fit, int layer, rectangle *area) {
+	WORD *from;
+	int stridefrom, i, j;
+	fitted_PSF *result;
+	double bg = background(fit, layer, area);
+	//~ fprintf(stdout, "background: %g\n", bg);
+
+	// create the matrix with values from the selected rectangle
+	gsl_matrix *z = gsl_matrix_alloc(area->h, area->w);
+	from = fit->pdata[layer] + (fit->ry - area->y - area->h) * fit->rx
+			+ area->x;
+	stridefrom = fit->rx - area->w;
+
+	for (i = 0; i < area->h; i++) {
+		for (j = 0; j < area->w; j++) {
+			gsl_matrix_set(z, i, j, (double) *from);
+			from++;
+		}
+		from += stridefrom;
+	}
+	result = psf_global_minimisation(z, bg, layer, TRUE);
+	if (result)
+		psf_update_units(fit, &result);
+	gsl_matrix_free(z);
+	return result;
+}
+
+/* This function is the global minimisation. Every call to the minimisation
+ * must come over here. It will check if the difference between Sx and Sy is
+ * larger than or equal to 0.01 pixel.
+ * In this case, Dynamic PSF fits additional angle parameter wich is the
+ * rotation angle of the X axis with respect to the centroid coordinates: so,
+ * by design we set Sx>Sy.
+ * If the difference is smaller OR if fit_Angle is equal to FALSE (in the case
+ * of the star_finder algorithm), no angle parameter is fitted.
+ * The function returns NULL if values look bizarre.
+ */
+fitted_PSF *psf_global_minimisation(gsl_matrix* z, double bg, int layer,
+		gboolean fit_angle) {
+	fitted_PSF *psf;
+
+	// To compute good starting values, we first compute with no angle
+	if ((psf = psf_minimiz_no_angle(z, bg, layer)) != NULL) {
+		if (fit_angle && fabs(psf->sx - psf->sy) >= EPSILON) {
+			fitted_PSF *tmp_psf;
+			if ((tmp_psf = psf_minimiz_angle(z, psf)) == NULL) {
+				free(psf);
+				return NULL;
+			}
+			free(psf);
+			psf = tmp_psf;
+		}
+		// Solve symmetry problem in order to have Sx>Sy in any case !!!
+		if (psf->sy > psf->sx) {
+			swap_param(&psf->sx, &psf->sy);
+			swap_param(&psf->fwhmx, &psf->fwhmy);
+			if (fit_angle && psf->angle != 0.0) {
+				psf->angle > 0.0 ? psf->angle - 90.0 : psf->angle + 90.0;
+			}
+		}
+
+		/* We normalize B, A and the RMSE for the output */
+		WORD norm = get_normalized_value(&gfit);
+		psf->B = psf->B / (double) norm;
+		psf->A = psf->A / (double) norm;
+		psf->rmse = psf->rmse / (double) norm;
+
+		/* We quickly test the result. If it is bad we return NULL */
+		if (!isfinite(psf->fwhmx) || !isfinite(psf->fwhmy) || psf->fwhmx <= 0.0
+				|| psf->fwhmy <= 0.0) {
+			free(psf);
+			psf = NULL;
+		}
+	}
+	/* When the first minimization gives NULL value, it's probably because the selected
+	 * area was not big enough: we need more samples than parameters to fit the area */
+	return psf;
+}
+
+void psf_display_result(fitted_PSF *result, rectangle *area) {
 	char buffer[256];
 
 	g_snprintf(buffer, sizeof(buffer), "PSF fit Result:\n"
@@ -611,7 +613,7 @@ void DisplayResult(fitted_PSF *result, rectangle *area) {
 /* If the pixel pitch and the focal length are known and filled in the 
  * setting box, we convert FWHM in pixel to arcsec by multiplying
  * the FWHM value with the sampling value */
-void update_units(fits* fit, fitted_PSF **result) {
+void psf_update_units(fits* fit, fitted_PSF **result) {
 
 	if (!fit->focal_length || !fit->pixel_size_x || !fit->pixel_size_y)
 		return;

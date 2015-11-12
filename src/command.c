@@ -633,9 +633,9 @@ int process_psf(int nb){
 			siril_log_message("Current selection is too large. To determine the PSF, please make a selection around a star.\n");
 			return 1;
 		}
-		fitted_PSF *result = get_Minimisation(&gfit, layer, &com.selection);
+		fitted_PSF *result = psf_get_minimisation(&gfit, layer, &com.selection);
 		if (result) {
-			DisplayResult(result, &com.selection);
+			psf_display_result(result, &com.selection);
 			free(result);
 		}
 	}

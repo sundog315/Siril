@@ -37,20 +37,10 @@ struct PSF_data {
 	double rmse;
 };
 
-double get_fwhm(fits *, int, double *);
-fitted_PSF *get_Minimisation(fits *, int, rectangle *);
-fitted_PSF *global_Minimisation(gsl_matrix *, double, int, gboolean);
-gsl_vector* MaxInz(gsl_matrix*, double);
-int Gaussian_f(const gsl_vector *, void *, gsl_vector *);
-int Gaussian_df(const gsl_vector *, void *, gsl_matrix *);
-int Gaussian_fdf(const gsl_vector *, void *, gsl_vector *, gsl_matrix *);
-int Gaussian_f_An(const gsl_vector *, void *, gsl_vector *);
-int Gaussian_df_An(const gsl_vector *, void *, gsl_matrix *);
-int Gaussian_fdf_An(const gsl_vector *, void *, gsl_vector *, gsl_matrix *);
-fitted_PSF *minimiz_no_angle(gsl_matrix *, double, int);
-fitted_PSF *minimiz_angle(gsl_matrix *, fitted_PSF *);
-void DisplayResult(fitted_PSF *, rectangle *);
-double Get_Magnitude(gsl_matrix *, double);
-void update_units(fits*, fitted_PSF**);
+double psf_get_fwhm(fits *, int, double *);
+fitted_PSF *psf_get_minimisation(fits *, int, rectangle *);
+fitted_PSF *psf_global_minimisation(gsl_matrix *, double, int, gboolean);
+void psf_display_result(fitted_PSF *, rectangle *);
+void psf_update_units(fits*, fitted_PSF**);
 
 #endif

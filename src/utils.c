@@ -321,7 +321,6 @@ int readinitfile() {
 	else {
 		com.ext = strdup(".fit");
 	}
-
 	return 0;
 }
 
@@ -540,7 +539,6 @@ int changedir(const char *dir) {
 		}
 		siril_log_message("Setting CWD (Current Working Directory) to `%s'\n",
 				com.wd);
-		//~ gtk_file_chooser_set_filename(GTK_FILE_CHOOSER(gtk_builder_get_object(builder, "OpenDial")), com.wd);
 		set_GUI_CWD();
 
 		snprintf(str, 255, "%s v%s - %s", PACKAGE, VERSION, dir);
@@ -928,4 +926,18 @@ char *replace_spaces_from_filename(const char *filename) {
 		}
 	}
 	return g_string_free(string, FALSE);
+}
+
+// append a string to the end of an existing string
+char* str_append(char** data, const char* newdata) {
+	char* p;
+	int len = (*data ? strlen(*data) : 0);
+	if ((p = realloc(*data, len + strlen(newdata) + 1)) == NULL) {
+		free(p);
+		siril_log_message("str_append: error allocating data\n");
+		return NULL;
+	}
+	*data = p;
+	strcpy(*data + len, newdata);
+	return *data;
 }

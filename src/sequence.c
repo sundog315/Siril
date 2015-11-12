@@ -892,7 +892,7 @@ int seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit) {
 	area.x = area.y = 0;
 	area.w = fit->rx; area.h = fit->ry;
 	assert(seq_layer < seq->nb_layers);
-	fitted_PSF *result = get_Minimisation(fit, 0, &area);
+	fitted_PSF *result = psf_get_minimisation(fit, 0, &area);
 	if (result) {
 		seq->regparam[seq_layer][frame_no].fwhm_data = result;
 		seq->regparam[seq_layer][frame_no].fwhm = result->fwhmx;
