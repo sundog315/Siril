@@ -28,8 +28,8 @@
 #include <math.h>
 #include <assert.h>
 #include "siril.h"
-#include "proto.h"
-#include "misc.h"
+#include "core/proto.h"
+#include "registration/matching/misc.h"
 #include "opencv.h"
 #include <iostream>
 #include <iomanip>

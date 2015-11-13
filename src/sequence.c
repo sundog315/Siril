@@ -37,19 +37,19 @@
 #include <libgen.h>
 
 #include "siril.h"
-#include "proto.h"
+#include "core/proto.h"
 #include "callbacks.h"
-#include "ser.h"
+#include "io/ser.h"
 #ifdef HAVE_FFMS2
-#include "films.h"
+#include "io/films.h"
 #endif
 #include "single_image.h"
-#include "histogram.h"
-#include "PSF.h"
-#include "PSF_list.h"	// clear_stars_list
-#include "quality.h"
-#include "registration.h"	// for update_reg_interface
-#include "stacking.h"	// for update_stack_interface
+#include "core/histogram.h"
+#include "algos/PSF.h"
+#include "algos/PSF_list.h"	// clear_stars_list
+#include "algos/quality.h"
+#include "registration/registration.h"	// for update_reg_interface
+#include "stacking/stacking.h"	// for update_stack_interface
 
 /* when opening a file outside the main sequence loading system and that file
  * is a sequence (SER/AVI), this function is called to load this sequence. */

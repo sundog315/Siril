@@ -31,11 +31,11 @@
 #include <assert.h>
 
 #include "siril.h"
-#include "ser.h"
-#include "proto.h"
+#include "io/ser.h"
+#include "core/proto.h"
 #include "callbacks.h"
 #ifdef HAVE_FFMS2
-#include "films.h"
+#include "io/films.h"
 #endif
 
 /* name is sequence filename, with or without .seq extension */

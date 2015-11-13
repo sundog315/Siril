@@ -38,17 +38,17 @@
 #include <fcntl.h>
 
 #include "siril.h"
-#include "proto.h"
+#include "core/proto.h"
 #include "callbacks.h"
-#include "colors.h"
-#include "histogram.h"
+#include "algos/colors.h"
+#include "core/histogram.h"
 #include "single_image.h"
-#include "gradient.h"
-#include "PSF_list.h"
+#include "algos/gradient.h"
+#include "algos/PSF_list.h"
 #include "opencv.h"
-#include "Def_Math.h"
-#include "Def_Wavelet.h"
-#include "ser.h"
+#include "algos/Def_Math.h"
+#include "algos/Def_Wavelet.h"
+#include "io/ser.h"
 
 /* this file contains all functions for image processing */
 

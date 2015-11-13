@@ -36,12 +36,12 @@
 #endif
 
 #include "siril.h"
-#include "proto.h"
-#include "conversion.h"
+#include "core/proto.h"
+#include "io/conversion.h"
 #include "callbacks.h"
-#include "registration.h"
-#include "stacking.h"
-#include "undo.h"
+#include "registration/registration.h"
+#include "stacking/stacking.h"
+#include "core/undo.h"
 #include "single_image.h"
 
 /* the global variables of the whole project */

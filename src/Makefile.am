@@ -6,26 +6,24 @@ AM_CPPFLAGS = -DPACKAGE_DATA_DIR='"$(datadir)/${PACKAGE}"' -DPACKAGE_DOC_DIR='"$
 
 siril_SOURCES = \
 	siril.c main.c command.c command.h \
-	utils.c siril.h proto.h \
+	io/conversion.c io/conversion.h io/ser.c io/ser.h io/films.c io/films.h \
+	io/image_formats_libraries.c io/image_formats_internal.c io/image_format_fits.c \
+	siril.h core/proto.h \
 	callbacks.c callbacks.h \
-	registration.c registration.h registration_preview.c \
-	quality.c quality.h \
-	stacking.c stacking.h \
-	fft.c fft.h\
-	colors.c colors.h \
-	demosaicing.c demosaicing.h \
+	registration/registration.c registration/registration.h registration/registration_preview.c \
+	registration/matching/match.c registration/matching/atpmatch.c registration/matching/misc.c registration/matching/match.h registration/matching/atpmatch.h registration/matching/misc.h \
+	stacking/stacking.c stacking/stacking.h \
+	algos/gradient.c algos/gradient.h algos/quality.c algos/quality.h \
+	algos/fft.c algos/fft.h \
+	algos/colors.c algos/colors.h \
+	algos/demosaicing.c algos/demosaicing.h \
 	sequence.c seqfile.c sequence_list.c \
-	conversion.c \
 	single_image.c single_image.h \
-	histogram.c histogram.h \
-	ser.c ser.h films.c films.h \
-	image_formats_libraries.c image_formats_internal.c image_format_fits.c \
-	pave.c transform.c io_wave.c reconstr.c Def_Math.h Def_Wavelet.h Def_Mem.h \
-	PSF.c PSF.h PSF_list.c PSF_list.h star_finder.c star_finder.h gradient.c gradient.h \
-	compositing.c compositing.h filters.c filters.h \
-	match.c atpmatch.c misc.c match.h atpmatch.h misc.h \
-	undo.c undo.h
-
+	core/histogram.c core/histogram.h core/undo.c core/undo.h core/utils.c \
+	algos/pave.c algos/transform.c algos/io_wave.c algos/reconstr.c algos/Def_Math.h algos/Def_Wavelet.h algos/Def_Mem.h \
+	algos/PSF.c algos/PSF.h algos/PSF_list.c algos/PSF_list.h algos/star_finder.c algos/star_finder.h \
+	compositing.c compositing.h filters.c filters.h
+	
 siril_LDADD = $(GTK_LIBS) $(LIBRAW_LIBS) $(LIBTIFF_LIBS) $(LIBPNG_LIBS) $(FFTW_LIBS) $(CFITSIO_LIBS) $(GSL_LIBS) $(FFMS2_LIBS) $(LIBCONFIGXX_LIBS)
 
 if HAVE_OPENCV

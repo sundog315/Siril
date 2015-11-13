@@ -23,12 +23,12 @@
 
 #include "compositing.h"
 #include "siril.h"
-#include "proto.h"
-#include "colors.h"
+#include "core/proto.h"
+#include "algos/colors.h"
 #include "single_image.h"
-#include "PSF_list.h"
+#include "algos/PSF_list.h"
 #include "callbacks.h"
-#include "registration.h"
+#include "registration/registration.h"
 #include "filters.h"
 #ifdef HAVE_OPENCV
 #include "opencv.h"

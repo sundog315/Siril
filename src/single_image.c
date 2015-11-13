@@ -24,12 +24,12 @@
 #include <string.h>
 
 #include "siril.h"
-#include "proto.h"
+#include "core/proto.h"
 #include "callbacks.h"
 #include "single_image.h"
-#include "PSF_list.h"
-#include "histogram.h"
-#include "undo.h"
+#include "algos/PSF_list.h"
+#include "core/histogram.h"
+#include "core/undo.h"
 
 /* Closes and frees resources attached to the single image opened in gfit.
  * If a sequence is loaded and one of its images is displayed, nothing is done.

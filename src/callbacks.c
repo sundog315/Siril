@@ -34,27 +34,27 @@
 #include <libgen.h>
 
 #include "siril.h"
-#include "conversion.h"
+#include "io/conversion.h"
 #include "callbacks.h"
-#include "proto.h"
-#include "colors.h"
-#include "films.h"
+#include "core/proto.h"
+#include "algos/colors.h"
+#include "io/films.h"
 #include "command.h"	// for processcommand()
-#include "PSF.h"
-#include "PSF_list.h"
-#include "star_finder.h"
-#include "histogram.h"
+#include "algos/PSF.h"
+#include "algos/PSF_list.h"
+#include "algos/star_finder.h"
+#include "core/histogram.h"
 #include "single_image.h"
-#include "gradient.h"
-#include "registration.h"
-#include "stacking.h"
-#include "fft.h"
+#include "algos/gradient.h"
+#include "registration/registration.h"
+#include "stacking/stacking.h"
+#include "algos/fft.h"
 #include "compositing.h"
 #ifdef HAVE_OPENCV
 #include "opencv.h"
 #endif
-#include "Def_Wavelet.h"
-#include "undo.h"
+#include "algos/Def_Wavelet.h"
+#include "core/undo.h"
 
 #define CSS_FILE "gtk.css"                      /* CSS style sheet name */
 

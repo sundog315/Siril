@@ -10,7 +10,7 @@
 extern "C" {
 #endif
 
-#include "misc.h"
+#include "registration/matching/misc.h"
 
 int resize_gaussian(fits *, int, int, int);
 int rotate_image(fits *, double, int, int);

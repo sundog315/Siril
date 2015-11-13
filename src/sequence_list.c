@@ -19,11 +19,11 @@
 */
 
 #include "siril.h"
-#include "proto.h"
+#include "core/proto.h"
 #include "callbacks.h"
-#include "PSF.h"
-#include "registration.h"	// for update_reg_interface
-#include "stacking.h"	// for update_stack_interface
+#include "algos/PSF.h"
+#include "registration/registration.h"	// for update_reg_interface
+#include "stacking/stacking.h"	// for update_stack_interface
 
 static gboolean fill_sequence_list_idle(gpointer p);
 
