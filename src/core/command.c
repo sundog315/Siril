@@ -46,7 +46,7 @@
 #include "algos/fft.h"
 
 #ifdef HAVE_OPENCV
-#include "opencv.h"
+#include "opencv/opencv.h"
 #endif
 
 static char *word[MAX_COMMAND_WORDS];

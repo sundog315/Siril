@@ -51,7 +51,7 @@
 #include "algos/fft.h"
 #include "compositing.h"
 #ifdef HAVE_OPENCV
-#include "opencv.h"
+#include "opencv/opencv.h"
 #endif
 #include "algos/Def_Wavelet.h"
 #include "core/undo.h"

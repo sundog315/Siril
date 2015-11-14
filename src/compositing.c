@@ -35,7 +35,7 @@
 #include "registration/registration.h"
 #include "filters.h"
 #ifdef HAVE_OPENCV
-#include "opencv.h"
+#include "opencv/opencv.h"
 #endif
 
 static int compositing_loaded = 0;

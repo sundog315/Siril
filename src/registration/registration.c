@@ -40,7 +40,7 @@
 #include "gui/PSF_list.h"
 #include "algos/quality.h"
 #ifdef HAVE_OPENCV
-#include "opencv.h"
+#include "opencv/opencv.h"
 #endif
 
 #define MAX_STARS_FITTED 100

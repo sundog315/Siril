@@ -45,7 +45,7 @@
 #include "io/single_image.h"
 #include "algos/gradient.h"
 #include "gui/PSF_list.h"
-#include "opencv.h"
+#include "opencv/opencv.h"
 #include "algos/Def_Math.h"
 #include "algos/Def_Wavelet.h"
 #include "io/ser.h"
