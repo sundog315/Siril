@@ -33,11 +33,11 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <dirent.h>
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
 #include "io/conversion.h"
 #include "io/films.h"
-#include "callbacks.h"
+#include "gui/callbacks.h"
 #include "algos/demosaicing.h"
 
 #define SUFFIX_MAX_LEN 9

@@ -1,7 +1,7 @@
 #if !defined(MATCH_H)
 #define MATCH_H
 
-#include "siril.h"
+#include "core/siril.h"
 
 /*
  * this is default value for the base of the output file names.

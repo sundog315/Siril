@@ -1,6 +1,6 @@
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
-#include "siril.h"
+#include "core/siril.h"
 
 typedef struct
 {

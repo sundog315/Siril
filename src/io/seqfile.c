@@ -30,10 +30,10 @@
 #include <unistd.h>
 #include <assert.h>
 
-#include "siril.h"
+#include "core/siril.h"
 #include "io/ser.h"
 #include "core/proto.h"
-#include "callbacks.h"
+#include "gui/callbacks.h"
 #ifdef HAVE_FFMS2
 #include "io/films.h"
 #endif

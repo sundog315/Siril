@@ -27,7 +27,7 @@
 #include <string.h>
 #include <assert.h>
 #include "io/ser.h"
-#include "callbacks.h"
+#include "gui/callbacks.h"
 #include "algos/demosaicing.h"
 #include "core/proto.h"
 

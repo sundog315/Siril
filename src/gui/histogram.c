@@ -22,11 +22,11 @@
 #include <assert.h>
 #include <string.h>
 #include <stdint.h>
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
-#include "single_image.h"
-#include "core/histogram.h"
-#include "callbacks.h"	// for lookup_widget()
+#include "io/single_image.h"
+#include "gui/histogram.h"
+#include "gui/callbacks.h"	// for lookup_widget()
 #include "core/undo.h"
 
 /* The gsl_histogram, documented here:

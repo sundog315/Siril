@@ -32,15 +32,15 @@
 #include <config.h>
 #endif
 
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
-#include "callbacks.h"
-#include "single_image.h"
+#include "gui/callbacks.h"
+#include "io/single_image.h"
 #include "registration/registration.h"
 #include "stacking/stacking.h"
 #include "algos/PSF.h"
-#include "algos/PSF_list.h"
-#include "core/histogram.h"	// update_gfit_histogram_if_needed();
+#include "gui/PSF_list.h"
+#include "gui/histogram.h"	// update_gfit_histogram_if_needed();
 #include "io/ser.h"
 
 static struct stacking_args stackparam = {	// parameters passed to stacking

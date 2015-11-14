@@ -79,7 +79,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "siril.h"
+#include "core/siril.h"
 #include "algos/Def_Math.h"
 #include "algos/Def_Mem.h"
 #include "algos/Def_Wavelet.h"

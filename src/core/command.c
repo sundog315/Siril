@@ -29,19 +29,19 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include "siril.h"
-#include "command.h"
+#include "core/siril.h"
+#include "core/command.h"
 #include "core/proto.h"
 #include "io/conversion.h"
-#include "callbacks.h"
+#include "gui/callbacks.h"
 #include "algos/colors.h"
 #include "algos/PSF.h"
-#include "algos/PSF_list.h"
+#include "gui/PSF_list.h"
 #include "algos/star_finder.h"
 #include "algos/Def_Math.h"
 #include "algos/Def_Wavelet.h"
-#include "core/histogram.h"
-#include "single_image.h"
+#include "gui/histogram.h"
+#include "io/single_image.h"
 #include "algos/gradient.h"
 #include "algos/fft.h"
 

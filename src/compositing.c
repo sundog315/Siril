@@ -21,21 +21,22 @@
 #  include <config.h>
 #endif
 
+#include <string.h>
+#include <assert.h>
+#include <stdlib.h>
+
 #include "compositing.h"
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
 #include "algos/colors.h"
-#include "single_image.h"
-#include "algos/PSF_list.h"
-#include "callbacks.h"
+#include "io/single_image.h"
+#include "gui/PSF_list.h"
+#include "gui/callbacks.h"
 #include "registration/registration.h"
 #include "filters.h"
 #ifdef HAVE_OPENCV
 #include "opencv.h"
 #endif
-#include <string.h>
-#include <assert.h>
-#include <stdlib.h>
 
 static int compositing_loaded = 0;
 

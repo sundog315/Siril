@@ -1,6 +1,6 @@
 #ifndef FWHM_LIST_H_
 #define FWHM_LIST_H_
-#include "siril.h"
+#include "core/siril.h"
 
 void get_stars_list_store();
 void add_star_to_list(fitted_PSF *);

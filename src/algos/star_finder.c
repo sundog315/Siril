@@ -26,10 +26,10 @@
 #include <locale.h>
 #include <gsl/gsl_matrix.h>
 
-#include "siril.h"
-#include "callbacks.h"
+#include "core/siril.h"
+#include "gui/callbacks.h"
 #include "algos/PSF.h"
-#include "algos/PSF_list.h"
+#include "gui/PSF_list.h"
 #include "algos/star_finder.h"
 #include "core/proto.h"
 

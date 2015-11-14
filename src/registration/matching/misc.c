@@ -45,8 +45,8 @@
 #include <string.h>
 #include <ctype.h>
 #include <math.h>
-#include "siril.h"
-#include "callbacks.h"
+#include "core/siril.h"
+#include "gui/callbacks.h"
 #include "algos/PSF.h"
 #include "registration/matching/misc.h"
 #include "registration/matching/atpmatch.h"

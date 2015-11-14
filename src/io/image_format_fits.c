@@ -26,9 +26,9 @@
 #include <string.h>
 #include <gsl/gsl_statistics_double.h>
 
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
-#include "callbacks.h"
+#include "gui/callbacks.h"
 
 // return 0 on success, fills realname if not NULL with the opened file's name
 int readfits(const char *filename, fits *fit, char *realname) {

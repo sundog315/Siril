@@ -7,7 +7,7 @@
 
 #include <ffms.h>
 
-#include "siril.h"
+#include "core/siril.h"
 
 #define FILM_SUCCESS 0
 #define FILM_ERROR -1

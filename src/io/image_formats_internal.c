@@ -28,9 +28,9 @@
 #include <string.h>
 #include <assert.h>
 
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
-#include "callbacks.h"
+#include "gui/callbacks.h"
 
 /* reads a BMP image at filename `name', and stores it into the fit argument */
 int readbmp(const char *name, fits *fit) {

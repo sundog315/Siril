@@ -1,7 +1,7 @@
 #ifndef _REGISTRATION_H_
 #define _REGISTRATION_H_
 
-#include "siril.h"
+#include "core/siril.h"
 
 struct registration_args;
 typedef int (*registration_function)(struct registration_args *);

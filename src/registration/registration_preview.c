@@ -18,9 +18,9 @@
  * along with Siril. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
-#include "callbacks.h"
+#include "gui/callbacks.h"
 #include "registration/registration.h"
 
 mouse_status_enum mouse_status;

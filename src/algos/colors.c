@@ -24,10 +24,10 @@
 #include <assert.h>
 #include <float.h>
 
-#include "siril.h"
-#include "callbacks.h"
-#include "single_image.h"
-#include "core/histogram.h"
+#include "core/siril.h"
+#include "gui/callbacks.h"
+#include "io/single_image.h"
+#include "gui/histogram.h"
 #include "core/proto.h"
 #include "algos/colors.h"
 #include "core/undo.h"

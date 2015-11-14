@@ -37,14 +37,14 @@
 #include <libgen.h>
 #include <fcntl.h>
 
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
-#include "callbacks.h"
+#include "gui/callbacks.h"
 #include "algos/colors.h"
-#include "core/histogram.h"
-#include "single_image.h"
+#include "gui/histogram.h"
+#include "io/single_image.h"
 #include "algos/gradient.h"
-#include "algos/PSF_list.h"
+#include "gui/PSF_list.h"
 #include "opencv.h"
 #include "algos/Def_Math.h"
 #include "algos/Def_Wavelet.h"

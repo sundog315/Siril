@@ -111,8 +111,8 @@
 #include <string.h>
 #include <gtk/gtk.h>
 
-#include "callbacks.h"
-#include "siril.h"
+#include "gui/callbacks.h"
+#include "core/siril.h"
 #include "core/proto.h"
 #include "algos/Def_Math.h"
 #include "algos/Def_Mem.h"

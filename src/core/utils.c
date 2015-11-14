@@ -46,11 +46,11 @@
 #include <libconfig.h>
 #include <assert.h>
 #include <math.h>
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
 #include "io/conversion.h"
-#include "callbacks.h"
-#include "single_image.h"
+#include "gui/callbacks.h"
+#include "io/single_image.h"
 
 static const char *keywords[] = { "working-directory", "libraw-settings",
 		"ser-settings", "preprocessing-settings", "registration-settings",

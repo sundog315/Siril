@@ -27,7 +27,7 @@
 #ifdef HAVE_OPENCV
 #include <math.h>
 #include <assert.h>
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
 #include "registration/matching/misc.h"
 #include "opencv.h"

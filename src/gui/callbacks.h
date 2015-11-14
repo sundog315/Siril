@@ -3,7 +3,7 @@
 
 #include <gtk/gtk.h>
 #include <sys/time.h>
-#include "siril.h"	// for sequence
+#include "core/siril.h"	// for sequence
 
 void load_css_style_sheet (char *original, char *path);
 void initialize_shortcuts();

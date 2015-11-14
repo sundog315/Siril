@@ -23,12 +23,12 @@
 #endif
 #include <string.h>
 
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
-#include "callbacks.h"
-#include "single_image.h"
-#include "algos/PSF_list.h"
-#include "core/histogram.h"
+#include "gui/callbacks.h"
+#include "io/single_image.h"
+#include "gui/PSF_list.h"
+#include "gui/histogram.h"
 #include "core/undo.h"
 
 /* Closes and frees resources attached to the single image opened in gfit.

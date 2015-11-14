@@ -27,7 +27,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "callbacks.h"
+#include "gui/callbacks.h"
 #include "io/films.h"
 #include "core/proto.h"		// for fits_flip_top_to_bottom()
 

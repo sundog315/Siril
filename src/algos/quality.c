@@ -26,10 +26,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-#include "siril.h"
+#include "core/siril.h"
 #include "algos/quality.h"
 #include "core/proto.h"
-#include "callbacks.h"
+#include "gui/callbacks.h"
 
 static int32_t SubSample(WORD *ptr, int img_wid, int x_size,
 		int y_size);

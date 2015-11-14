@@ -23,9 +23,9 @@
 #include <stdint.h>
 #include <assert.h>
 
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
-#include "callbacks.h"
+#include "gui/callbacks.h"
 #include "algos/demosaicing.h"
 
 /* width and height are sizes of the original image */

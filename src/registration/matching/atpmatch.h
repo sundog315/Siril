@@ -1,7 +1,7 @@
 #if !defined(ATPMATCH_H)
 #define ATPMATCH_H
 
-#include "siril.h"
+#include "core/siril.h"
 
 /*
  *

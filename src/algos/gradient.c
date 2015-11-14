@@ -25,9 +25,9 @@
 #include <gsl/gsl_statistics.h>
 #include <string.h>
 
-#include "callbacks.h"
+#include "gui/callbacks.h"
 #include "algos/gradient.h"
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
 
 

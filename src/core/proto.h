@@ -1,6 +1,6 @@
 #ifndef PROTO_H_
 #define PROTO_H_
-#include "siril.h"
+#include "core/siril.h"
 #ifdef HAVE_CONFIG_H
 #  include <config.h>
 #endif

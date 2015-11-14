@@ -38,9 +38,9 @@
 #include <libraw/libraw.h>
 #endif
 
-#include "siril.h"
+#include "core/siril.h"
 #include "core/proto.h"
-#include "callbacks.h"
+#include "gui/callbacks.h"
 
 /********************* TIFF IMPORT AND EXPORT *********************/
 

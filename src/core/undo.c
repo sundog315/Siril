@@ -24,10 +24,10 @@
 #include <fcntl.h>
 #include <string.h>
 
-#include "siril.h"
-#include "callbacks.h"
+#include "core/siril.h"
+#include "gui/callbacks.h"
 #include "core/undo.h"
-#include "core/histogram.h"
+#include "gui/histogram.h"
 #include "core/proto.h"
 
 /* *filename must be freed */

@@ -149,7 +149,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include "siril.h"
+#include "core/siril.h"
 #include "registration/matching/misc.h"
 #include "registration/matching/atpmatch.h"
 

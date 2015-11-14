@@ -1,7 +1,7 @@
 #if !defined(MISC_H)
 #define MISC_H
 
-#include "siril.h"
+#include "core/siril.h"
 
 /*
  *

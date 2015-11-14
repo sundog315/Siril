@@ -1,10 +1,12 @@
-#ifndef FWHM_H_
-#define FWHM_H_
-#include "siril.h"
+#ifndef PSF_H_
+#define PSF_H_
+
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_linalg.h>
 #include <gsl/gsl_cblas.h>
+
+#include "core/siril.h"
 
 struct fwhm_struct {
 	double B; /* average sky background value */

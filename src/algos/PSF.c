@@ -32,8 +32,8 @@
 #include <gsl/gsl_multifit_nlin.h>
 
 #include "algos/PSF.h"
-#include "siril.h"
-#include "callbacks.h"
+#include "core/siril.h"
+#include "gui/callbacks.h"
 #include "core/proto.h"
 
 #define MAX_ITER_NO_ANGLE  10		//Number of iteration in the minimization with no angle
