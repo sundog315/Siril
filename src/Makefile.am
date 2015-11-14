@@ -5,22 +5,21 @@ bin_PROGRAMS = siril
 AM_CPPFLAGS = -DPACKAGE_DATA_DIR='"$(datadir)/${PACKAGE}"' -DPACKAGE_DOC_DIR='"${datarootdir}/doc/${PACKAGE}"' $(GTK_CFLAGS) $(LIBTIFF_CFLAGS) $(LIBPNG_CFLAGS) $(FFTW_CFLAGS) $(CFITSIO_CFLAGS) $(FFMPEG_CFLAGS) $(GSL_CFLAGS) $(FFMS2_CFLAGS) $(LIBCONFIGXX_CFLAGS)
 
 siril_SOURCES = \
-	core/siril.c main.c core/command.c core/command.h \
+	main.c \
+	core/siril.c core/command.c core/command.h core/siril.h core/proto.h \
 	io/conversion.c io/conversion.h io/ser.c io/ser.h io/films.c io/films.h \
 	io/image_formats_libraries.c io/image_formats_internal.c io/image_format_fits.c \
-	core/siril.h core/proto.h \
-	gui/callbacks.c gui/callbacks.h \
+	io/sequence.c io/seqfile.c gui/sequence_list.c io/single_image.c io/single_image.h \
+	gui/callbacks.c gui/callbacks.h gui/histogram.c gui/histogram.h core/undo.c core/undo.h core/utils.c \
 	registration/registration.c registration/registration.h registration/registration_preview.c \
-	registration/matching/match.c registration/matching/atpmatch.c registration/matching/misc.c registration/matching/match.h registration/matching/atpmatch.h registration/matching/misc.h \
+	registration/matching/match.c registration/matching/atpmatch.c registration/matching/misc.c \
 	stacking/stacking.c stacking/stacking.h \
 	algos/gradient.c algos/gradient.h algos/quality.c algos/quality.h \
 	algos/fft.c algos/fft.h \
 	algos/colors.c algos/colors.h \
 	algos/demosaicing.c algos/demosaicing.h \
-	io/sequence.c io/seqfile.c gui/sequence_list.c \
-	io/single_image.c io/single_image.h \
-	gui/histogram.c gui/histogram.h core/undo.c core/undo.h core/utils.c \
-	algos/pave.c algos/transform.c algos/io_wave.c algos/reconstr.c algos/Def_Math.h algos/Def_Wavelet.h algos/Def_Mem.h \
+	algos/pave.c algos/transform.c algos/io_wave.c algos/reconstr.c \
+	algos/Def_Math.h algos/Def_Wavelet.h algos/Def_Mem.h \
 	algos/PSF.c algos/PSF.h gui/PSF_list.c gui/PSF_list.h algos/star_finder.c algos/star_finder.h \
 	compositing.c compositing.h filters.c filters.h
 	
