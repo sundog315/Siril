@@ -571,7 +571,9 @@ fitted_PSF *psf_global_minimisation(gsl_matrix* z, double bg, int layer,
 			swap_param(&psf->sx, &psf->sy);
 			swap_param(&psf->fwhmx, &psf->fwhmy);
 			if (fit_angle && psf->angle != 0.0) {
-				psf->angle > 0.0 ? (psf->angle -= 90.0) : (psf->angle += 90.0);
+				if (psf->angle > 0.0)
+					psf->angle -= 90.0;
+				else psf->angle += 90.0;
 			}
 		}
 
@@ -582,8 +584,8 @@ fitted_PSF *psf_global_minimisation(gsl_matrix* z, double bg, int layer,
 		psf->rmse = psf->rmse / (double) norm;
 
 		/* We quickly test the result. If it is bad we return NULL */
-		if (!isfinite(psf->fwhmx) || !isfinite(psf->fwhmy) || psf->fwhmx <= 0.0
-				|| psf->fwhmy <= 0.0) {
+		if (!isfinite(psf->fwhmx) || !isfinite(psf->fwhmy) ||
+				psf->fwhmx <= 0.0 || psf->fwhmy <= 0.0) {
 			free(psf);
 			psf = NULL;
 		}
