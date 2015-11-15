@@ -27,11 +27,11 @@
 #include <gsl/gsl_matrix.h>
 
 #include "core/siril.h"
+#include "core/proto.h"
 #include "gui/callbacks.h"
 #include "algos/PSF.h"
 #include "gui/PSF_list.h"
 #include "algos/star_finder.h"
-#include "core/proto.h"
 
 #define ROUNDNESS_THRESHOLD  0.800
 #define RADIUS_THRESHOLD     20

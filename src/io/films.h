@@ -7,8 +7,6 @@
 
 #include <ffms.h>
 
-#include "core/siril.h"
-
 #define FILM_SUCCESS 0
 #define FILM_ERROR -1
 
@@ -16,7 +14,7 @@
 
 typedef struct {
 	char *extension;
-} supported_film_list;
+}supported_film_list;
 
 extern supported_film_list supported_film[];	//supported film extensions
 

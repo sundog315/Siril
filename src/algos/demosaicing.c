@@ -174,8 +174,8 @@ int bayer_Bilinear(const WORD *bayer, WORD *rgb, int sx, int sy,
 }
 
 /* insprired by OpenCV's Bayer decoding */
-int bayer_NearestNeighbor(const WORD *bayer, WORD *rgb, int sx,
-		int sy, sensor_pattern tile) {
+int bayer_NearestNeighbor(const WORD *bayer, WORD *rgb, int sx, int sy,
+		sensor_pattern tile) {
 	const int bayerStep = sx;
 	const int rgbStep = 3 * sx;
 	int width = sx;
@@ -623,9 +623,10 @@ int bayer_AHD(const WORD *bayer, WORD *dst, int sx, int sy,
 					for (d = 0; d < 2; d++)
 						for (i = 0; i < 4; i++)
 							if (i >> 1 == d || ldiff[d][i] <= leps)
-								abdiff[d][i] =	SQR(lab[d][tr][tc][1]
-										- lab[d][tr][tc + dir[i]][1])
-											+ SQR(lab[d][tr][tc][2] -lab[d][tr][tc+dir[i]][2]);
+								abdiff[d][i] =
+										SQR(
+												lab[d][tr][tc][1]
+														- lab[d][tr][tc + dir[i]][1]) + SQR(lab[d][tr][tc][2] -lab[d][tr][tc+dir[i]][2]);
 					abeps = MIN(MAX(abdiff[0][0],abdiff[0][1]),
 							MAX(abdiff[1][2],abdiff[1][3]));
 					for (d = 0; d < 2; d++)
@@ -752,17 +753,19 @@ int debayer(fits* fit, interpolation_method interpolation) {
 	fit->pdata[GLAYER] = fit->data + npixels;
 	fit->pdata[BLAYER] = fit->data + npixels * 2;
 	for (i = 0, j = 0; j < npixels; i += 3, j++) {
-		fit->pdata[RLAYER][j] = (fit->bitpix == 8) ?
-				round_to_BYTE(newbuf[i + RLAYER]) : newbuf[i + RLAYER];
-		fit->pdata[GLAYER][j] = (fit->bitpix == 8) ?
-				round_to_BYTE(newbuf[i + GLAYER]) : newbuf[i + GLAYER];
-		fit->pdata[BLAYER][j] = (fit->bitpix == 8) ?
-				round_to_BYTE(newbuf[i + BLAYER]) : newbuf[i + BLAYER];
+		fit->pdata[RLAYER][j] =
+				(fit->bitpix == 8) ?
+						round_to_BYTE(newbuf[i + RLAYER]) : newbuf[i + RLAYER];
+		fit->pdata[GLAYER][j] =
+				(fit->bitpix == 8) ?
+						round_to_BYTE(newbuf[i + GLAYER]) : newbuf[i + GLAYER];
+		fit->pdata[BLAYER][j] =
+				(fit->bitpix == 8) ?
+						round_to_BYTE(newbuf[i + BLAYER]) : newbuf[i + BLAYER];
 	}
 	free(newbuf);
 	return 0;
 }
-
 
 /* From an area, get the area corresponding to the debayer data for all colors,
  * the dashed area below.
@@ -781,14 +784,16 @@ int debayer(fits* fit, interpolation_method interpolation) {
  * debayer_offset_x and y are the offset that need to be applied to the debayer
  *	data to find the original area (between 0 and 3).
  */
-void get_debayer_area(const rectangle *area, rectangle *debayer_area, const rectangle *image_area,
-		int *debayer_offset_x, int *debayer_offset_y) {
+void get_debayer_area(const rectangle *area, rectangle *debayer_area,
+		const rectangle *image_area, int *debayer_offset_x,
+		int *debayer_offset_y) {
 	int right, bottom;	// temp debayer negative offsets
 
 	/* left side */
 	if (area->x & 1)
 		*debayer_offset_x = 3;
-	else *debayer_offset_x = 2;
+	else
+		*debayer_offset_x = 2;
 	if (area->x - *debayer_offset_x < 0) {
 		debayer_area->x = 0;
 		*debayer_offset_x = area->x;
@@ -800,17 +805,18 @@ void get_debayer_area(const rectangle *area, rectangle *debayer_area, const rect
 	int xend = area->x + area->w - 1;
 	if (xend & 1)
 		right = 2;
-	else right = 3;
+	else
+		right = 3;
 	if (xend + right >= image_area->w) {
 		right = image_area->w - xend - 1;
 	}
 	debayer_area->w = area->w + (area->x - debayer_area->x) + right;
 
-
 	/* top */
 	if (area->y & 1)
 		*debayer_offset_y = 3;
-	else *debayer_offset_y = 2;
+	else
+		*debayer_offset_y = 2;
 	if (area->y - *debayer_offset_y < 0) {
 		debayer_area->y = 0;
 		*debayer_offset_y = area->y;
@@ -822,7 +828,8 @@ void get_debayer_area(const rectangle *area, rectangle *debayer_area, const rect
 	int yend = area->y + area->h - 1;
 	if (yend & 1)
 		bottom = 2;
-	else bottom = 3;
+	else
+		bottom = 3;
 	if (yend + bottom >= image_area->h) {
 		bottom = image_area->h - yend - 1;
 	}

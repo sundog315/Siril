@@ -25,22 +25,21 @@ struct enhance_saturation_data {
 	gboolean preserve;
 };
 
-void rgb_to_hsl (double, double, double, double *, double *, double *);
-void hsl_to_rgb (double, double, double, double *, double *, double *);
-void rgb_to_hsv (double, double, double, double *, double *, double *);
-void hsv_to_rgb (double, double, double, double *, double *, double *);
-void rgb_to_xyz (double, double, double, double *, double *, double *);
-void xyz_to_LAB (double, double, double, double *, double *, double *);
-void LAB_to_xyz (double, double, double, double *, double *, double *);
-void xyz_to_rgb (double, double, double, double *, double *, double *);
+void rgb_to_hsl(double, double, double, double *, double *, double *);
+void hsl_to_rgb(double, double, double, double *, double *, double *);
+void rgb_to_hsv(double, double, double, double *, double *, double *);
+void hsv_to_rgb(double, double, double, double *, double *, double *);
+void rgb_to_xyz(double, double, double, double *, double *, double *);
+void xyz_to_LAB(double, double, double, double *, double *, double *);
+void LAB_to_xyz(double, double, double, double *, double *, double *);
+void xyz_to_rgb(double, double, double, double *, double *, double *);
 
 gpointer extract_channels(gpointer p);
-//~ void enhance_saturation(fits *, double, double, double, gboolean);
 gpointer enhance_saturation(gpointer p);
 gpointer scnr(gpointer p);
 
 void initialize_calibration_interface();
-void background_neutralize (fits*, rectangle);
+void background_neutralize(fits*, rectangle);
 void white_balance(fits *, gboolean, rectangle, rectangle);
 
 #endif

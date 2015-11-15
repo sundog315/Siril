@@ -49,7 +49,7 @@
 #include "registration/registration.h"
 #include "stacking/stacking.h"
 #include "algos/fft.h"
-#include "compositing.h"
+#include "compositing/compositing.h"
 #ifdef HAVE_OPENCV
 #include "opencv/opencv.h"
 #endif
@@ -4668,7 +4668,7 @@ void on_button_extract_clicked(GtkButton *button, gpointer user_data) {
 		return;
 	}
 	set_cursor_waiting(TRUE);
-	extract_BKG(&wfit[0]);
+	grad_background_extraction(&wfit[0]);
 	redraw(com.cvport, REMAP_NONE);
 	redraw_previews();
 	set_cursor_waiting(FALSE);

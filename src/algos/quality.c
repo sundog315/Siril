@@ -27,12 +27,11 @@
 #include <stdlib.h>
 
 #include "core/siril.h"
-#include "algos/quality.h"
 #include "core/proto.h"
 #include "gui/callbacks.h"
+#include "algos/quality.h"
 
-static int32_t SubSample(WORD *ptr, int img_wid, int x_size,
-		int y_size);
+static int32_t SubSample(WORD *ptr, int img_wid, int x_size, int y_size);
 
 static unsigned short *_smooth_image_16(unsigned short *buf, int width,
 		int height);
@@ -115,8 +114,7 @@ double QualityEstimate(fits *fit, int layer, int qtype) {
 		for (y += subsample; y < y_last; y += subsample) {
 			ptr = buffer + (y * width + x1);
 			for (x = 0; x < x_samples; ++x, ptr += x_inc) {
-				register int v = SubSample(ptr, width, subsample,
-						subsample);
+				register int v = SubSample(ptr, width, subsample, subsample);
 
 				if (v > maxp[2] && v < 65530) {
 					int slot;
@@ -177,11 +175,11 @@ double QualityEstimate(fits *fit, int layer, int qtype) {
 		sprintf(filename, "sample_%d.ppm", subsample);
 		out = fopen(filename, "wb");
 		if (out == NULL)
-			printf("Cannot write subsampled image %d\n", subsample);
+		printf("Cannot write subsampled image %d\n", subsample);
 		else {
 			fprintf(out, "P5\n%d %d\n255\n", x_samples, y_samples);
 			for (i = 0; i < n; ++i)
-				putc(new_image[i] >> 8, out);
+			putc(new_image[i] >> 8, out);
 			fclose(out);
 		}
 		/*********************************/
@@ -242,7 +240,7 @@ static double Gradient(WORD *buf, int width, int height, int qtype) {
 	int xborder = (int) ((double) width * QMARGIN) + 1;
 	double d1, d2;
 	double val, avg = 0;
-	int threshhold = (ThreshHold) << 8;
+	int threshhold = (THRESHOLD) << 8;
 	unsigned char *map = calloc(width * height, sizeof(unsigned char));
 
 	// pass 1 locate all pixels > threshhold and flag the 3x3 region
@@ -380,9 +378,9 @@ static int _FindCentre_Barycentre(fits *fit, int x1, int y1, int x2, int y2,
 		y2 = img_height - 2;
 
 	if (get_normalized_value(fit) == UCHAR_MAX)
-		RealThreshHold = ThreshHold;
+		RealThreshHold = THRESHOLD;
 	else
-		RealThreshHold = ThreshHold * 256;
+		RealThreshHold = THRESHOLD * 256;
 
 	for (y = y1; y <= y2; ++y) {
 		int rowcount = 0;
@@ -426,10 +424,10 @@ static int _FindCentre_Barycentre(fits *fit, int x1, int y1, int x2, int y2,
 	return (1);
 }
 
-static int _FindCentre(fits *fit, int x1, int y1, int x2, int y2,
-		int *x_avg, int *y_avg) {
+static int _FindCentre(fits *fit, int x1, int y1, int x2, int y2, int *x_avg,
+		int *y_avg) {
 
-		return _FindCentre_Barycentre(fit, x1, y1, x2, y2, x_avg, y_avg);
+	return _FindCentre_Barycentre(fit, x1, y1, x2, y2, x_avg, y_avg);
 
 	return 0;
 }

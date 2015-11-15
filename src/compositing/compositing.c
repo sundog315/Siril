@@ -25,7 +25,7 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "compositing.h"
+#include "compositing/compositing.h"
 #include "core/siril.h"
 #include "core/proto.h"
 #include "algos/colors.h"
@@ -33,7 +33,7 @@
 #include "gui/PSF_list.h"
 #include "gui/callbacks.h"
 #include "registration/registration.h"
-#include "filters.h"
+#include "compositing/filters.h"
 #ifdef HAVE_OPENCV
 #include "opencv/opencv.h"
 #endif

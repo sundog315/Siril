@@ -1,6 +1,6 @@
 #ifndef _SER_H_
 #define _SER_H_
-#include "core/siril.h"
+
 #include <stdint.h>
 #ifdef _OPENMP
 #include <omp.h>

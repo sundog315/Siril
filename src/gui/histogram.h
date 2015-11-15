@@ -10,11 +10,13 @@ void set_histogram(gsl_histogram *histo, int layer);
 void clear_histograms();
 void set_histo_toggles_names();
 void erase_histo_display(cairo_t *cr, int width, int height);
-void display_histo(gsl_histogram *histo, cairo_t *cr, int layer, int width, int height);
+void display_histo(gsl_histogram *histo, cairo_t *cr, int layer, int width,
+		int height);
 void reset_curors_and_values();
 void update_histo_mtf();
 void apply_mtf_to_fits(fits *fit);
-void apply_mtf_to_histo(gsl_histogram *histo, double norm, double m, double lo, double hi);
+void apply_mtf_to_histo(gsl_histogram *histo, double norm, double m, double lo,
+		double hi);
 double MTF(double x, double m);
 
 #endif

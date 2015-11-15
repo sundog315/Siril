@@ -26,10 +26,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
-#include "io/ser.h"
+
+#include "core/siril.h"
+#include "core/proto.h"
 #include "gui/callbacks.h"
 #include "algos/demosaicing.h"
-#include "core/proto.h"
+#include "io/ser.h"
 
 /* 62135596800 sec from year 0001 to 01 janv. 1970 00:00:00 GMT */
 const uint64_t epochTicks = 621355968000000000UL;

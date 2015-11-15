@@ -20,7 +20,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <gtk/gtk.h>
 #include <math.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
@@ -31,10 +30,10 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_multifit_nlin.h>
 
-#include "algos/PSF.h"
 #include "core/siril.h"
-#include "gui/callbacks.h"
 #include "core/proto.h"
+#include "gui/callbacks.h"
+#include "algos/PSF.h"
 
 #define MAX_ITER_NO_ANGLE  10		//Number of iteration in the minimization with no angle
 #define MAX_ITER_ANGLE     10		//Number of iteration in the minimization with angle

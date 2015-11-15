@@ -26,7 +26,7 @@
 #define QSUBSAMPLE_INC 1
 #define QSUBSAMPLE_MAX 5
 #define QSUBSAMPLE_MIN 3
-#define ThreshHold 40
+#define THRESHOLD 40
 #define QF_APERTURE_RADIUS 0
 
 #undef DEBUG

@@ -1,8 +1,6 @@
 #ifndef STACKING_H_
 #define STACKING_H_
 
-#include "core/siril.h"	// for sequence and gboolean
-
 /* the dynamic image selection, based on various possible criteria */
 typedef int (*stack_filter)(sequence *seq, int nb_img, double param);
 

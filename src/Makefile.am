@@ -10,7 +10,8 @@ siril_SOURCES = \
 	io/conversion.c io/conversion.h io/ser.c io/ser.h io/films.c io/films.h \
 	io/image_formats_libraries.c io/image_formats_internal.c io/image_format_fits.c \
 	io/sequence.c io/seqfile.c io/single_image.c io/single_image.h \
-	gui/callbacks.c gui/callbacks.h gui/histogram.c gui/histogram.h gui/PSF_list.h  gui/sequence_list.c \
+	gui/callbacks.c gui/callbacks.h gui/histogram.c gui/histogram.h \
+	gui/PSF_list.h gui/PSF_list.c gui/sequence_list.c \
 	registration/registration.c registration/registration.h registration/registration_preview.c \
 	registration/matching/match.c registration/matching/atpmatch.c registration/matching/misc.c \
 	stacking/stacking.c stacking/stacking.h \
@@ -20,8 +21,8 @@ siril_SOURCES = \
 	algos/demosaicing.c algos/demosaicing.h \
 	algos/pave.c algos/transform.c algos/io_wave.c algos/reconstr.c \
 	algos/Def_Math.h algos/Def_Wavelet.h algos/Def_Mem.h \
-	algos/PSF.c algos/PSF.h gui/PSF_list.c algos/star_finder.c algos/star_finder.h \
-	compositing.c compositing.h filters.c filters.h
+	algos/PSF.c algos/PSF.h algos/star_finder.c algos/star_finder.h \
+	compositing/compositing.c compositing/compositing.h compositing/filters.c compositing/filters.h
 	
 siril_LDADD = $(GTK_LIBS) $(LIBRAW_LIBS) $(LIBTIFF_LIBS) $(LIBPNG_LIBS) $(FFTW_LIBS) $(CFITSIO_LIBS) $(GSL_LIBS) $(FFMS2_LIBS) $(LIBCONFIGXX_LIBS)
 

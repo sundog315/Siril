@@ -23,11 +23,11 @@
 #include <string.h>
 
 #include "core/siril.h"
+#include "core/proto.h"
+#include "gui/callbacks.h"
 #include "algos/PSF.h"
 #include "gui/PSF_list.h"
 #include "algos/star_finder.h"
-#include "gui/callbacks.h"
-#include "core/proto.h"
 
 static GtkListStore *liststore_stars = NULL;
 

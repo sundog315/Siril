@@ -1,6 +1,5 @@
 #ifndef FINDER_H_
 #define FINDER_H_
-#include "core/siril.h"
 
 typedef struct starFinder_struct starFinder;
 
