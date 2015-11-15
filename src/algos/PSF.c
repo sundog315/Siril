@@ -571,7 +571,7 @@ fitted_PSF *psf_global_minimisation(gsl_matrix* z, double bg, int layer,
 			swap_param(&psf->sx, &psf->sy);
 			swap_param(&psf->fwhmx, &psf->fwhmy);
 			if (fit_angle && psf->angle != 0.0) {
-				psf->angle > 0.0 ? psf->angle - 90.0 : psf->angle + 90.0;
+				psf->angle > 0.0 ? psf->angle -= 90.0 : psf->angle += 90.0;
 			}
 		}
 
