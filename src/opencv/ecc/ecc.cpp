@@ -308,7 +308,7 @@ double findTransform(InputArray templateImage, InputArray inputImage,
 		InputOutputArray warpMatrix, int motionType, TermCriteria criteria,
 		InputArray inputMask) {
 
-	Mat src = templateImage.getMat(); //template iamge
+	Mat src = templateImage.getMat(); //template image
 	Mat dst = inputImage.getMat(); //input image (to be warped)
 	Mat map = warpMatrix.getMat(); //warp (transformation)
 
@@ -561,6 +561,7 @@ int cfindTransform(fits *reference, fits *image, int layer,
 	WARP_MODE warp_mode = WARP_MODE_TRANSLATION;	// for tests
 	int number_of_iterations = 50;
 	double termination_eps = 0.001;
+	int retvalue = 0;
 
 	setIdentity(warp_matrix);
 	ref.convertTo(ref, CV_8UC1);
@@ -578,6 +579,7 @@ int cfindTransform(fits *reference, fits *image, int layer,
 	if (rho > 0) {
 
 #ifdef ECC_DEBUG
+		std::cout << "rho=" << rho << std::endl;
 		std::cout << "result=" << std::endl << warp_matrix << std::endl;
 #endif
 
@@ -588,11 +590,12 @@ int cfindTransform(fits *reference, fits *image, int layer,
 			break;
 		default:
 			std::cout << "Not handled yet" << std::endl;
+			retvalue = 1;
 		}
 	}
 
 	warp_matrix.release();
 	ref.release();
 	im.release();
-	return 0;
+	return retvalue;
 }

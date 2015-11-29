@@ -677,7 +677,10 @@ int register_ecc(struct registration_args *args) {
 				reg_ecc reg_param;
 				memset(&reg_param, 0, sizeof(reg_ecc));
 
-				cfindTransform(&ref, &im, args->layer, &reg_param);
+				if (cfindTransform(&ref, &im, args->layer, &reg_param)) {
+					siril_log_message("Cannot perform ECC alignment\n");
+					break;
+				}
 				// We don't need fit anymore, we can destroy it.
 				current_regdata[frame].quality = QualityEstimate(&im, args->layer,
 						QUALTYPE_NORMAL);
