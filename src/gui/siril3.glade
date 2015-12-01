@@ -8109,18 +8109,18 @@ If the selection is empty, the whole image will be used as reference.</property>
       <object class="GtkBox" id="dialog-vbox16">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox" id="dialog-action_area17">
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-              <object class="GtkButton" id="button3">
-                <property name="label">gtk-cancel</property>
+              <object class="GtkButton" id="confirmcancel">
+                <property name="label">gtk-no</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="has_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="border_width">16</property>
+                <property name="valign">center</property>
                 <property name="use_underline">True</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_confirmcancel_clicked" swapped="no"/>
@@ -8132,12 +8132,12 @@ If the selection is empty, the whole image will be used as reference.</property>
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="button2">
-                <property name="label">gtk-ok</property>
+              <object class="GtkButton" id="confirmok">
+                <property name="label">gtk-yes</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
-                <property name="border_width">17</property>
+                <property name="valign">center</property>
                 <property name="use_underline">True</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_confirmok_clicked" swapped="no"/>
@@ -8161,10 +8161,10 @@ If the selection is empty, the whole image will be used as reference.</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkImage" id="image2">
+              <object class="GtkImage" id="confirmicon">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="stock">gtk-info</property>
+                <property name="stock">gtk-dialog-question</property>
                 <property name="icon_size">6</property>
               </object>
               <packing>
@@ -8196,8 +8196,8 @@ If the selection is empty, the whole image will be used as reference.</property>
       </object>
     </child>
     <action-widgets>
-      <action-widget response="0">button3</action-widget>
-      <action-widget response="0">button2</action-widget>
+      <action-widget response="0">confirmcancel</action-widget>
+      <action-widget response="0">confirmok</action-widget>
     </action-widgets>
   </object>
   <object class="GtkDialog" id="crop_dialog">
