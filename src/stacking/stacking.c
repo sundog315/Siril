@@ -214,8 +214,6 @@ int stack_summing(struct stacking_args *args) {
 		}
 		tmpmsg = strdup("Processing image ");
 		tmpmsg = str_append(&tmpmsg, filename);
-//		tmpmsg = siril_log_message("Processing image %s\n", filename);
-//		tmpmsg[strlen(tmpmsg)-1] = '\0';
 		set_progress_bar_data(tmpmsg, (double)cur_nb/((double)nb_frames+1.));
 		free(tmpmsg);
 

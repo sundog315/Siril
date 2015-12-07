@@ -164,6 +164,7 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
       </object>
     </child>
   </object>
+  <object class="GtkAction" id="action1"/>
   <object class="GtkImage" id="add_convert_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -4328,7 +4329,6 @@ When processing images, registration data is taken from the default layer if ava
                 </child>
                 <child>
                   <object class="GtkBox" id="box29">
-                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <child>
                       <object class="GtkLabel" id="preproseqname_label1">
@@ -4347,7 +4347,6 @@ When processing images, registration data is taken from the default layer if ava
                     <child>
                       <object class="GtkEntry" id="regseqname_entry">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Prefix of the image names resulting from the registration.</property>
                         <property name="text">r_</property>
@@ -5690,6 +5689,53 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
                               <packing>
                                 <property name="expand">False</property>
                                 <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkBox" id="box60">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <child>
+                                  <object class="GtkRadioButton" id="bkgButtonAuto">
+                                    <property name="label" translatable="yes">Automatic</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">Siril picks background samples automatically.</property>
+                                    <property name="xalign">0</property>
+                                    <property name="active">True</property>
+                                    <property name="draw_indicator">True</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkRadioButton" id="bkgButtonManual">
+                                    <property name="label" translatable="yes">Manual</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">You must click on the picture to pick your own background samples.</property>
+                                    <property name="xalign">0</property>
+                                    <property name="active">True</property>
+                                    <property name="draw_indicator">True</property>
+                                    <property name="group">bkgButtonAuto</property>
+                                    <signal name="toggled" handler="on_bkgButtonManual_toggled" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">True</property>
                                 <property name="position">2</property>
                               </packing>
                             </child>
@@ -6010,78 +6056,6 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
                             <property name="position">2</property>
                           </packing>
                         </child>
-                        <child>
-                          <object class="GtkFrame" id="frame25">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="label_xalign">0</property>
-                            <property name="shadow_type">none</property>
-                            <child>
-                              <object class="GtkAlignment" id="alignment29">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="left_padding">12</property>
-                                <child>
-                                  <object class="GtkBox" id="box59">
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="homogeneous">True</property>
-                                    <child>
-                                      <object class="GtkLabel" id="label41">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="halign">start</property>
-                                        <property name="label" translatable="yes">Degree Order: </property>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">0</property>
-                                      </packing>
-                                    </child>
-                                    <child>
-                                      <object class="GtkComboBoxText" id="combo_polyorder">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">False</property>
-                                        <property name="tooltip_text" translatable="yes">Choose the degree order of the polynomial function used in the fit.
-By default the value is of 4.
-The higher the degree order is, the stronger the gradient can be remove.</property>
-                                        <property name="valign">center</property>
-                                        <property name="active">0</property>
-                                        <items>
-                                          <item translatable="yes">1</item>
-                                          <item translatable="yes">2</item>
-                                          <item translatable="yes">3</item>
-                                          <item translatable="yes">4</item>
-                                        </items>
-                                      </object>
-                                      <packing>
-                                        <property name="expand">False</property>
-                                        <property name="fill">True</property>
-                                        <property name="position">1</property>
-                                      </packing>
-                                    </child>
-                                  </object>
-                                </child>
-                              </object>
-                            </child>
-                            <child type="label">
-                              <object class="GtkLabel" id="label107">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Interpolation</property>
-                                <attributes>
-                                  <attribute name="weight" value="bold"/>
-                                </attributes>
-                              </object>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">3</property>
-                          </packing>
-                        </child>
                       </object>
                     </child>
                     <child type="tab">
@@ -6391,71 +6365,65 @@ The higher the degree order is, the stronger the gradient can be remove.</proper
                     <property name="orientation">vertical</property>
                     <property name="spacing">10</property>
                     <child>
-                      <object class="GtkFrame" id="frame36">
+                      <object class="GtkFrame" id="frame25">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="label_xalign">0</property>
                         <property name="shadow_type">none</property>
                         <child>
-                          <object class="GtkAlignment" id="alignment40">
+                          <object class="GtkAlignment" id="alignment29">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="left_padding">12</property>
                             <child>
-                              <object class="GtkScrolledWindow" id="scrolledwindow7">
+                              <object class="GtkBox" id="box59">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="vexpand">False</property>
-                                <property name="shadow_type">in</property>
-                                <property name="min_content_height">127</property>
+                                <property name="can_focus">False</property>
+                                <property name="homogeneous">True</property>
                                 <child>
-                                  <object class="GtkTreeView" id="treeviewbkg">
+                                  <object class="GtkLabel" id="label41">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="hscroll_policy">natural</property>
-                                    <property name="vscroll_policy">natural</property>
-                                    <property name="model">liststore_bkg</property>
-                                    <property name="search_column">0</property>
-                                    <property name="show_expanders">False</property>
-                                    <property name="enable_grid_lines">horizontal</property>
-                                    <child internal-child="selection">
-                                      <object class="GtkTreeSelection" id="treeview-selection4"/>
-                                    </child>
-                                    <child>
-                                      <object class="GtkTreeViewColumn" id="treeviewcolumn22">
-                                        <property name="spacing">5</property>
-                                        <property name="sizing">autosize</property>
-                                        <property name="title" translatable="yes">Box</property>
-                                        <child>
-                                          <object class="GtkCellRendererText" id="cellrenderertext12"/>
-                                          <attributes>
-                                            <attribute name="text">0</attribute>
-                                          </attributes>
-                                        </child>
-                                      </object>
-                                    </child>
-                                    <child>
-                                      <object class="GtkTreeViewColumn" id="treeviewcolumn21">
-                                        <property name="resizable">True</property>
-                                        <property name="title" translatable="yes">Selected</property>
-                                        <child>
-                                          <object class="GtkCellRendererToggle" id="cellrenderertext11"/>
-                                          <attributes>
-                                            <attribute name="active">1</attribute>
-                                          </attributes>
-                                        </child>
-                                      </object>
-                                    </child>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="label" translatable="yes">Degree Order: </property>
                                   </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkComboBoxText" id="combo_polyorder">
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="tooltip_text" translatable="yes">Choose the degree order of the polynomial function used in the fit.
+By default the value is of 4.
+The higher the degree order is, the stronger the gradient can be remove.</property>
+                                    <property name="valign">center</property>
+                                    <property name="active">0</property>
+                                    <items>
+                                      <item translatable="yes">1</item>
+                                      <item translatable="yes">2</item>
+                                      <item translatable="yes">3</item>
+                                      <item translatable="yes">4</item>
+                                    </items>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
                                 </child>
                               </object>
                             </child>
                           </object>
                         </child>
                         <child type="label">
-                          <object class="GtkLabel" id="label152">
+                          <object class="GtkLabel" id="label107">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">Boxes</property>
+                            <property name="label" translatable="yes">Interpolation</property>
                             <attributes>
                               <attribute name="weight" value="bold"/>
                             </attributes>
@@ -6586,18 +6554,12 @@ Division: it is mainly used to correct multiplicative phenomena, such as vignett
                 <property name="can_focus">False</property>
                 <property name="homogeneous">True</property>
                 <child>
-                  <object class="GtkButton" id="button_extract">
-                    <property name="label" translatable="yes">Extract</property>
+                  <object class="GtkButton" id="bkgCompute">
+                    <property name="label" translatable="yes">Compute</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
-                    <property name="has_tooltip">True</property>
-                    <property name="tooltip_markup" translatable="yes">This will generate the synthetic background.</property>
-                    <property name="tooltip_text" translatable="yes">This will generate the synthetic background.</property>
-                    <property name="halign">center</property>
-                    <property name="valign">end</property>
-                    <property name="margin_left">12</property>
-                    <signal name="clicked" handler="on_button_extract_clicked" swapped="no"/>
+                    <signal name="clicked" handler="on_bkgCompute_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -6613,14 +6575,13 @@ Division: it is mainly used to correct multiplicative phenomena, such as vignett
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">This will apply the selected correction.</property>
-                    <property name="halign">center</property>
                     <property name="valign">center</property>
                     <signal name="clicked" handler="on_button_bkg_correct_clicked" swapped="no"/>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">1</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
               </object>

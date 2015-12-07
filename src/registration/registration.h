@@ -61,9 +61,6 @@ void fill_comboboxregmethod();
 
 /** getter */
 int get_registration_layer(sequence *seq);
-int get_regtype();
-int get_planetarytype();
-
 
 /* mouse behaviour */
 
@@ -72,6 +69,7 @@ typedef enum {
 	MOUSE_ACTION_SELECT_REG_AREA,
 	MOUSE_ACTION_SELECT_PREVIEW1,
 	MOUSE_ACTION_SELECT_PREVIEW2,
+	MOUSE_ACTION_DRAW_SAMPLES,
 } mouse_status_enum;
 
 extern mouse_status_enum mouse_status;	// defined in registration_preview.c

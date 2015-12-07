@@ -2362,6 +2362,34 @@ gboolean on_drawingarea_button_press_event(GtkWidget *widget,
 				}
 				gtk_widget_queue_draw(widget);
 			}
+			else if (mouse_status == MOUSE_ACTION_DRAW_SAMPLES) {
+				double zoom = get_zoom_val();
+				if (!com.grad) {
+					com.grad = malloc(NB_MAX_OF_SAMPLES * sizeof(gradient));
+					com.grad_boxes_drawn = TRUE;
+					com.grad_nb_boxes = 0;
+				}
+				int i = com.grad_nb_boxes;
+				GtkSpinButton *size = GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_sizebox"));
+				point pt;
+				int midbox;
+
+				midbox = (size_t) gtk_spin_button_get_value(size);
+				com.grad_size_boxes = midbox * 2;
+				pt.x = (event->x / zoom);
+				pt.y = (event->y / zoom);
+
+				if (pt.x + midbox <= gfit.rx && pt.y + midbox <= gfit.ry
+						&& pt.x - midbox >= 0 && pt.y - midbox >= 0) {
+					com.grad[i].centre.x = pt.x + midbox;
+					com.grad[i].centre.y = pt.y + midbox;
+					com.grad[i].boxvalue = get_value_from_box(&gfit, pt,
+							com.grad_size_boxes);
+					com.grad_nb_boxes++;
+					redraw(com.cvport, REMAP_NONE);
+					redraw_previews();
+				}
+			}
 		} else if (event->button == 2) {	// middle click
 
 		}
@@ -4665,21 +4693,33 @@ void on_menuitem_bkg_extraction_activate(GtkMenuItem *menuitem,
 		gtk_widget_show(lookup_widget("Bkg_extract_window"));
 }
 
-void on_button_extract_clicked(GtkButton *button, gpointer user_data) {
-	static GtkToggleButton *imgbutton = NULL;
+void on_bkgButtonManual_toggled(GtkToggleButton *togglebutton,
+		gpointer user_data) {
 
-	if (imgbutton == NULL)
+	update_bkg_interface();
+	redraw(com.cvport, REMAP_NONE);
+	redraw_previews();
+}
+
+void on_bkgCompute_clicked(GtkButton *button, gpointer user_data) {
+	static GtkToggleButton *imgbutton = NULL, *bgkAutoButton = NULL;
+	gboolean automatic;
+
+	if (imgbutton == NULL) {
 		imgbutton = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_bkg_img"));
+		bgkAutoButton = GTK_TOGGLE_BUTTON(lookup_widget("bkgButtonAuto"));
+	}
+	automatic = gtk_toggle_button_get_active(bgkAutoButton);
 
 	if (!gtk_toggle_button_get_active(imgbutton)) {
-		char *msg =
-				siril_log_message(
-						"Background cannot be extracted from itself. Please, click on Show Image\n");
+		char *msg =	siril_log_message("Background cannot be extracted"
+				" from itself. Please, click on Show Image\n");
 		show_dialog(msg, "Error", "gtk-dialog-error");
 		return;
 	}
+
 	set_cursor_waiting(TRUE);
-	grad_background_extraction(&wfit[0]);
+	bkgExtractBackground(&wfit[0], automatic);
 	redraw(com.cvport, REMAP_NONE);
 	redraw_previews();
 	set_cursor_waiting(FALSE);
@@ -4761,25 +4801,30 @@ void on_button_bkg_extract_close_clicked(GtkButton *button, gpointer user_data) 
 }
 
 void on_Bkg_extract_window_hide(GtkWidget *widget, gpointer user_data) {
-	static GtkToggleButton *imgbutton = NULL, *bkgbutton = NULL;
+	static GtkToggleButton *imgbutton = NULL, *bkgbutton = NULL, *bgkAutoButton;
+	int remap_option;
+
 
 	if (imgbutton == NULL) {
 		imgbutton = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_bkg_img"));
 		bkgbutton = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_bkg_bkg"));
+		bgkAutoButton = GTK_TOGGLE_BUTTON(lookup_widget("bkgButtonAuto"));
 	}
 	gtk_widget_set_sensitive(lookup_widget("frame_bkg_tools"), FALSE);
 	gtk_widget_set_sensitive(lookup_widget("button_bkg_correct"), FALSE);
-	int remap = REMAP_NONE;
+	gtk_toggle_button_set_active(bgkAutoButton, TRUE);
+	remap_option = REMAP_NONE;
 
 	set_cursor_waiting(TRUE);
 	if (gtk_toggle_button_get_active(bkgbutton)) {
 		gtk_toggle_button_set_active(imgbutton, TRUE);
-		remap = REMAP_ALL;
+		remap_option = REMAP_ALL;
 	}
-	if (com.grad)
+	if (com.grad) {
 		free(com.grad);
-	com.grad = NULL;
-	redraw(com.cvport, remap);
+		com.grad = NULL;
+	}
+	redraw(com.cvport, remap_option);
 	redraw_previews();
 	clearfits(&wfit[0]);
 	set_cursor_waiting(FALSE);

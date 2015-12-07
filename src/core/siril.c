@@ -50,6 +50,8 @@
 #include "algos/Def_Wavelet.h"
 #include "io/ser.h"
 
+#define SIGMA_PER_FWHM 2.35482
+
 /* this file contains all functions for image processing */
 
 int threshlo(fits *fit, int level) {
@@ -347,7 +349,7 @@ int unsharp(fits *fit, double sigma, double amount, gboolean verbose) {
 		siril_log_color_message("Unsharp: processing...\n", "red");
 		gettimeofday(&t_start, NULL);
 	}
-	unsharp_filter(fit, sigma, amount);
+	cvUnsharpFilter(fit, sigma, amount);
 
 	if (verbose) {
 		gettimeofday(&t_end, NULL);
@@ -1132,11 +1134,15 @@ int backgroundnoise(fits* fit, double sigma[]) {
 	ndata = fit->rx * fit->ry;
 
 	copyfits(fit, waveimage, CP_ALLOC | CP_FORMAT | CP_COPYA, 0);
+#ifdef HAVE_OPENCV	// a bit faster
+	cvComputeFinestScale(waveimage);
+#else
 	if (get_wavelet_layers(waveimage, 2, 0, TO_PAVE_BSPLINE, -1)) {
 		siril_log_message("Siril cannot evaluate the noise in the image\n");
 		clearfits(waveimage);
 		return 1;
 	}
+#endif
 
 	for (layer = 0; layer < fit->naxes[2]; layer++) {
 		imstats *stat = statistics(waveimage, layer, NULL);
@@ -1183,7 +1189,7 @@ int backgroundnoise(fits* fit, double sigma[]) {
 			}
 			n++;
 		} while (fabs(sigma[layer] - sigma0) / sigma[layer] > 0.0001 && n < 10);
-		sigma[layer] *= 2.35482;
+		sigma[layer] *= SIGMA_PER_FWHM;
 		free(array1);
 		free(array2);
 		free(stat);
@@ -1312,7 +1318,7 @@ int verbose_resize_gaussian(fits *image, int toX, int toY, int interpolation) {
 	free(str_inter);
 	gettimeofday(&t_start, NULL);
 
-	retvalue = resize_gaussian(&gfit, toX, toY, interpolation);
+	retvalue = cvResizeGaussian(&gfit, toX, toY, interpolation);
 
 	gettimeofday(&t_end, NULL);
 	show_time(t_start, t_end);
@@ -1352,7 +1358,7 @@ int verbose_rotate_image(fits *image, double angle, int interpolation,
 			str_inter, angle);
 	gettimeofday(&t_start, NULL);
 
-	rotate_image(&gfit, angle, interpolation, cropped);
+	cvRotateImage(&gfit, angle, interpolation, cropped);
 
 	gettimeofday(&t_end, NULL);
 	show_time(t_start, t_end);
