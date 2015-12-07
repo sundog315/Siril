@@ -21,7 +21,7 @@ typedef struct {
 } newBackground;
 
 void bkgExtractBackground(fits *fit, gboolean automatic);
-double get_value_from_box(fits *fit, point box, size_t size);
+double get_value_from_box(fits *fit, point box, size_t size, int layer);
 void update_bkg_interface();
 
 #endif

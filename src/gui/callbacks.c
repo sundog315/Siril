@@ -682,7 +682,7 @@ gboolean redraw_drawingarea(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	if (com.grad && com.grad_boxes_drawn) {
 		int i = 0;
 		while (i < com.grad_nb_boxes) {
-			if (com.grad[i].boxvalue != -1.0) {
+			if (com.grad[i].boxvalue[0] != -1.0) {
 				cairo_set_line_width(cr, 1.5);
 				cairo_set_source_rgba(cr, 0.2, 1.0, 0.3, 1.0);
 				cairo_rectangle(cr, com.grad[i].centre.x - com.grad_size_boxes,
@@ -2370,6 +2370,7 @@ gboolean on_drawingarea_button_press_event(GtkWidget *widget,
 					com.grad_nb_boxes = 0;
 				}
 				int i = com.grad_nb_boxes;
+				int layer;
 				GtkSpinButton *size = GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_sizebox"));
 				point pt;
 				int midbox;
@@ -2383,8 +2384,9 @@ gboolean on_drawingarea_button_press_event(GtkWidget *widget,
 						&& pt.x - midbox >= 0 && pt.y - midbox >= 0) {
 					com.grad[i].centre.x = pt.x + midbox;
 					com.grad[i].centre.y = pt.y + midbox;
-					com.grad[i].boxvalue = get_value_from_box(&gfit, pt,
-							com.grad_size_boxes);
+					for (layer = 0; layer < gfit.naxes[2]; layer++)
+						com.grad[i].boxvalue[layer] = get_value_from_box(&gfit, pt,
+								com.grad_size_boxes, layer);
 					com.grad_nb_boxes++;
 					redraw(com.cvport, REMAP_NONE);
 					redraw_previews();

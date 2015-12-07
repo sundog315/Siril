@@ -880,7 +880,7 @@ int process_clearstar(int nb){
 int process_contrast(int nb){
 	int layer;
 	double result[gfit.naxes[2]], value=0;
-	
+
 	for (layer = 0; layer < gfit.naxes[2]; layer++)
 		result[layer] = contrast(&gfit, layer);
 	for (layer = 0; layer < gfit.naxes[2]; layer++)

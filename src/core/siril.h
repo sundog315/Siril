@@ -419,7 +419,7 @@ struct point_struct {
 
 struct gradient_struct {
 	point centre;
-	double boxvalue;
+	double boxvalue[3];
 };
 
 struct historic_struct {

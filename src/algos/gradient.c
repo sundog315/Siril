@@ -78,7 +78,7 @@ static double poly_1(gsl_vector * c, int x, int y) {
 }
 
 
-static int buildBoxesAutomatically(gsl_vector *MatR, newBackground *bkg) {
+static int buildBoxesAutomatically(gsl_vector *MatR, newBackground *bkg, int layer) {
 	size_t i, k;
 	size_t row, col, inc_row, inc_col;
 	size_t inc = 0;
@@ -184,7 +184,7 @@ static int buildBoxesAutomatically(gsl_vector *MatR, newBackground *bkg) {
 		if (((pixel - median) / sigma > deviation)
 				|| ((median - pixel) / sigma > (deviation * unbalance)))
 			gsl_vector_set(bkg->mesh, i, -1);
-		com.grad[i].boxvalue = gsl_vector_get(bkg->mesh, i);
+		com.grad[i].boxvalue[layer] = gsl_vector_get(bkg->mesh, i);
 	}
 	free(data);
 	return 0;
@@ -329,7 +329,7 @@ static int extractBackgroundAuto(fits *imgfit, fits *bkgfit, int layer) {
 	com.grad_nb_boxes = bkg->boxPerCol * bkg->boxPerRow;
 	com.grad_size_boxes = bkg->box;
 
-	if (buildBoxesAutomatically(MatR, bkg))
+	if (buildBoxesAutomatically(MatR, bkg, layer))
 		return 1;		// not enough samples
 	gsl_vector_free(MatR);
 
@@ -379,9 +379,9 @@ static int extractBackgroundManual(fits *imgfit, fits *bkgfit, int layer) {
 	bkg->box = (size_t) gtk_spin_button_get_value(GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_sizebox"))) * 2;
 
 	for (i = 0; i < n; i++) {
-		gsl_vector_set(bkg->meshRow, i, com.grad[i].centre.y - (bkg->box * 0.5));
+		gsl_vector_set(bkg->meshRow, i, imgfit->ry - com.grad[i].centre.y + (bkg->box * 0.5));
 		gsl_vector_set(bkg->meshCol, i, com.grad[i].centre.x - (bkg->box * 0.5));
-		gsl_vector_set(bkg->mesh, i, com.grad[i].boxvalue);
+		gsl_vector_set(bkg->mesh, i, com.grad[i].boxvalue[layer]);
 	}
 
 	bkgMatrix = computeBackground(bkg);
@@ -435,7 +435,7 @@ static void remove_pixel(double *arr, int i, int N) {
 	memmove(&arr[i], &arr[i + 1], (N - i - 1) * sizeof(*arr));
 }
 
-double get_value_from_box(fits *fit, point box, size_t size) {
+double get_value_from_box(fits *fit, point box, size_t size, int layer) {
 	double value = -1.0;
 	double sigma, median;
 	int i, j, stridefrom, data;
@@ -451,7 +451,7 @@ double get_value_from_box(fits *fit, point box, size_t size) {
 	data = size * size;
 
 	// create the matrix with values from the selected rectangle
-	from = fit->pdata[0] + (fit->ry - area.y - area.h) * fit->rx
+	from = fit->pdata[layer] + (fit->ry - area.y - area.h) * fit->rx
 			+ area.x;
 	stridefrom = fit->rx - area.w;
 
