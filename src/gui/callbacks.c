@@ -4798,14 +4798,37 @@ void on_combobox_gradient_inter_changed(GtkComboBox* box, gpointer user_data) {
 	gtk_notebook_set_current_page(notebook, gtk_combo_box_get_active(box));
 }
 
+void on_bkgClearSamples_clicked(GtkButton *button, gpointer user_data) {
+	static GtkToggleButton *imgbutton = NULL, *bkgbutton = NULL;
+	int remap_option;
+
+	if (imgbutton == NULL) {
+		imgbutton = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_bkg_img"));
+		bkgbutton = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_bkg_bkg"));
+	}
+	gtk_widget_set_sensitive(lookup_widget("frame_bkg_tools"), FALSE);
+	gtk_widget_set_sensitive(lookup_widget("button_bkg_correct"), FALSE);
+	remap_option = REMAP_NONE;
+
+	set_cursor_waiting(TRUE);
+	if (gtk_toggle_button_get_active(bkgbutton)) {
+		gtk_toggle_button_set_active(imgbutton, TRUE);
+		remap_option = REMAP_ALL;
+	}
+	clearSamples();
+	redraw(com.cvport, remap_option);
+	redraw_previews();
+	clearfits(&wfit[0]);
+	set_cursor_waiting(FALSE);
+}
+
 void on_button_bkg_extract_close_clicked(GtkButton *button, gpointer user_data) {
 	gtk_widget_hide(lookup_widget("Bkg_extract_window"));
 }
 
 void on_Bkg_extract_window_hide(GtkWidget *widget, gpointer user_data) {
-	static GtkToggleButton *imgbutton = NULL, *bkgbutton = NULL, *bgkAutoButton;
+	static GtkToggleButton *imgbutton = NULL, *bkgbutton = NULL, *bgkAutoButton = NULL;
 	int remap_option;
-
 
 	if (imgbutton == NULL) {
 		imgbutton = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_bkg_img"));
@@ -4822,10 +4845,7 @@ void on_Bkg_extract_window_hide(GtkWidget *widget, gpointer user_data) {
 		gtk_toggle_button_set_active(imgbutton, TRUE);
 		remap_option = REMAP_ALL;
 	}
-	if (com.grad) {
-		free(com.grad);
-		com.grad = NULL;
-	}
+	clearSamples();
 	redraw(com.cvport, remap_option);
 	redraw_previews();
 	clearfits(&wfit[0]);

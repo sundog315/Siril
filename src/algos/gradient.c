@@ -47,9 +47,8 @@ static double poly_4(gsl_vector * c, int x, int y) {
 			C(10) * x * x * x * x + C(11) * x * x * x * y
 			+ C(12) * x * x * y * y + C(13) * x * y * y * y
 			+ C(14) * y * y * y * y;
-	if (value < 0.)
-		value = 0.;
-	return value;
+
+	return (value < 0 ? 0.0 : value);
 }
 
 static double poly_3(gsl_vector * c, int x, int y) {
@@ -57,24 +56,21 @@ static double poly_3(gsl_vector * c, int x, int y) {
 			+ C(5) * y * y +
 			C(6) * x * x * x + C(7) * x * x * y + C(8) * x * y * y
 			+ C(9) * y * y * y;
-	if (value < 0.)
-		value = 0.;
-	return value;
+
+	return (value < 0 ? 0.0 : value);
 }
 
 static double poly_2(gsl_vector * c, int x, int y) {
 	double value = C(0) * 1 + C(1) * x + C(2) * y + C(3) * x * x + C(4) * y * x
 			+ C(5) * y * y;
-	if (value < 0.)
-		value = 0.;
-	return value;
+
+	return (value < 0 ? 0.0 : value);
 }
 
 static double poly_1(gsl_vector * c, int x, int y) {
 	double value = C(0) * 1 + C(1) * x + C(2) * y;
-	if (value < 0.)
-		value = 0.;
-	return value;
+
+	return (value < 0 ? 0.0 : value);
 }
 
 
@@ -95,16 +91,15 @@ static int buildBoxesAutomatically(gsl_vector *MatR, newBackground *bkg, int lay
 	assert(box > 0);
 
 	bkg->NbBoxes = boxPerRow * boxPerCol;
-	if (com.grad) {
-		free(com.grad);
-		com.grad = NULL;
-	}
+	clearSamples();
 	com.grad = malloc(bkg->NbBoxes * sizeof(gradient));
 
-	if (boxPerRow < (int) bkg->order + 1 || boxPerCol < (int) bkg->order + 1) {
+	if (((bkg->order == POLY_1) && (bkg->NbBoxes < NPARAM_POLY1))
+			|| ((bkg->order == POLY_2) && (bkg->NbBoxes < NPARAM_POLY2))
+			|| ((bkg->order == POLY_3) && (bkg->NbBoxes < NPARAM_POLY3))
+			|| ((bkg->order == POLY_4) && (bkg->NbBoxes < NPARAM_POLY4))) {
 		return -1;
 	}
-
 	gsl_vector *vecRow = gsl_vector_alloc(boxPerCol);
 	gsl_vector *vecCol = gsl_vector_alloc(boxPerRow);
 
@@ -122,7 +117,7 @@ static int buildBoxesAutomatically(gsl_vector *MatR, newBackground *bkg, int lay
 
 	bkg->meshRow = gsl_vector_alloc(bkg->NbBoxes);
 	bkg->meshCol = gsl_vector_alloc(bkg->NbBoxes);
-	bkg->mesh = gsl_vector_alloc(bkg->NbBoxes);
+	bkg->meshVal = gsl_vector_alloc(bkg->NbBoxes);
 
 	for (row = 0; row < boxPerCol; row++) {
 		size_t start_row = round(gsl_vector_get(vecRow, row) - midbox + 1);
@@ -158,7 +153,7 @@ static int buildBoxesAutomatically(gsl_vector *MatR, newBackground *bkg, int lay
 			gsl_sort(data_box, 1, k);
 			double value = gsl_stats_median_from_sorted_data(data_box, 1, k);
 
-			gsl_vector_set(bkg->mesh, inc, value);
+			gsl_vector_set(bkg->meshVal, inc, value);
 
 			/* Drawing boxes */
 			com.grad[inc].centre.x = gsl_vector_get(vecCol, col) + midbox;
@@ -173,18 +168,18 @@ static int buildBoxesAutomatically(gsl_vector *MatR, newBackground *bkg, int lay
 
 	double *data = calloc(bkg->NbBoxes, sizeof(double));
 	for (i = 0; i < bkg->NbBoxes; i++)
-		data[i] = gsl_vector_get(bkg->mesh, i);
+		data[i] = gsl_vector_get(bkg->meshVal, i);
 
 	gsl_sort(data, 1, bkg->NbBoxes);
 	double median = gsl_stats_median_from_sorted_data(data, 1, bkg->NbBoxes);
 	double sigma = gsl_stats_sd(data, 1, bkg->NbBoxes);
 
 	for (i = 0; i < bkg->NbBoxes; i++) {
-		double pixel = gsl_vector_get(bkg->mesh, i);
+		double pixel = gsl_vector_get(bkg->meshVal, i);
 		if (((pixel - median) / sigma > deviation)
 				|| ((median - pixel) / sigma > (deviation * unbalance)))
-			gsl_vector_set(bkg->mesh, i, -1);
-		com.grad[i].boxvalue[layer] = gsl_vector_get(bkg->mesh, i);
+			gsl_vector_set(bkg->meshVal, i, -1);
+		com.grad[i].boxvalue[layer] = gsl_vector_get(bkg->meshVal, i);
 	}
 	free(data);
 	return 0;
@@ -228,7 +223,7 @@ static gsl_matrix *computeBackground(newBackground *bkg) {
 	for (inc = 0; inc < n; inc++) {
 		tmpCol = gsl_vector_get(bkg->meshCol, inc);
 		tmpRow = gsl_vector_get(bkg->meshRow, inc);
-		pixel_value = gsl_vector_get(bkg->mesh, inc);
+		pixel_value = gsl_vector_get(bkg->meshVal, inc);
 		// here, it is a bit sketchy in the sense that if there is not value to report in a box (because the threshold is too
 		// low for example, then I just skip the initialization of J and y. gsl automatically discard the non assigned values
 		// during the minimization. I tested it with Matlab and it works fine. The results agree.
@@ -272,7 +267,7 @@ static gsl_matrix *computeBackground(newBackground *bkg) {
 	gsl_matrix_free(J);
 	gsl_vector_free(y);
 	gsl_vector_free(w);
-	gsl_vector_free(bkg->mesh);
+	gsl_vector_free(bkg->meshVal);
 	gsl_vector_free(bkg->meshRow);
 	gsl_vector_free(bkg->meshCol);
 
@@ -301,26 +296,12 @@ static gsl_matrix *computeBackground(newBackground *bkg) {
 	return bkgMatrix;
 }
 
-static int extractBackgroundAuto(fits *imgfit, fits *bkgfit, int layer) {
-	newBackground *bkg = malloc(sizeof(newBackground));
+static int extractBackgroundAuto(fits *imgfit, fits *bkgfit, newBackground *bkg) {
 	size_t ndata, i, j;
-	WORD *buf = imgfit->pdata[layer];
+	WORD *buf = imgfit->pdata[bkg->layer];
 
 	ndata = (size_t) (imgfit->rx * imgfit->ry);
 	gsl_vector *MatR = gsl_vector_alloc(ndata);
-
-	bkg->row = (size_t) imgfit->ry;
-	bkg->col = (size_t) imgfit->rx;
-
-	bkg->box = (size_t) gtk_spin_button_get_value(GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_sizebox"))) * 2;
-	int interval = (size_t) gtk_spin_button_get_value(GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_Box_sep")));
-	bkg->tolerance = (double) gtk_spin_button_get_value(GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_tolerance")));
-	bkg->deviation = (double) gtk_spin_button_get_value(GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_deviation")));
-	bkg->unbalance = (double) gtk_spin_button_get_value(GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_unbalance")));
-	bkg->order = gtk_combo_box_get_active(GTK_COMBO_BOX(gtk_builder_get_object(builder, "combo_polyorder")));
-
-	bkg->boxPerRow = (size_t) ((double) bkg->col / ((double) bkg->box + interval - 1));
-	bkg->boxPerCol = (size_t) ((double) bkg->row / ((double) bkg->box + interval - 1));
 
 	for (i = 0; i < ndata; i++) {
 		gsl_vector_set(MatR, i, (double) buf[i]);
@@ -329,106 +310,133 @@ static int extractBackgroundAuto(fits *imgfit, fits *bkgfit, int layer) {
 	com.grad_nb_boxes = bkg->boxPerCol * bkg->boxPerRow;
 	com.grad_size_boxes = bkg->box;
 
-	if (buildBoxesAutomatically(MatR, bkg, layer))
+	if (buildBoxesAutomatically(MatR, bkg, bkg->layer))
 		return 1;		// not enough samples
 	gsl_vector_free(MatR);
 
 	gsl_matrix *bkgMatrix = computeBackground(bkg);
 
 	if (imgfit->naxes[2] > 1)
-		copyfits(imgfit, bkgfit, CP_ALLOC | CP_FORMAT | CP_EXPAND, layer);
+		copyfits(imgfit, bkgfit, CP_ALLOC | CP_FORMAT | CP_EXPAND, bkg->layer);
 	else
 		copyfits(imgfit, bkgfit, CP_ALLOC | CP_FORMAT | CP_COPYA, 0);
 
-	WORD *tbuf = bkgfit->pdata[layer];
+	WORD *tbuf = bkgfit->pdata[bkg->layer];
 	for (i = 0; i < bkg->row; i++) {
 		for (j = 0; j < bkg->col; j++)
 			*tbuf++ = (WORD) gsl_matrix_get(bkgMatrix, i, j);
 	}
 
-	siril_log_message("Channel #%d: background extraction done.\n", layer);
+	siril_log_message("Channel #%d: background extraction done.\n", bkg->layer);
 	gsl_matrix_free(bkgMatrix);
-	free(bkg);
 	return 0;
 }
 
-static int extractBackgroundManual(fits *imgfit, fits *bkgfit, int layer) {
-	newBackground *bkg = malloc(sizeof(newBackground));
+static int extractBackgroundManual(fits *imgfit, fits *bkgfit, newBackground *bkg) {
 	gsl_matrix *bkgMatrix;
 	size_t i, j;
 
 	/* Now we fill bkg from samples picked in the image */
-	bkg->order = gtk_combo_box_get_active(GTK_COMBO_BOX(gtk_builder_get_object(builder, "combo_polyorder")));
 
 	int n = bkg->NbBoxes = com.grad_nb_boxes;
 
-	if (((bkg->order == POLY_1) && (n < NPARAM_POLY1)) ||
-			((bkg->order == POLY_2) && (n < NPARAM_POLY2)) ||
-			((bkg->order == POLY_3) && (n < NPARAM_POLY3)) ||
-			((bkg->order == POLY_4) && (n < NPARAM_POLY4))) {
-
-		free(bkg);
+	if (((bkg->order == POLY_1) && (n < NPARAM_POLY1))
+			|| ((bkg->order == POLY_2) && (n < NPARAM_POLY2))
+			|| ((bkg->order == POLY_3) && (n < NPARAM_POLY3))
+			|| ((bkg->order == POLY_4) && (n < NPARAM_POLY4))) {
 		return -1;
 	}
 
 	bkg->meshRow = gsl_vector_alloc(n);
 	bkg->meshCol = gsl_vector_alloc(n);
-	bkg->mesh = gsl_vector_alloc(n);
-	bkg->row = (size_t) imgfit->ry;
-	bkg->col = (size_t) imgfit->rx;
-	bkg->box = (size_t) gtk_spin_button_get_value(GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_sizebox"))) * 2;
+	bkg->meshVal = gsl_vector_alloc(n);
 
 	for (i = 0; i < n; i++) {
-		gsl_vector_set(bkg->meshRow, i, imgfit->ry - com.grad[i].centre.y + (bkg->box * 0.5));
-		gsl_vector_set(bkg->meshCol, i, com.grad[i].centre.x - (bkg->box * 0.5));
-		gsl_vector_set(bkg->mesh, i, com.grad[i].boxvalue[layer]);
+		gsl_vector_set(bkg->meshRow, i,
+				imgfit->ry - com.grad[i].centre.y + (bkg->box * 0.5));
+		gsl_vector_set(bkg->meshCol, i,
+				com.grad[i].centre.x - (bkg->box * 0.5));
+		gsl_vector_set(bkg->meshVal, i, com.grad[i].boxvalue[bkg->layer]);
 	}
 
 	bkgMatrix = computeBackground(bkg);
 
 	if (imgfit->naxes[2] > 1)
-		copyfits(imgfit, bkgfit, CP_ALLOC | CP_FORMAT | CP_EXPAND, layer);
+		copyfits(imgfit, bkgfit, CP_ALLOC | CP_FORMAT | CP_EXPAND, bkg->layer);
 	else
 		copyfits(imgfit, bkgfit, CP_ALLOC | CP_FORMAT | CP_COPYA, 0);
 
-	WORD *tbuf = bkgfit->pdata[layer];
+	WORD *tbuf = bkgfit->pdata[bkg->layer];
 	for (i = 0; i < bkg->row; i++) {
 		for (j = 0; j < bkg->col; j++)
 			*tbuf++ = (WORD) gsl_matrix_get(bkgMatrix, i, j);
 	}
 
-	siril_log_message("Channel #%d: background extraction done.\n", layer);
+	siril_log_message("Channel #%d: background extraction done.\n", bkg->layer);
 	gsl_matrix_free(bkgMatrix);
-	free(bkg);
 	return 0;
+}
+
+void clearSamples() {
+	if (com.grad) {
+		free(com.grad);
+		com.grad = NULL;
+	}
 }
 
 void bkgExtractBackground(fits *fit, gboolean automatic) {
 	int layer;
 	struct timeval t_start, t_end;
+	GtkComboBox *comboBkgPolyOrder;
+	GtkSpinButton *spinBkgSizeBox, *spinBkgInterval, *spinBkgTolerance;
+	GtkSpinButton *spinBkgDeviation, *spinBkgUnbalance;
+	newBackground bkg;
+
+	comboBkgPolyOrder = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combo_polyorder"));
+	spinBkgSizeBox = GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_sizebox"));
+	/* Automatic mode */
+	spinBkgInterval = GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_Box_sep"));
+	spinBkgTolerance = GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_tolerance"));
+	spinBkgDeviation = GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_deviation"));
+	spinBkgUnbalance = GTK_SPIN_BUTTON(lookup_widget("spinbutton_bkg_unbalance"));
 
 	siril_log_color_message("Background extraction: processing...\n", "red");
 	gettimeofday(&t_start, NULL);
 
-	for (layer = 0; layer < com.uniq->nb_layers; layer++)
+	bkg.order = gtk_combo_box_get_active(comboBkgPolyOrder);
+	bkg.box = (size_t) gtk_spin_button_get_value(spinBkgSizeBox) * 2;
+	bkg.row = (size_t) gfit.ry;
+	bkg.col = (size_t) gfit.rx;
+
+	for (layer = 0; layer < com.uniq->nb_layers; layer++) {
+		bkg.layer = layer;
 		if (automatic) {
-			if (extractBackgroundAuto(&gfit, fit, layer)) {
+			int interval = (size_t) gtk_spin_button_get_value(spinBkgInterval);
+
+			bkg.tolerance = gtk_spin_button_get_value(spinBkgTolerance);
+			bkg.deviation = gtk_spin_button_get_value(spinBkgDeviation);
+			bkg.unbalance = gtk_spin_button_get_value(spinBkgUnbalance);
+
+			bkg.boxPerRow = (size_t) ((double) bkg.col / ((double) bkg.box + interval - 1));
+			bkg.boxPerCol = (size_t) ((double) bkg.row / ((double) bkg.box + interval - 1));
+
+			if (extractBackgroundAuto(&gfit, fit, &bkg)) {
 				siril_log_message("Insufficient background samples.\n");
 				return;
 			}
 		}
 		else {
-			if (extractBackgroundManual(&gfit, fit, layer)) {
+			if (extractBackgroundManual(&gfit, fit, &bkg)) {
 				siril_log_message("Insufficient background samples.\n");
 				return;
 			}
 		}
+	}
 	gtk_widget_set_sensitive(lookup_widget("frame_bkg_tools"), TRUE);
 	gtk_widget_set_sensitive(lookup_widget("button_bkg_correct"), TRUE);
 
 	gettimeofday(&t_end, NULL);
 	show_time(t_start, t_end);
-
 }
 
 static void remove_pixel(double *arr, int i, int N) {
@@ -469,7 +477,7 @@ double get_value_from_box(fits *fit, point box, size_t size, int layer) {
 	for (i = 0; i < data; i++) {
 		double tmp = databox[i];
 
-		if (tmp > (sigma + median)) {
+		if (tmp > (sigma + median) || tmp < (median - sigma)) {
 			remove_pixel(databox, i, data);
 			data--;
 			i--;
@@ -483,18 +491,14 @@ double get_value_from_box(fits *fit, point box, size_t size, int layer) {
 
 void update_bkg_interface() {
 	static GtkToggleButton *bgkAutoButton = NULL;
-	gboolean autoButton;
-
 	GtkWidget *frame24 = GTK_WIDGET(lookup_widget("frame24"));
 	GtkWidget *frame23 = GTK_WIDGET(lookup_widget("frame23"));
 	GtkWidget *label44 = GTK_WIDGET(lookup_widget("label44"));
 	GtkWidget *spinSeparation = GTK_WIDGET(lookup_widget("spinbutton_bkg_Box_sep"));
 	GtkWidget *drawBoxes = GTK_WIDGET(lookup_widget("checkbutton_bkg_boxes"));
+	gboolean autoButton;
 
-	if (com.grad) {
-		free(com.grad);
-		com.grad = NULL;
-	}
+	clearSamples();
 
 	if (bgkAutoButton == NULL) {
 		bgkAutoButton = GTK_TOGGLE_BUTTON(lookup_widget("bkgButtonAuto"));
