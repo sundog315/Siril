@@ -3784,8 +3784,7 @@ double get_zoom_val() {
 	double wtmp, htmp;
 	static GtkWidget *scrolledwin = NULL;
 	if (scrolledwin == NULL)
-		scrolledwin = GTK_WIDGET(
-				gtk_builder_get_object(builder, "scrolledwindowr"));
+		scrolledwin = lookup_widget("scrolledwindowr");
 	if (com.zoom_value > 0.)
 		return com.zoom_value;
 	/* else if zoom is < 0, it means fit to window */
@@ -3842,6 +3841,7 @@ void scrollbars_hadjustment_changed_handler(GtkAdjustment *adjustment,
 		gpointer user_data) {
 	int i;
 	double value = gtk_adjustment_get_value(adjustment);
+
 	for (i = 0; i < MAXVPORT; i++) {
 		if (com.hadj[i] != adjustment) {
 			gtk_adjustment_set_value(com.hadj[i], value);

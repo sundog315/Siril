@@ -336,8 +336,6 @@ static int extractBackgroundManual(fits *imgfit, fits *bkgfit, newBackground *bk
 	gsl_matrix *bkgMatrix;
 	size_t i, j;
 
-	/* Now we fill bkg from samples picked in the image */
-
 	int n = bkg->NbBoxes = com.grad_nb_boxes;
 
 	if (((bkg->order == POLY_1) && (n < NPARAM_POLY1))
