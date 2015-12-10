@@ -291,16 +291,15 @@ void on_histo_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
 
 // erase image and redraw the background color and grid
 void erase_histo_display(cairo_t *cr, int width, int height, double zoomH, double zoomV) {
-	double dash_format[] = { 8.0, 4.0 };
+	double dash_format[] = { 1.0 / zoomH, 1.0 / zoomV };
 	// clear all with background color
 	cairo_scale(cr, zoomH, zoomV);
 	cairo_set_source_rgb(cr, 0, 0, 0);
 	cairo_rectangle(cr, 0, 0, width, height);
 	cairo_fill(cr);
-	// draw axis
 
 	// draw grid 
-	cairo_set_line_width(cr, 1.0 / max(zoomV, zoomH));
+	cairo_set_line_width(cr, 1.0 / zoomH);
 	cairo_set_source_rgb(cr, 0.4, 0.4, 0.4);
 	// quarters in solid, eights in dashed line
 	cairo_set_dash(cr, NULL, 0, 0);
@@ -311,6 +310,7 @@ void erase_histo_display(cairo_t *cr, int width, int height, double zoomH, doubl
 	cairo_move_to(cr, width * 0.75, 0);
 	cairo_line_to(cr, width * 0.75, height);
 
+	cairo_set_line_width(cr, 1.0 / zoomV);
 	cairo_move_to(cr, 0, height * 0.25);
 	cairo_line_to(cr, width, height * 0.25);
 	cairo_move_to(cr, 0, height * 0.5);
@@ -320,6 +320,7 @@ void erase_histo_display(cairo_t *cr, int width, int height, double zoomH, doubl
 
 	cairo_stroke(cr);
 
+	cairo_set_line_width(cr, 1.0 / zoomV);
 	cairo_set_dash(cr, dash_format, 2, 0);
 	cairo_move_to(cr, width * 0.125, 0);
 	cairo_line_to(cr, width * 0.125, height);
@@ -330,6 +331,7 @@ void erase_histo_display(cairo_t *cr, int width, int height, double zoomH, doubl
 	cairo_move_to(cr, width * 0.875, 0);
 	cairo_line_to(cr, width * 0.875, height);
 
+	cairo_set_line_width(cr, 1.0 / zoomH);
 	cairo_move_to(cr, 0, height * 0.125);
 	cairo_line_to(cr, width, height * 0.125);
 	cairo_move_to(cr, 0, height * 0.375);

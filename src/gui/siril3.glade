@@ -703,6 +703,7 @@ enter a visible wavelength in nm</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Zoom 1:1</property>
                 <property name="always_show_image">True</property>
                 <signal name="clicked" handler="on_histoZoom100_clicked" swapped="no"/>
                 <child>
@@ -832,6 +833,7 @@ enter a visible wavelength in nm</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Reset</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_button_histo_reset_clicked" swapped="no"/>
               </object>
@@ -847,6 +849,7 @@ enter a visible wavelength in nm</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Close</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_button_histo_close_clicked" swapped="no"/>
               </object>
@@ -862,6 +865,7 @@ enter a visible wavelength in nm</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Apply histogram transformation</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_button_histo_apply_clicked" swapped="no"/>
               </object>
@@ -889,6 +893,7 @@ enter a visible wavelength in nm</property>
               <object class="GtkScale" id="scale_highlights">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Highlights clipping</property>
                 <property name="hexpand">True</property>
                 <property name="adjustment">adj_highlights</property>
                 <property name="round_digits">1</property>
@@ -907,6 +912,7 @@ enter a visible wavelength in nm</property>
               <object class="GtkScale" id="scale_midtones">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Midtones balance</property>
                 <property name="hexpand">True</property>
                 <property name="adjustment">adj_midtones</property>
                 <property name="round_digits">5</property>
@@ -925,6 +931,7 @@ enter a visible wavelength in nm</property>
               <object class="GtkScale" id="scale_shadows">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Shadows clipping</property>
                 <property name="hexpand">True</property>
                 <property name="adjustment">adj_shadows</property>
                 <property name="round_digits">1</property>
@@ -989,6 +996,7 @@ enter a visible wavelength in nm</property>
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Clipped pixels count (shadows)</property>
                 <property name="halign">center</property>
                 <property name="editable">False</property>
                 <property name="width_chars">6</property>
@@ -1004,6 +1012,7 @@ enter a visible wavelength in nm</property>
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Clipped pixels count (highlights)</property>
                 <property name="halign">center</property>
                 <property name="editable">False</property>
                 <property name="width_chars">6</property>
@@ -1018,6 +1027,7 @@ enter a visible wavelength in nm</property>
               <object class="GtkEntry" id="histoMidEntry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Midtones balance</property>
                 <property name="max_length">7</property>
                 <property name="width_chars">7</property>
                 <property name="max_width_chars">10</property>
@@ -1035,6 +1045,7 @@ enter a visible wavelength in nm</property>
               <object class="GtkEntry" id="histoShadEntry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Shadows clipping</property>
                 <property name="max_length">7</property>
                 <property name="width_chars">7</property>
                 <property name="max_width_chars">10</property>
@@ -1052,6 +1063,7 @@ enter a visible wavelength in nm</property>
               <object class="GtkEntry" id="histoHighEntry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Highlights clipping</property>
                 <property name="max_length">7</property>
                 <property name="width_chars">7</property>
                 <property name="max_width_chars">10</property>
