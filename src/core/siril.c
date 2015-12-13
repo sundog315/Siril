@@ -1204,10 +1204,8 @@ int backgroundnoise(fits* fit, double sigma[]) {
  * and average deviation.
  */
 imstats* statistics(fits *fit, int layer, rectangle *selection) {
-	double sigma, mean = 0.0, avgdev = 0.0, max = 0.0, min = 0.0, sum = 0.0,
-			median = 0.0;
+	double sigma, mean, avgdev, max, min, sum = 0.0, median;
 	double nbdata = fit->rx * fit->ry;
-	double *pixels = malloc(nbdata * sizeof(double));
 	gsl_histogram* histo;
 	size_t i, hist_size;
 	imstats* stat = malloc(sizeof(imstats));
@@ -1219,9 +1217,6 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 		histo = computeHisto(fit, layer);
 	hist_size = gsl_histogram_bins(histo);
 
-	/* Calcul of sigma */
-	sigma = gsl_histogram_sigma(histo);
-
 	/* Get the median value */
 	for (i = 0; i < hist_size; i++) {
 		sum += gsl_histogram_get(histo, i);
@@ -1230,18 +1225,21 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 			break;	//we get out of the loop
 		}
 	}
-	/* Calcul of the Mean and the Average Absolute Deviation from the Median */
-	for (i = 0; i < nbdata; i++)
-		pixels[i] = (double)fit->pdata[layer][i];	/* this is time consuming. Should be done once
-														while histogram creation */
-
-	mean = gsl_histogram_mean(histo);
-	avgdev = gsl_stats_absdev_m(pixels, 1, nbdata, mean);
-	min = gsl_stats_min(pixels, 1, nbdata);
-	max = gsl_stats_max(pixels, 1, nbdata);
 
 	gsl_histogram_free(histo);
-	free(pixels);
+
+	/* Mean */
+	mean = gsl_stats_ushort_mean(fit->pdata[layer], 1, nbdata);
+
+	/* Calculation of sigma */
+	sigma = gsl_stats_ushort_sd_with_fixed_mean(fit->pdata[layer], 1, nbdata, mean);
+
+	/* Calculation of mean absolute deviation */
+	avgdev = gsl_stats_ushort_absdev_m(fit->pdata[layer], 1, nbdata, mean);
+
+	/* Minimum and Maximum */
+	min = gsl_stats_ushort_min(fit->pdata[layer], 1, nbdata);
+	max = gsl_stats_ushort_max(fit->pdata[layer], 1, nbdata);
 
 	switch (layer) {
 	case 0:

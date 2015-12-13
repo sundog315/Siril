@@ -88,13 +88,13 @@ gsl_histogram* computeHisto(fits* fit, int layer) {
 	size_t i, ndata, size;
 	WORD *buf;
 
-	size = (size_t) get_normalized_value(fit) + 1;
-	gsl_histogram* histo = gsl_histogram_alloc(size);
-	gsl_histogram_set_ranges_uniform(histo, 0, size - 1);
+	size = (size_t) get_normalized_value(fit);
+	gsl_histogram* histo = gsl_histogram_alloc(size + 1);
+	gsl_histogram_set_ranges_uniform(histo, 0, size);
 
 	buf = fit->pdata[layer];
 	ndata = fit->rx * fit->ry;
-#pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
+//#pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static) // cause errors !!!
 	for (i = 0; i < ndata; i++) {
 		gsl_histogram_increment(histo, (double) buf[i]);
 	}
@@ -109,9 +109,8 @@ gsl_histogram* computeHisto_Selection(fits* fit, int layer,
 
 	size = (size_t) get_normalized_value(fit);
 	gsl_histogram* histo = gsl_histogram_alloc(size + 1);
-
-	size = (size_t) get_normalized_value(fit);
 	gsl_histogram_set_ranges_uniform(histo, 0, size);
+
 	from = fit->pdata[layer] + (fit->ry - selection->y - selection->h) * fit->rx
 			+ selection->x;
 	stridefrom = fit->rx - selection->w;
