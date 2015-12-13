@@ -18,5 +18,9 @@ void apply_mtf_to_fits(fits *fit);
 void apply_mtf_to_histo(gsl_histogram *histo, double norm, double m, double lo,
 		double hi);
 double MTF(double x, double m);
+double findMidtonesBalance(fits *fit, double *shadows);
+void on_scale_midtones_value_changed(GtkRange *range, gpointer user_data);
+void on_scale_shadows_value_changed(GtkRange *range, gpointer user_data);
+void on_scale_highlights_value_changed(GtkRange *range, gpointer user_data);
 
 #endif

@@ -1207,6 +1207,7 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 	double sigma, mean = 0.0, avgdev = 0.0, max = 0.0, min = 0.0, sum = 0.0,
 			median = 0.0;
 	double nbdata = fit->rx * fit->ry;
+	double *pixels = malloc(nbdata * sizeof(double));
 	gsl_histogram* histo;
 	size_t i, hist_size;
 	imstats* stat = malloc(sizeof(imstats));
@@ -1221,21 +1222,6 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 	/* Calcul of sigma */
 	sigma = gsl_histogram_sigma(histo);
 
-	/* Calcul of the median */
-	/* Get the maximum non null element */
-	for (i = hist_size - 1; i > 0; i--) {
-		if (gsl_histogram_get(histo, i)) {
-			max = (double) i;
-			break;	//we get out of the loop
-		}
-	}
-	/* Get the minimum non null element */
-	for (i = 0; i < hist_size; i++) {
-		if (gsl_histogram_get(histo, i)) {
-			min = (double) i;
-			break;	//we get out of the loop
-		}
-	}
 	/* Get the median value */
 	for (i = 0; i < hist_size; i++) {
 		sum += gsl_histogram_get(histo, i);
@@ -1245,18 +1231,18 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 		}
 	}
 	/* Calcul of the Mean and the Average Absolute Deviation from the Median */
-	int k;
-	for (i = 0, k = 0; i < hist_size; i++) {
-		double pxl = gsl_histogram_get(histo, i);
-		mean += pxl * (double) i;
-		if (i > 0 && i < USHRT_MAX) {			// we reject hot and cold pixels
-			avgdev += fabs(pxl - median) * (double) i;
-			k = k + i;
-		}
-	}
-	mean /= nbdata;
-	avgdev /= (double) k;
+	for (i = 0; i < nbdata; i++)
+		pixels[i] = (double)fit->pdata[layer][i];	/* this is time consuming. Should be done once
+														while histogram creation */
+
+	mean = gsl_histogram_mean(histo);
+	avgdev = gsl_stats_absdev_m(pixels, 1, nbdata, mean);
+	min = gsl_stats_min(pixels, 1, nbdata);
+	max = gsl_stats_max(pixels, 1, nbdata);
+
 	gsl_histogram_free(histo);
+	free(pixels);
+
 	switch (layer) {
 	case 0:
 		if (fit->naxes[2] == 1)
@@ -1271,6 +1257,7 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 		strcpy(stat->layername, "Blue");
 		break;
 	}
+
 	stat->mean = mean;
 	stat->avgdev = avgdev;
 	stat->median = median;

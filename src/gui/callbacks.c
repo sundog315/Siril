@@ -846,7 +846,7 @@ void remaprgb(void) {
 	cairo_surface_mark_dirty(com.surface[RGB_VPORT]);
 }
 
-void activate_widgets_for_histeq(gboolean sensitive) {
+void set_viewer_mode_widgets_sensitive(gboolean sensitive) {
 	static GtkWidget *scalemax = NULL;
 	static GtkWidget *scalemin = NULL;
 	static GtkWidget *entrymin = NULL;
@@ -1000,11 +1000,14 @@ void remap(int vport) {
 		}
 
 		last_mode[vport] = mode;
-		activate_widgets_for_histeq(FALSE);
+		set_viewer_mode_widgets_sensitive(FALSE);
 	} else {
 		// for all other modes, the index can be reused
 		make_index_for_current_display(mode, lo, hi, vport);
-		activate_widgets_for_histeq(TRUE);
+		if (mode == STF_DISPLAY)
+			set_viewer_mode_widgets_sensitive(FALSE);
+		else
+			set_viewer_mode_widgets_sensitive(TRUE);
 	}
 
 	src = gfit.pdata[vport];	// index is i
@@ -1022,7 +1025,7 @@ void remap(int vport) {
 	/* cannot be parallelized because of i and j */
 	for (y = 0; y < gfit.ry; y++) {
 		for (x = 0; x < gfit.rx; x++, i++) {
-			if (mode == HISTEQ_DISPLAY)	// special case, no lo & hi
+			if (mode == HISTEQ_DISPLAY || mode == STF_DISPLAY)	// special case, no lo & hi
 				dst_pixel_value = index[src[i]];
 			else if (do_cut_over && src[i] > hi)	// cut
 				dst_pixel_value = 0;
@@ -1068,6 +1071,10 @@ int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
 	float pente;
 	int i;
 	BYTE *index;
+	double m = 0.0;
+	double pxl, shadows = 0.0;
+	if (mode == STF_DISPLAY)
+		m = findMidtonesBalance(&gfit, &shadows);
 
 	/* initialization of data required to build the remap_index */
 	switch (mode) {
@@ -1086,11 +1093,14 @@ int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
 	case ASINH_DISPLAY:
 		pente = UCHAR_MAX_SINGLE / asinhf(((float) (hi - lo)) * 0.001f);
 		break;
+	case STF_DISPLAY:
+		pente = UCHAR_MAX_SINGLE;
+		break;
 	default:
 		return 1;
 	}
-	if (mode != HISTEQ_DISPLAY && pente == last_pente[vport]
-			&& mode == last_mode[vport]) {
+	if (mode != HISTEQ_DISPLAY && mode != STF_DISPLAY
+			&& pente == last_pente[vport] && mode == last_mode[vport]) {
 		fprintf(stdout, "Re-using previous remap_index\n");
 		return 0;
 	}
@@ -1106,6 +1116,7 @@ int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
 		}
 	}
 	index = remap_index[vport];
+
 	for (i = 0; i <= USHRT_MAX; i++) {
 		switch (mode) {
 		case LOG_DISPLAY:
@@ -1129,6 +1140,12 @@ int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
 			break;
 		case NORMAL_DISPLAY:
 			index[i] = round_to_BYTE((float) i * pente);
+			break;
+		case STF_DISPLAY:
+			pxl = (double) i / USHRT_MAX_DOUBLE;
+			pxl = (pxl - shadows < 0.0) ? 0.0 : pxl - shadows;
+			pxl /= (1.0 - shadows);
+			index[i] = round_to_BYTE((float) (MTF(pxl, m)) * pente);
 			break;
 		default:
 			return 1;

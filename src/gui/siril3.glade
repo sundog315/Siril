@@ -1030,7 +1030,7 @@ enter a visible wavelength in nm</property>
                 <property name="tooltip_text" translatable="yes">Midtones balance</property>
                 <property name="max_length">7</property>
                 <property name="width_chars">7</property>
-                <property name="max_width_chars">10</property>
+                <property name="max_width_chars">7</property>
                 <property name="text" translatable="yes">0.50000</property>
                 <property name="overwrite_mode">True</property>
                 <property name="input_purpose">digits</property>
@@ -1048,7 +1048,7 @@ enter a visible wavelength in nm</property>
                 <property name="tooltip_text" translatable="yes">Shadows clipping</property>
                 <property name="max_length">7</property>
                 <property name="width_chars">7</property>
-                <property name="max_width_chars">10</property>
+                <property name="max_width_chars">7</property>
                 <property name="text" translatable="yes">0.00000</property>
                 <property name="overwrite_mode">True</property>
                 <property name="input_purpose">digits</property>
@@ -1066,7 +1066,7 @@ enter a visible wavelength in nm</property>
                 <property name="tooltip_text" translatable="yes">Highlights clipping</property>
                 <property name="max_length">7</property>
                 <property name="width_chars">7</property>
-                <property name="max_width_chars">10</property>
+                <property name="max_width_chars">7</property>
                 <property name="text" translatable="yes">1.00000</property>
                 <property name="overwrite_mode">True</property>
                 <property name="input_purpose">digits</property>
@@ -2075,6 +2075,7 @@ enter a visible wavelength in nm</property>
                           <item translatable="yes">Square root</item>
                           <item translatable="yes">Squared</item>
                           <item translatable="yes">Asinh</item>
+                          <item id="&lt;Saisir un identifiant&gt;" translatable="yes">AutoStretch</item>
                           <item translatable="yes">Histogram</item>
                         </items>
                         <signal name="changed" handler="on_combodisplay_changed" swapped="no"/>

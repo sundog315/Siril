@@ -29,6 +29,9 @@
 #include "gui/callbacks.h"	// for lookup_widget()
 #include "core/undo.h"
 
+#define shadowsClipping -1.25 /* Shadows clipping point measured in sigma units from the main histogram peak. */
+#define targetBackground 0.25 /* final "luminance" of the image for autostretch in the [0,1] range */
+
 /* The gsl_histogram, documented here:
  * http://linux.math.tifr.res.in/manuals/html/gsl-ref-html/gsl-ref_21.html
  * is able to group values into bins, it does not need to handle all values
@@ -36,7 +39,6 @@
  */
 
 // margin between axis and drawing area border
-//#define AXIS_MARGIN 10
 // colors of layers histograms		R	G	B	RGB
 static double histo_color_r[] = { 1.0, 0.0, 0.0, 0.0 };
 static double histo_color_g[] = { 0.0, 1.0, 0.0, 0.0 };
@@ -464,14 +466,14 @@ void apply_mtf_to_fits(fits *fit) {
 	hi = gtk_range_get_value(scale_transfert_function[2]);
 	pente = 1.0 / (hi - lo);
 
-	undo_save_state("Processing: Histogram Transformation (mid=%.3lf, low=%.3lf, high=%.3lf)",
-			m, lo, hi);
+	undo_save_state("Processing: Histogram Transformation "
+			"(mid=%.3lf, low=%.3lf, high=%.3lf)", m, lo, hi);
 
 	for (chan = 0; chan < nb_chan; chan++) {
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
 		for (i = 0; i < ndata; i++) {
 			double pxl = ((double) buf[chan][i] / (double) norm);
-			pxl -= lo;
+			pxl = (pxl - lo < 0.0) ? 0.0 : pxl - lo;
 			pxl *= pente;
 			buf[chan][i] = round_to_WORD(MTF(pxl, m) * (double) norm);
 		}
@@ -509,12 +511,12 @@ void on_button_histo_apply_clicked(GtkButton *button, gpointer user_data) {
 double MTF(double x, double m) {
 	double out;
 
-	if (m == 0)
+	if (m == 0.0)
 		out = 0.0;
 	else if (m == 0.5)
 		out = x;
-	else if (m == 1)
-		out = 1;
+	else if (m == 1.0)
+		out = 1.0;
 	else {
 		out = ((m - 1.0) * x) / (((2.0 * m - 1.0) * x) - m);
 	}
@@ -603,9 +605,33 @@ void update_histo_mtf() {
 	gtk_widget_queue_draw(drawarea);
 }
 
-void on_scale_midtones_value_changed(GtkRange *range, gpointer user_data);
-void on_scale_shadows_value_changed(GtkRange *range, gpointer user_data);
-void on_scale_highlights_value_changed(GtkRange *range, gpointer user_data);
+double findMidtonesBalance(fits *fit, double *shadows) {
+	double c0 = 0.0;
+	double m = 0.0;
+	double normValue;
+	int i, n;
+
+	n = (fit->naxes[2] == 2) ? 3 : 1;
+	normValue = (double) get_normalized_value(fit);
+
+	for (i = 0; i < n; ++i) {
+		double median, avgDev;
+		imstats *stat = statistics(fit, i, NULL);
+
+		median = stat->median / normValue;
+		avgDev = stat->avgdev / normValue;
+
+		c0 += median + shadowsClipping * avgDev;
+		m += median;
+		free(stat);
+	}
+	c0 /= n;
+	double m2 = m/n - c0;
+	m = MTF(m2, targetBackground);
+	//printf("c0 = %lf et m=%lf\n", c0, m);
+	*shadows = c0;
+	return m;
+}
 
 void on_histoMidEntry_changed(GtkEditable *editable, gpointer user_data) {
 	double value;

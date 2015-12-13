@@ -220,6 +220,7 @@ typedef enum {
 	SQRT_DISPLAY,
 	SQUARED_DISPLAY,
 	ASINH_DISPLAY,
+	STF_DISPLAY,
 	HISTEQ_DISPLAY
 } display_mode;			// used in the layer_info_struct below
 #define DISPLAY_MODE_MAX HISTEQ_DISPLAY
