@@ -118,6 +118,7 @@ typedef enum {
 #define CONVCFA (1 << 7)
 #define CONVTIF (1 << 8)
 #define CONVPIC (1 << 9)
+#define CONVFIT (1 << 10)
 /* layer conversion type */
 #define CONV1X3	(1 << 16)
 #define CONV3X1	(1 << 17)
