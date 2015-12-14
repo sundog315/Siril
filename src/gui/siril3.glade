@@ -5322,7 +5322,7 @@ prefered for image which will be used for multiplication or division as flat-fie
 the signal-to-noise ratio and therefore this is the option used by default with
 the additive normalisation.
 
-The offset and bias masters should not be processed with normalisation.
+The offset and dark masters should not be processed with normalisation.
 However, multiplicative normalisation must be used with flat-field frames.</property>
                             <property name="halign">start</property>
                             <property name="valign">center</property>
