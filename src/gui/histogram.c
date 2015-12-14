@@ -157,12 +157,13 @@ void compute_histo_for_gfit(int force) {
 
 void update_gfit_histogram_if_needed() {
 	static GtkWidget *drawarea = NULL;
-	if (is_histogram_visible())
-		compute_histo_for_gfit(1);
 	if (!drawarea) {
 		drawarea = lookup_widget("drawingarea_histograms");
 	}
-	gtk_widget_queue_draw(drawarea);
+	if (is_histogram_visible()) {
+		compute_histo_for_gfit(1);
+		gtk_widget_queue_draw(drawarea);
+	}
 }
 
 void set_histogram(gsl_histogram *histo, int layer) {
@@ -227,34 +228,37 @@ void set_histo_toggles_names() {
 }
 
 static double get_histoZoomValueH() {
-	GtkAdjustment *histoAdjZoomH;
-
-	histoAdjZoomH = GTK_ADJUSTMENT(
-			gtk_builder_get_object(builder, "histoAdjZoomH"));
+	static GtkAdjustment *histoAdjZoomH = NULL;
+	if (!histoAdjZoomH)
+		histoAdjZoomH = GTK_ADJUSTMENT(
+				gtk_builder_get_object(builder, "histoAdjZoomH"));
 
 	return gtk_adjustment_get_value(histoAdjZoomH);
 }
 
 static double get_histoZoomValueV() {
-	GtkAdjustment *histoAdjZoomV;
-
-	histoAdjZoomV = GTK_ADJUSTMENT(
-			gtk_builder_get_object(builder, "histoAdjZoomV"));
+	static GtkAdjustment *histoAdjZoomV = NULL;
+	if (!histoAdjZoomV)
+		histoAdjZoomV = GTK_ADJUSTMENT(
+				gtk_builder_get_object(builder, "histoAdjZoomV"));
 
 	return gtk_adjustment_get_value(histoAdjZoomV);
 }
 
-static void adjust_histogram_vport_size(int width, int height) {
-	GtkWidget *vport;
-	int w, h;
+static void adjust_histogram_vport_size() {
+	GtkWidget *drawarea, *vport;
+	int targetW, targetH;
 	double zoomH = get_histoZoomValueH();
 	double zoomV = get_histoZoomValueV();
 
+	drawarea = lookup_widget("drawingarea_histograms");
 	vport = lookup_widget("viewport1");
-	w = (int) (((double) width) * zoomH);
-	h = (int) (((double) height) * zoomV);
-	gtk_widget_set_size_request(vport, w, h);
-	fprintf(stdout, "Histo vport size (%d, %d)\n", w, h);
+	int cur_width = gtk_widget_get_allocated_width(vport);
+	int cur_height = gtk_widget_get_allocated_height(vport);
+	targetW = (int) (((double) cur_width) * zoomH);
+	targetH = (int) (((double) cur_height) * zoomV);
+	gtk_widget_set_size_request(drawarea, targetW, targetH);
+	fprintf(stdout, "Histo vport size (%d, %d)\n", targetW, targetH);
 }
 
 gboolean redraw_histo(GtkWidget *widget, cairo_t *cr, gpointer data) {
@@ -265,13 +269,12 @@ gboolean redraw_histo(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	init_toggles();
 	width = gtk_widget_get_allocated_width(widget);
 	height = gtk_widget_get_allocated_height(widget);
-	printf("w = %d et h = %d\n", width, height);
+	fprintf(stdout, "w = %d and h = %d\n", width, height);
 	zoomH = get_histoZoomValueH();
 	zoomV = get_histoZoomValueV();
 
 	if (height == 1)
 		return FALSE;
-	adjust_histogram_vport_size(width, height);
 	erase_histo_display(cr, width, height, zoomH, zoomV);
 	graph_height = 0.0;
 	for (i = 0; i < MAXVPORT; i++) {
@@ -747,9 +750,9 @@ void on_histoZoom100_clicked(GtkButton *button, gpointer user_data) {
 
 void on_histoSpinZoom_value_changed(GtkRange *range, gpointer user_data) {
 	static GtkWidget *drawarea = NULL;
-
 	if (!drawarea) {
 		drawarea = lookup_widget("drawingarea_histograms");
 	}
+	adjust_histogram_vport_size();
 	gtk_widget_queue_draw(drawarea);
 }
