@@ -463,7 +463,7 @@ int set_convflags_from_extension() {
 		}
 	} else if (!strcasecmp(sourcesuf, "fit") || !strcasecmp(sourcesuf, "fits") ||
 			!strcasecmp(sourcesuf, "fts")) {
-		if (com.raw_set.cfa && supported_filetypes & CONVCFA)
+		if (com.raw_set.cfa && (supported_filetypes & CONVCFA))
 			convflags |= CONVCFA;
 		else convflags |= CONVFIT;
 		return 0;
@@ -1028,7 +1028,7 @@ int tofits(char *source, char *dest){
  * *******************************************************************/
 	else if (convflags & CONVFIT) {
 		readfits(source, tmpfit, NULL);
-		if (tmpfit->naxes[2] == 3 && convflags & CONV3X1){
+		if (tmpfit->naxes[2] == 3 && (convflags & CONV3X1)){
 			snprintf(filename, 255, "r_%s", dest);
 			if (save1fits16(filename, tmpfit, RLAYER)) {
 				return 1;

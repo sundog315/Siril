@@ -607,18 +607,17 @@ void update_histo_mtf() {
 double findMidtonesBalance(fits *fit, double *shadows) {
 	double c0 = 0.0;
 	double m = 0.0;
-	double normValue;
 	int i, n;
 
 	n = (fit->naxes[2] == 2) ? 3 : 1;
-	normValue = (double) get_normalized_value(fit);
 
 	for (i = 0; i < n; ++i) {
-		double median, avgDev;
+		double median, avgDev, normValue;
 		imstats *stat = statistics(fit, i, NULL);
 
+		normValue = stat->normValue;
 		median = stat->median / normValue;
-		avgDev = stat->avgdev / normValue;
+		avgDev = stat->avgDev / normValue;
 
 		c0 += median + shadowsClipping * avgDev;
 		m += median;

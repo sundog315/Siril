@@ -5134,7 +5134,7 @@ void on_menu_gray_stat_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	if (layer != -1) {
 		char msg[512];
 		char name[256];
-		char sel[64];
+		char sel[256];
 		imstats* stat = statistics(&gfit, layer, &com.selection);
 
 		if (single_image_is_loaded())
@@ -5157,9 +5157,14 @@ void on_menu_gray_stat_activate(GtkMenuItem *menuitem, gpointer user_data) {
 			g_snprintf(sel, sizeof(sel), "%s", name);
 		}
 		g_snprintf(msg, sizeof(msg),
-				"%sMean:\t\t%.1lf\n\nMedian:\t\t%.1lf\n\nSigma:\t\t%.1lf\n\n"
-						"Minimum:\t%.1lf\n\nMaximum:\t%.1lf", sel, stat->mean,
-				stat->median, stat->sigma, stat->min, stat->max);
+				"%sCount:\t\t%u px\n"
+				"Mean:\t\t%.1lf\n"
+				"Median:\t\t%.1lf\n"
+				"Sigma:\t\t%.1lf\n"
+				"AvgDev:\t\t%.1lf\n"
+				"Minimum:\t%.1lf\n"
+				"Maximum:\t%.1lf", sel, stat->count, stat->mean, stat->median, stat->sigma,
+				stat->avgDev, stat->min, stat->max);
 		show_data_dialog(msg, "Statistics");
 		free(stat);
 		stat = NULL;

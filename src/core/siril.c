@@ -51,6 +51,7 @@
 #include "io/ser.h"
 
 #define SIGMA_PER_FWHM 2.35482
+#define AVGDEV_NORM 1.2533
 
 /* this file contains all functions for image processing */
 
@@ -1200,19 +1201,22 @@ int backgroundnoise(fits* fit, double sigma[]) {
 }
 
 /* computes statistics on the given layer of the given image. It creates the
- * histogram to easily extract the min and max value, the median, mean, sigma
- * and average deviation.
+ * histogram to easily extract the median. min and max value, mean, sigma
+ * and average deviation are computed with gsl stats.
  */
 imstats* statistics(fits *fit, int layer, rectangle *selection) {
-	double sigma, mean, avgdev, max, min, sum = 0.0, median;
-	double nbdata = fit->rx * fit->ry;
+	double sigma, mean, avgDev, median;
+	double sum = 0.0;
+	WORD min, max;
 	gsl_histogram* histo;
-	size_t i, hist_size;
+	size_t i, hist_size, count;
 	imstats* stat = malloc(sizeof(imstats));
+
+	count = fit->rx * fit->ry;
 
 	if (selection && selection->h > 0 && selection->w > 0) {
 		histo = computeHisto_Selection(fit, layer, selection);
-		nbdata = selection->h * selection->w;
+		count = selection->h * selection->w;
 	} else
 		histo = computeHisto(fit, layer);
 	hist_size = gsl_histogram_bins(histo);
@@ -1220,7 +1224,7 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 	/* Get the median value */
 	for (i = 0; i < hist_size; i++) {
 		sum += gsl_histogram_get(histo, i);
-		if (sum > (nbdata * 0.5)) {
+		if (sum > ((double) count * 0.5)) {
 			median = (double) i;
 			break;	//we get out of the loop
 		}
@@ -1229,17 +1233,16 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 	gsl_histogram_free(histo);
 
 	/* Mean */
-	mean = gsl_stats_ushort_mean(fit->pdata[layer], 1, nbdata);
+	mean = gsl_stats_ushort_mean(fit->pdata[layer], 1, count);
 
 	/* Calculation of sigma */
-	sigma = gsl_stats_ushort_sd_with_fixed_mean(fit->pdata[layer], 1, nbdata, mean);
+	sigma = gsl_stats_ushort_sd_with_fixed_mean(fit->pdata[layer], 1, count, mean);
 
-	/* Calculation of mean absolute deviation */
-	avgdev = gsl_stats_ushort_absdev_m(fit->pdata[layer], 1, nbdata, mean);
+	/* Calculation of average absolute deviation from the median */
+	avgDev = gsl_stats_ushort_absdev_m(fit->pdata[layer], 1, count, median);
 
 	/* Minimum and Maximum */
-	min = gsl_stats_ushort_min(fit->pdata[layer], 1, nbdata);
-	max = gsl_stats_ushort_max(fit->pdata[layer], 1, nbdata);
+	gsl_stats_ushort_minmax(&min, &max, fit->pdata[layer], 1, count);
 
 	switch (layer) {
 	case 0:
@@ -1256,12 +1259,14 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 		break;
 	}
 
+	stat->count = count;
 	stat->mean = mean;
-	stat->avgdev = avgdev;
+	stat->avgDev = avgDev;
 	stat->median = median;
 	stat->sigma = sigma;
-	stat->min = min;
-	stat->max = max;
+	stat->min = (double) min;
+	stat->max = (double) max;
+	stat->normValue = (double) hist_size;
 	return stat;
 }
 
@@ -1351,65 +1356,6 @@ int verbose_rotate_image(fits *image, double angle, int interpolation,
 	return 0;
 }
 
-#endif
-
-#if 0
-/* Algorithm written in order to display the gaussian equalized image : 
- * http://www.ifa.hawaii.edu/users/ishida/gauss_equal.pro */
-
-double gauss_int(double value) {
-	return gsl_sf_erf_Q(-value);
-}
-
-double bisect_pdf(double p, double up, double low) {
-	if (p < 0.0 || p > 1.0) return -1.0;
-	double mid = low + (up - low) * p;
-	double z=gauss_int(mid);
-	int count = 1;
-	while ((fabs(up - low) > (mid * 1.0e-6)) && (count < 100)) {
-		if (z > p)
-		up = mid;
-		else
-		low = mid;
-		mid = (up + low)/2.;
-		z = gauss_int(mid);
-		count ++;
-	}
-	return mid;
-}
-
-/* The GAUSS_CVF function computes the cutoff value V in a standard 
- * Gaussian (normal) distribution with a mean of 0.0 and a variance of 
- * 1.0 such that the probability that a random variable X is greater 
- * than V is equal to a user-supplied probability P . */
-double gauss_cvf(double p) {
-	double cutoff = 0.0, below, up;
-	int adjust;
-
-	if (p > 1.0 || p < 0.0) return -1.0;
-	if (p==0.0) return 1.0e12;
-	if (p==1.0) return -1.0e12;
-
-	if (p > 0.5) {
-		p = 1.0 - p;
-		adjust = 1;
-	}
-	else adjust = 0;
-	below = 0.0;
-	up = 1.0;
-
-	while (gauss_int(up) < (1.0 - p)) {
-		below = up;
-		up = 2 * up;
-	}
-	cutoff = bisect_pdf(1.0 - p, up, below);
-	if (adjust) {
-		p = 1.0 - p;
-		return -cutoff;
-	}
-	else
-	return cutoff;
-}
 #endif
 
 /* This function computes wavelets with the number of Nbr_Plan and
@@ -1664,7 +1610,7 @@ gpointer BandingEngine(gpointer p) {
 			return GINT_TO_POINTER(1);
 		}
 		if (args->protect_highlights) {
-			globalsigma = stat->avgdev * 1.2533;
+			globalsigma = stat->avgDev * AVGDEV_NORM;
 		}
 		for (row = 0; row < args->fit->ry; row++) {
 			line = args->fit->pdata[chan] + row * args->fit->rx;

@@ -519,7 +519,8 @@ struct cominf {
 
 /* this structure is used to characterize the statistics of the image */
 struct image_stats {
-	double mean, avgdev, median, sigma, min, max;
+	size_t count;
+	double mean, avgDev, median, sigma, min, max, normValue;
 	char layername[6];
 };
 

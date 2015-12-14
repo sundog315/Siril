@@ -92,7 +92,7 @@ static int _compute_normalization_for_image(struct stacking_args *args, int i,
 	switch (mode) {
 	default:
 	case ADDITIVE_SCALING:
-		scale[i] = stat->avgdev;
+		scale[i] = stat->avgDev;
 		if (i == 0)
 			*scale0 = scale[0];
 		scale[i] = *scale0 / scale[i];
@@ -104,7 +104,7 @@ static int _compute_normalization_for_image(struct stacking_args *args, int i,
 		offset[i] = scale[i] * offset[i] - *offset0;
 		break;
 	case MULTIPLICATIVE_SCALING:
-		scale[i] = stat->avgdev;
+		scale[i] = stat->avgDev;
 		if (i == 0)
 			*scale0 = scale[0];
 		scale[i] = *scale0 / scale[i];
