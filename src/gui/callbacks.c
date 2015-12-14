@@ -5130,45 +5130,20 @@ void on_menu_gray_crop_seq_activate(GtkMenuItem *menuitem, gpointer user_data) {
 }
 
 void on_menu_gray_stat_activate(GtkMenuItem *menuitem, gpointer user_data) {
-	int layer = match_drawing_area_widget(com.vport[com.cvport], FALSE);
-	if (layer != -1) {
-		char msg[512];
-		char name[256];
-		char sel[256];
-		imstats* stat = statistics(&gfit, layer, &com.selection);
+	GtkToggleButton *checkButton;
+	gboolean normalized;
+	int channel;
+	imstats *stat[3];
 
-		if (single_image_is_loaded())
-			g_snprintf(name, sizeof(name), "%s (%s layer)\n\n",
-					com.uniq->filename, stat->layername);
-		else if (sequence_is_loaded())
-			g_snprintf(name, sizeof(name),
-					"Image %d/%d from the sequence %s (%s layer)\n\n",
-					com.seq.current, com.seq.number, com.seq.seqname,
-					stat->layername);
-		else
-			g_snprintf(name, sizeof(name), "unknown image (%s layer)\n\n",
-					stat->layername);
+	checkButton = GTK_TOGGLE_BUTTON(lookup_widget("statCheckButton"));
+	normalized = gtk_toggle_button_get_active(checkButton);
 
-		if (com.selection.h && com.selection.w) {
-			g_snprintf(sel, sizeof(sel),
-					"%sSize of selection in pixel:\t(%d,%d)\n\n", name,
-					com.selection.w, com.selection.h);
-		} else {
-			g_snprintf(sel, sizeof(sel), "%s", name);
-		}
-		g_snprintf(msg, sizeof(msg),
-				"%sCount:\t\t%u px\n"
-				"Mean:\t\t%.1lf\n"
-				"Median:\t\t%.1lf\n"
-				"Sigma:\t\t%.1lf\n"
-				"AvgDev:\t\t%.1lf\n"
-				"Minimum:\t%.1lf\n"
-				"Maximum:\t%.1lf", sel, stat->count, stat->mean, stat->median, stat->sigma,
-				stat->avgDev, stat->min, stat->max);
-		show_data_dialog(msg, "Statistics");
-		free(stat);
-		stat = NULL;
-	}
+	for (channel = 0; channel < gfit.naxes[2]; channel++)
+		stat[channel] = statistics(&gfit, channel, &com.selection);
+	add_stats_to_list(stat, gfit.naxes[2], normalized);
+	gtk_widget_show_all(lookup_widget("StatWindow"));
+	for (channel = 0; channel < gfit.naxes[2]; channel++)
+		free(stat[channel]);
 }
 
 /************************* GUI for FFT ********************************/

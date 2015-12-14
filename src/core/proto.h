@@ -251,4 +251,7 @@ void	sequence_list_change_reference();
 void	fill_sequence_list(sequence *seq, int layer);
 void	clear_sequence_list();
 
+/****************** statistics_list.h ******************/
+void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized);
+
 #endif

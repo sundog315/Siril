@@ -2256,6 +2256,82 @@ enter a visible wavelength in nm</property>
       </object>
     </child>
   </object>
+  <object class="GtkDialog" id="data_dialog">
+    <property name="width_request">330</property>
+    <property name="height_request">300</property>
+    <property name="can_focus">False</property>
+    <property name="border_width">5</property>
+    <property name="destroy_with_parent">True</property>
+    <property name="type_hint">dialog</property>
+    <property name="transient_for">main_window</property>
+    <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="dialog-vbox12">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="dialog-action_area12">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_data_ok">
+                <property name="label">gtk-ok</property>
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="receives_default">True</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_button_data_ok_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="scrolledwindow6">
+            <property name="height_request">350</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="hscrollbar_policy">never</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkTextView" id="data_txt">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="margin_left">10</property>
+                <property name="margin_right">10</property>
+                <property name="margin_top">10</property>
+                <property name="margin_bottom">10</property>
+                <property name="editable">False</property>
+                <property name="cursor_visible">False</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <action-widgets>
+      <action-widget response="0">button_data_ok</action-widget>
+    </action-widgets>
+  </object>
   <object class="GtkListStore" id="liststoreStat">
     <columns>
       <!-- column-name Name -->
@@ -2266,11 +2342,16 @@ enter a visible wavelength in nm</property>
       <column type="gchararray"/>
       <!-- column-name Blue -->
       <column type="gchararray"/>
+      <!-- column-name Color -->
+      <column type="gchararray"/>
     </columns>
   </object>
-  <object class="GtkDialog" id="dialog2">
+  <object class="GtkDialog" id="StatWindow">
+    <property name="name">Statistics</property>
     <property name="can_focus">False</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
+    <property name="transient_for">main_window</property>
+    <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox30">
         <property name="can_focus">False</property>
@@ -2281,10 +2362,18 @@ enter a visible wavelength in nm</property>
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
             <child>
-              <placeholder/>
-            </child>
-            <child>
-              <placeholder/>
+              <object class="GtkButton" id="statButtonClose">
+                <property name="label" translatable="yes">Close</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <signal name="clicked" handler="on_statButtonClose_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
             </child>
           </object>
           <packing>
@@ -2294,24 +2383,47 @@ enter a visible wavelength in nm</property>
           </packing>
         </child>
         <child>
-          <object class="GtkScrolledWindow" id="scrolledwindow2">
+          <object class="GtkCheckButton" id="statCheckButton">
+            <property name="label" translatable="yes">Normalized Real [0, 1]</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
-            <property name="vexpand">False</property>
+            <property name="receives_default">False</property>
+            <property name="xalign">0</property>
+            <property name="draw_indicator">True</property>
+            <signal name="toggled" handler="on_statCheckButton_toggled" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkScrolledWindow" id="scrolledwindow2">
+            <property name="width_request">430</property>
+            <property name="height_request">200</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
             <property name="shadow_type">in</property>
             <child>
               <object class="GtkTreeView" id="statTreeView">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
                 <property name="model">liststoreStat</property>
                 <child internal-child="selection">
                   <object class="GtkTreeSelection" id="treeview-selection9"/>
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="treeviewcolumn19">
+                    <property name="fixed_width">100</property>
                     <child>
                       <object class="GtkCellRendererText" id="cellrenderertext8"/>
                       <attributes>
+                        <attribute name="background">4</attribute>
                         <attribute name="text">0</attribute>
                       </attributes>
                     </child>
@@ -2319,10 +2431,12 @@ enter a visible wavelength in nm</property>
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="treeviewcolumn20">
+                    <property name="fixed_width">100</property>
                     <property name="title" translatable="yes">Red</property>
                     <child>
                       <object class="GtkCellRendererText" id="cellrenderertext9"/>
                       <attributes>
+                        <attribute name="background">4</attribute>
                         <attribute name="text">1</attribute>
                       </attributes>
                     </child>
@@ -2330,10 +2444,12 @@ enter a visible wavelength in nm</property>
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="treeviewcolumn21">
+                    <property name="fixed_width">100</property>
                     <property name="title" translatable="yes">Green</property>
                     <child>
                       <object class="GtkCellRendererText" id="cellrenderertext10"/>
                       <attributes>
+                        <attribute name="background">4</attribute>
                         <attribute name="text">2</attribute>
                       </attributes>
                     </child>
@@ -2341,10 +2457,12 @@ enter a visible wavelength in nm</property>
                 </child>
                 <child>
                   <object class="GtkTreeViewColumn" id="treeviewcolumn22">
+                    <property name="fixed_width">100</property>
                     <property name="title" translatable="yes">Blue</property>
                     <child>
                       <object class="GtkCellRendererText" id="cellrenderertext11"/>
                       <attributes>
+                        <attribute name="background">4</attribute>
                         <attribute name="text">3</attribute>
                       </attributes>
                     </child>
@@ -8480,82 +8598,6 @@ If the selection is empty, the whole image will be used as reference.</property>
     </child>
     <action-widgets>
       <action-widget response="0">crop_Apply</action-widget>
-    </action-widgets>
-  </object>
-  <object class="GtkDialog" id="data_dialog">
-    <property name="width_request">330</property>
-    <property name="height_request">300</property>
-    <property name="can_focus">False</property>
-    <property name="border_width">5</property>
-    <property name="destroy_with_parent">True</property>
-    <property name="type_hint">dialog</property>
-    <property name="transient_for">control_window</property>
-    <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
-    <child internal-child="vbox">
-      <object class="GtkBox" id="dialog-vbox12">
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
-        <child internal-child="action_area">
-          <object class="GtkButtonBox" id="dialog-action_area12">
-            <property name="can_focus">False</property>
-            <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
-            <child>
-              <object class="GtkButton" id="button_data_ok">
-                <property name="label">gtk-ok</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="receives_default">True</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_button_data_ok_clicked" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkScrolledWindow" id="scrolledwindow6">
-            <property name="height_request">350</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="hscrollbar_policy">never</property>
-            <property name="shadow_type">in</property>
-            <child>
-              <object class="GtkTextView" id="data_txt">
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="margin_left">10</property>
-                <property name="margin_right">10</property>
-                <property name="margin_top">10</property>
-                <property name="margin_bottom">10</property>
-                <property name="editable">False</property>
-                <property name="cursor_visible">False</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-    <action-widgets>
-      <action-widget response="0">button_data_ok</action-widget>
     </action-widgets>
   </object>
   <object class="GtkDialog" id="dialog1">
