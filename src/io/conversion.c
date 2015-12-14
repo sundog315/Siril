@@ -1017,19 +1017,7 @@ int tofits(char *source, char *dest){
 		siril_log_message("Filter Pattern: %s\n", filter_pattern[com.raw_set.bayer_pattern]);
 		if (!debayer(tmpfit, com.raw_set.bayer_inter)) {
 			fits_flip_top_to_bottom(tmpfit);
-			if (tmpfit->naxes[2] == 3 && convflags & CONV3X1){
-				snprintf(filename, 255, "r_%s", dest);
-				if (save1fits16(filename, tmpfit, RLAYER)) {
-					return 1;
-				}
-				snprintf(filename ,255, "g_%s", dest);
-				save1fits16(filename, tmpfit, GLAYER);
-				snprintf(filename, 255, "b_%s", dest);
-				save1fits16(filename, tmpfit, BLAYER);
-			}
-			else {
-				savefits(dest, tmpfit);
-			}
+			savefits(dest, tmpfit);
 		} else {
 			siril_log_message("Cannot perform debayering\n");
 		}
@@ -1040,7 +1028,19 @@ int tofits(char *source, char *dest){
  * *******************************************************************/
 	else if (convflags & CONVFIT) {
 		readfits(source, tmpfit, NULL);
-		savefits(dest, tmpfit);
+		if (tmpfit->naxes[2] == 3 && convflags & CONV3X1){
+			snprintf(filename, 255, "r_%s", dest);
+			if (save1fits16(filename, tmpfit, RLAYER)) {
+				return 1;
+			}
+			snprintf(filename ,255, "g_%s", dest);
+			save1fits16(filename, tmpfit, GLAYER);
+			snprintf(filename, 255, "b_%s", dest);
+			save1fits16(filename, tmpfit, BLAYER);
+		}
+		else {
+			savefits(dest, tmpfit);
+		}
 	}
 
 	clearfits(tmpfit);
