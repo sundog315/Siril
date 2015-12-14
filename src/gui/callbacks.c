@@ -1651,11 +1651,9 @@ void set_filters_dialog(GtkFileChooser *chooser) {
 	is_cfa = gtk_toggle_button_get_active(cfaButton);
 #endif
 
-	if (!(whichdial == OD_CONVERT && !is_cfa)) {
-		gtk_filter_add(chooser, "FITS Files (*.fit, *.fits, *.fts)",
-				"*.fit;*.FIT;*.fits;*.FITS;*.fts;*.FTS",
-				com.filter == TYPEFITS);
-	}
+	gtk_filter_add(chooser, "FITS Files (*.fit, *.fits, *.fts)",
+			"*.fit;*.FIT;*.fits;*.FITS;*.fts;*.FTS",
+			com.filter == TYPEFITS);
 	if (whichdial == OD_OPEN || (whichdial == OD_CONVERT && !is_cfa)) {
 #ifdef HAVE_LIBRAW
 		/* RAW FILES */
