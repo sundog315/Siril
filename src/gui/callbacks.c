@@ -1480,8 +1480,10 @@ void opendial(void) {
 	GtkWidget *widgetdialog = NULL;
 	GtkFileChooser *dialog = NULL;
 	gint res;
-	GtkWindow *parent_window = GTK_WINDOW(
-			gtk_builder_get_object(builder, "control_window"));
+	GtkWindow *main_window = GTK_WINDOW(
+			gtk_builder_get_object(builder, "main_window"));
+	GtkWindow *controle_window = GTK_WINDOW(
+			gtk_builder_get_object(builder, "controle_window"));
 
 	if (!com.wd)
 		return;
@@ -1493,7 +1495,7 @@ void opendial(void) {
 	case OD_FLAT:
 	case OD_DARK:
 	case OD_OFFSET:
-		widgetdialog = gtk_file_chooser_dialog_new("Open File", parent_window,
+		widgetdialog = gtk_file_chooser_dialog_new("Open File", controle_window,
 				GTK_FILE_CHOOSER_ACTION_OPEN, ("_Cancel"), GTK_RESPONSE_CANCEL,
 				("_Open"), GTK_RESPONSE_ACCEPT,
 				NULL);
@@ -1503,7 +1505,7 @@ void opendial(void) {
 		set_filters_dialog(dialog);
 		break;
 	case OD_CWD:
-		widgetdialog = gtk_file_chooser_dialog_new("Open File", parent_window,
+		widgetdialog = gtk_file_chooser_dialog_new("Open File", controle_window,
 				GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, ("_Cancel"),
 				GTK_RESPONSE_CANCEL, ("_Open"), GTK_RESPONSE_ACCEPT,
 				NULL);
@@ -1512,7 +1514,7 @@ void opendial(void) {
 		gtk_file_chooser_set_select_multiple(dialog, FALSE);
 		break;
 	case OD_OPEN:
-		widgetdialog = gtk_file_chooser_dialog_new("Open File", parent_window,
+		widgetdialog = gtk_file_chooser_dialog_new("Open File", main_window,
 				GTK_FILE_CHOOSER_ACTION_OPEN, ("_Cancel"), GTK_RESPONSE_CANCEL,
 				("_Open"), GTK_RESPONSE_ACCEPT,
 				NULL);
@@ -1522,7 +1524,7 @@ void opendial(void) {
 		set_filters_dialog(dialog);
 		break;
 	case OD_CONVERT:
-		widgetdialog = gtk_file_chooser_dialog_new("Open File", parent_window,
+		widgetdialog = gtk_file_chooser_dialog_new("Open File", controle_window,
 				GTK_FILE_CHOOSER_ACTION_OPEN, ("_Cancel"), GTK_RESPONSE_CANCEL,
 				("_Open"), GTK_RESPONSE_ACCEPT,
 				NULL);
@@ -5130,20 +5132,8 @@ void on_menu_gray_crop_seq_activate(GtkMenuItem *menuitem, gpointer user_data) {
 }
 
 void on_menu_gray_stat_activate(GtkMenuItem *menuitem, gpointer user_data) {
-	GtkToggleButton *checkButton;
-	gboolean normalized;
-	int channel;
-	imstats *stat[3];
-
-	checkButton = GTK_TOGGLE_BUTTON(lookup_widget("statCheckButton"));
-	normalized = gtk_toggle_button_get_active(checkButton);
-
-	for (channel = 0; channel < gfit.naxes[2]; channel++)
-		stat[channel] = statistics(&gfit, channel, &com.selection);
-	add_stats_to_list(stat, gfit.naxes[2], normalized);
+	computeStat();
 	gtk_widget_show_all(lookup_widget("StatWindow"));
-	for (channel = 0; channel < gfit.naxes[2]; channel++)
-		free(stat[channel]);
 }
 
 /************************* GUI for FFT ********************************/

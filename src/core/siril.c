@@ -29,7 +29,7 @@
 #include <math.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_sf_erf.h>
-#include <gsl/gsl_statistics.h>
+#include <gsl/gsl_statistics_ushort.h>
 #include <fitsio.h>
 #include <complex.h>
 #include <float.h>
@@ -1152,8 +1152,8 @@ int backgroundnoise(fits* fit, double sigma[]) {
 		double mean = stat->mean;
 		WORD *buf = waveimage->pdata[layer];
 		assert(ndata > 0);
-		double *array1 = calloc(ndata, sizeof(double));
-		double *array2 = calloc(ndata, sizeof(double));
+		WORD *array1 = calloc(ndata, sizeof(WORD));
+		WORD *array2 = calloc(ndata, sizeof(WORD));
 		if (array1 == NULL || array2 == NULL) {
 			siril_log_message("backgroundnoise : Error allocating data\n");
 			if (array1)
@@ -1163,10 +1163,10 @@ int backgroundnoise(fits* fit, double sigma[]) {
 			free(stat);
 			return 1;
 		}
-		double *set = array1, *subset = array2;
+		WORD *set = array1, *subset = array2;
 
 		for (i = 0; i < ndata; i++)
-			set[i] = (double) buf[i];
+			set[i] = buf[i];
 		int n = 0;
 		do {
 			sigma0 = sigma[layer];
@@ -1176,7 +1176,7 @@ int backgroundnoise(fits* fit, double sigma[]) {
 					k++;
 				}
 			}
-			sigma[layer] = gsl_stats_sd(subset, 1, k);
+			sigma[layer] = gsl_stats_ushort_sd(subset, 1, k);
 			set = subset;
 			(set == array1) ? (subset = array2) : (subset = array1);
 			ndata = k;
@@ -1200,6 +1200,29 @@ int backgroundnoise(fits* fit, double sigma[]) {
 	return 0;
 }
 
+static void select_area(fits *fit, rectangle *bounds) {
+	int i, j, layer;
+	int newnbdata;
+
+	newnbdata = bounds->w * bounds->h;
+	for (layer = 0; layer < fit->naxes[2]; ++layer) {
+		WORD *from = fit->pdata[layer]
+				+ (fit->ry - bounds->y - bounds->h) * fit->rx + bounds->x;
+		fit->pdata[layer] = fit->data + layer * newnbdata;
+		WORD *to = fit->pdata[layer];
+		int stridefrom = fit->rx - bounds->w;
+
+		for (i = 0; i < bounds->h; ++i) {
+			for (j = 0; j < bounds->w; ++j) {
+				*to++ = *from++;
+			}
+			from += stridefrom;
+		}
+	}
+	fit->rx = fit->naxes[0] = bounds->w;
+	fit->ry = fit->naxes[1] = bounds->h;
+}
+
 /* computes statistics on the given layer of the given image. It creates the
  * histogram to easily extract the median. min and max value, mean, sigma
  * and average deviation are computed with gsl stats.
@@ -1207,18 +1230,25 @@ int backgroundnoise(fits* fit, double sigma[]) {
 imstats* statistics(fits *fit, int layer, rectangle *selection) {
 	double sigma, mean, avgDev, median;
 	double sum = 0.0;
-	WORD min, max;
+	WORD min, max, *data;
 	gsl_histogram* histo;
 	size_t i, hist_size, count;
 	imstats* stat = malloc(sizeof(imstats));
+	fits sfit;
 
 	count = fit->rx * fit->ry;
 
 	if (selection && selection->h > 0 && selection->w > 0) {
 		histo = computeHisto_Selection(fit, layer, selection);
 		count = selection->h * selection->w;
-	} else
+		memcpy(&sfit, fit, sizeof(fits));
+		select_area(&sfit, selection);
+		data = sfit.pdata[layer];
+
+	} else {
 		histo = computeHisto(fit, layer);
+		data = fit->pdata[layer];
+	}
 	hist_size = gsl_histogram_bins(histo);
 
 	/* Get the median value */
@@ -1233,16 +1263,16 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 	gsl_histogram_free(histo);
 
 	/* Mean */
-	mean = gsl_stats_ushort_mean(fit->pdata[layer], 1, count);
+	mean = gsl_stats_ushort_mean(data, 1, count);
 
 	/* Calculation of sigma */
-	sigma = gsl_stats_ushort_sd_with_fixed_mean(fit->pdata[layer], 1, count, mean);
+	sigma = gsl_stats_ushort_sd_m(data, 1, count, mean);
 
 	/* Calculation of average absolute deviation from the median */
-	avgDev = gsl_stats_ushort_absdev_m(fit->pdata[layer], 1, count, median);
+	avgDev = gsl_stats_ushort_absdev_m(data, 1, count, median);
 
 	/* Minimum and Maximum */
-	gsl_stats_ushort_minmax(&min, &max, fit->pdata[layer], 1, count);
+	gsl_stats_ushort_minmax(&min, &max, data, 1, count);
 
 	switch (layer) {
 	case 0:
@@ -1266,7 +1296,7 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 	stat->sigma = sigma;
 	stat->min = (double) min;
 	stat->max = (double) max;
-	stat->normValue = (double) hist_size;
+	stat->normValue = (double) hist_size - 1;
 	return stat;
 }
 
@@ -1427,20 +1457,19 @@ int find_hot_pixels(fits *fit, double sigma, char *filename) {
 
 	for (y = 1; y < fit->ry - 1; y++) {
 		for (x = 1; x < fit->rx - 1; x++) {
-			double tab[8];
-			tab[0] = (double) buf[x - 1 + y * fit->rx];
-			tab[1] = (double) buf[x + 1 + y * fit->rx];
-			tab[2] = (double) buf[x + (y - 1) * fit->rx];
-			tab[3] = (double) buf[x + (y + 1) * fit->rx];
-			tab[4] = (double) buf[x - 1 + (y - 1) * fit->rx];
-			tab[5] = (double) buf[x + 1 + (y - 1) * fit->rx];
-			tab[6] = (double) buf[x - 1 + (y + 1) * fit->rx];
-			tab[7] = (double) buf[x + 1 + (y + 1) * fit->rx];
-			quicksort_d(tab, 8);
+			WORD tab[8];
+			tab[0] = buf[x - 1 + y * fit->rx];
+			tab[1] = buf[x + 1 + y * fit->rx];
+			tab[2] = buf[x + (y - 1) * fit->rx];
+			tab[3] = buf[x + (y + 1) * fit->rx];
+			tab[4] = buf[x - 1 + (y - 1) * fit->rx];
+			tab[5] = buf[x + 1 + (y - 1) * fit->rx];
+			tab[6] = buf[x - 1 + (y + 1) * fit->rx];
+			tab[7] = buf[x + 1 + (y + 1) * fit->rx];
+			quicksort_s(tab, 8);
 			//~ double median = gsl_stats_median_from_sorted_data (tab, 1, 8);
-			double mean = gsl_stats_mean(tab, 1, 8);
-			//~ double sd = gsl_stats_sd_m(tab, 1, 8, mean);
-			double absdev = gsl_stats_absdev_m(tab, 1, 8, mean);
+			double mean = gsl_stats_ushort_mean(tab, 1, 8);
+			double absdev = gsl_stats_ushort_absdev_m(tab, 1, 8, mean);
 			double pixel = (double) buf[x + y * fit->rx];
 			if ((pixel - mean) > absdev * sigma) {
 				fprintf(cosme_file, "P %d %d\n", x, y);

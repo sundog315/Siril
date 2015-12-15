@@ -1712,14 +1712,14 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 				case LINEARFIT:
 					do {
 						double *xf = malloc(N * sizeof(double));
-						double *yf = malloc(N*sizeof(double));
+						double *yf = malloc(N * sizeof(double));
 						double a, b, cov00, cov01, cov11, sumsq;
 						quicksort_s(data->stack, N);
-						for (frame=0; frame < N; frame++) {
-							xf[frame] = (double)frame;
-							yf[frame] = (double)data->stack[frame];
+						for (frame = 0; frame < N; frame++) {
+							xf[frame] = (double) frame;
+							yf[frame] = (double) data->stack[frame];
 						}
-						gsl_fit_linear (xf, 1, yf, 1, N, &b, &a, &cov00, &cov01, &cov11, &sumsq);
+						gsl_fit_linear(xf, 1, yf, 1, N, &b, &a, &cov00, &cov01, &cov11, &sumsq);
 						sigma = 0.0;
 						for (frame=0; frame < N; frame++)
 							sigma += (fabs((double)data->stack[frame] - (a*(double)frame + b)));

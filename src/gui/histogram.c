@@ -31,6 +31,7 @@
 
 #define shadowsClipping -1.25 /* Shadows clipping point measured in sigma units from the main histogram peak. */
 #define targetBackground 0.25 /* final "luminance" of the image for autostretch in the [0,1] range */
+#undef HISTO_DEBUG
 
 /* The gsl_histogram, documented here:
  * http://linux.math.tifr.res.in/manuals/html/gsl-ref-html/gsl-ref_21.html
@@ -258,18 +259,22 @@ static void adjust_histogram_vport_size() {
 	targetW = (int) (((double) cur_width) * zoomH);
 	targetH = (int) (((double) cur_height) * zoomV);
 	gtk_widget_set_size_request(drawarea, targetW, targetH);
+#ifdef HISTO_DEBUG
 	fprintf(stdout, "Histo vport size (%d, %d)\n", targetW, targetH);
+#endif
 }
 
 gboolean redraw_histo(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	int i, width, height;
 	double zoomH, zoomV;
 
-	fprintf(stdout, "histogram redraw\n");
 	init_toggles();
 	width = gtk_widget_get_allocated_width(widget);
 	height = gtk_widget_get_allocated_height(widget);
+#ifdef HISTO_DEBUG
+	fprintf(stdout, "histogram redraw\n");
 	fprintf(stdout, "w = %d and h = %d\n", width, height);
+#endif
 	zoomH = get_histoZoomValueH();
 	zoomV = get_histoZoomValueV();
 

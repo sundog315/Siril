@@ -22,6 +22,7 @@
 #include "core/siril.h"
 #include "core/proto.h"
 #include "gui/callbacks.h"
+#include "io/single_image.h"
 
 static GtkListStore *list_store = NULL;
 
@@ -38,8 +39,8 @@ enum {
 char *statName[] = {
 		"count (px)",
 		"mean",
-		"avgDev",
 		"median",
+		"avgDev",
 		"sigma",
 		"min",
 		"max",
@@ -50,11 +51,11 @@ void get_statlist_store() {
 	if (list_store == NULL)
 		list_store = GTK_LIST_STORE(gtk_builder_get_object(builder, "liststoreStat"));
 }
-/* Add an statistic to the list. If imstats is NULL, the list is cleared. */
+/* Add a statistic to the list. If imstats is NULL, the list is cleared. */
 void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 	static GtkTreeSelection *selection = NULL;
 	GtkTreeIter iter;
-	char count[20], format[6];
+	char format[6];
 	char rvalue[20], gvalue[20], bvalue[20];
 	double normValue[] = { 1.0, 1.0, 1.0 };
 
@@ -71,7 +72,7 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 		normValue[RLAYER] = stat[RLAYER]->normValue;
 		normValue[GLAYER] = stat[RLAYER]->normValue;
 		normValue[BLAYER] = stat[RLAYER]->normValue;
-		sprintf(format, "%%.9lf");
+		sprintf(format, "%%.5lf");
 	}
 	else
 		sprintf(format, "%%.1lf");
@@ -112,10 +113,10 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			-1);
 
 	/* AvgDev */
-	sprintf(rvalue, format, stat[RLAYER]->avgDev / normValue[RLAYER]);
+	sprintf(rvalue, format, stat[RLAYER]->median / normValue[RLAYER]);
 	if (nblayer > 1) {
-		sprintf(gvalue, format, stat[GLAYER]->avgDev / normValue[GLAYER]);
-		sprintf(bvalue, format, stat[BLAYER]->avgDev / normValue[BLAYER]);
+		sprintf(gvalue, format, stat[GLAYER]->median / normValue[GLAYER]);
+		sprintf(bvalue, format, stat[BLAYER]->median / normValue[BLAYER]);
 	} else {
 		sprintf(gvalue, "--");
 		sprintf(bvalue, "--");
@@ -130,10 +131,10 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			-1);
 
 	/* median */
-	sprintf(rvalue, format, stat[RLAYER]->median / normValue[RLAYER]);
+	sprintf(rvalue, format, stat[RLAYER]->avgDev / normValue[RLAYER]);
 	if (nblayer > 1) {
-		sprintf(gvalue, format, stat[GLAYER]->median / normValue[GLAYER]);
-		sprintf(bvalue, format, stat[BLAYER]->median / normValue[BLAYER]);
+		sprintf(gvalue, format, stat[GLAYER]->avgDev / normValue[GLAYER]);
+		sprintf(bvalue, format, stat[BLAYER]->avgDev / normValue[BLAYER]);
 	} else {
 		sprintf(gvalue, "--");
 		sprintf(bvalue, "--");
@@ -207,22 +208,54 @@ void on_statButtonClose_clicked(GtkButton *button, gpointer user_data) {
 	gtk_widget_hide(lookup_widget("StatWindow"));
 }
 
-void on_statCheckButton_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
+void computeStat() {
 	GtkToggleButton *checkButton;
+	GtkLabel *statNameLabel, *statSelecLabel;
 	gboolean normalized;
 	int channel;
+	char name[256], selection[256];
 	imstats *stat[3];
 
-	set_cursor_waiting(TRUE);
-
 	checkButton = GTK_TOGGLE_BUTTON(lookup_widget("statCheckButton"));
+	statNameLabel = GTK_LABEL(lookup_widget("statNameLabel"));
+	statSelecLabel = GTK_LABEL(lookup_widget("statSelecLabel"));
 	normalized = gtk_toggle_button_get_active(checkButton);
+
+	if (single_image_is_loaded())
+		g_snprintf(name, sizeof(name), "%s", com.uniq->filename);
+	else if (sequence_is_loaded())
+		g_snprintf(name, sizeof(name), "Image %d/%d from the sequence %s",
+				com.seq.current, com.seq.number, com.seq.seqname);
+	else
+		g_snprintf(name, sizeof(name), "unknown image");
+
+	gtk_label_set_text(statNameLabel, name);
+
+	if (com.selection.h && com.selection.w) {
+		g_snprintf(selection, sizeof(selection),
+				"Size of selection in pixel: (%d,%d)", com.selection.w,
+				com.selection.h);
+	} else {
+		g_snprintf(selection, sizeof(selection), "No selection");
+	}
+
+	gtk_label_set_text(statSelecLabel, selection);
 
 	for (channel = 0; channel < gfit.naxes[2]; channel++)
 		stat[channel] = statistics(&gfit, channel, &com.selection);
 	add_stats_to_list(stat, gfit.naxes[2], normalized);
-	gtk_widget_show_all(lookup_widget("StatWindow"));
 	for (channel = 0; channel < gfit.naxes[2]; channel++)
 		free(stat[channel]);
+}
+
+void on_statCheckButton_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
+	set_cursor_waiting(TRUE);
+	computeStat();
+	set_cursor_waiting(FALSE);
+}
+
+void on_statButtonRun_clicked(GtkButton *button, gpointer user_data) {
+	set_cursor_waiting(TRUE);
+	computeStat();
 	set_cursor_waiting(FALSE);
 }
