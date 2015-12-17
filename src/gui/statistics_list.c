@@ -72,7 +72,7 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 		normValue[RLAYER] = stat[RLAYER]->normValue;
 		normValue[GLAYER] = stat[RLAYER]->normValue;
 		normValue[BLAYER] = stat[RLAYER]->normValue;
-		sprintf(format, "%%.5lf");
+		sprintf(format, "%%.7lf");
 	}
 	else
 		sprintf(format, "%%.1lf");
