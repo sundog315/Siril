@@ -428,8 +428,9 @@ void erase_histo_display(cairo_t *cr, int width, int height) {
 	cairo_fill(cr);
 
 	// draw curve // disabled because bugged
-	if (0)
+#if 0
 		draw_MTF_curve(cr, width, height);
+#endif
 	// draw grid
 	drawGrid = gtk_toggle_tool_button_get_active(toggleGrid);
 	if (drawGrid)
