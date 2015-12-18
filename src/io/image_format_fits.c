@@ -30,23 +30,14 @@
 #include "core/proto.h"
 #include "gui/callbacks.h"
 
-static char *PixSizeX[] = { "XPIXSZ", "XPIXELSZ",
-NULL };
-
-static char *PixSizeY[] = { "YPIXSZ", "YPIXELSZ",
-NULL };
-
-static char *BinX[] = { "XBINNING", "BINX",
-NULL };
-
-static char *BinY[] = { "YBINNING", "BINY",
-NULL };
-
-static char *Focal[] = { "FOCAL", "FOCALLEN",
-NULL };
-
-static char *Exposure[] = { "EXPTIME", "EXPOSURE",
-NULL };
+static char *MIPSHI[] = {"MIPS-HI", "CWHITE", NULL };
+static char *MIPSLO[] = {"MIPS-LO", "CBLACK", NULL };
+static char *PixSizeX[] = { "XPIXSZ", "XPIXELSZ", NULL };
+static char *PixSizeY[] = { "YPIXSZ", "YPIXELSZ", NULL };
+static char *BinX[] = { "XBINNING", "BINX", NULL };
+static char *BinY[] = { "YBINNING", "BINY", NULL };
+static char *Focal[] = { "FOCAL", "FOCALLEN", NULL };
+static char *Exposure[] = { "EXPTIME", "EXPOSURE", NULL };
 
 // return 0 on success, fills realname if not NULL with the opened file's name
 int readfits(const char *filename, fits *fit, char *realname) {
@@ -256,17 +247,6 @@ static void tryToFindKeywordsFloat(fits *fit, char **keyword, float *value) {
 	} while (keyword[i] && status);
 }
 
-static void tryToFindKeywordsUint(fits *fit, char **keyword, unsigned int *value) {
-	int i = 0;
-	int status;
-
-	do {
-		status = 0;
-		fits_read_key(fit->fptr, TUINT, keyword[i], value, NULL, &status);
-		i++;
-	} while (keyword[i] && status);
-}
-
 static void tryToFindKeywordsDouble(fits *fit, char **keyword, double *value) {
 	int i = 0;
 	int status;
@@ -278,22 +258,36 @@ static void tryToFindKeywordsDouble(fits *fit, char **keyword, double *value) {
 	} while (keyword[i] && status);
 }
 
+static void tryToFindKeywordsUint(fits *fit, char **keyword, unsigned int *value) {
+	int i = 0;
+	int status;
+
+	do {
+		status = 0;
+		fits_read_key(fit->fptr, TUINT, keyword[i], value, NULL, &status);
+		i++;
+	} while (keyword[i] && status);
+}
+
+static void tryToFindKeywordsUshort(fits *fit, char **keyword, unsigned short *value) {
+	int i = 0;
+	int status;
+
+	do {
+		status = 0;
+		fits_read_key(fit->fptr, TUSHORT, keyword[i], value, NULL, &status);
+		i++;
+	} while (keyword[i] && status);
+}
+
 /* reading the FITS header to get useful information */
 void read_fits_header(fits *fit) {
 	/* about the status argument: http://heasarc.gsfc.nasa.gov/fitsio/c/c_user/node28.html */
 	int status = 0;
 	int zero;
-	fits_read_key(fit->fptr, TUSHORT, "MIPS-HI", &(fit->hi), NULL, &status);
-	if (status || fit->hi == 0) {
-		status = 0;
-		fits_read_key(fit->fptr, TUSHORT, "CWHITE", &(fit->hi), NULL, &status);
-	}
-	status = 0;
-	fits_read_key(fit->fptr, TUSHORT, "MIPS-LO", &(fit->lo), NULL, &status);
-	if (status) {
-		status = 0;
-		fits_read_key(fit->fptr, TUSHORT, "CBLACK", &(fit->lo), NULL, &status);
-	}
+
+	tryToFindKeywordsUshort(fit, MIPSHI, &fit->hi);
+	tryToFindKeywordsUshort(fit, MIPSLO, &fit->lo);
 
 	status = 0;
 	fits_read_key(fit->fptr, TINT, "BSCALE", &zero, NULL, &status);
