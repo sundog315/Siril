@@ -197,10 +197,10 @@ gpointer BandingEngine(gpointer p);
 gpointer noise(gpointer p);
 
 /****************** sequence.h ******************/
-int read_single_sequence(char *realname, int imagetype);
+int	read_single_sequence(char *realname, int imagetype);
 int	seqsetnum(int image_number);
 int	check_seq(int force);
-int check_only_one_film_seq(char* name);
+int	check_only_one_film_seq(char* name);
 int	set_seq(const char *);
 char *	seq_get_image_filename(sequence *seq, int index, char *name_buf);
 int	seq_read_frame(sequence *seq, int index, fits *dest);
@@ -219,9 +219,8 @@ void	free_sequence(sequence *seq, gboolean free_seq_too);
 void	sequence_free_preprocessing_data(sequence *seq);
 gboolean sequence_is_loaded();
 int	sequence_processing(sequence *seq, sequence_proc process, int layer);
-int	seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit);
-int	do_fwhm_sequence_processing(sequence *seq, int layer);
-int	seqprocess_planetary(sequence *seq, int seq_layer, int frame_no, fits *fit);
+int	seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit, rectangle *source_area);
+int	do_fwhm_sequence_processing(sequence *seq, int layer, int print_psf);
 void	check_or_allocate_regparam(sequence *seq, int layer);
 sequence *create_internal_sequence(int size);
 void	internal_sequence_set(sequence *seq, int index, fits *fit);
@@ -229,6 +228,7 @@ int	internal_sequence_find_index(sequence *seq, fits *fit);
 gpointer crop_sequence(gpointer p);
 gboolean sequence_is_rgb(sequence *seq);
 imstats* seq_get_imstats(sequence *seq, int index, fits *the_image);
+void	check_area_is_in_image(rectangle *area, sequence *seq);
 
 /****************** seqfile.h ******************/
 sequence * readseqfile(const char *name);

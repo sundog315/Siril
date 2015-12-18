@@ -77,10 +77,10 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 	else
 		sprintf(format, "%%.1lf");
 
-	sprintf(rvalue, "%u", stat[RLAYER]->count);
+	sprintf(rvalue, "%lu", stat[RLAYER]->count);
 	if (nblayer > 1) {
-		sprintf(gvalue, "%u", stat[GLAYER]->count);
-		sprintf(bvalue, "%u", stat[BLAYER]->count);
+		sprintf(gvalue, "%lu", stat[GLAYER]->count);
+		sprintf(bvalue, "%lu", stat[BLAYER]->count);
 	} else {
 		sprintf(gvalue, "--");
 		sprintf(bvalue, "--");

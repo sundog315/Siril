@@ -942,3 +942,4 @@ char* str_append(char** data, const char* newdata) {
 	strcpy(*data + len, newdata);
 	return *data;
 }
+

@@ -78,6 +78,7 @@ int	process_rotate(int nb);
 #endif
 int	process_rotatepi(int nb);
 int 	process_psf(int nb);
+int	process_seq_psf(int nb);
 int	process_bg(int nb);
 int	process_bgnoise(int nb);
 int	process_histo(int nb);

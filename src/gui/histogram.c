@@ -646,7 +646,6 @@ void update_histo_mtf() {
 	double lo, hi, m;
 	unsigned int i, data = 0;
 	static GtkRange *scale_transfert_function[3] = { NULL, NULL, NULL };
-	static GtkAdjustment *adjustment[3] = { NULL, NULL, NULL };
 	static GtkWidget *drawarea = NULL;
 	double norm = (double) gsl_histogram_bins(com.layers_hist[0]) - 1;
 

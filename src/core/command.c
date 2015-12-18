@@ -108,6 +108,7 @@ command commande[] = {
 	{"offset", 1, "offset value", process_offset},
 	
 	{"psf", 0, "psf", process_psf},
+	{"seqpsf", 0, "seqpsf", process_seq_psf},
 	
 #ifdef HAVE_OPENCV
 	{"resample", 1, "resample factor", process_resample},
@@ -630,7 +631,11 @@ int process_psf(int nb){
 		if (!com.drawn || com.drawing)
 			return 1;
 		if (com.selection.w > 300 || com.selection.h > 300){
-			siril_log_message("Current selection is too large. To determine the PSF, please make a selection around a star.\n");
+			siril_log_message("Current selection is too large. To determine the PSF, please make a selection around a single star.\n");
+			return 1;
+		}
+		if (com.selection.w <= 0 || com.selection.h <= 0){
+			siril_log_message("Select an area first\n");
 			return 1;
 		}
 		fitted_PSF *result = psf_get_minimisation(&gfit, layer, &com.selection);
@@ -640,6 +645,39 @@ int process_psf(int nb){
 		}
 	}
 	return 0;
+}
+
+void *_psf_thread(void *arg) {
+	int layer = (intptr_t) arg;
+	do_fwhm_sequence_processing(&com.seq, layer, 1);
+	return NULL;
+}
+
+int process_seq_psf(int nb) {
+	if (get_thread_run()) {
+		siril_log_message("Another task is already in progress, ignoring new request.\n");
+		return 1;
+	}
+	if (com.selection.w > 300 || com.selection.h > 300){
+		siril_log_message("Current selection is too large. To determine the PSF, please make a selection around a single star.\n");
+		return 1;
+	}
+	if (com.selection.w <= 0 || com.selection.h <= 0){
+		siril_log_message("Select an area first\n");
+		return 1;
+	}
+
+	int layer = match_drawing_area_widget(com.vport[com.cvport], FALSE);
+	if (sequence_is_loaded() && layer != -1) {
+		siril_log_message("Running the PSF on the loaded sequence, layer %d\n", layer);
+		siril_log_message("Results will be displayed at the end of the processing, on the console output, in the following form:\n");
+		start_in_new_thread(_psf_thread, (void *)(intptr_t)layer);
+		return 0;
+	}
+	else {
+		siril_log_message("This command can be used only when a sequence is loaded\n");
+		return 1;
+	}
 }
 
 int process_bg(int nb){

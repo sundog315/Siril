@@ -851,7 +851,7 @@ gboolean sequence_is_loaded() {
  * The see coment in siril.h for help on process format.
  */
 int sequence_processing(sequence *seq, sequence_proc process, int layer) {
-	int i;
+	int i, run = 1;
 	float cur_nb = 0.f, nb_frames;
 	fits fit;
 	rectangle area;
@@ -866,39 +866,57 @@ int sequence_processing(sequence *seq, sequence_proc process, int layer) {
 
 	nb_frames = (float)seq->number;
 
+	/* this loops could be run in parallel, but now the area depends on the previous star
+	 * detection, which makes it a bit hard to keep track of the star movement... */
+//#pragma omp parallel for private(i) schedule(dynamic)
 	for (i=0; i<seq->number; ++i) {
-		// Don't check for thread running here, this is always false
-		// for compositing registration.
-		//if (!get_thread_run()) break;
+		if (run) {
+			// Don't check for thread running here, this is always false
+			// for compositing registration.
+			//if (!get_thread_run()) break;
+			check_area_is_in_image(&area, seq);
 
-		/* opening the image */
-		if (seq_read_frame_part(seq, layer, i, &fit, &area))
-			return 1;
+			/* opening the image */
+			if (seq_read_frame_part(seq, layer, i, &fit, &area)) {
+				run = 0;
+				continue;
+			}
 
-		/* processing the image */
-		if (process(seq, layer, i, &fit) < 0)
-			return 1;
+			/* processing the image
+			 * warning: area may be modified */
+			if (process(seq, layer, i, &fit, &area) < 0) {
+				run = 0;
+				continue;
+			}
+		}
 		cur_nb += 1.f;
 		set_progress_bar_data(NULL, cur_nb/nb_frames);
 	}
+	if (!run) return 1;
 	return 0;
 }
 
 /* Computes FWHM for a sequence image and store data in the sequence imgdata.
  * seq_layer is the corresponding layer in the raw image from the sequence.
+ * source_area is the area from which fit was extracted from the full frame. It can be used
+ * for reference, but can also be modified to help subsequent minimisations.
  */
-int seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit) {
+int seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit, rectangle *source_area) {
 	rectangle area;
 	area.x = area.y = 0;
 	area.w = fit->rx; area.h = fit->ry;
 	assert(seq_layer < seq->nb_layers);
 	fitted_PSF *result = psf_get_minimisation(fit, 0, &area);
 	if (result) {
+		result->xpos = result->x0 + source_area->x;
+		result->ypos = source_area->y + source_area->h - result->y0;
 		seq->regparam[seq_layer][frame_no].fwhm_data = result;
 		seq->regparam[seq_layer][frame_no].fwhm = result->fwhmx;
-		assert(result->fwhmx >= result->fwhmy);
-		/* just a try, to verify what's written elsewhere. If it fails,
-		 * we need to add a test and store FWHMY in fwhm instead. */
+		//fprintf(stdout, "%d\t%f\t%f\t%f\t%f\t%f\n", frame_no, result->A, result->mag, result->fwhmx, result->xpos, result->ypos);
+
+		/* let's move source_area to center it on the star */
+		source_area->x = round_to_int(result->xpos) - source_area->w/2;
+		source_area->y = round_to_int(result->ypos) - source_area->h/2;
 		return 0;
 	} else {
 		seq->regparam[seq_layer][frame_no].fwhm_data = NULL;
@@ -907,7 +925,9 @@ int seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit) {
 	}
 }
 
-int do_fwhm_sequence_processing(sequence *seq, int layer) {
+/* Computes PSF for all images in a sequence.
+ * Prints PSF data if print_psf is true, only position if false. */
+int do_fwhm_sequence_processing(sequence *seq, int layer, int print_psf) {
 	int i, retval;
 	siril_log_message("Starting sequence processing of PSF\n");
 	set_progress_bar_data("Computing PSF on selected star", PROGRESS_NONE);
@@ -921,14 +941,15 @@ int do_fwhm_sequence_processing(sequence *seq, int layer) {
 	// update the list
 	if (seq->type != SEQ_INTERNAL)
 		fill_sequence_list(seq, layer);
-	// set the coordinates of the detected star, not known by the processing
-	for (i=0; i<seq->number; i++) {
-		fitted_PSF *star = seq->regparam[layer][i].fwhm_data;
-		if (star) {
-			// same code as in add_star(), set position of star using selection coords
-			star->xpos = star->x0 + com.selection.x;
-			star->ypos = com.selection.y + com.selection.h - star->y0;
-			fprintf(stdout, "star image %d: %g, %g\n", i, star->xpos, star->ypos);
+
+	if (print_psf) {
+		fprintf(stdout, "# image_no amplitude magnitude fwhm x y\n");
+		for (i=0; i<seq->number; i++) {
+			fitted_PSF *star = seq->regparam[layer][i].fwhm_data;
+			if (star) {
+				// see algos/PSF.h for more fields to print
+				fprintf(stdout, "%d\t%f\t%f\t%f\t%f\t%f\n", i, star->A, star->mag, star->fwhmx, star->xpos, star->ypos);
+			}
 		}
 	}
 	set_fwhm_star_as_star_list_with_layer(seq, layer);
@@ -1060,5 +1081,17 @@ imstats* seq_get_imstats(sequence *seq, int index, fits *the_image) {
 		seq->needs_saving = TRUE;
 	}
 	return seq->imgparam[index].stats;
+}
+
+/* ensures that an area does not derive off-image.
+ * Verifies coordinates of the center and moves it inside the image if the area crosses the bounds.
+ */
+void check_area_is_in_image(rectangle *area, sequence *seq) {
+	if (area->x < 0) area->x = 0;
+	if (area->y < 0) area->y = 0;
+	if (area->x + area->w > seq->rx)
+		area->x = seq->rx - area->w;
+	if (area->y + area->h > seq->ry)
+		area->y = seq->ry - area->h;
 }
 
