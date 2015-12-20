@@ -202,8 +202,12 @@ void set_histogram(gsl_histogram *histo, int layer) {
 
 void clear_histograms() {
 	int i;
-	for (i = 0; i < MAXVPORT; i++)
+	for (i = 0; i < MAXVPORT; i++) {
 		set_histogram(NULL, i);
+		if (histCpy[i])
+			gsl_histogram_free(histCpy[i]);
+		histCpy[i] = NULL;
+	}
 }
 
 void init_toggles() {
