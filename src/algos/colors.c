@@ -643,16 +643,16 @@ static void background_neutralize(fits* fit, rectangle black_selection) {
 	}
 	ref /= 3;
 
-	for (chan = 0; chan < 3; chan++) { {
+	for (chan = 0; chan < 3; chan++) {
 		int offset = stats[chan]->mean - ref;
 		WORD *buf = fit->pdata[chan];
 		for (i = 0; i < fit->rx * fit->ry; i++) {
 			if (buf[i] < offset)
 				buf[i] = 0;
 			else
-				buf[i] = (
-						buf[i] - offset >= USHRT_MAX ?
-								USHRT_MAX : buf[i] - offset);
+				buf[i] = (buf[i] - offset >= USHRT_MAX ?
+				USHRT_MAX :
+															buf[i] - offset);
 
 		}
 		free(stats[chan]);
