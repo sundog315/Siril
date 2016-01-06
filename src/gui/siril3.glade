@@ -8190,11 +8190,12 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
             </child>
             <child>
               <object class="GtkButton" id="statButtonClose">
-                <property name="label" translatable="yes">Close</property>
+                <property name="label">gtk-close</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Close the window</property>
+                <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_statButtonClose_clicked" swapped="no"/>
               </object>
               <packing>

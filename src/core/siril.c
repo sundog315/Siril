@@ -1126,7 +1126,6 @@ double background(fits* fit, int reqlayer, rectangle *selection) {
  * Royal Astronomical Society of the Pacific, vol. 110, pp. 193–199. */
 int backgroundnoise(fits* fit, double sigma[]) {
 	int layer, k;
-	unsigned int i;
 	fits *waveimage = calloc(1, sizeof(fits));
 
 	if (waveimage == NULL) {
@@ -1152,6 +1151,7 @@ int backgroundnoise(fits* fit, double sigma[]) {
 		double mean = stat->mean;
 		double epsilon = 0.0;
 		WORD *buf = waveimage->pdata[layer];
+		unsigned int i;
 		unsigned int ndata = fit->rx * fit->ry;
 		assert(ndata > 0);
 		WORD *array1 = calloc(ndata, sizeof(WORD));
@@ -1175,14 +1175,13 @@ int backgroundnoise(fits* fit, double sigma[]) {
 			sigma0 = sigma[layer];
 			for (i = 0, k = 0; i < ndata; i++) {
 				if (fabs(set[i] - mean) < 3.0 * sigma0) {
-					subset[k] = set[i];
-					k++;
+					subset[k++] = set[i];
 				}
 			}
-			sigma[layer] = gsl_stats_ushort_sd(subset, 1, k);
+			ndata = k;
+			sigma[layer] = gsl_stats_ushort_sd(subset, 1, ndata);
 			set = subset;
 			(set == array1) ? (subset = array2) : (subset = array1);
-			ndata = k;
 			if (ndata == 0) {
 				free(array1);
 				free(array2);
