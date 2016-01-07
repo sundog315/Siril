@@ -636,7 +636,7 @@ static void background_neutralize(fits* fit, rectangle black_selection) {
 
 	assert(fit->naxes[2] == 3);
 
-	stats = malloc(com.uniq->nb_layers * sizeof(imstats *));
+	stats = malloc(3 * sizeof(imstats *));
 	for (chan = 0; chan < 3; chan++) {
 		stats[chan] = statistics(fit, chan, &black_selection);
 		ref += stats[chan]->median;
@@ -650,9 +650,7 @@ static void background_neutralize(fits* fit, rectangle black_selection) {
 			if (buf[i] < offset)
 				buf[i] = 0;
 			else
-				buf[i] = (buf[i] - offset >= USHRT_MAX ?
-				USHRT_MAX :
-															buf[i] - offset);
+				buf[i] = (buf[i] - offset >= USHRT_MAX ? USHRT_MAX : buf[i] - offset);
 
 		}
 		free(stats[chan]);
@@ -687,6 +685,8 @@ void on_button_bkg_neutralization_clicked(GtkButton *button, gpointer user_data)
 	black_selection.y = gtk_spin_button_get_value(selection_black_value[1]);
 	black_selection.w = gtk_spin_button_get_value(selection_black_value[2]);
 	black_selection.h = gtk_spin_button_get_value(selection_black_value[3]);
+
+	undo_save_state("Processing: Background neutralization");
 
 	set_cursor_waiting(TRUE);
 	background_neutralize(&gfit, black_selection);
@@ -819,6 +819,7 @@ static void white_balance(fits *fit, gboolean is_manual, rectangle white_selecti
 	}
 #pragma omp parallel for num_threads(com.max_thread) private(chan) schedule(dynamic, 1)
 	for (chan = 0; chan < 3; chan++) {
+		if (coef[chan] == 1.0) continue;
 		calibrate(fit, chan, coef[chan], bg[chan]);
 	}
 }
@@ -831,7 +832,6 @@ void on_calibration_apply_button_clicked(GtkButton *button, gpointer user_data) 
 
 	siril_log_color_message("Color Calibration: processing...\n", "red");
 	gettimeofday(&t_start, NULL);
-	undo_save_state("Processing: Color Calibration");
 
 	GtkToggleButton *manual = GTK_TOGGLE_BUTTON(
 			lookup_widget("checkbutton_manual_calibration"));
@@ -883,12 +883,14 @@ void on_calibration_apply_button_clicked(GtkButton *button, gpointer user_data) 
 	}
 
 	set_cursor_waiting(TRUE);
+	undo_save_state("Processing: Color Calibration");
 	white_balance(&gfit, is_manual, white_selection, black_selection);
-	delete_selected_area();
 
 	gettimeofday(&t_end, NULL);
 
 	show_time(t_start, t_end);
+
+	delete_selected_area();
 
 	redraw(com.cvport, REMAP_ALL);
 	redraw_previews();
