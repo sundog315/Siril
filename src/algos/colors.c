@@ -724,12 +724,16 @@ void on_button_white_selection_clicked(GtkButton *button, gpointer user_data) {
 }
 
 static void get_coeff_for_wb(fits *fit, rectangle white, rectangle black,
-		double coef[], double bg[]) {
+		double kw[], double bg[], double *norm, double low, double high) {
 	int chan, i, j, n;
-	double norm = (double) get_normalized_value(fit);
-	double kw[3] = { 0.0, 0.0, 0.0 };
+	double tmp[3] = { 0.0, 0.0, 0.0 };
+	WORD lo, hi;
 
 	assert(fit->naxes[2] == 3);
+
+	*norm = (double) get_normalized_value(fit);
+	lo = round_to_WORD(low * (*norm));
+	hi = round_to_WORD(high * (*norm));
 
 	for (chan = 0; chan < 3; chan++) {
 		n = 0;
@@ -739,8 +743,8 @@ static void get_coeff_for_wb(fits *fit, rectangle white, rectangle black,
 
 		for (i = 0; i < white.h; i++) {
 			for (j = 0; j < white.w; j++) {
-				if (*from > 0 && *from < (WORD) norm) {
-					coef[chan] += (double) *from / norm;
+				if (*from > lo && *from < hi ) {
+					kw[chan] += (double) *from / *norm;
 					n++;
 				}
 				from++;
@@ -748,7 +752,7 @@ static void get_coeff_for_wb(fits *fit, rectangle white, rectangle black,
 			from += stridefrom;
 		}
 		if (n > 0)
-			coef[chan] /= (double) n;
+			kw[chan] /= (double) n;
 	}
 
 	siril_log_message("Background reference:\n");
@@ -761,32 +765,32 @@ static void get_coeff_for_wb(fits *fit, rectangle white, rectangle black,
 
 	siril_log_message("White reference:\n");
 	for (chan = 0; chan < 3; chan++) {
-		siril_log_message("W%d : %.5e\n", chan, coef[chan]);
-		coef[chan] = fabs(coef[chan] - bg[chan]);
+		siril_log_message("W%d : %.5e\n", chan, kw[chan]);
+		kw[chan] = fabs(kw[chan] - bg[chan]);
 	}
 
-	int rc = (coef[0] > coef[1]) ? ((coef[0] > coef[2]) ? 0 : 2) :
-					((coef[1] > coef[2]) ? 1 : 2);
+	int rc = (kw[0] > kw[1]) ? ((kw[0] > kw[2]) ? 0 : 2) :
+					((kw[1] > kw[2]) ? 1 : 2);
 	for (chan = 0; chan < 3; chan++) {
 		if (chan == rc)
-			kw[chan] = 1;
+			tmp[chan] = 1;
 		else
-			kw[chan] = coef[rc] / coef[chan];
+			tmp[chan] = kw[rc] / kw[chan];
 	}
 
 	siril_log_message("Color calibration factors:\n");
 	for (chan = 0; chan < 3; chan++) {
-		coef[chan] = kw[chan];
-		siril_log_message("K%d : %7.3lf\n", chan, coef[chan]);
+		kw[chan] = tmp[chan];
+		siril_log_message("K%d : %5.3lf\n", chan, kw[chan]);
 	}
 }
 
-static int calibrate(fits *fit, int layer, double kw, double bg) {
+static int calibrate(fits *fit, int layer, double kw, double bg, double norm) {
 	WORD *buf;
 	WORD bgNorm;
 	int i;
 
-	bgNorm = bg * get_normalized_value(fit);
+	bgNorm = bg * norm;
 
 	buf = fit->pdata[layer];
 	for (i = 0; i < fit->rx * fit->ry; ++i) {
@@ -798,29 +802,36 @@ static int calibrate(fits *fit, int layer, double kw, double bg) {
 static void white_balance(fits *fit, gboolean is_manual, rectangle white_selection,
 		rectangle black_selection) {
 	int chan;
-	double coef[3] = { 0.0, 0.0, 0.0 };
+	double norm, low, high;
+	double kw[3] = { 0.0, 0.0, 0.0 };
 	double bg[3] = { 0.0, 0.0, 0.0 };
 	static GtkRange *scale_white_balance[3] = { NULL, NULL, NULL };
+	static GtkRange *scaleLimit[2] = { NULL, NULL };
 
 	if (scale_white_balance[RLAYER] == NULL) {
 		scale_white_balance[RLAYER] = GTK_RANGE(lookup_widget("scale_r"));
 		scale_white_balance[GLAYER] = GTK_RANGE(lookup_widget("scale_g"));
 		scale_white_balance[BLAYER] = GTK_RANGE(lookup_widget("scale_b"));
+
+		scaleLimit[0] = GTK_RANGE(lookup_widget("lowWhiteColorCalibScale"));
+		scaleLimit[1] = GTK_RANGE(lookup_widget("upWhiteColorCalibScale"));
 	}
 
 	assert(fit->naxes[2] == 3);
 
 	if (is_manual) {
-		coef[RLAYER] = gtk_range_get_value(scale_white_balance[RLAYER]);
-		coef[GLAYER] = gtk_range_get_value(scale_white_balance[GLAYER]);
-		coef[BLAYER] = gtk_range_get_value(scale_white_balance[BLAYER]);
+		kw[RLAYER] = gtk_range_get_value(scale_white_balance[RLAYER]);
+		kw[GLAYER] = gtk_range_get_value(scale_white_balance[GLAYER]);
+		kw[BLAYER] = gtk_range_get_value(scale_white_balance[BLAYER]);
 	} else {
-		get_coeff_for_wb(fit, white_selection, black_selection, coef, bg);
+		low = gtk_range_get_value(scaleLimit[0]);
+		high = gtk_range_get_value(scaleLimit[1]);
+		get_coeff_for_wb(fit, white_selection, black_selection, kw, bg, &norm, low, high);
 	}
 #pragma omp parallel for num_threads(com.max_thread) private(chan) schedule(dynamic, 1)
 	for (chan = 0; chan < 3; chan++) {
-		if (coef[chan] == 1.0) continue;
-		calibrate(fit, chan, coef[chan], bg[chan]);
+		if (kw[chan] == 1.0) continue;
+		calibrate(fit, chan, kw[chan], bg[chan], norm);
 	}
 }
 
@@ -876,10 +887,9 @@ void on_calibration_apply_button_clicked(GtkButton *button, gpointer user_data) 
 	white_selection.h = gtk_spin_button_get_value(selection_white_value[3]);
 
 	if (!white_selection.w || !white_selection.h) {
-		white_selection.x = 0;
-		white_selection.y = 0;
-		white_selection.w = gfit.rx;
-		white_selection.h = gfit.ry;
+		show_dialog("Make a selection of the white area before", "Warning",
+				"gtk-dialog-warning");
+		return;
 	}
 
 	set_cursor_waiting(TRUE);
