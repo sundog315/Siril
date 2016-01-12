@@ -49,7 +49,7 @@ sequence * readseqfile(const char *name){
 	sequence *seq;
 
 	if (!name) return NULL;
-	siril_log_message("Reading sequence file `%s'.\n", name);
+	fprintf(stdout, "Reading sequence file `%s'.\n", name);
 
 	if(!ends_with(name, ".seq")){
 		seqfilename = malloc(strlen(name) + 6);	/* 6 stands for a max length of 4 + '.' + '\0' */
@@ -60,7 +60,7 @@ sequence * readseqfile(const char *name){
 
 	if ((seqfile = fopen(seqfilename, "r")) == NULL) {
 		perror("fopen sequence file");
-		siril_log_message("Reading sequence failed, file cannot be opened: %s.\n", seqfilename);
+		fprintf(stderr, "Reading sequence failed, file cannot be opened: %s.\n", seqfilename);
 		free(seqfilename);
 		return NULL;
 	}
@@ -274,11 +274,11 @@ int writeseqfile(sequence *seq){
 	sprintf(filename, "%s.seq", seq->seqname);
 	seqfile = fopen(filename, "w+");
 	if (seqfile == NULL) {
-		siril_log_message("Writing sequence file: cannot open %s for writing\n", filename);
+		fprintf(stderr, "Writing sequence file: cannot open %s for writing\n", filename);
 		free(filename);
 		return 1;
 	}
-	siril_log_message("Writing sequence file %s\n", filename);
+	fprintf(stdout, "Writing sequence file %s\n", filename);
 	free(filename);
 
 	fprintf(seqfile,"#Siril sequence file. Contains list of files (images), selection, and registration data\n");
@@ -428,7 +428,7 @@ int buildseqfile(sequence *seq, int force_recompute) {
 #endif
 	writeseqfile(seq);
 
-	siril_log_message("sequence found: %s %d->%d\n", seq->seqname, seq->beg, seq->end);
+	fprintf(stdout, "Sequence found: %s %d->%d\n", seq->seqname, seq->beg, seq->end);
 	free(filename);
 	return 0;
 }

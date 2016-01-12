@@ -183,7 +183,7 @@ gpointer seqpreprocess(gpointer empty);
 void	initialize_preprocessing();
 double	background(fits* fit, int reqlayer, rectangle *selection);
 int backgroundnoise(fits* fit, double sigma[]);
-imstats* statistics(fits *, int, rectangle *);
+imstats* statistics(fits *, int, rectangle *, int);
 void	show_FITS_header(fits *);
 #ifdef HAVE_OPENCV
 int	verbose_resize_gaussian(fits *, int, int, int);

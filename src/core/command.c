@@ -1047,7 +1047,7 @@ int process_stat(int nb){
 	int layer;
 
 	for (layer = 0; layer < nplane; layer++) {
-		imstats* stat = statistics(&gfit, layer, &com.selection);
+		imstats* stat = statistics(&gfit, layer, &com.selection, STATS_ALL);
 		siril_log_message(
 				"%s layer: Mean: %0.1lf, Median: %0.1lf, Sigma: %0.1lf, "
 						"AvgDev: %0.1lf, Min: %0.1lf, Max: %0.1lf\n",

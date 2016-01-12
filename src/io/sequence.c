@@ -314,6 +314,9 @@ int set_seq(const char *name){
 		seq->layers = calloc(seq->nb_layers, sizeof(layer_info));
 		writeseqfile(seq);
 	}
+
+	siril_log_message("Sequence loaded: %s (%d->%d)\n", seq->seqname, seq->beg,
+			seq->end);
 	/* Sequence is stored in com.seq for now */
 	free_sequence(&com.seq, FALSE);
 	memcpy(&com.seq, seq, sizeof(sequence));
@@ -1077,7 +1080,7 @@ gboolean sequence_is_rgb(sequence *seq) {
 imstats* seq_get_imstats(sequence *seq, int index, fits *the_image) {
 	assert(seq->imgparam);
 	if (!seq->imgparam[index].stats && the_image) {
-		seq->imgparam[index].stats = statistics(the_image, 0, NULL);
+		seq->imgparam[index].stats = statistics(the_image, 0, NULL, STATS_ALL);
 		seq->needs_saving = TRUE;
 	}
 	return seq->imgparam[index].stats;

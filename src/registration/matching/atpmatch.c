@@ -6898,7 +6898,11 @@ TRANS *output_trans /* I/O: "order" field must be set on input */
 									iter);
 #endif
 							failure_flag = 1;
-							break;
+							/** ***/
+							atTransDel(test_trans);
+							return (SH_GENERIC_ERROR);
+							/** ***/
+							//break;
 						}
 #ifdef DEBUG2
 						printf("  find_quick_match: calc_trans succeeds \n");

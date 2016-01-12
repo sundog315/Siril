@@ -1227,7 +1227,7 @@ void test_and_allocate_reference_image(int vport) {
 				cairo_surface_destroy(com.refimage_surface);
 				com.refimage_surface = NULL;
 			} else {
-				siril_log_message(
+				fprintf(stdout,
 						"Saved the reference frame buffer for alignment preview.\n");
 				enable_view_reference_checkbox(TRUE);
 			}
@@ -1240,7 +1240,7 @@ void test_and_allocate_reference_image(int vport) {
 }
 
 void free_reference_image() {
-	siril_log_message("Purging previously saved reference frame data.\n");
+	fprintf(stdout, "Purging previously saved reference frame data.\n");
 	if (com.refimage_regbuffer) {
 		free(com.refimage_regbuffer);
 		com.refimage_regbuffer = NULL;

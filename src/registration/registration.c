@@ -44,7 +44,7 @@
 #include "opencv/ecc/ecc.h"
 #endif
 
-#define MAX_STARS_FITTED 100
+#define MAX_STARS_FITTED 200
 #undef DEBUG
 
 static char *tooltip_text[] = { "One Star Registration: This is the simplest method to register deep-sky images. "
@@ -436,7 +436,7 @@ static void _print_result(TRANS *trans, float FWHMx, float FWHMy) {
 	point shift;
 
 	switch (trans->order) {
-	case 1:
+	case AT_TRANS_LINEAR:
 		rotation = atan2(trans->c, trans->b);
 		shift.x = trans->a;
 		shift.y = -trans->d;

@@ -516,21 +516,26 @@ struct _convert_data {
 	struct timeval t_start;
 	DIR *dir;
 	GList *list;
+	int start;
 	int total;
 };
 
 void on_convert_button_clicked(GtkButton *button, gpointer user_data) {
 	DIR *dir;
 	gchar *file_data, *file_date;
+	const gchar *indice;
 	static GtkTreeView *tree_convert = NULL;
+	static GtkEntry *startEntry = NULL;
 	GtkTreeModel *model = NULL;
 	GtkTreeIter iter;
 	gboolean valid;
 	GList *list = NULL;
 	int count = 0;
 	
-	if (tree_convert == NULL)
+	if (tree_convert == NULL) {
 		tree_convert = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_convert"));
+		startEntry = GTK_ENTRY(gtk_builder_get_object(builder, "startIndiceEntry"));
+	}
 
 	struct timeval t_start, t_end;
 	
@@ -552,6 +557,8 @@ void on_convert_button_clicked(GtkButton *button, gpointer user_data) {
 		count ++;
 	}
 	
+	indice = gtk_entry_get_text(startEntry);
+
 	siril_log_color_message("Conversion: processing...\n", "red");	
 	gettimeofday(&t_start, NULL);
 	
@@ -580,6 +587,7 @@ void on_convert_button_clicked(GtkButton *button, gpointer user_data) {
 		}
 
 		args = malloc(sizeof(struct _convert_data));
+		args->start = (atof(indice) == 0 || atof(indice) > USHRT_MAX) ? 1 : atof(indice);
 		args->dir = dir;
 		args->list = list;
 		args->total = count;
@@ -628,10 +636,12 @@ int convert_film(char *filename) {
 // This idle function was not really required, but allows to properly join the thread.
 static gpointer convert_thread_worker(gpointer p) {
 	char destfilename[256], msg_bar[256];
-	int i=0;
+	int i = 0;
+	int indice;
 	struct _convert_data *args = (struct _convert_data *) p;
 	
 	args->list = g_list_first (args->list);
+	indice = args->start - 1;
 	while(args->list) {
 		char *sourcefilename;
 
@@ -640,7 +650,8 @@ static gpointer convert_thread_worker(gpointer p) {
 			break;
 		}
 		sourcefilename = (char *)args->list->data;
-		snprintf(destfilename, 255, "%s%03d.%s", destroot, ++i, destsuf);
+		snprintf(destfilename, 255, "%s%05d.%s", destroot, ++indice, destsuf);
+		++i;
 		strncpy(sourcesuf, get_filename_ext(sourcefilename), SUFFIX_MAX_LEN);
 		if (set_convflags_from_extension()) {
 			char msg[512];

@@ -207,10 +207,12 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 		/* okay */
 		if (min_scale > max_scale) {
 			shFatal("min_scale must be smaller than max_scale");
+			return (SH_GENERIC_ERROR);
 		}
 	} else {
 		/* not okay */
 		shFatal("invalid combination of 'scale', 'min_scale', 'max_scale'");
+		return (SH_GENERIC_ERROR);
 	}
 #ifdef DEBUG
 	if ((scale == -1) && (min_scale == -1) && (max_scale == -1)) {
@@ -235,16 +237,19 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 	} else {
 		/* this is NOT okay */
 		shFatal("Must specify both 'rotangle' and 'rottol', or neither ");
+		return (SH_GENERIC_ERROR);
 	}
 
 	/* Can only specify one of 'identity' and 'intrans' */
 	if ((intrans != 0) && (identity != 0)) {
 		shFatal("Cannot specify both 'identity' and an input TRANS file");
+		return (SH_GENERIC_ERROR);
 	}
 
 	/* Makes no sense to specify 'identity' and 'quadratic' or 'cubic' */
 	if ((identity != 0) && (trans_order != AT_TRANS_LINEAR)) {
 		shFatal("Cannot specify both 'identity' and any order beyond linear");
+		return (SH_GENERIC_ERROR);
 	}
 	/*
 	 * Likewise, makes no sense to specify 'intrans=' and
@@ -253,6 +258,7 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 	 */
 	if ((intrans != 0) && (trans_order != AT_TRANS_LINEAR)) {
 		shFatal("Cannot specify both 'intrans' and any order ");
+		return (SH_GENERIC_ERROR);
 	}
 
 	/*
@@ -264,12 +270,15 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 	 */
 	if ((trans_order == AT_TRANS_LINEAR) && (min_req_pairs < 3)) {
 		shFatal("linear trans requires at least 3 matched pairs ");
+		return (SH_GENERIC_ERROR);
 	}
 	if ((trans_order == AT_TRANS_QUADRATIC) && (min_req_pairs < 6)) {
 		shFatal("quadratic trans requires at least 6 matched pairs ");
+		return (SH_GENERIC_ERROR);
 	}
 	if ((trans_order == AT_TRANS_CUBIC) && (min_req_pairs < 10)) {
 		shFatal("cubic trans requires at least 10 matched pairs ");
+		return (SH_GENERIC_ERROR);
 	}
 
 	/*
@@ -306,6 +315,7 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 	} else if (intrans == 1) {
 		if ((trans = getGuessTrans(intransfile)) == NULL) {
 			shFatal("GetGuessTrans fails -- must give up");
+			return (SH_GENERIC_ERROR);
 		}
 		trans_order = trans->order;
 	} else {
@@ -443,11 +453,13 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 	if (prepare_to_recalc(outfile, &num_matched_A, &matched_list_A,
 			&num_matched_B, &matched_list_B, star_list_A_copy, trans) != 0) {
 		shFatal("prepare_to_recalc fails");
+		return (SH_GENERIC_ERROR);
 	}
 	/* okay, now we're ready to call atRecalcTrans, on matched items only */
 	if (atRecalcTrans(num_matched_A, matched_list_A, num_matched_B,
 			matched_list_B, max_iter, halt_sigma, trans) != SH_SUCCESS) {
 		shFatal("atRecalcTrans fails on matched pairs only");
+		return (SH_GENERIC_ERROR);
 	}
 #ifdef DEBUG
 	printf("TRANS based on matches only :\n");
@@ -469,6 +481,7 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 		/* re-set coords of all items in star A */
 		if (reset_A_coords(numA, star_list_A, star_list_A_copy) != 0) {
 			shFatal("reset_A_coords returns with error before recalc");
+			return (SH_GENERIC_ERROR);
 		}
 
 		/*
@@ -494,12 +507,14 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 				&num_matched_B, &matched_list_B, star_list_A_copy, trans)
 				!= 0) {
 			shFatal("prepare_to_recalc fails");
+			return (SH_GENERIC_ERROR);
 		}
 
 		/* final call atRecalcTrans, on matched items only */
 		if (atRecalcTrans(num_matched_A, matched_list_A, num_matched_B,
 				matched_list_B, max_iter, halt_sigma, trans) != SH_SUCCESS) {
 			shFatal("atRecalcTrans fails on matched pairs only");
+			return (SH_GENERIC_ERROR);
 		}
 
 #ifdef DEBUG
@@ -521,6 +536,7 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 		if (reset_A_coords(num_matched_A, matched_list_A, star_list_A_copy)
 				!= 0) {
 			shFatal("second call to reset_A_coords returns with error");
+			return (SH_GENERIC_ERROR);
 		}
 
 		medtf = atMedtfNew();

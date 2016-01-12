@@ -42,6 +42,19 @@ typedef unsigned short WORD;		// default type for internal image data
 #define LOW_BOUND  0.00002
 #define HIGH_BOUND 0.99998
 
+/* Some statistic constants */
+#define SIGMA_PER_FWHM 2.35482
+#define AVGDEV_NORM 1.2533
+#define MAD_NORM 1.4826
+
+#define STATS_SIGMA		(1 << 1)
+#define STATS_AVGDEV	(1 << 2)
+#define STATS_MAD		(1 << 3)
+#define STATS_MINMAX	(1 << 4)
+#define STATS_BASIC		(1 << 10)
+#define STATS_ALL		STATS_SIGMA | STATS_AVGDEV | STATS_MAD | STATS_MINMAX
+
+
 /* when requesting an image redraw, it can be asked to remap its data before redrawing it.
  * REMAP_NONE	doesn't remaps the data,
  * REMAP_ONLY	remaps only the current viewport (color channel) and the mixed (RGB) image
@@ -525,7 +538,7 @@ struct cominf {
 /* this structure is used to characterize the statistics of the image */
 struct image_stats {
 	size_t count;
-	double mean, avgDev, median, sigma, min, max, normValue;
+	double mean, avgDev, median, sigma, min, max, normValue, mad;
 	char layername[6];
 };
 

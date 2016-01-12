@@ -50,8 +50,6 @@
 #include "algos/Def_Wavelet.h"
 #include "io/ser.h"
 
-#define SIGMA_PER_FWHM 2.35482
-#define AVGDEV_NORM 1.2533
 #define MAX_ITER 15
 #define EPSILON 1E-4
 
@@ -675,7 +673,7 @@ double contrast(fits* fit, int layer) {
 	int i;
 	WORD *buf = fit->pdata[layer];
 	double contrast = 0.0;
-	imstats *stat = statistics(fit, layer, &com.selection);
+	imstats *stat = statistics(fit, layer, &com.selection, STATS_BASIC);
 	double mean = stat->mean;
 	free(stat);
 
@@ -993,7 +991,7 @@ gpointer seqpreprocess(gpointer p) {
 		if (args->autolevel) {
 			/* TODO: evaluate the layer to apply but generally RLAYER is a good choice.
 			 * Indeed, if it is image from APN, CFA picture are in black & white */
-			imstats *stat = statistics(flat, RLAYER, NULL);
+			imstats *stat = statistics(flat, RLAYER, NULL, STATS_BASIC);
 			args->normalisation = stat->mean;
 			siril_log_message("Normalisation value auto evaluated: %.2lf\n",
 					args->normalisation);
@@ -1112,7 +1110,7 @@ double background(fits* fit, int reqlayer, rectangle *selection) {
 	bg = gsl_histogram_max_bin(histo);
 
 	gsl_histogram_free(histo);
-	imstats* stat = statistics(fit, layer, selection);
+	imstats* stat = statistics(fit, layer, selection, STATS_BASIC);
 	if (fabs(bg - stat->median) > (10))	//totaly arbitrary. Allow to see a background at 0 when a planet take plenty of room.
 		bg = stat->median;
 //	printf("layer = %d\n", layer);
@@ -1146,7 +1144,7 @@ int backgroundnoise(fits* fit, double sigma[]) {
 #endif
 
 	for (layer = 0; layer < fit->naxes[2]; layer++) {
-		imstats *stat = statistics(waveimage, layer, NULL);
+		imstats *stat = statistics(waveimage, layer, NULL, STATS_SIGMA);
 		double sigma0 = stat->sigma;
 		double mean = stat->mean;
 		double epsilon = 0.0;
@@ -1228,12 +1226,41 @@ static void select_area(fits *fit, WORD *data, int layer, rectangle *bounds) {
 	}
 }
 
+static double siril_stats_ushort_mad(const WORD* data, const size_t stride,
+		const size_t n, const double m) {
+	size_t i;
+	double median, sum = 0.0;
+	gsl_histogram *histo;
+
+	histo = gsl_histogram_alloc(USHRT_MAX + 1);
+	gsl_histogram_set_ranges_uniform(histo, 0, USHRT_MAX);
+	for (i = 0; i < n; i++) {
+		const double delta = fabs(data[i * stride] - m);
+		gsl_histogram_increment(histo, delta);
+	}
+
+	/* Get the median value */
+	sum = 0;
+	for (i = 0; i < USHRT_MAX + 1; i++) {
+		sum += gsl_histogram_get(histo, i);
+		if (sum > ((double) n * 0.5)) {
+			median = (double) i;
+			break;	//we get out of the loop
+		}
+	}
+	return median;
+}
+
 /* computes statistics on the given layer of the given image. It creates the
  * histogram to easily extract the median. min and max value, mean, sigma
  * and average deviation are computed with gsl stats.
  */
-imstats* statistics(fits *fit, int layer, rectangle *selection) {
-	double sigma, mean, avgDev, median;
+imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
+	double mean = 0.0;
+	double median = 0.0;
+	double sigma = 0.0;
+	double avgDev = 0.0;
+	double mad = 0.0;
 	double sum = 0.0;
 	WORD min, max, *data;
 	gsl_histogram* histo;
@@ -1269,13 +1296,20 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 	mean = gsl_stats_ushort_mean(data, 1, count);
 
 	/* Calculation of sigma */
-	sigma = gsl_stats_ushort_sd_m(data, 1, count, mean);
+	if (option & STATS_SIGMA)
+		sigma = gsl_stats_ushort_sd_m(data, 1, count, mean);
 
 	/* Calculation of average absolute deviation from the median */
-	avgDev = gsl_stats_ushort_absdev_m(data, 1, count, median);
+	if (option & STATS_AVGDEV)
+		avgDev = gsl_stats_ushort_absdev_m(data, 1, count, median);
+
+	/* Calculation of median absolute deviation */
+	if (option & STATS_MAD)
+		mad = siril_stats_ushort_mad(data, 1, count, median);
 
 	/* Minimum and Maximum */
-	gsl_stats_ushort_minmax(&min, &max, data, 1, count);
+	if (option & STATS_MINMAX)
+		gsl_stats_ushort_minmax(&min, &max, data, 1, count);
 
 	switch (layer) {
 	case 0:
@@ -1295,6 +1329,7 @@ imstats* statistics(fits *fit, int layer, rectangle *selection) {
 	stat->count = count;
 	stat->mean = mean;
 	stat->avgDev = avgDev;
+	stat->mad = mad;
 	stat->median = median;
 	stat->sigma = sigma;
 	stat->min = (double) min;
@@ -1633,7 +1668,7 @@ gpointer BandingEngine(gpointer p) {
 	new_fit_image(fiximage, args->fit->rx, args->fit->ry, args->fit->naxes[2]);
 
 	for (chan = 0; chan < args->fit->naxes[2]; chan++) {
-		imstats *stat = statistics(args->fit, chan, NULL);
+		imstats *stat = statistics(args->fit, chan, NULL, STATS_AVGDEV);
 		double background = stat->median;
 		double *rowvalue = calloc(args->fit->ry, sizeof(double));
 		if (rowvalue == NULL) {
