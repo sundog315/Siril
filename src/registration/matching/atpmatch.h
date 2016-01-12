@@ -65,7 +65,7 @@
     * This is the default value.  The user can override it with an optional
     * command-line argument.
     */
-#define AT_MATCH_NBRIGHT   200
+#define AT_MATCH_NBRIGHT   50
 
    /*
     * ignore all triangles which have (b/a) > AT_MATCH_RATIO when
