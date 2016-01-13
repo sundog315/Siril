@@ -1779,10 +1779,7 @@ void on_settings_activate(GtkMenuItem *menuitem, gpointer user_data) {
 void on_file1_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	if (single_image_is_loaded() || sequence_is_loaded()) {
 		gtk_widget_set_sensitive(lookup_widget("save1"), TRUE);
-		if (gfit.header && !sequence_is_loaded())
-			gtk_widget_set_sensitive(lookup_widget("menu_FITS_header"), TRUE);
-		else
-			gtk_widget_set_sensitive(lookup_widget("menu_FITS_header"), FALSE);
+		gtk_widget_set_sensitive(lookup_widget("menu_FITS_header"), gfit.header != NULL);
 	} else {
 		gtk_widget_set_sensitive(lookup_widget("save1"), FALSE);
 		gtk_widget_set_sensitive(lookup_widget("menu_FITS_header"), FALSE);
@@ -1801,8 +1798,7 @@ void on_edit_activate(GtkMenuItem *menuitem, gpointer user_data) {
 }
 
 void on_menu_FITS_header_activate(GtkMenuItem *menuitem, gpointer user_data) {
-	if (single_image_is_loaded(BW_VPORT))
-		show_FITS_header(&gfit);
+	show_FITS_header(&gfit);
 }
 
 void on_close_settings_button_clicked(GtkButton *button, gpointer user_data) {
