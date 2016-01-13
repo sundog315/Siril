@@ -1226,10 +1226,27 @@ static void select_area(fits *fit, WORD *data, int layer, rectangle *bounds) {
 	}
 }
 
+static double siril_stats_ushort_median(gsl_histogram *histo, const size_t n) {
+	size_t i;
+	size_t hist_size = gsl_histogram_bins(histo);
+	double sum = 0.0;
+	double median = 0.0;
+
+	/* Get the median value */
+	for (i = 0; i < hist_size + 1; i++) {
+		sum += gsl_histogram_get(histo, i);
+		if (sum > ((double) n * 0.5)) {
+			median = (double) i;
+			break;	//we get out of the loop
+		}
+	}
+	return median;
+}
+
 static double siril_stats_ushort_mad(const WORD* data, const size_t stride,
 		const size_t n, const double m) {
 	size_t i;
-	double median, sum = 0.0;
+	double median;
 	gsl_histogram *histo;
 
 	histo = gsl_histogram_alloc(USHRT_MAX + 1);
@@ -1238,16 +1255,9 @@ static double siril_stats_ushort_mad(const WORD* data, const size_t stride,
 		const double delta = fabs(data[i * stride] - m);
 		gsl_histogram_increment(histo, delta);
 	}
+	median = siril_stats_ushort_median(histo, n);
+	gsl_histogram_free(histo);
 
-	/* Get the median value */
-	sum = 0;
-	for (i = 0; i < USHRT_MAX + 1; i++) {
-		sum += gsl_histogram_get(histo, i);
-		if (sum > ((double) n * 0.5)) {
-			median = (double) i;
-			break;	//we get out of the loop
-		}
-	}
 	return median;
 }
 
@@ -1281,18 +1291,11 @@ imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
 	}
 	hist_size = gsl_histogram_bins(histo);
 
-	/* Get the median value */
-	for (i = 0; i < hist_size; i++) {
-		sum += gsl_histogram_get(histo, i);
-		if (sum > ((double) count * 0.5)) {
-			median = (double) i;
-			break;	//we get out of the loop
-		}
-	}
-
+	/* Calculation of median with histogram */
+	median = siril_stats_ushort_median(histo, count);
 	gsl_histogram_free(histo);
 
-	/* Mean */
+	/* Calculation of mean */
 	mean = gsl_stats_ushort_mean(data, 1, count);
 
 	/* Calculation of sigma */
@@ -1668,7 +1671,7 @@ gpointer BandingEngine(gpointer p) {
 	new_fit_image(fiximage, args->fit->rx, args->fit->ry, args->fit->naxes[2]);
 
 	for (chan = 0; chan < args->fit->naxes[2]; chan++) {
-		imstats *stat = statistics(args->fit, chan, NULL, STATS_AVGDEV);
+		imstats *stat = statistics(args->fit, chan, NULL, STATS_MAD);
 		double background = stat->median;
 		double *rowvalue = calloc(args->fit->ry, sizeof(double));
 		if (rowvalue == NULL) {
@@ -1678,7 +1681,7 @@ gpointer BandingEngine(gpointer p) {
 			return GINT_TO_POINTER(1);
 		}
 		if (args->protect_highlights) {
-			globalsigma = stat->avgDev * AVGDEV_NORM;
+			globalsigma = stat->mad * MAD_NORM;
 		}
 		for (row = 0; row < args->fit->ry; row++) {
 			line = args->fit->pdata[chan] + row * args->fit->rx;

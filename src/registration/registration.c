@@ -44,7 +44,7 @@
 #include "opencv/ecc/ecc.h"
 #endif
 
-#define MAX_STARS_FITTED 200
+#define MAX_STARS_FITTED 2000
 #undef DEBUG
 
 static char *tooltip_text[] = { "One Star Registration: This is the simplest method to register deep-sky images. "
@@ -517,13 +517,18 @@ int register_star_alignment(struct registration_args *args) {
 	}
 	redraw(com.cvport, REMAP_NONE); // draw stars
 #ifdef DEBUG
-	printf("REFERENCE IMAGE\n");
-	for (i = 0; i < MAX_STARS_FITTED; i++) {
-		printf("%.3lf\t%.3lf\t%.3lf\n",
-				com.stars[i]->xpos, com.stars[i]->ypos, com.stars[i]->mag);
-	}
+		FILE *pfile;
+
+		pfile = fopen("ref.txt", "w+");
+		fprintf(pfile, "REFERENCE IMAGE\n");
+		for (i = 0; i < MAX_STARS_FITTED; i++) {
+			fprintf(pfile, "%.3lf\t%.3lf\t%.3lf\n",
+					com.stars[i]->xpos, com.stars[i]->ypos, com.stars[i]->mag);
+		}
+		fclose(pfile);
 #endif
-	fitted_stars = (sf.nb_stars > MAX_STARS_FITTED) ? MAX_STARS_FITTED : sf.nb_stars;
+	fitted_stars =
+			(sf.nb_stars > MAX_STARS_FITTED) ? MAX_STARS_FITTED : sf.nb_stars;
 	FWHM_average(com.stars, &FWHMx, &FWHMy, fitted_stars);
 	siril_log_message("FWHMx:\t%*.2f px\n", 8, FWHMx);
 	siril_log_message("FWHMy:\t%*.2f px\n", 8, FWHMy);
@@ -555,12 +560,17 @@ int register_star_alignment(struct registration_args *args) {
 				}
 
 #ifdef DEBUG
-				printf("IMAGE %d\n", frame);
+				FILE *pfile2;
+
+				pfile2 = fopen("im.txt", "w+");
+				fprintf(pfile2, "IMAGE %d\n", frame);
 				for (i = 0; i < MAX_STARS_FITTED; i++) {
-					printf("%.3lf\t%.3lf\t%.3lf\n", stars[i]->xpos,
+					fprintf(pfile2, "%.3lf\t%.3lf\t%.3lf\n", stars[i]->xpos,
 							stars[i]->ypos, stars[i]->mag);
 				}
-				printf("\n\n", frame);
+				fprintf(pfile2, "\n\n", frame);
+				fclose(pfile2);
+
 #endif
 
 				nbpoints = (sf.nb_stars < fitted_stars) ?
@@ -602,7 +612,7 @@ int register_star_alignment(struct registration_args *args) {
 	args->seq->regparam[args->layer] = current_regdata;
 	update_used_memory();
 	siril_log_message("Registration finished.\n");
-	siril_log_color_message("%d images processed.\n", "green", args->seq->number);
+	siril_log_color_message("%d images processed.\n", "green", args->seq->new_total + failed);
 	siril_log_color_message("Total: %d failed, %d registred.\n", "green", failed, args->seq->new_total);
 
 	return args->seq->new_total == 0;

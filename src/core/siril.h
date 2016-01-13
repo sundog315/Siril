@@ -47,13 +47,12 @@ typedef unsigned short WORD;		// default type for internal image data
 #define AVGDEV_NORM 1.2533
 #define MAD_NORM 1.4826
 
+#define STATS_BASIC		(1 << 0)
 #define STATS_SIGMA		(1 << 1)
 #define STATS_AVGDEV	(1 << 2)
 #define STATS_MAD		(1 << 3)
 #define STATS_MINMAX	(1 << 4)
-#define STATS_BASIC		(1 << 10)
 #define STATS_ALL		STATS_SIGMA | STATS_AVGDEV | STATS_MAD | STATS_MINMAX
-
 
 /* when requesting an image redraw, it can be asked to remap its data before redrawing it.
  * REMAP_NONE	doesn't remaps the data,

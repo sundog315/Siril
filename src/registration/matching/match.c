@@ -133,8 +133,8 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 	double triangle_radius = AT_TRIANGLE_RADIUS; /* in triangle-space coords */
 	double match_radius = AT_MATCH_RADIUS; /* in units of list B */
 	double scale = -1.0;
-	double min_scale = 0.9;
-	double max_scale = 1.1;
+	double min_scale = 0.99;
+	double max_scale = 1.01;
 	double rot_angle = AT_MATCH_NOANGLE; /* by default, any angle is okay */
 	double rot_tol = AT_MATCH_NOANGLE;
 	double halt_sigma = AT_MATCH_HALTSIGMA;

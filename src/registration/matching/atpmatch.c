@@ -6898,11 +6898,7 @@ TRANS *output_trans /* I/O: "order" field must be set on input */
 									iter);
 #endif
 							failure_flag = 1;
-							/** ***/
-							atTransDel(test_trans);
-							return (SH_GENERIC_ERROR);
-							/** ***/
-							//break;
+							break;
 						}
 #ifdef DEBUG2
 						printf("  find_quick_match: calc_trans succeeds \n");
@@ -7004,6 +7000,8 @@ TRANS *output_trans /* I/O: "order" field must be set on input */
 				}
 
 				if (failure_flag == 1) {
+					//atTransDel(test_trans);
+					//return (SH_GENERIC_ERROR);
 					continue;
 				}
 
