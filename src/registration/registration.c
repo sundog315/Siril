@@ -530,7 +530,9 @@ int register_star_alignment(struct registration_args *args) {
 	current_regdata[ref_image].fwhm = FWHMx;
 
 	/* then we compare to other frames */
-	args->seq->new_total = args->seq->number;
+	if (args->process_all_frames)
+		args->seq->new_total = args->seq->number;
+	else args->seq->new_total = args->seq->selnum;
 	for (frame = 0, cur_nb = 0.f; frame < args->seq->number; frame++) {
 		if (args->run_in_thread && !get_thread_run())
 			break;
@@ -603,7 +605,7 @@ int register_star_alignment(struct registration_args *args) {
 	siril_log_color_message("%d images processed.\n", "green", args->seq->number);
 	siril_log_color_message("Total: %d failed, %d registred.\n", "green", failed, args->seq->new_total);
 
-	return 0;
+	return args->seq->new_total == 0;
 }
 
 int register_ecc(struct registration_args *args) {
@@ -658,7 +660,9 @@ int register_ecc(struct registration_args *args) {
 	q_index = ref_image;
 
 	/* then we compare to other frames */
-	args->seq->new_total = args->seq->number;
+	if (args->process_all_frames)
+		args->seq->new_total = args->seq->number;
+	else args->seq->new_total = args->seq->selnum;
 	for (frame = 0, cur_nb = 0.f; frame < args->seq->number; frame++) {
 		if (args->run_in_thread && !get_thread_run())
 			break;
