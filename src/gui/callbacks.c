@@ -1148,7 +1148,9 @@ int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
 			index[i] = round_to_BYTE((float) i * pente);
 			break;
 		case STF_DISPLAY:
-			pxl = (double) i / USHRT_MAX_DOUBLE;
+			pxl = (gfit.bitpix == BYTE_IMG ?
+					(double) i / UCHAR_MAX_DOUBLE :
+					(double) i / USHRT_MAX_DOUBLE);
 			pxl = (pxl - shadows < 0.0) ? 0.0 : pxl - shadows;
 			pxl /= (highlights - shadows);
 			index[i] = round_to_BYTE((float) (MTF(pxl, m)) * pente);
