@@ -113,16 +113,21 @@ sequence * readseqfile(const char *name){
 			case 'I':
 				seq->imgparam[i].stats = malloc(sizeof(imstats));
 				/* new format: with stats, if already computed, else it's old format */
-				int nb_tokens = sscanf(line+2, "%d %d %lg %lg %lg %lg %lg %lg",
+			int nb_tokens = sscanf(line + 2,
+					"%d %d %lg %lg %lg %lg %lg %lg %lg %lg %lg %lg",
 						&(seq->imgparam[i].filenum),
 						&(seq->imgparam[i].incl),
 						&(seq->imgparam[i].stats->mean),
-						&(seq->imgparam[i].stats->avgDev),
 						&(seq->imgparam[i].stats->median),
 						&(seq->imgparam[i].stats->sigma),
+						&(seq->imgparam[i].stats->avgDev),
+						&(seq->imgparam[i].stats->mad),
+						&(seq->imgparam[i].stats->sqrtbwmv),
+						&(seq->imgparam[i].stats->location),
+						&(seq->imgparam[i].stats->scale),
 						&(seq->imgparam[i].stats->min),
 						&(seq->imgparam[i].stats->max));
-				if (nb_tokens == 8) {
+				if (nb_tokens == 12) {
 					if (seq->nb_layers == 1)
 						strcpy(seq->imgparam[i].stats->layername, "B&W");
 					else	strcpy(seq->imgparam[i].stats->layername, "Red");
@@ -298,13 +303,17 @@ int writeseqfile(sequence *seq){
 
 	for(i=0; i < seq->number; ++i){
 		if (seq->imgparam[i].stats) {
-			fprintf(seqfile,"I %d %d %g %g %g %g %g %g\n",
+			fprintf(seqfile,"I %d %d %g %g %g %g %g %g %g %g %g %g\n",
 					seq->imgparam[i].filenum, 
 					seq->imgparam[i].incl,
 					seq->imgparam[i].stats->mean,
-					seq->imgparam[i].stats->avgDev,
 					seq->imgparam[i].stats->median,
 					seq->imgparam[i].stats->sigma,
+					seq->imgparam[i].stats->avgDev,
+					seq->imgparam[i].stats->mad,
+					seq->imgparam[i].stats->sqrtbwmv,
+					seq->imgparam[i].stats->location,
+					seq->imgparam[i].stats->scale,
 					seq->imgparam[i].stats->min,
 					seq->imgparam[i].stats->max);
 		} else {

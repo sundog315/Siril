@@ -387,6 +387,12 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 				max_iter, halt_sigma, min_req_pairs, trans);
 		if (ret != SH_SUCCESS) {
 			shFatal("initial call to atFindTrans fails");
+			/** */
+			atTransDel(trans);
+			free_star_array(star_list_A);
+			free_star_array(star_list_A_copy);
+			free_star_array(star_list_B);
+			/** */
 			return (SH_GENERIC_ERROR);
 		}
 	}
@@ -453,12 +459,24 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 	if (prepare_to_recalc(outfile, &num_matched_A, &matched_list_A,
 			&num_matched_B, &matched_list_B, star_list_A_copy, trans) != 0) {
 		shFatal("prepare_to_recalc fails");
+		/** */
+		atTransDel(trans);
+		free_star_array(matched_list_A);
+		free_star_array(matched_list_B);
+		free_star_array(star_list_A_copy);
+		/** */
 		return (SH_GENERIC_ERROR);
 	}
 	/* okay, now we're ready to call atRecalcTrans, on matched items only */
 	if (atRecalcTrans(num_matched_A, matched_list_A, num_matched_B,
 			matched_list_B, max_iter, halt_sigma, trans) != SH_SUCCESS) {
 		shFatal("atRecalcTrans fails on matched pairs only");
+		/** */
+		atTransDel(trans);
+		free_star_array(matched_list_A);
+		free_star_array(matched_list_B);
+		free_star_array(star_list_A_copy);
+		/** */
 		return (SH_GENERIC_ERROR);
 	}
 #ifdef DEBUG
@@ -481,6 +499,12 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 		/* re-set coords of all items in star A */
 		if (reset_A_coords(numA, star_list_A, star_list_A_copy) != 0) {
 			shFatal("reset_A_coords returns with error before recalc");
+			/** */
+			atTransDel(trans);
+			free_star_array(matched_list_A);
+			free_star_array(matched_list_B);
+			free_star_array(star_list_A_copy);
+			/** */
 			return (SH_GENERIC_ERROR);
 		}
 
@@ -507,6 +531,12 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 				&num_matched_B, &matched_list_B, star_list_A_copy, trans)
 				!= 0) {
 			shFatal("prepare_to_recalc fails");
+			/** */
+			atTransDel(trans);
+			free_star_array(matched_list_A);
+			free_star_array(matched_list_B);
+			free_star_array(star_list_A_copy);
+			/** */
 			return (SH_GENERIC_ERROR);
 		}
 
@@ -514,6 +544,12 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 		if (atRecalcTrans(num_matched_A, matched_list_A, num_matched_B,
 				matched_list_B, max_iter, halt_sigma, trans) != SH_SUCCESS) {
 			shFatal("atRecalcTrans fails on matched pairs only");
+			/** */
+			atTransDel(trans);
+			free_star_array(matched_list_A);
+			free_star_array(matched_list_B);
+			free_star_array(star_list_A_copy);
+			/** */
 			return (SH_GENERIC_ERROR);
 		}
 
@@ -536,6 +572,12 @@ int star_match(fitted_PSF **s1, fitted_PSF **s2, int n, TRANS *t) {
 		if (reset_A_coords(num_matched_A, matched_list_A, star_list_A_copy)
 				!= 0) {
 			shFatal("second call to reset_A_coords returns with error");
+			/** */
+			atTransDel(trans);
+			free_star_array(matched_list_A);
+			free_star_array(matched_list_B);
+			free_star_array(star_list_A_copy);
+			/** */
 			return (SH_GENERIC_ERROR);
 		}
 

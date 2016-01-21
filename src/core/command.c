@@ -671,6 +671,7 @@ int process_seq_psf(int nb) {
 	if (sequence_is_loaded() && layer != -1) {
 		siril_log_message("Running the PSF on the loaded sequence, layer %d\n", layer);
 		siril_log_message("Results will be displayed at the end of the processing, on the console output, in the following form:\n");
+		siril_log_message("# image_no amplitude magnitude fwhm x y\n");
 		start_in_new_thread(_psf_thread, (void *)(intptr_t)layer);
 		return 0;
 	}
@@ -725,7 +726,7 @@ int process_histo(int nb){
 		return 1;
 	}
 	for (i=0; i < USHRT_MAX + 1; i++)
-		fprintf(f, "%d %d\n",(unsigned int)i, (unsigned int)gsl_histogram_get (histo, i));
+		fprintf(f, "%zu %d\n", i, (int) gsl_histogram_get (histo, i));
 	fclose(f);
 	gsl_histogram_free(histo);
 	siril_log_message("The file %s has been created for the %s layer.\n", name, clayer);
@@ -1047,7 +1048,7 @@ int process_stat(int nb){
 	int layer;
 
 	for (layer = 0; layer < nplane; layer++) {
-		imstats* stat = statistics(&gfit, layer, &com.selection, STATS_ALL);
+		imstats* stat = statistics(&gfit, layer, &com.selection, STATS_MAIN);
 		siril_log_message(
 				"%s layer: Mean: %0.1lf, Median: %0.1lf, Sigma: %0.1lf, "
 						"AvgDev: %0.1lf, Min: %0.1lf, Max: %0.1lf\n",

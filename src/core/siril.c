@@ -29,7 +29,7 @@
 #include <math.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_sf_erf.h>
-#include <gsl/gsl_statistics_ushort.h>
+#include <gsl/gsl_statistics.h>
 #include <fitsio.h>
 #include <complex.h>
 #include <float.h>
@@ -206,10 +206,11 @@ int imoper(fits *a, fits *b, char oper) {
  * fits are very close: if WORD is used, many pixels will be out of bounds
  */
 int sub_background(fits* image, fits* background, int layer) {
-	int *pxl_image, *pxl_bkg, min = 0.;
+	double *pxl_image, *pxl_bkg, min = 0.;
 	WORD *image_buf = image->pdata[layer];
 	WORD *bkg_buf = background->pdata[layer];
-	int i;
+	size_t i, ndata;
+
 	if ((image->rx) != (background->rx) || ((image->ry) != (background->ry))) {
 		char *msg = siril_log_message(
 				"Images don't have the same size (w = %d|%d, h = %d|%d)\n",
@@ -217,25 +218,22 @@ int sub_background(fits* image, fits* background, int layer) {
 		show_dialog(msg, "Error", "gtk-dialog-error");
 		return 1;
 	}
-	size_t ndata = image->rx * image->ry;
+	ndata = image->rx * image->ry;
 
 	// First step we convert data, apply the subtraction and search for minimum
-	pxl_image = malloc(sizeof(int) * ndata);
-	pxl_bkg = malloc(sizeof(int) * ndata);
+	pxl_image = malloc(sizeof(double) * ndata);
+	pxl_bkg = malloc(sizeof(double) * ndata);
 	for (i = 0; i < ndata; i++) {
-		pxl_image[i] = (int) image_buf[i];
-		pxl_bkg[i] = (int) bkg_buf[i];
+		pxl_image[i] = (double) image_buf[i] / USHRT_MAX_DOUBLE;
+		pxl_bkg[i] = (double) bkg_buf[i] / USHRT_MAX_DOUBLE;
 		pxl_image[i] -= pxl_bkg[i];
 		min = min(pxl_image[i], min);
 	}
 	image_buf = image->pdata[layer];
 	// Second we apply an offset to the result and re-convert the data
 	for (i = 0; i < ndata; i++) {
-		pxl_image[i] += abs(min);
-		if (pxl_image[i] > USHRT_MAX)
-			image_buf[i] = USHRT_MAX; //avoid clipping
-		else
-			image_buf[i] = (WORD) pxl_image[i];
+		pxl_image[i] += fabs(min);
+		image_buf[i] = round_to_WORD(pxl_image[i] * USHRT_MAX_DOUBLE);
 	}
 
 	// We free memory
@@ -1210,138 +1208,6 @@ int backgroundnoise(fits* fit, double sigma[]) {
 	return 0;
 }
 
-static void select_area(fits *fit, WORD *data, int layer, rectangle *bounds) {
-	int i, j, k = 0;
-
-	WORD *from = fit->pdata[layer] + (fit->ry - bounds->y - bounds->h) * fit->rx
-			+ bounds->x;
-	int stridefrom = fit->rx - bounds->w;
-
-	for (i = 0; i < bounds->h; ++i) {
-		for (j = 0; j < bounds->w; ++j) {
-			data[k] = *from++;
-			k++;
-		}
-		from += stridefrom;
-	}
-}
-
-static double siril_stats_ushort_median(gsl_histogram *histo, const size_t n) {
-	size_t i;
-	size_t hist_size = gsl_histogram_bins(histo);
-	double sum = 0.0;
-	double median = 0.0;
-
-	/* Get the median value */
-	for (i = 0; i < hist_size + 1; i++) {
-		sum += gsl_histogram_get(histo, i);
-		if (sum > ((double) n * 0.5)) {
-			median = (double) i;
-			break;	//we get out of the loop
-		}
-	}
-	return median;
-}
-
-static double siril_stats_ushort_mad(const WORD* data, const size_t stride,
-		const size_t n, const double m) {
-	size_t i;
-	double median;
-	gsl_histogram *histo;
-
-	histo = gsl_histogram_alloc(USHRT_MAX + 1);
-	gsl_histogram_set_ranges_uniform(histo, 0, USHRT_MAX);
-	for (i = 0; i < n; i++) {
-		const double delta = fabs(data[i * stride] - m);
-		gsl_histogram_increment(histo, delta);
-	}
-	median = siril_stats_ushort_median(histo, n);
-	gsl_histogram_free(histo);
-
-	return median;
-}
-
-/* computes statistics on the given layer of the given image. It creates the
- * histogram to easily extract the median. min and max value, mean, sigma
- * and average deviation are computed with gsl stats.
- */
-imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
-	double mean = 0.0;
-	double median = 0.0;
-	double sigma = 0.0;
-	double avgDev = 0.0;
-	double mad = 0.0;
-	double sum = 0.0;
-	WORD min, max, *data;
-	gsl_histogram* histo;
-	size_t i, hist_size, count;
-	imstats* stat = malloc(sizeof(imstats));
-
-	count = fit->rx * fit->ry;
-
-	if (selection && selection->h > 0 && selection->w > 0) {
-		count = selection->h * selection->w;
-		data = calloc(count, sizeof(WORD));
-		select_area(fit, data, layer, selection);
-		histo = computeHisto_Selection(fit, layer, selection);
-	} else {
-		data = calloc(count, sizeof(WORD));
-		histo = computeHisto(fit, layer);
-		memcpy(data, fit->pdata[layer], count * sizeof(WORD));
-	}
-	hist_size = gsl_histogram_bins(histo);
-
-	/* Calculation of median with histogram */
-	median = siril_stats_ushort_median(histo, count);
-	gsl_histogram_free(histo);
-
-	/* Calculation of mean */
-	mean = gsl_stats_ushort_mean(data, 1, count);
-
-	/* Calculation of sigma */
-	if (option & STATS_SIGMA)
-		sigma = gsl_stats_ushort_sd_m(data, 1, count, mean);
-
-	/* Calculation of average absolute deviation from the median */
-	if (option & STATS_AVGDEV)
-		avgDev = gsl_stats_ushort_absdev_m(data, 1, count, median);
-
-	/* Calculation of median absolute deviation */
-	if (option & STATS_MAD)
-		mad = siril_stats_ushort_mad(data, 1, count, median);
-
-	/* Minimum and Maximum */
-	if (option & STATS_MINMAX)
-		gsl_stats_ushort_minmax(&min, &max, data, 1, count);
-
-	switch (layer) {
-	case 0:
-		if (fit->naxes[2] == 1)
-			strcpy(stat->layername, "B&W");
-		else
-			strcpy(stat->layername, "Red");
-		break;
-	case 1:
-		strcpy(stat->layername, "Green");
-		break;
-	case 2:
-		strcpy(stat->layername, "Blue");
-		break;
-	}
-
-	stat->count = count;
-	stat->mean = mean;
-	stat->avgDev = avgDev;
-	stat->mad = mad;
-	stat->median = median;
-	stat->sigma = sigma;
-	stat->min = (double) min;
-	stat->max = (double) max;
-	stat->normValue = (double) hist_size - 1;
-	free(data);
-	return stat;
-}
-
 void show_FITS_header(fits *fit) {
 	if (fit->header)
 		show_data_dialog(fit->header, "FITS Header");
@@ -1764,7 +1630,6 @@ gpointer noise(gpointer p) {
 	}
 
 	if (backgroundnoise(args->fit, args->bgnoise)) {
-		set_cursor_waiting(FALSE);
 		gdk_threads_add_idle(end_noise, args);
 		return GINT_TO_POINTER(1);
 	}

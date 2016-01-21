@@ -40,9 +40,10 @@ char *statName[] = {
 		"count (px)",
 		"mean",
 		"median",
+		"sigma",
 		"avgDev",
 		"MAD",
-		"sigma",
+		"sqrt(BWMV)",
 		"min",
 		"max",
 		"normalization"
@@ -131,11 +132,11 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_COLOR, "White Smoke",
 			-1);
 
-	/* avgDev */
-	sprintf(rvalue, format, stat[RLAYER]->avgDev / normValue[RLAYER]);
+	/* sigma */
+	sprintf(rvalue, format, stat[RLAYER]->sigma / normValue[RLAYER]);
 	if (nblayer > 1) {
-		sprintf(gvalue, format, stat[GLAYER]->avgDev / normValue[GLAYER]);
-		sprintf(bvalue, format, stat[BLAYER]->avgDev / normValue[BLAYER]);
+		sprintf(gvalue, format, stat[GLAYER]->sigma / normValue[GLAYER]);
+		sprintf(bvalue, format, stat[BLAYER]->sigma / normValue[BLAYER]);
 	} else {
 		sprintf(gvalue, "--");
 		sprintf(bvalue, "--");
@@ -149,11 +150,11 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_COLOR, "Powder Blue",
 			-1);
 
-	/* MAD */
-	sprintf(rvalue, format, stat[RLAYER]->mad / normValue[RLAYER]);
+	/* avgDev */
+	sprintf(rvalue, format, stat[RLAYER]->avgDev / normValue[RLAYER]);
 	if (nblayer > 1) {
-		sprintf(gvalue, format, stat[GLAYER]->mad / normValue[GLAYER]);
-		sprintf(bvalue, format, stat[BLAYER]->mad / normValue[BLAYER]);
+		sprintf(gvalue, format, stat[GLAYER]->avgDev / normValue[GLAYER]);
+		sprintf(bvalue, format, stat[BLAYER]->avgDev / normValue[BLAYER]);
 	} else {
 		sprintf(gvalue, "--");
 		sprintf(bvalue, "--");
@@ -167,11 +168,11 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_COLOR, "White Smoke",
 			-1);
 
-	/* sigma */
-	sprintf(rvalue, format, stat[RLAYER]->sigma / normValue[RLAYER]);
+	/* MAD */
+	sprintf(rvalue, format, stat[RLAYER]->mad / normValue[RLAYER]);
 	if (nblayer > 1) {
-		sprintf(gvalue, format, stat[GLAYER]->sigma / normValue[GLAYER]);
-		sprintf(bvalue, format, stat[BLAYER]->sigma / normValue[BLAYER]);
+		sprintf(gvalue, format, stat[GLAYER]->mad / normValue[GLAYER]);
+		sprintf(bvalue, format, stat[BLAYER]->mad / normValue[BLAYER]);
 	} else {
 		sprintf(gvalue, "--");
 		sprintf(bvalue, "--");
@@ -185,11 +186,11 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_COLOR, "Powder Blue",
 			-1);
 
-	/* min */
-	sprintf(rvalue, format, stat[RLAYER]->min / normValue[RLAYER]);
+	/* sqrt(BWMV) */
+	sprintf(rvalue, format, stat[RLAYER]->sqrtbwmv / normValue[RLAYER]);
 	if (nblayer > 1) {
-		sprintf(gvalue, format, stat[GLAYER]->min / normValue[GLAYER]);
-		sprintf(bvalue, format, stat[BLAYER]->min / normValue[BLAYER]);
+		sprintf(gvalue, format, stat[GLAYER]->sqrtbwmv / normValue[GLAYER]);
+		sprintf(bvalue, format, stat[BLAYER]->sqrtbwmv / normValue[BLAYER]);
 	} else {
 		sprintf(gvalue, "--");
 		sprintf(bvalue, "--");
@@ -203,11 +204,11 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_COLOR, "White Smoke",
 			-1);
 
-	/* max */
-	sprintf(rvalue, format, stat[RLAYER]->max / normValue[RLAYER]);
+	/* min */
+	sprintf(rvalue, format, stat[RLAYER]->min / normValue[RLAYER]);
 	if (nblayer > 1) {
-		sprintf(gvalue, format, stat[GLAYER]->max / normValue[GLAYER]);
-		sprintf(bvalue, format, stat[BLAYER]->max / normValue[BLAYER]);
+		sprintf(gvalue, format, stat[GLAYER]->min / normValue[GLAYER]);
+		sprintf(bvalue, format, stat[BLAYER]->min / normValue[BLAYER]);
 	} else {
 		sprintf(gvalue, "--");
 		sprintf(bvalue, "--");
@@ -219,6 +220,24 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_GVALUE, gvalue,
 			COLUMN_BVALUE, bvalue,
 			COLUMN_COLOR, "Powder Blue",
+			-1);
+
+	/* max */
+	sprintf(rvalue, format, stat[RLAYER]->max / normValue[RLAYER]);
+	if (nblayer > 1) {
+		sprintf(gvalue, format, stat[GLAYER]->max / normValue[GLAYER]);
+		sprintf(bvalue, format, stat[BLAYER]->max / normValue[BLAYER]);
+	} else {
+		sprintf(gvalue, "--");
+		sprintf(bvalue, "--");
+	}
+
+	gtk_list_store_append(list_store, &iter);
+	gtk_list_store_set(list_store, &iter, COLUMN_NAME, statName[8],
+			COLUMN_RVALUE, rvalue,
+			COLUMN_GVALUE, gvalue,
+			COLUMN_BVALUE, bvalue,
+			COLUMN_COLOR, "White Smoke",
 			-1);
 
 }
@@ -261,7 +280,7 @@ void computeStat() {
 	gtk_label_set_text(statSelecLabel, selection);
 
 	for (channel = 0; channel < gfit.naxes[2]; channel++)
-		stat[channel] = statistics(&gfit, channel, &com.selection, STATS_ALL);
+		stat[channel] = statistics(&gfit, channel, &com.selection, STATS_MAIN);
 	add_stats_to_list(stat, gfit.naxes[2], normalized);
 	for (channel = 0; channel < gfit.naxes[2]; channel++)
 		free(stat[channel]);

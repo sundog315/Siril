@@ -31,6 +31,7 @@
 #include "registration/registration.h"
 #include "registration/matching/misc.h"
 #include "registration/matching/match.h"
+#include "registration/matching/atpmatch.h"
 #include "algos/star_finder.h"
 #include "stacking/stacking.h"
 #include "core/siril.h"
@@ -507,7 +508,7 @@ int register_star_alignment(struct registration_args *args) {
 	}
 	siril_log_color_message("Reference Image:\n", "green");
 	com.stars = peaker(&fit, args->layer, &sf);
-	if (sf.nb_stars < 4) {
+	if (sf.nb_stars < AT_MATCH_MINPAIRS) {
 		siril_log_message(
 				"There are not enough stars in reference image to perform alignment\n");
 		if (current_regdata == args->seq->regparam[args->layer])
@@ -551,7 +552,7 @@ int register_star_alignment(struct registration_args *args) {
 
 			if (frame != ref_image) {
 				stars = peaker(&fit, args->layer, &sf);
-				if (sf.nb_stars < 4) {
+				if (sf.nb_stars < AT_MATCH_MINPAIRS) {
 					siril_log_message("Not enough stars. Image %d skipped\n",
 							frame);
 					args->seq->new_total--;
