@@ -21,6 +21,7 @@
 #endif
 
 #define USHRT_MAX_DOUBLE ((double)USHRT_MAX)
+#define USHRT_MAX_SINGLE ((float)USHRT_MAX)
 #define UCHAR_MAX_DOUBLE ((double)UCHAR_MAX)
 #define UCHAR_MAX_SINGLE ((float)UCHAR_MAX)
 
@@ -520,6 +521,7 @@ struct cominf {
 	int hist_display;		// displayed index
 	char *swap_dir;
 
+	gboolean is_cfa;		// in order to know which conversion it is
 	libraw raw_set;			// the libraw setting
 
 	sequence seq;			// currently loaded sequence	TODO: *seq

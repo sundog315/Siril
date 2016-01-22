@@ -175,19 +175,19 @@ void on_radiobutton_conv_cfa_toggled (GtkToggleButton *togglebutton, gpointer us
 	static GtkTreeView *tree_convert = NULL;
 	GtkTreeIter iter;
 	GtkTreeModel *model = NULL;
-	gboolean valid, is_cfa;
+	gboolean valid;
 	
 	if (tree_convert == NULL)
 		tree_convert = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_convert"));
 	model = gtk_tree_view_get_model(tree_convert);
 	valid = gtk_tree_model_get_iter_first(model, &iter);
-	is_cfa = gtk_toggle_button_get_active(togglebutton);
+	com.is_cfa = gtk_toggle_button_get_active(togglebutton);
 	
 	while(valid) {
 		gchar *str_data, *msg;
 		gtk_tree_model_get (model, &iter, 0, &str_data, -1);	//0 for FILECOLUMN
 		GtkToggleButton *but = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_conv"));
-		if (!ends_with(str_data, ".fit") && (is_cfa)) {
+		if (!ends_with(str_data, ".fit") && (com.is_cfa)) {
 			g_signal_handlers_block_by_func(but, on_radiobutton_conv_cfa_toggled, NULL);
 			gtk_toggle_button_set_active (but, TRUE);
 			g_signal_handlers_unblock_by_func(but, on_radiobutton_conv_cfa_toggled, NULL);
@@ -463,7 +463,7 @@ int set_convflags_from_extension() {
 		}
 	} else if (!strcasecmp(sourcesuf, "fit") || !strcasecmp(sourcesuf, "fits") ||
 			!strcasecmp(sourcesuf, "fts")) {
-		if (com.raw_set.cfa && (supported_filetypes & CONVCFA))
+		if (com.is_cfa && (supported_filetypes & CONVCFA))
 			convflags |= CONVCFA;
 		else convflags |= CONVFIT;
 		return 0;
