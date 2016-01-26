@@ -1223,20 +1223,20 @@ int verbose_resize_gaussian(fits *image, int toX, int toY, int interpolation) {
 	struct timeval t_start, t_end;
 
 	switch (interpolation) {
-	case 0:
+	case OPENCV_NEAREST:
 		str_inter = strdup("Nearest-Neighbor");
 		break;
 	default:
-	case 1:
+	case OPENCV_LINEAR:
 		str_inter = strdup("Bilinear");
 		break;
-	case 2:
+	case OPENCV_AREA:
 		str_inter = strdup("Pixel Area Relation");
 		break;
-	case 3:
+	case OPENCV_CUBIC:
 		str_inter = strdup("Bicubic");
 		break;
-	case 4:
+	case OPENCV_LANCZOS4:
 		str_inter = strdup("Lanczos4");
 		break;
 	}
@@ -1263,20 +1263,20 @@ int verbose_rotate_image(fits *image, double angle, int interpolation,
 	case -1:
 		str_inter = "No";
 		break;
-	case 0:
+	case OPENCV_NEAREST:
 		str_inter = "Nearest-Neighbor";
 		break;
 	default:
-	case 1:
+	case OPENCV_LINEAR:
 		str_inter = "Bilinear";
 		break;
-	case 2:
+	case OPENCV_AREA:
 		str_inter = "Pixel Area Relation";
 		break;
-	case 3:
+	case OPENCV_CUBIC:
 		str_inter = "Bicubic";
 		break;
-	case 4:
+	case OPENCV_LANCZOS4:
 		str_inter = "Lanczos4";
 		break;
 	}

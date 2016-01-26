@@ -461,7 +461,7 @@ void on_filechooser_file_set(GtkFileChooserButton *widget, gpointer user_data) {
 						layers[layer]->the_fit.ry, gfit.rx, gfit.ry);
 				sprintf(buf, "OK upscaled from %ux%u",
 						layers[layer]->the_fit.rx, layers[layer]->the_fit.ry);
-				cvResizeGaussian(&layers[layer]->the_fit, gfit.rx, gfit.ry, 0);	//0: INTER_LINEAR
+				cvResizeGaussian(&layers[layer]->the_fit, gfit.rx, gfit.ry, OPENCV_LINEAR); // BILINEAR
 				image_find_minmax(&layers[layer]->the_fit, 0);
 				gtk_label_set_text(layers[layer]->label, buf);
 			}
@@ -1040,11 +1040,11 @@ void on_compositing_reset_clicked(GtkButton *button, gpointer user_data){
 void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 	int layer, nb_images_red = 0, nb_images_green = 0, nb_images_blue = 0;
 	GdkRGBA max_pixel;
-	if (luminance_mode) {
-		siril_log_message("auto adjusting colours is not yet "
-				"implemented for luminance-based compositings\n");
-		return;
-	}
+//	if (luminance_mode) {
+//		siril_log_message("auto adjusting colours is not yet "
+//				"implemented for luminance-based compositings\n");
+//		return;
+//	}
 	clear_pixel(&max_pixel);
 	/* sum the max per channel */
 	/* should we assume that fits mini and maxi are correct? */
@@ -1060,7 +1060,7 @@ void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 	}
 
 	if (max_pixel.red <= 1.0 && max_pixel.green <= 1.0 && max_pixel.blue <= 1.0) {
-	       siril_log_message("noting to adjust, no overflow\n");
+	       siril_log_message("nothing to adjust, no overflow\n");
        	       return;
 	}
 

@@ -3524,7 +3524,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
             <property name="halign">start</property>
             <property name="margin_left">2</property>
             <property name="margin_top">2</property>
-           <signal name="clicked" handler="on_compositing_autoadjust_clicked" swapped="no"/>
+            <signal name="clicked" handler="on_compositing_autoadjust_clicked" swapped="no"/>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -8585,7 +8585,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                     <property name="tooltip_text" translatable="yes">Average Neutral Protection is the default option. This is the recommended option in most cases.</property>
                     <property name="halign">end</property>
                     <property name="valign">center</property>
-                    <property name="active">4</property>
+                    <property name="active">1</property>
                     <items>
                       <item translatable="yes">Nearest Neighbor</item>
                       <item translatable="yes">Bilinear (default)</item>
@@ -8789,7 +8789,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                 <property name="tooltip_text" translatable="yes">Average Neutral Protection is the default option. This is the recommended option in most cases.</property>
                 <property name="halign">end</property>
                 <property name="valign">center</property>
-                <property name="active">4</property>
+                <property name="active">1</property>
                 <items>
                   <item translatable="yes">Nearest Neighbor</item>
                   <item translatable="yes">Bilinear (default)</item>

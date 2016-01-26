@@ -1036,7 +1036,6 @@ gpointer crop_sequence(gpointer p) {
 	int frame, ret;
 	float cur_nb;
 
-	/* then we compare to other frames */
 	for (frame = 0, cur_nb = 0.f; frame < args->seq->number; frame++) {
 		if (!get_thread_run())
 			break;

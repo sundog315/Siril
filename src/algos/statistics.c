@@ -104,17 +104,21 @@ static double siril_stats_ushort_bwmv(const WORD* data, const size_t n,
 	double up = 0.0, down = 0.0;
 	size_t i;
 
-	for (i = 0; i < n; i++) {
-		double yi, ai, yi2;
+	if (mad > 0.0) {
+		for (i = 0; i < n; i++) {
+			double yi, ai, yi2;
 
-		yi = ((double) data[i] - median) / (9 * mad);
-		yi2 = yi * yi;
-		ai = (fabs(yi) < 1.0) ? 1.0 : 0.0;
+			yi = ((double) data[i] - median) / (9 * mad);
+			yi2 = yi * yi;
+			ai = (fabs(yi) < 1.0) ? 1.0 : 0.0;
 
-		up += ai * SQR((double ) data[i] - median) * SQR(SQR (1 - yi2));
-		down += (ai * (1 - yi2) * (1 - 5 * yi2));
+			up += ai * SQR((double ) data[i] - median) * SQR(SQR (1 - yi2));
+			down += (ai * (1 - yi2) * (1 - 5 * yi2));
+
+		}
+
+		bwmv = n * (up / (down * down));
 	}
-	bwmv = n * (up / (down * down));
 
 	return bwmv;
 }
@@ -126,17 +130,19 @@ static double siril_stats_double_bwmv(const double* data, const size_t n,
 	double up = 0.0, down = 0.0;
 	size_t i;
 
-	for (i = 0; i < n; i++) {
-		double yi, ai, yi2;
+	if (mad > 0.0) {
+		for (i = 0; i < n; i++) {
+			double yi, ai, yi2;
 
-		yi = (data[i] - median) / (9 * mad);
-		yi2 = yi * yi;
-		ai = (fabs(yi) < 1.0) ? 1.0 : 0.0;
+			yi = (data[i] - median) / (9 * mad);
+			yi2 = yi * yi;
+			ai = (fabs(yi) < 1.0) ? 1.0 : 0.0;
 
-		up += ai * SQR(data[i] - median) * SQR(SQR (1 - yi2));
-		down += (ai * (1 - yi2) * (1 - 5 * yi2));
+			up += ai * SQR(data[i] - median) * SQR(SQR (1 - yi2));
+			down += (ai * (1 - yi2) * (1 - 5 * yi2));
+		}
+		bwmv = n * (up / (down * down));
 	}
-	bwmv = n * (up / (down * down));
 
 	return bwmv;
 }

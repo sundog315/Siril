@@ -278,6 +278,14 @@ typedef enum {
 } interpolation_method;
 
 typedef enum {
+	OPENCV_NEAREST,
+	OPENCV_LINEAR,
+	OPENCV_AREA,
+	OPENCV_CUBIC,
+	OPENCV_LANCZOS4,
+} opencv_interpolation;
+
+typedef enum {
     BAYER_FILTER_RGGB,
     BAYER_FILTER_BGGR,
     BAYER_FILTER_GBRG,

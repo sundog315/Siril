@@ -4570,7 +4570,6 @@ void on_button_resample_ok_clicked(GtkButton *button, gpointer user_data) {
 	redraw(com.cvport, REMAP_ALL);
 	redraw_previews();
 	set_cursor_waiting(FALSE);
-	gtk_widget_hide(lookup_widget("resample_dialog"));
 }
 
 void on_button_resample_close_clicked(GtkButton *button, gpointer user_data) {
@@ -4684,7 +4683,6 @@ void on_button_rotation_ok_clicked(GtkButton *button, gpointer user_data) {
 	redraw(com.cvport, REMAP_ALL);
 	redraw_previews();
 	set_cursor_waiting(FALSE);
-	gtk_widget_hide(lookup_widget("rotation_dialog"));
 }
 
 #endif
