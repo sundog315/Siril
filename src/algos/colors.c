@@ -45,6 +45,8 @@ void hsl_to_rgb(double h, double sl, double l, double * r, double * g,
 		double * b) {
 	double v;
 
+	assert(h >= 0.0 && h <= 1.0);
+	if (h >= 1.0) h -= 1.0;		// this code doesn't work for h = 1
 	v = (l <= 0.5) ? (l * (1.0 + sl)) : (l + sl - l * sl);
 	if (v <= 0) {
 		*r = *g = *b = 0.0;

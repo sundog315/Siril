@@ -57,7 +57,8 @@ typedef struct {
 	GtkSpinButton *spinbutton_y;	// the Y spin button
 
 	/* useful data */
-	GdkRGBA color;			// color of the layer
+	GdkRGBA color;			// real color of the layer
+	GdkRGBA saturated_color;	// saturated color of the layer
 	fits the_fit;			// the fits for layers
 } layer;
 
@@ -105,8 +106,11 @@ int has_fit(int layer);
 void update_compositing_interface();
 WORD get_composition_pixel_value(int fits_index, int reg_layer, int x, int y);
 void increment_pixel_components_from_layer_value(int fits_index, GdkRGBA *rgbpixel, WORD layer_pixel_value);
+void increment_pixel_components_from_layer_saturated_value(int fits_index, GdkRGBA *rgbpixel, WORD layer_pixel_value);
 void colors_align_and_compose();		// the rgb procedure
 void luminance_and_colors_align_and_compose();	// the lrgb procedure
+void color_has_been_updated(int layer);
+void update_color_from_saturation(int layer, double newl);
 void rgb_pixel_limiter(GdkRGBA *pixel);
 void clear_pixel(GdkRGBA *pixel);
 void update_result(int and_refresh);
@@ -188,6 +192,7 @@ layer *create_layer(int index) {
 				&list_of_12_palette_colors[(index-2)*2],
 				sizeof(GdkRGBA));
 	else clear_pixel(&ret->color);
+	clear_pixel(&ret->saturated_color);
 	return ret;
 }
 
@@ -205,6 +210,8 @@ void on_layer_add(GtkButton *button, gpointer user_data) {
 	layers[layers_count] = NULL;
 
 	grid_add_row(layers_count-1, layers_count, 1);
+
+	color_has_been_updated(layers_count-1);
 }
 
 /* adds the '+' button at the bottom of the list. Creates the trailing grid row too */
@@ -636,6 +643,15 @@ void increment_pixel_components_from_layer_value(int fits_index, GdkRGBA *rgbpix
 	rgbpixel->blue += layer_color->blue * layer_pixel_value / USHRT_MAX_DOUBLE;
 }
 
+/* increments the color values in rgbpixel from the saturated pixel value for a
+ * particular layer. GdkRGBA values are stored in the [0, 1] interval. */
+void increment_pixel_components_from_layer_saturated_value(int fits_index, GdkRGBA *rgbpixel, WORD layer_pixel_value) {
+	GdkRGBA *layer_color = &layers[fits_index]->saturated_color;
+	rgbpixel->red += layer_color->red * layer_pixel_value / USHRT_MAX_DOUBLE;
+	rgbpixel->green += layer_color->green * layer_pixel_value / USHRT_MAX_DOUBLE;
+	rgbpixel->blue += layer_color->blue * layer_pixel_value / USHRT_MAX_DOUBLE;
+}
+
 /* called when selection changed */
 void update_compositing_interface() {
 	if (!builder) return;
@@ -790,6 +806,28 @@ void update_result(int and_refresh) {
 
 /****************** colour management ******************/
 
+// update the saturated color from the new real colour
+void color_has_been_updated(int layer) {
+	double h, s, l;
+	GdkRGBA *real = &layers[layer]->color;
+	GdkRGBA *satu = &layers[layer]->saturated_color;
+	rgb_to_hsl(real->red, real->green, real->blue, &h,&s,&l);
+	printf("%d: saturation: %g, light: %g\n", layer, s, l);
+	/* in HSL, the actual saturated pure colour happens at l=0.5 and s=1 */
+	s = 1.0; l = 0.5;
+	hsl_to_rgb(h,s,l, &satu->red, &satu->green, &satu->blue);
+	printf("%d: r: %g, g: %g, b: %g\n", layer, satu->red, satu->green, satu->blue);
+}
+
+// update a real colour from the saturated colour with a new lightness
+void update_color_from_saturation(int layer, double newl) {
+	double h, s, l;
+	GdkRGBA *real = &layers[layer]->color;
+	GdkRGBA *satu = &layers[layer]->saturated_color;
+	rgb_to_hsl(satu->red, satu->green, satu->blue, &h,&s,&l);
+	hsl_to_rgb(h,s,newl, &real->red, &real->green, &real->blue);
+}
+
 void on_colordialog_response(GtkColorChooserDialog *chooser, gint response_id, gpointer user_data) {
 	/* this callback is called on any action of the dialog, and must be
 	 * filtered according to the response_id. List is here:
@@ -807,6 +845,7 @@ void on_colordialog_response(GtkColorChooserDialog *chooser, gint response_id, g
 
 	if (current_layer_color_choosing > 0 && layers[current_layer_color_choosing]) {
 		gtk_color_chooser_get_rgba(GTK_COLOR_CHOOSER(chooser), &layers[current_layer_color_choosing]->color);
+		color_has_been_updated(current_layer_color_choosing);
 		gtk_widget_queue_draw(GTK_WIDGET(layers[current_layer_color_choosing]->color_w));
 		gtk_widget_hide(GTK_WIDGET(chooser));
 		gtk_editable_delete_text(GTK_EDITABLE(wl_entry), 0, -1);
@@ -890,6 +929,7 @@ gboolean on_color_button_motion_event(GtkWidget *widget, GdkEventMotion *event, 
 		hsl_to_rgb(h,s,l, &layers[current_layer_color_choosing]->color.red,
 				&layers[current_layer_color_choosing]->color.green,
 				&layers[current_layer_color_choosing]->color.blue);
+		color_has_been_updated(current_layer_color_choosing);
 		gtk_widget_queue_draw(GTK_WIDGET(layers[current_layer_color_choosing]->color_w));
 	}
 	return FALSE;
@@ -986,3 +1026,81 @@ void on_compositing_reset_clicked(GtkButton *button, gpointer user_data){
 
 	update_used_memory();
 }
+
+/* Reduce brightness of colours associated to layers so that they never overflow on composition.
+ * Algorithm: take the max of the composition and normalize brightness with
+ * this max. It has to be done three times because it's the same layers that
+ * can act on the resulting RGB channels.
+ * This algorithm doesn't give the optimal answer, which could be found
+ * iteratively, but it should never give an overflow.
+ */
+void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
+	int layer, nb_images_red = 0, nb_images_green = 0, nb_images_blue = 0;
+	GdkRGBA max_pixel;
+	if (luminance_mode) {
+		siril_log_message("auto adjusting colours is not yet "
+				"implemented for luminance-based compositings\n");
+		return;
+	}
+	clear_pixel(&max_pixel);
+	/* sum the max per channel */
+	/* should we assume that fits mini and maxi are correct? */
+	for (layer = 1; layers[layer]; layer++) {
+		if (has_fit(layer)) {
+			increment_pixel_components_from_layer_saturated_value(layer,
+					&max_pixel, layers[layer]->the_fit.maxi);
+
+			if (layers[layer]->color.red > 0.0) nb_images_red++;
+			if (layers[layer]->color.green > 0.0) nb_images_green++;
+			if (layers[layer]->color.blue > 0.0) nb_images_blue++;
+		}
+	}
+
+	if (max_pixel.red <= 1.0 && max_pixel.green <= 1.0 && max_pixel.blue <= 1.0) {
+	       siril_log_message("noting to adjust, no overflow\n");
+       	       return;
+	}
+
+	/* update the real colours of layers from their saturated colour, based
+	 * on how much each colour of the composition overflows */
+	int channel;
+	/* amount of normalization to be done on each layer's image for each channel */
+	double to_redistribute_red = (max_pixel.red - 1.0) / (double)nb_images_red;
+	double to_redistribute_green = (max_pixel.green - 1.0) / (double)nb_images_green;
+	double to_redistribute_blue = (max_pixel.blue - 1.0) / (double)nb_images_blue;
+	for (layer = 1; layers[layer]; layer++) {
+		if (has_fit(layer)) {
+			double to_redistribute = 0.0;	// for this layer
+
+			if (layers[layer]->color.red > 0.0 && to_redistribute_red > 0.0) {
+				to_redistribute = to_redistribute_red;
+			}
+			/* for each layer, we check if a channel requires the
+			 * current layer to be readjusted and we take the more
+			 * severe value of all requirements */
+
+			if (layers[layer]->color.green > 0.0 && to_redistribute_green > 0.0) {
+				if (to_redistribute_green > to_redistribute)
+					to_redistribute = to_redistribute_green;
+			}
+
+			if (layers[layer]->color.blue > 0.0 && to_redistribute_blue > 0.0) {
+				if (to_redistribute_blue > to_redistribute)
+					to_redistribute = to_redistribute_blue;
+			}
+
+			siril_log_message("readjusting layer %d to %g times bright\n",
+					layer, 1.0-to_redistribute);
+			/* to_redistribute here is the maximum reduction we
+			 * need to give to the layer */
+			update_color_from_saturation(layer, 0.5 * (1.0 - to_redistribute));
+		}
+	}
+
+	/* redraw colours and composition */
+	for (layer = 1; layers[layer]; layer++) {
+		gtk_widget_queue_draw(GTK_WIDGET(layers[layer]->color_w));
+	}
+	update_result(1);
+}
+

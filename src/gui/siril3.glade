@@ -3511,6 +3511,24 @@ This is useful when modulation parameter is different to 1 helping the whole pro
             <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="padding">2</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="composition_layers_autoadjust">
+            <property name="label" translatable="yes">Adjust layers brightness</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes">Automatically adjust the brightness of the colours picked for layers so that they don't overflow when compositing (based on max value for each image). Colour hues are unchanged.</property>
+            <property name="halign">start</property>
+            <property name="margin_left">2</property>
+            <property name="margin_top">2</property>
+           <signal name="clicked" handler="on_compositing_autoadjust_clicked" swapped="no"/>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
             <property name="position">2</property>
           </packing>
         </child>
