@@ -580,6 +580,9 @@ void on_button_align_clicked(GtkButton *button, gpointer user_data) {
 	regcombo = GTK_COMBO_BOX(gtk_builder_get_object(builder, "compositing_align_method_combo"));
 	method = reg_methods[gtk_combo_box_get_active(regcombo)];
 
+	seq->rx = gfit.rx;
+	seq->ry = gfit.ry;
+
 	regargs.seq = seq;
 	regargs.process_all_frames = TRUE;
 	get_the_registration_area(&regargs, method);
