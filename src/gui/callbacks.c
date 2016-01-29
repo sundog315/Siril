@@ -3373,17 +3373,16 @@ void on_seqproc_entry_changed(GtkComboBox *widget, gpointer user_data) {
 	if (name && name[0] != '\0') {
 		gchar *type;
 		set_cursor_waiting(TRUE);
-		if (ends_with(name, ".ser")) {
+		const char *ext = get_filename_ext(name);
+		if (!strcmp(ext, "ser")) {
 			name[strlen(name) - 1] = 'q';
 			type = " SER";
 #ifdef HAVE_FFMS2
-		} else if (!check_for_film_extensions(get_filename_ext(name))) {
-#else
-		} else if (ends_with(name, ".avi")) {
-#endif
-			int len = strlen(get_filename_ext(name));
-			strncpy(name + strlen(name) - len - 1, ".seq", len + 1);
+		} else if (!check_for_film_extensions(ext)) {
+			int len = strlen(ext);
+			strncpy(name + strlen(name) - len - 1, "seq", len + 1);
 			type = " AVI";
+#endif
 		} else
 			type = "";
 		g_snprintf(msg, sizeof(msg), "Selected%s sequence %s...", type, name);

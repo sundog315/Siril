@@ -26,6 +26,7 @@
 #include "core/siril.h"
 #include "core/proto.h"
 #include "gui/callbacks.h"
+#include "io/conversion.h"
 #include "io/single_image.h"
 #include "gui/PSF_list.h"
 #include "gui/histogram.h"
@@ -112,49 +113,13 @@ int read_single_image(const char* filename, fits *dest, char **realname_out) {
 		free(realname);
 		return 1;
 	}
-	switch (imagetype) {
-		case TYPEFITS:
-			retval = (readfits(realname, dest, NULL) != 0);
-			break;
-		case TYPEBMP:
-			retval = (readbmp(realname, dest) < 0);
-			break;
-		case TYPEPIC:
-			retval = (readpic(realname, dest) < 0);
-			break;
-#ifdef HAVE_LIBTIFF
-		case TYPETIFF:
-			retval = (readtif(realname, dest) < 0);
-			break;
-#endif
-		case TYPEPNM:
-			retval = (import_pnm_to_fits(realname, dest) < 0);
-			break;
-#ifdef HAVE_LIBJPEG
-		case TYPEJPG:
-			retval = (readjpg(realname, dest) < 0);
-			break;		
-#endif
-#ifdef HAVE_LIBPNG
-		case TYPEPNG:
-			retval = (readpng(realname, dest) < 0);
-			break;
-#endif
-#ifdef HAVE_LIBRAW
-		case TYPERAW:
-			retval = (open_raw_files(realname, dest, com.raw_set.cfa) < 0);
-			break;
-#endif
-		case TYPESER:
-		case TYPEAVI:
+	if (imagetype == TYPESER || imagetype == TYPEAVI) {
 			/* Returns 3 if ok */
-			retval = read_single_sequence(realname, imagetype);
-			break;
-		case TYPEUNDEF:
-		default:	// when the ifdefs are not compiled, default happens!
-			siril_log_message("Error opening %s: file type not supported.\n", filename);
-			retval = 2;
+		retval = read_single_sequence(realname, imagetype);
 	}
+
+	retval = any_to_fits(imagetype, realname, dest);
+
 	if (retval > 0 && retval < 3)
 		siril_log_message("Opening %s failed.\n", realname);
 	if (realname_out)

@@ -100,6 +100,7 @@ void set_prepro_button_sensitiveness();
 
 void on_removegreen_activate(GtkMenuItem *menuitem, gpointer user_data);
 void on_SCNR_Apply_clicked(GtkButton *button, gpointer user_data);
+void update_statusbar_convert();
 void fill_convert_list(GSList *list);
 
 void update_spinCPU(int max);

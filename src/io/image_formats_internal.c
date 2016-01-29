@@ -107,7 +107,7 @@ int readbmp(const char *name, fits *fit) {
 	return nbplane;
 }
 
-int savebmp(char *name, fits *fit) {
+int savebmp(const char *name, fits *fit) {
 	unsigned char bmpfileheader[14] = { 'B', 'M', 	//Magic Number
 			0, 0, 0, 0, 	//Size in bytes, see below
 			0, 0, 0, 0, 54, 0, 0, 0	//offset
@@ -321,7 +321,7 @@ int bmp8tofits(unsigned char *rgb, int rx, int ry, fits *fit) {
  * P6	Portable pixmap	Binary
  */
 /* This method loads a pnm or pgm binary file into the fits image passed as argument. */
-int import_pnm_to_fits(char *filename, fits *fit) {
+int import_pnm_to_fits(const char *filename, fits *fit) {
 	FILE *fd;
 	char buf[256], *msg;
 	int i, j, max_val;

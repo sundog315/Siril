@@ -16,8 +16,8 @@ typedef enum {
 	SER_BAYER_YCMY = 17,
 	SER_BAYER_YMCY = 18,
 	SER_BAYER_MYYC = 19,
-	RGB = 100,	// SER v3
-	BGR = 101	// SER v3
+	SER_RGB = 100,	// SER v3
+	SER_BGR = 101	// SER v3
 } ser_color;
 
 typedef enum {
@@ -55,6 +55,8 @@ void ser_init_struct(struct ser_struct *ser_file);
 void ser_display_info(struct ser_struct *ser_file);
 int ser_open_file(char *filename, struct ser_struct *ser_file);
 int ser_write_header(struct ser_struct *ser_file);
+int ser_create_file_with_header(const char *filename, struct ser_struct *ser_file, gboolean overwrite);
+void ser_header_from_fit(struct ser_struct *ser_file, fits *fit);
 int ser_close_file(struct ser_struct *ser_file);
 int ser_read_frame(struct ser_struct *ser_file, int frame_no, fits *fit);
 int ser_read_opened_partial(struct ser_struct *ser_file, int layer,

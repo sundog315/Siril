@@ -79,17 +79,17 @@ enum {
 
 
 typedef enum {
-	TYPEUNDEF,
-	TYPEFITS,
-	TYPETIFF,
-	TYPEBMP,
-	TYPEPNG,
-	TYPEJPG,
-	TYPEPNM,
-	TYPEPIC,
-	TYPERAW,
-	TYPEAVI,
-	TYPESER,
+	TYPEUNDEF=(1 << 1),
+	TYPEFITS= (1 << 2),
+	TYPETIFF= (1 << 3),
+	TYPEBMP = (1 << 4),
+	TYPEPNG = (1 << 5),
+	TYPEJPG = (1 << 6),
+	TYPEPNM = (1 << 7),
+	TYPEPIC = (1 << 8),
+	TYPERAW = (1 << 9),
+	TYPEAVI = (1 << 10),
+	TYPESER = (1 << 11)
 } image_type;
 
 #define USE_DARK	0x01
@@ -130,23 +130,12 @@ typedef enum {
 #define CP_EXTRACT	0x10	// extract a 16bit plane from a 48 bit fit
 #define CP_EXPAND	0x20	// expands a 16bit fits to a 48bit one.
 
-#define CONVALL	(1 << 0)	// all files, not based on an index
-/* file types available */
-#define CONVBMP	(1 << 1)
-#define CONVPNG	(1 << 2)
-#define CONVJPG	(1 << 3)
-#define CONVAVI	(1 << 4)
-#define CONVPNM	(1 << 5)
-#define CONVRAW (1 << 6)
-#define CONVCFA (1 << 7)
-#define CONVTIF (1 << 8)
-#define CONVPIC (1 << 9)
-#define CONVFIT (1 << 10)
-/* layer conversion type */
+/* processing */
+#define CONVDEBAYER (1 << 7)
+/* channel conversion type */
 #define CONV1X3	(1 << 16)
 #define CONV3X1	(1 << 17)
 #define CONV1X1	(1 << 18)
-#define CONVUFL	(1 << 20)	// use fixed length
 
 /* operations on image data */
 #define OPER_ADD 'a'

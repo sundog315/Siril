@@ -73,6 +73,7 @@ int read_single_sequence(char *realname, int imagetype) {
 #ifdef HAVE_FFMS2
 			case TYPEAVI:
 				ext = get_filename_ext(realname);
+				assert(ext);
 				int len = strlen(ext);
 				strncpy(name+strlen(name)-len, "seq", len);
 				break;
@@ -125,7 +126,9 @@ int check_seq(int force) {
 	while ((file = readdir(dir)) != NULL) {
 		sequence *new_seq;
 		int fnlen = strlen(file->d_name);
-		if (!strncasecmp(file->d_name + fnlen - 4, ".ser", 4)) {
+		const char *ext = get_filename_ext(file->d_name);
+		if (!ext) continue;
+		if (!strcasecmp(ext, "ser")) {
 			struct ser_struct *ser_file = malloc(sizeof(struct ser_struct));
 			ser_init_struct(ser_file);
 			if (ser_open_file(file->d_name, ser_file))
@@ -144,7 +147,7 @@ int check_seq(int force) {
 			set_progress_bar_data(NULL, PROGRESS_PULSATE);
 		}
 #ifdef HAVE_FFMS2
-		else if (!check_for_film_extensions(get_filename_ext(file->d_name))) {
+		else if (!check_for_film_extensions(ext)) {
 			struct film_struct *film_file = malloc(sizeof(struct film_struct));
 			if (film_open_file(file->d_name, film_file)) {
 				free(film_file);
@@ -152,7 +155,7 @@ int check_seq(int force) {
 			}
 			new_seq = calloc(1, sizeof(sequence));
 			initialize_sequence(new_seq, TRUE);
-			int len = strlen(get_filename_ext(file->d_name));
+			int len = strlen(ext);
 			new_seq->seqname = strndup(file->d_name, fnlen-(len+1));
 			new_seq->beg = 0;
 			new_seq->end = film_file->frame_count-1;
@@ -166,8 +169,7 @@ int check_seq(int force) {
 		}
 #endif
 
-		else if (!strncasecmp(file->d_name + fnlen - com.len_ext, com.ext,
-				com.len_ext)) {
+		else if (!strcasecmp(ext, com.ext+1)) {
 			if (!get_index_and_basename(file->d_name, &basename, &curidx, &fixed)) {
 				int current_seq = -1;
 				/* search in known sequences if we already have it */
@@ -239,13 +241,15 @@ int check_only_one_film_seq(char* name) {
 		com.wd = NULL;
 		return 1;
 	}
-	
+
 	int fnlen = strlen(name);
-	if (!strncasecmp(name + fnlen - 4, ".ser", 4)) {
+	const char *ext = get_filename_ext(name);
+
+	if (!strcasecmp(ext, "ser")) {
 		struct ser_struct *ser_file = malloc(sizeof(struct ser_struct));
 		ser_init_struct(ser_file);
 		if (ser_open_file(name, ser_file)) return 1;
-			
+
 		new_seq = calloc(1, sizeof(sequence));
 		initialize_sequence(new_seq, TRUE);
 		new_seq->seqname = strndup(name, fnlen-4);
@@ -256,7 +260,7 @@ int check_only_one_film_seq(char* name) {
 		new_seq->ser_file = ser_file;
 	}
 #ifdef HAVE_FFMS2
-	else if (!check_for_film_extensions(get_filename_ext(name))) {
+	else if (!check_for_film_extensions(ext)) {
 		struct film_struct *film_file = malloc(sizeof(struct film_struct));
 		if (film_open_file(name, film_file)) {
 			free(film_file);
@@ -264,7 +268,7 @@ int check_only_one_film_seq(char* name) {
 		}
 		new_seq = calloc(1, sizeof(sequence));
 		initialize_sequence(new_seq, TRUE);
-		int len = strlen(get_filename_ext(name));
+		int len = strlen(ext);
 		new_seq->seqname = strndup(name, fnlen-len-1);
 		new_seq->beg = 0;
 		new_seq->end = film_file->frame_count-1;
@@ -277,10 +281,10 @@ int check_only_one_film_seq(char* name) {
 	closedir(dir);
 	if (!new_seq) return 0;
 	if (new_seq->beg != new_seq->end) {
-			if (!buildseqfile(new_seq, 0) && retval)
-				retval = 0;
-		}
-		free_sequence(new_seq, TRUE);
+		if (!buildseqfile(new_seq, 0) && retval)
+			retval = 0;
+	}
+	free_sequence(new_seq, TRUE);
 	return retval;
 }
 
@@ -1065,7 +1069,8 @@ gboolean sequence_is_rgb(sequence *seq) {
 			return seq->nb_layers == 3;
 		case SEQ_SER:
 			return (seq->ser_file->color_id != SER_MONO && !com.raw_set.ser_cfa) ||
-				seq->ser_file->color_id == RGB || seq->ser_file->color_id == BGR;
+				seq->ser_file->color_id == SER_RGB ||
+				seq->ser_file->color_id == SER_BGR;
 		default:
 			return TRUE;
 	}

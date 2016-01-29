@@ -9936,7 +9936,7 @@ SER files are directly handled as a sequence, and are not available for conversi
                         <property name="tooltip_text" translatable="yes">By default, Siril takes the data from seq file if already computed. However you can force Siril to recompute the file if some changes have not been taken into account.
 This button will be automatically unchecked after being used.
 
-WARNING: it will erase all registration data</property>
+WARNING: it will erase all registration and statistics data.</property>
                         <property name="halign">end</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>

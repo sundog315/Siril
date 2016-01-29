@@ -37,30 +37,20 @@
 #include "core/proto.h"
 #include "io/conversion.h"
 #include "io/films.h"
+#include "io/ser.h"
 #include "gui/callbacks.h"
 #include "algos/demosaicing.h"
 
-#define SUFFIX_MAX_LEN 9
-#define MAX_OF_EXTENSIONS 50
+#define MAX_OF_EXTENSIONS 50	// actual size of supported_extensions
 
-//~ static char *sourceroot = NULL;
 static char *destroot = NULL;
-static char sourcesuf[SUFFIX_MAX_LEN+1];	// initialized at runtime
-static char destsuf[]="fit";
-static unsigned int convflags = CONV1X3 | CONVBMP | CONVPIC | CONVTIF | CONVJPG | CONVPNG | CONVRAW | CONVCFA | CONVALL;
+static unsigned int convflags = CONV1X3;	// default
 static unsigned int supported_filetypes = 0;	// initialized by initialize_converters()
-//static char pnmpath[255]={"/usr/bin"};
-//static char pnmcom[3][255]={"pngtopnm","jpegtopnm","bmptopnm"};
-static char combuffer[512];
 
-//~ static gpointer convert_thread_worker(gpointer p);
-//~ static gboolean end_convert_idle(gpointer p);
-static gpointer convert_thread_worker(gpointer p);
-static gboolean end_convert_idle(gpointer p);
+// NULL-terminated array, initialized by initialize_converters(), used only by stat_file
+char **supported_extensions;
 
-char **supported_extensions;		// initialized by initialize_converters() and is a NULL-terminated array
 supported_raw_list supported_raw[] = {
-	
 	{"dng",	"Adobe", BAYER_FILTER_RGGB},
 	{"mos",	"Aptus", BAYER_FILTER_RGGB},
 	{"cr2",	"Canon", BAYER_FILTER_RGGB},
@@ -85,10 +75,13 @@ supported_raw_list supported_raw[] = {
 	{"arw",	"Sony", BAYER_FILTER_RGGB}
 };
 
-int get_nb_raw_supported() {
-	return sizeof(supported_raw) / sizeof(supported_raw_list);
-}
-		
+char *filter_pattern[] = {
+	"RGGB",
+	"BGGR",
+	"GBRG",
+	"GRBG"
+};
+
 char *conversion_tips[] = {
 	//~ Color interpolation
 	"Your RAW files are being converted to interpolated colour-pictures. "
@@ -99,14 +92,15 @@ char *conversion_tips[] = {
 	"To change this behaviour, uncheck the correspondant button in File->Settings->Raw images." 
 };
 
-char *filter_pattern[] = {
-	"RGGB",
-	"BGGR",
-	"GBRG",
-	"GRBG"
-};
+static gpointer convert_thread_worker(gpointer p);
+static gboolean end_convert_idle(gpointer p);
 
-	/* This function is used with command line only */ 
+
+int get_nb_raw_supported() {
+	return sizeof(supported_raw) / sizeof(supported_raw_list);
+}
+
+/* This function is used with command line only */ 
 void list_format_available() {
 	puts("======================================================="); 
 	puts("[            Supported image file formats             ]");
@@ -118,7 +112,7 @@ void list_format_available() {
 #ifdef HAVE_LIBRAW
 	printf("RAW\t(");
 	int i, nb_raw;
-	
+
 	nb_raw = get_nb_raw_supported();
 	for (i = 0; i < nb_raw; i++) {
 		printf("*.%s",supported_raw[i].extension);
@@ -155,7 +149,7 @@ void check_for_conversion_form_completeness() {
 }
 
 void on_convtoroot_changed (GtkEditable *editable, gpointer user_data){
-	const char *name=gtk_entry_get_text(GTK_ENTRY(editable));
+	const char *name = gtk_entry_get_text(GTK_ENTRY(editable));
 	if (destroot) free(destroot);
 	destroot = strdup(name);
 	check_for_conversion_form_completeness();
@@ -183,45 +177,26 @@ void on_radiobutton_conv_cfa_toggled (GtkToggleButton *togglebutton, gpointer us
 	valid = gtk_tree_model_get_iter_first(model, &iter);
 	com.is_cfa = gtk_toggle_button_get_active(togglebutton);
 	
-	while(valid) {
+	while (valid) {
 		gchar *str_data, *msg;
 		gtk_tree_model_get (model, &iter, 0, &str_data, -1);	//0 for FILECOLUMN
 		GtkToggleButton *but = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_conv"));
-		if (!ends_with(str_data, ".fit") && (com.is_cfa)) {
+		const char *ext = get_filename_ext(str_data);
+		if (ext && com.is_cfa && strcasecmp(ext, "fit") &&
+				strcasecmp(ext, "fits") && strcasecmp(ext, "fts")) {
 			g_signal_handlers_block_by_func(but, on_radiobutton_conv_cfa_toggled, NULL);
-			gtk_toggle_button_set_active (but, TRUE);
+			gtk_toggle_button_set_active(but, TRUE);
 			g_signal_handlers_unblock_by_func(but, on_radiobutton_conv_cfa_toggled, NULL);
-			msg = siril_log_message("There is at least one file not compatible. For demosaicing, all files must have *.fit extension\n");
+			msg = siril_log_message("For demosaicing, all files must be in FITS format. At least one is not.\n");
 			show_dialog(msg, "ERROR", "gtk-dialog-error");
 			return;
 		}
-		/*else if (ends_with(str_data, ".fit") && (!is_cfa)) {
-			g_signal_handlers_block_by_func(togglebutton, on_radiobutton_conv_cfa_toggled, NULL);
-			gtk_toggle_button_set_active (togglebutton, TRUE);
-			g_signal_handlers_unblock_by_func(togglebutton, on_radiobutton_conv_cfa_toggled, NULL);
-			msg = siril_log_message("There is at least one file not compatible. No *.fit files allowed in FITS conversion.\n");
-			show_dialog(msg, "ERROR", "gtk-dialog-error");
-			return;
-		}*/
 		valid = gtk_tree_model_iter_next (model, &iter);
 	}
 }
 
-/* COMMAND LINE CONVERSION UTILITIES */
+/*************************************************************************************/
 
-/* returns true if the command mplayer for AVI file importing is available */
-gboolean mplayer_is_available() {
-	int retval = system("mplayer > /dev/null 2>&1");
-	if (WIFEXITED(retval))
-		return 0 == WEXITSTATUS(retval); // mplayer always returns 0
-	return FALSE;
-}
-
-/*************************************************************************************
- * 
- * 
- * ********************************************************************************/
- 
 void update_raw_cfa_tooltip() {
 	GtkWidget* conv_button = lookup_widget("convert_button");
 	gtk_widget_set_tooltip_text(conv_button, conversion_tips[(int)com.raw_set.cfa]);
@@ -267,11 +242,11 @@ void initialize_converters() {
 	//text[0] = '\0';
 	int count_ext = 0;
 	/* internal converters */
-	supported_filetypes |= CONVBMP;
+	supported_filetypes |= TYPEBMP;
 	strcat(text, "BMP images, ");
-	supported_filetypes |= CONVPIC;
+	supported_filetypes |= TYPEPIC;
 	strcat(text, "PIC images (IRIS), ");
-	supported_filetypes |= CONVPNM;
+	supported_filetypes |= TYPEPNM;
 	strcat(text, "PGM and PPM binary images");
 	has_entry = TRUE;
 		
@@ -296,7 +271,7 @@ void initialize_converters() {
 #ifdef HAVE_LIBRAW
 	int i, nb_raw;
 	
-	supported_filetypes |= CONVRAW;
+	supported_filetypes |= TYPERAW;
 	if (has_entry)	strcat(text, ", ");
 	strcat(text, "RAW images");
 	has_entry = TRUE;
@@ -313,22 +288,21 @@ void initialize_converters() {
 #else
 	set_libraw_settings_menu_available(FALSE);	// disable libraw settings
 #endif
-	supported_filetypes |= CONVCFA;
+	//supported_filetypes |= TYPECFA;
 	if (has_entry)	strcat(text, ", ");
 	strcat(text, "FITS-CFA images");
 	has_entry = TRUE;
 
-	if (mplayer_is_available() && (supported_filetypes & CONVPNM)) {
-		// pnmtofits is used after mplayer extracted frames to PNM
-		supported_filetypes |= CONVAVI;
-		if (has_entry)	strcat(text, ", ");
-		strcat(text, "Videos");
-		has_entry = TRUE;
-	}
+#ifdef HAVE_FFMS2
+	supported_filetypes |= TYPEAVI;
+	if (has_entry)	strcat(text, ", ");
+	strcat(text, "Videos");
+	has_entry = TRUE;
+#endif
 
 	/* library converters (detected by configure) */
 #ifdef HAVE_LIBTIFF
-	supported_filetypes |= CONVTIF;
+	supported_filetypes |= TYPETIFF;
 	if (has_entry)	strcat(text, ", ");
 	strcat(text, "TIFF images");
 	supported_extensions[count_ext++] = ".tif";
@@ -336,7 +310,7 @@ void initialize_converters() {
 	has_entry = TRUE;
 #endif
 #ifdef HAVE_LIBJPEG
-	supported_filetypes |= CONVJPG;
+	supported_filetypes |= TYPEJPG;
 	if (has_entry)	strcat(text, ", ");
 	strcat(text, "JPG images");
 	supported_extensions[count_ext++] = ".jpg";
@@ -344,7 +318,7 @@ void initialize_converters() {
 	has_entry = TRUE;
 #endif
 #ifdef HAVE_LIBPNG
-	supported_filetypes |= CONVPNG;
+	supported_filetypes |= TYPEPNG;
 	if (has_entry)	strcat(text, ", ");
 	strcat(text, "PNG images");
 	supported_extensions[count_ext++] = ".png";
@@ -360,131 +334,70 @@ void initialize_converters() {
 	siril_log_message("Supported file types: %s\n", text+1);
 }
 
-/**************************************************************************/
-
-int check_for_raw_extensions() {
+int check_for_raw_extensions(const char *extension) {
 	int i, nb_raw;
-	
 	nb_raw = get_nb_raw_supported();
 	for (i = 0; i < nb_raw; i++) {
-		if (!strcasecmp(sourcesuf, supported_raw[i].extension)) return 0;
+		if (!strcasecmp(extension, supported_raw[i].extension))
+			return 0;
 	}
 	return 1;
 }
 
-image_type get_type_for_extension_name(const char *extension) {
-	if (!strcasecmp(extension, ".fit"))	return TYPEFITS;
-	if (!strcasecmp(extension, ".fits"))	return TYPEFITS;
-	if (!strcasecmp(extension, ".fts"))	return TYPEFITS;
-	if (!strcasecmp(extension, ".png"))	return TYPEPNG;
-	if (!strcasecmp(extension, ".jpg"))	return TYPEJPG;
-	if (!strcasecmp(extension, ".jpeg"))	return TYPEJPG;
-	if (!strcasecmp(extension, ".bmp"))	return TYPEBMP;
-	if (!strcasecmp(extension, ".ser"))	return TYPESER;
-	if (!strcasecmp(extension, ".tif"))	return TYPETIFF;
-	if (!strcasecmp(extension, ".tiff"))	return TYPETIFF;
-	if (!strcasecmp(extension, ".pnm"))	return TYPEPNM;
-	if (!strcasecmp(extension, ".pgm"))	return TYPEPNM;
-	if (!strcasecmp(extension, ".ppm"))	return TYPEPNM;
-	if (!strcasecmp(extension, ".pic"))	return TYPEPIC;
-
-	/* Check for raw extentions
-	 * Cannot use check_for_raw_extensions() because of the dot */
-	int i, nb_raw;
-	nb_raw = get_nb_raw_supported();
-	for (i = 0; i < nb_raw; i++) {
-		char temp[10];
-		strncpy(temp, ".", 10);
-		strcat(temp, supported_raw[i].extension);
-		if (!strcasecmp(extension, temp)) return TYPERAW;
-	}
-
-#ifdef HAVE_FFMS2	
-	/* Check for film extensions */
-	int nb_film;
-	nb_film = get_nb_film_ext_supported();
-	for (i = 0; i < nb_film; i++) {
-		char temp[10];
-		strncpy(temp, ".", 10);
-		strcat(temp, supported_film[i].extension);
-		if (!strcasecmp(extension, temp)) return TYPEAVI;
-	}
-#else
-	if (!strcasecmp(extension, ".avi"))	return TYPEAVI;
+/* returns the image_type for the extension without the dot, only if it is supported by
+ * the current instance of Siril. */
+image_type get_type_for_extension(const char *extension) {
+	//convflags &= (CONV1X3 | CONV3X1 | CONV1X1);	// reset file format
+	if (supported_filetypes & TYPEBMP && !strcasecmp(extension, "bmp")) {
+		return TYPEBMP;
+	} else if (supported_filetypes & TYPEJPG &&
+			(!strcasecmp(extension, "jpg") || !strcasecmp(extension, "jpeg"))) {
+		return TYPEJPG;
+	} else if (supported_filetypes & TYPETIFF &&
+			(!strcasecmp(extension, "tif") || !strcasecmp(extension, "tiff"))) {
+		return TYPETIFF;
+	} else if (supported_filetypes & TYPEPNG && !strcasecmp(extension, "png")) { 
+		return TYPEPNG;
+	} else if (supported_filetypes & TYPEPNM &&
+			(!strcasecmp(extension, "pnm") || !strcasecmp(extension, "ppm") ||
+			 !strcasecmp(extension, "pgm"))) {
+		return TYPEPNM;
+	} else if (supported_filetypes & TYPEPIC && !strcasecmp(extension, "pic")){
+		return TYPEPIC;
+	} else if (supported_filetypes & TYPERAW && !check_for_raw_extensions(extension)) {
+		return TYPERAW;
+#ifdef HAVE_FFMS2
+		// check_for_film_extensions is undefined without FFMS2
+	} else if (supported_filetypes & TYPEAVI && !check_for_film_extensions(extension)) {
+		return TYPEAVI;
 #endif
-	return TYPEUNDEF;
-}
-
-/* takes the extension given by the user and converts it to a convflags flag *
- * returns: 0 is filetype is supported, 1 else */
-int set_convflags_from_extension() {
-	convflags &= (CONVALL | CONV1X3 | CONV3X1 | CONV1X1 | CONVUFL);	// reset
-	if (!strcasecmp(sourcesuf, "bmp")) {
-		if (supported_filetypes & CONVBMP) {
-			convflags |= CONVBMP;
-			return 0;
-		}
-	} else if (!strcasecmp(sourcesuf, "jpg") || !strcasecmp(sourcesuf, "jpeg")) {
-		if (supported_filetypes & CONVJPG) {
-			convflags |= CONVJPG;
-			return 0;
-		}
-	} else if (!strcasecmp(sourcesuf, "tif") || !strcasecmp(sourcesuf, "tiff")) {
-		if (supported_filetypes & CONVTIF) {
-			convflags |= CONVTIF;
-			return 0;
-		}
-	} else if (!strcasecmp(sourcesuf, "png")) { 
-		if (supported_filetypes & CONVPNG) {
-			convflags |= CONVPNG;
-			return 0;
-		}
-	} else if (!strcasecmp(sourcesuf, "avi") || !strcasecmp(sourcesuf, "mpg") ||
-				!strcasecmp(sourcesuf, "mpeg")) {
-		if (supported_filetypes & CONVAVI) {	// dependencies already managed
-			convflags |= CONVAVI;
-			return 0;
-		}
-	} else if (!strcasecmp(sourcesuf, "pnm") || !strcasecmp(sourcesuf, "ppm") ||
-			!strcasecmp(sourcesuf, "pgm")) {
-		if (supported_filetypes & CONVPNM) {
-			convflags |= CONVPNM;
-			return 0;
-		}
-	} else if (!strcasecmp(sourcesuf, "pic")){
-		if (supported_filetypes & CONVPIC) {
-			convflags |= CONVPIC;
-			return 0;
-		}
-	} else if (!check_for_raw_extensions()) {
-		if (supported_filetypes & CONVRAW) {
-			convflags |= CONVRAW;
-			return 0;
-		}
-	} else if (!strcasecmp(sourcesuf, "fit") || !strcasecmp(sourcesuf, "fits") ||
-			!strcasecmp(sourcesuf, "fts")) {
-		if (com.is_cfa && (supported_filetypes & CONVCFA))
-			convflags |= CONVCFA;
-		else convflags |= CONVFIT;
-		return 0;
+	} else if (!strcasecmp(extension, "fit") || !strcasecmp(extension, "fits") ||
+			!strcasecmp(extension, "fts")) {
+		return TYPEFITS;
 	}
-	return 1;	// not recognized of not in supported list
+	return TYPEUNDEF; // not recognized or not supported
 }
 
-// appends a '_' to destroot if it ends with a digit
+// truncates destroot if it's more than 120 characters, append a '_' if it
+// doesn't end with one or a '-'. SER extensions are accepted and unmodified.
 void verify_destroot_validity() {
 	if (!destroot) return;
+
+	const char *ext = get_filename_ext(destroot);
+	if (ext && !strcasecmp(ext, "ser")) return;
+
 	int len = strlen(destroot);
-	if (destroot[len-1] >= '0' && destroot[len-1] <= '9') {
-		char *newdest = realloc(destroot, strlen(destroot)+2);
-		if (newdest == NULL) {
-			free(destroot);
-			destroot = NULL;
-		} else {
-			destroot = newdest;
-			destroot[len] = '_';
-			destroot[len+1] = '\0';
-		}
+	if (len > 120) len = 120;
+	if (destroot[len-1] == '-' || destroot[len-1] == '_') return;
+
+	char *newdest = realloc(destroot, len+2);
+	if (newdest == NULL) {
+		free(destroot);
+		destroot = NULL;
+	} else {
+		destroot = newdest;
+		destroot[len] = '_';
+		destroot[len+1] = '\0';
 	}
 }
 
@@ -539,7 +452,7 @@ void on_convert_button_clicked(GtkButton *button, gpointer user_data) {
 
 	struct timeval t_start, t_end;
 	
-	if (((convflags & CONVALL) || (convflags & CONVAVI)) && get_thread_run()) {
+	if (get_thread_run()) {
 		siril_log_message("Another task is already in progress, ignoring new request.\n");
 		return;
 	}
@@ -569,7 +482,6 @@ void on_convert_button_clicked(GtkButton *button, gpointer user_data) {
 	
 	/* then, convert files to Siril's FITS format */
 
-	if (convflags & CONVALL) {
 		struct _convert_data *args;
 		set_cursor_waiting(TRUE);
 		char *tmpmsg;
@@ -595,7 +507,6 @@ void on_convert_button_clicked(GtkButton *button, gpointer user_data) {
 		args->t_start.tv_usec = t_start.tv_usec;
 		start_in_new_thread(convert_thread_worker, args);
 		return;
-	}
 
 	// non-threaded end
 	update_used_memory();
@@ -604,106 +515,124 @@ void on_convert_button_clicked(GtkButton *button, gpointer user_data) {
 	show_time(t_start, t_end);
 }
 
-int convert_film(char *filename) {
-	int retval;
-	
-	set_progress_bar_data("Converting AVI file, it may take some time...", PROGRESS_NONE);
-	siril_log_message("Converting AVI file, it may take some time...\n");
-	set_progress_bar_data(NULL, 0.05);
-	if (convflags & CONV1X1) {
-		snprintf(combuffer, 511, "/usr/bin/mplayer -fps 500 -vo pnm:pgm:outdir=%s %s",
-				destroot, replace_spaces_from_filename(filename));
-		sprintf(sourcesuf, "pgm");
-	} else {
-		snprintf(combuffer, 511, "/usr/bin/mplayer -fps 500 -vo pnm:outdir=%s %s",
-				destroot, replace_spaces_from_filename(filename));
-		sprintf(sourcesuf, "ppm");
-	}
-	fprintf(stdout, "converting avi file using this command: %s\n", combuffer);
-	retval = system(combuffer);
-	if (retval) return retval;
-	if (!WIFEXITED(retval) && 0 != WEXITSTATUS(retval)) {	// mplayer always returns 0
-		char *msg = siril_log_message("Invoking mplayer failed, verify you installed it\n");
-		set_progress_bar_data(msg, PROGRESS_DONE);
-		return -1;
-	}
-	siril_log_message("Conversion finished, now converting temporary PGM files\n");
-	set_progress_bar_data(NULL, 0.35);
-	convflags |= (CONVALL | CONVPNM);
-	return retval;
-}
-
-// This idle function was not really required, but allows to properly join the thread.
 static gpointer convert_thread_worker(gpointer p) {
-	char destfilename[256], msg_bar[256];
-	int i = 0;
+	char dest_filename[128], msg_bar[256];
 	int indice;
+	double progress = 0.0;
+	gboolean is_ser_output = FALSE;
+	struct ser_struct *ser_file = NULL;
 	struct _convert_data *args = (struct _convert_data *) p;
 	
 	args->list = g_list_first (args->list);
-	indice = args->start - 1;
-	while(args->list) {
-		char *sourcefilename;
+	indice = args->start;
+
+	// convflags gives the input format, but we might get SER as output
+	// instead of the usual FITS sequence in Siril 16 bits format
+	const char *ext = get_filename_ext(destroot);
+	if (ext && !strcasecmp(ext, "ser")) {
+		siril_log_message("NOT YET IMPLEMENTED\n");
+		/*if (convflags & CONV3X1) {
+			siril_log_color_message("SER output will take precedence over the 3-fit creation option.\n", "salmon");
+			convflags &= ~CONV3X1;
+		} else {
+			is_ser_output = TRUE;
+			ser_file = malloc(sizeof(struct ser_struct));
+			ser_init_struct(ser_file);
+			ser_create_file_with_header(destroot, ser_file, TRUE);
+		}*/
+	}
+
+	while (args->list) {
+		char *src_filename = (char *)args->list->data;
+		const char *src_ext = get_filename_ext(src_filename);
+		image_type imagetype;
 
 		if (!get_thread_run()) {
-			args->list = NULL;
 			break;
 		}
-		sourcefilename = (char *)args->list->data;
-		snprintf(destfilename, 255, "%s%05d.%s", destroot, ++indice, destsuf);
-		++i;
-		strncpy(sourcesuf, get_filename_ext(sourcefilename), SUFFIX_MAX_LEN);
-		if (set_convflags_from_extension()) {
+
+		imagetype = get_type_for_extension(src_ext);
+		if (imagetype == TYPEUNDEF) {
 			char msg[512];
-			siril_log_message("FILETYPE IS NOT SUPPORTED, CANNOT CONVERT: %s\n", sourcesuf);
-			snprintf(msg, 511, "File extension '%s' is not supported.\n"
+			siril_log_message("FILETYPE IS NOT SUPPORTED, CANNOT CONVERT: %s\n", src_ext);
+			snprintf(msg, 512, "File extension '%s' is not supported.\n"
 				"Verify that you typed the extension correctly.\n"
 				"If so, you may need to install third-party software to enable "
 				"this file type conversion, look at the README file.\n"
 				"If the file type you are trying to load is listed in supported "
 				"formats, you may notify the developpers that the extension you are "
-				"trying to use should be recognized for this type.", sourcesuf);
-			show_dialog(msg, "Warning", "gtk-dialog-warning");
+				"trying to use should be recognized for this type.", src_ext);
+			show_dialog(msg, "Error", "gtk-dialog-error");
+			break;	// avoid 100 error popups
 		}
-		else {
-			if (convflags & CONVAVI){
-				char newpath[256], newdest[256], newsource[256], *dirname;
-				struct dirent *file;
-				DIR *newdir;
-				
-				if (convert_film(sourcefilename)) {
-					siril_log_message("Error during mplayer conversion. Aborted...\n");
-					gdk_threads_add_idle(end_convert_idle, args);
-					return NULL;
-				}
-				dirname = extract_path(sourcefilename);
-				sprintf(newpath, "%s/%s", dirname, destroot);
-				free(dirname);
-				if((newdir = opendir(newpath)) == NULL){
-					siril_log_message("Conversion: error opening working directory %s.\n", newpath);
-					gdk_threads_add_idle(end_convert_idle, args);
-					return NULL;
-				}
-				
-				while ((file = readdir(newdir)) != NULL) {
-					if (ends_with(file->d_name, destsuf)) continue;
-					sprintf(newsource, "%s/%s", newpath, file->d_name);
-					sprintf(newdest, "%s/seq_%s.%s", newpath, remove_ext_from_filename(file->d_name), destsuf);
-					tofits(newsource, newdest);
-					unlink(newsource);
-				}
-				closedir(newdir);
+
+		if (imagetype == TYPEAVI) {
+			int frame;
+			if (convflags & CONV3X1) {
+				siril_log_color_message("SER output will take precedence over the 3-fit creation option.\n", "salmon");
+				convflags &= ~CONV3X1;
 			}
-			else
-				tofits(sourcefilename, remove_ext_from_filename(destfilename));
+			// we need to do a semi-recursive thing here,
+			// thankfully it's only one level deep
+			fits *fit = calloc(1, sizeof(fits));
+#ifdef HAVE_FFMS2
+			struct film_struct film_file;
+			if (film_open_file(src_filename, &film_file) != FILM_SUCCESS) {
+				break;
+			}
+			for (frame = 0; frame < film_file.frame_count; frame++) {
+				// read frame from the film
+				if (film_read_frame(&film_file, frame, fit) != FILM_SUCCESS) {
+					break;
+				}
+				
+				// save to the destination file
+				if (is_ser_output) {
+					ser_write_frame_from_fit(ser_file, fit);
+				} else {
+					snprintf(dest_filename, 128, "%s%05d", destroot, indice++);
+					save_to_target_fits(fit, dest_filename);
+				}
+				clearfits(fit);
+			}
+#endif
+			free(fit);
 		}
-		char *name = strrchr(sourcefilename, '/');
-		sprintf(msg_bar, "Converting %s...", name + 1);
-		set_progress_bar_data(msg_bar, (double)i/((double)args->total));
-		free(sourcefilename);
+		else {	// single image
+			fits *fit = any_to_new_fits(imagetype, src_filename);
+			if (is_ser_output) {
+				ser_write_frame_from_fit(ser_file, fit);
+			} else {
+				snprintf(dest_filename, 128, "%s%05d", destroot, indice++);
+				save_to_target_fits(fit, dest_filename);
+			}
+			clearfits(fit);
+			free(fit);
+		}
+
+		char *name = strrchr(src_filename, '/');
+		if (name)
+			snprintf(msg_bar, 256, "Converting %s...", name + 1);
+		else snprintf(msg_bar, 256, "Converting %s...", src_filename);
+		free(src_filename);
+		set_progress_bar_data(msg_bar, progress/((double)args->total));
+		progress += 1.0;
+
 		args->list = g_list_next(args->list);
 	}
-	set_progress_bar_data(NULL, PROGRESS_DONE);
+
+	// free the remaining if there was a break
+	while (args->list) {
+		char *src_filename = (char *)args->list->data;
+		free(src_filename);
+		args->list = g_list_next(args->list);
+	}
+
+	if (is_ser_output) {
+		// verify that ser_file->frame_count is correct
+		ser_close_file(ser_file);
+		free(ser_file);
+	}
 
 	gdk_threads_add_idle(end_convert_idle, args);
 	return NULL;
@@ -738,322 +667,116 @@ static gboolean end_convert_idle(gpointer p) {
 	return FALSE;
 }
 
-int tofits(char *source, char *dest){
-	char filename[256];
-	int nbplan;
-	fits *tmpfit = calloc(1, sizeof(fits));
-	
-/**********************************************************************
- * ***                     CONVERSION OF BMP                     **** *
- * *******************************************************************/
-
-	if (convflags & CONVBMP){
-		tmpfit->bitpix = USHORT_IMG;	// convert it to USHORT anyway
-		nbplan = readbmp(source, tmpfit);
-		switch (nbplan) {
-			case -1:
-				return 1;
-			case 1:
-				if(savefits(dest, tmpfit)){
-					siril_log_message("tofits: savefit error, 1 plane\n");
-				}
-				break;
-			case 3:
-			case 4:
-				if(convflags & CONV3X1){
-					snprintf(filename, 255, "r_%s", dest);
-					if (save1fits16(filename, tmpfit, RLAYER)) {
-						siril_log_message("tofits: save1fit8 error, CONV3X1\n");
-						return 1;
-					}
-					snprintf(filename, 255, "g_%s", dest);
-					save1fits16(filename, tmpfit, GLAYER);
-					snprintf(filename, 255, "b_%s", dest);
-					save1fits16(filename, tmpfit, BLAYER);
-				}
-				else if(convflags & CONV1X3){
-					//~ siril_log_message("tofits: CONV1X3\n");
-					if(savefits(dest, tmpfit)){
-						siril_log_message("tofits: savefit error, CONV1X3\n");
-					}
-				}
-				else if(convflags & CONV1X1){
-					if (save1fits16(dest, tmpfit, RLAYER)) {
-						siril_log_message("tofits: save1fit8 error, CONV1X1\n");
-					}
-				}
-				break;
-			default:
-				siril_log_message("Unrecognized BMP file %s, aborting (%d layers)\n",
-						source, nbplan);
-				return 1;
+/* from a fits object, save to file or files, based on the channel policy from convflags */
+int save_to_target_fits(fits *fit, const char *dest_filename) {
+	if (convflags & CONV3X1) {	// an RGB image to 3 fits, one for each channel
+		char filename[130];
+		if (fit->naxis != 3) {
+			siril_log_message("saving to 3 FITS files cannot be done because the source image does not have three channels\n");
+			return 1;
+		}
+		sprintf(filename, "r_%s", dest_filename);
+		if (save1fits16(filename, fit, RLAYER)) {
+			siril_log_message("tofits: save1fit8 error, CONV3X1\n");
+			return 1;
+		}
+		sprintf(filename, "g_%s", dest_filename);
+		save1fits16(filename, fit, GLAYER);
+		sprintf(filename, "b_%s", dest_filename);
+		save1fits16(filename, fit, BLAYER);
+	} else if (convflags & CONV1X1) { // a single FITS to convert from an RGB grey image
+		if (save1fits16(dest_filename, fit, RLAYER)) {
+			siril_log_message("tofits: save1fit8 error, CONV1X1\n");
+		}
+	} else {			// normal FITS save, any format
+		if (savefits(dest_filename, fit)) {
+			siril_log_message("tofits: savefit error, CONV1X3\n");
 		}
 	}
-	
-/**********************************************************************
- * ***                     CONVERSION OF PIC                     **** *
- * *******************************************************************/
-	else if (convflags & CONVPIC){
-		tmpfit->bitpix = USHORT_IMG;	// convert it to USHORT anyway but PIC are SHORT_IMG
-		nbplan=readpic(source, tmpfit);	
-		switch (nbplan){
-			case -1:
-				return 1;
-			case 1:
-				if(savefits(dest, tmpfit)){
-					siril_log_message("tofits: savefit error, 1 plane\n");
-				}
-				break;
-			case 3:
-				if(convflags & CONV3X1){
-					snprintf(filename, 255, "r_%s", dest);
-					if (save1fits16(filename, tmpfit, RLAYER)) {
-						siril_log_message("ERROR : Unable to convert the file %s.\n", filename);
-						return 1;
-					}
-					snprintf(filename, 255, "g_%s", dest);
-					save1fits16(filename, tmpfit, GLAYER);
-					snprintf(filename, 255, "b_%s", dest);
-					save1fits16(filename, tmpfit, BLAYER);;			
-				}
-				else if(convflags & CONV1X3){		
-					savefits(dest, tmpfit);	
-				}
-				break;
-			default:
-				siril_log_message("Unrecognized PIC file %s, aborting (%d layers)\n",
-						source, nbplan);
-				return 1;
-		}
-	}
-/**********************************************************************
- * ***                     CONVERSION OF TIFF                    **** *
- * *******************************************************************/	
-#ifdef HAVE_LIBTIFF
-	else if (convflags & CONVTIF){
-		tmpfit->bitpix = USHORT_IMG;	// convert it to USHORT anyway
-		nbplan=readtif(source, tmpfit);
-		switch (nbplan){
-			case -1:
-				return 1;
-			case 1:
-				if(savefits(dest, tmpfit)){
-					siril_log_message("tofits: savefit error, 1 plane\n");
-				}
-				break;	
-			case 3:		
-				if(convflags & CONV3X1){
-					snprintf(filename, 255, "r_%s", dest);
-					if (save1fits16(filename, tmpfit, RLAYER)) {
-						siril_log_message("ERROR : Unable to convert the file %s\n", filename);
-						return 1;
-					}
-					snprintf(filename, 255, "g_%s", dest);
-					save1fits16(filename, tmpfit, GLAYER);
-					snprintf(filename, 255, "b_%s", dest);
-					save1fits16(filename, tmpfit, BLAYER);			
-				}
-				else if(convflags & CONV1X3){		
-					savefits(dest, tmpfit);	
-				}
-				break;
-			default:
-				siril_log_message("Unrecognized TIFF file %s, aborting (%d layers)\n",
-						source, nbplan);
-				return 1;			
-			}
-	}
-#endif
-
-/**********************************************************************
- * ***                     CONVERSION OF JPG                     **** *
- * *******************************************************************/
-#ifdef HAVE_LIBJPEG
-	else if (convflags & CONVJPG){
-		tmpfit->bitpix = USHORT_IMG;	// convert it to USHORT anyway
-		nbplan=readjpg(source, tmpfit);	
-		switch (nbplan){
-			case -1:
-				return 1;
-			case 1:
-				if(savefits(dest, tmpfit)){
-					siril_log_message("tofits: savefit error, 1 plane\n");
-				}
-				break;	
-			case 3:	
-				if(convflags & CONV3X1){
-					snprintf(filename, 255, "r_%s", dest);
-					if (save1fits16(filename, tmpfit, RLAYER)) {
-						siril_log_message("ERROR : Unable to convert the file %s\n", filename);
-						return 1;
-					}
-					snprintf(filename, 255, "g_%s", dest);
-					save1fits16(filename, tmpfit, GLAYER);
-					snprintf(filename, 255, "b_%s", dest);
-					save1fits16(filename, tmpfit, BLAYER);;			
-				}
-				else if(convflags & CONV1X3){		
-					savefits(dest, tmpfit);	
-				}
-				break;
-			default:
-				siril_log_message("Unrecognized JPEG file %s, aborting (%d layers)\n",
-						source, nbplan);
-				return 1;			
-			}		
-	}
-#endif
-
-/**********************************************************************
- * ***                     CONVERSION OF PNG                     **** *
- * *******************************************************************/
-#ifdef HAVE_LIBPNG
-	else if (convflags & CONVPNG){
-		tmpfit->bitpix = USHORT_IMG;	// convert it to USHORT anyway
-		nbplan=readpng(source, tmpfit);
-		switch(nbplan){	
-			case -1:
-				return 1;
-			case 1:
-				if(savefits(dest, tmpfit)){
-					siril_log_message("tofits: savefit error, 1 plane\n");
-				}
-				break;	
-			case 3:	
-				if(convflags & CONV3X1){
-					snprintf(filename, 255, "r_%s", dest);
-					if (save1fits16(filename, tmpfit, RLAYER)) {
-						siril_log_message("ERROR : Unable to convert the file %s\n", filename);
-						return 1;
-					}
-					snprintf(filename, 255, "g_%s", dest);
-					save1fits16(filename, tmpfit, GLAYER);
-					snprintf(filename, 255, "b_%s", dest);
-					save1fits16(filename, tmpfit, BLAYER);;			
-				}
-				else if(convflags & CONV1X3){		
-					savefits(dest, tmpfit);	
-				}
-				break;
-			default:
-				siril_log_message("Unrecognized PNG file %s, aborting (%d layers)\n",
-						source, nbplan);
-				return 1;			
-			}					
-	}
-#endif
-
-/**********************************************************************
- * ***                     CONVERSION OF RAW                     **** *
- * *******************************************************************/
-#ifdef HAVE_LIBRAW
-	else if (convflags & CONVRAW) {
-		open_raw_files(source, tmpfit, com.raw_set.cfa);
-		if(convflags & CONV3X1){
-			if (com.raw_set.cfa) {
-				siril_log_message("Cannot convert the B&W file into 3 channels\n");
-				clearfits(tmpfit);
-				return 1;
-			}
-			snprintf(filename, 255, "r_%s", dest);
-			if (save1fits16(filename, tmpfit, RLAYER)) {
-				siril_log_message("ERROR : Unable to convert the file %s\n", filename);
-				return 1;
-			}
-			snprintf(filename, 255, "g_%s", dest);
-			save1fits16(filename,tmpfit,GLAYER);
-			snprintf(filename, 255, "b_%s", dest);
-			save1fits16(filename, tmpfit, BLAYER);;			
-		}
-		else if(convflags & CONV1X3){		
-			savefits(dest, tmpfit);
-		}
-	}
-#endif
-
-/**********************************************************************
- * ***                   CONVERSION OF NetPBM                    **** *
- * *******************************************************************/
-	else if (convflags & CONVPNM){
-		tmpfit->bitpix = USHORT_IMG;	// convert it to USHORT anyway
-		nbplan = import_pnm_to_fits(source, tmpfit);
-		switch (nbplan) {
-			case -1:
-				return 1;
-			case 1:
-				if(savefits(dest, tmpfit)){
-					siril_log_message("tofits: savefit error, 1 plane\n");
-				}
-				break;
-			case 3:
-				if(convflags & CONV3X1){
-					snprintf(filename, 255, "r_%s", dest);
-					if (save1fits16(filename, tmpfit, RLAYER)) {
-						siril_log_message("tofits: save1fit8 error, CONV3X1\n");
-						return 1;
-					}
-					snprintf(filename ,255, "g_%s", dest);
-					save1fits16(filename, tmpfit, GLAYER);
-					snprintf(filename, 255, "b_%s", dest);
-					save1fits16(filename, tmpfit, BLAYER);
-				}
-				else if(convflags & CONV1X3){
-					//~ siril_log_message("tofits: CONV1X3\n");
-					if(savefits(dest, tmpfit)){
-						siril_log_message("tofits: savefit error, CONV1X3\n");
-					}
-				}
-				else if(convflags & CONV1X1){
-					if (save1fits16(dest, tmpfit, RLAYER)) {
-						siril_log_message("tofits: save1fit8 error, CONV1X1\n");
-					}
-				}
-				break;
-			default:
-				siril_log_message("Unrecognized NetPNM file %s, aborting (%d layers)\n",
-						source, nbplan);
-				return 1;
-		}
-	}
-
-/**********************************************************************
- * ***                   CONVERSION OF FITS CFA                  **** *
- * *******************************************************************/
-/* Siril's FITS are stored bottom to top, debayering will throw 
- * wrong results. So before demosacaing we need to transforme the image
- * with fits_flip_top_to_bottom() function */
-	else if (convflags & CONVCFA) {
-		readfits(source, tmpfit, NULL);
-		fits_flip_top_to_bottom(tmpfit);
-		siril_log_message("Filter Pattern: %s\n", filter_pattern[com.raw_set.bayer_pattern]);
-		if (!debayer(tmpfit, com.raw_set.bayer_inter)) {
-			fits_flip_top_to_bottom(tmpfit);
-			savefits(dest, tmpfit);
-		} else {
-			siril_log_message("Cannot perform debayering\n");
-		}
-	}
-
-/**********************************************************************
- * ***                     CONVERSION OF FITS                    **** *
- * *******************************************************************/
-	else if (convflags & CONVFIT) {
-		readfits(source, tmpfit, NULL);
-		if (tmpfit->naxes[2] == 3 && (convflags & CONV3X1)){
-			snprintf(filename, 255, "r_%s", dest);
-			if (save1fits16(filename, tmpfit, RLAYER)) {
-				return 1;
-			}
-			snprintf(filename ,255, "g_%s", dest);
-			save1fits16(filename, tmpfit, GLAYER);
-			snprintf(filename, 255, "b_%s", dest);
-			save1fits16(filename, tmpfit, BLAYER);
-		}
-		else {
-			savefits(dest, tmpfit);
-		}
-	}
-
-	clearfits(tmpfit);
 	return 0;
 }
+
+/* open the file with path source from any image type and load it into a new FITS object */
+fits *any_to_new_fits(image_type imagetype, const char *source) {
+	int retval = 0;
+	fits *tmpfit = calloc(1, sizeof(fits));
+	//tmpfit->bitpix = USHORT_IMG;	// is this still useful?
+
+	retval = any_to_fits(imagetype, source, tmpfit);
+
+	/* What the hell?
+	 * Siril's FITS are stored bottom to top, debayering will throw 
+	 * wrong results. So before demosacaing we need to transforme the image
+	 * with fits_flip_top_to_bottom() function */
+	if (imagetype == TYPEFITS && convflags & CONVDEBAYER) {
+		fits_flip_top_to_bottom(tmpfit);
+		siril_log_message("Filter Pattern: %s\n",
+				filter_pattern[com.raw_set.bayer_pattern]);
+		if (debayer(tmpfit, com.raw_set.bayer_inter)) {
+			siril_log_message("Cannot perform debayering\n");
+			retval = -1;
+		} else {
+			fits_flip_top_to_bottom(tmpfit);
+		}
+	}
+
+	if (retval) {
+		clearfits(tmpfit);
+		free(tmpfit);
+		return NULL;
+	}
+
+	return tmpfit;
+}
+
+/* open the file with path source from any image type and load it into the given FITS object */
+int any_to_fits(image_type imagetype, const char *source, fits *dest) {
+	int retval = 0;
+
+	switch (imagetype) {
+		case TYPEFITS:
+			retval = (readfits(source, dest, NULL) != 0);
+			break;
+		case TYPEBMP:
+			retval = (readbmp(source, dest) < 0);
+			break;
+		case TYPEPIC:
+			retval = (readpic(source, dest) < 0);
+			break;
+#ifdef HAVE_LIBTIFF
+		case TYPETIFF:
+			retval = (readtif(source, dest) < 0);
+			break;
+#endif
+		case TYPEPNM:
+			retval = (import_pnm_to_fits(source, dest) < 0);
+			break;
+#ifdef HAVE_LIBJPEG
+		case TYPEJPG:
+			retval = (readjpg(source, dest) < 0);
+			break;		
+#endif
+#ifdef HAVE_LIBPNG
+		case TYPEPNG:
+			retval = (readpng(source, dest) < 0);
+			break;
+#endif
+#ifdef HAVE_LIBRAW
+		case TYPERAW:
+			retval = (open_raw_files(source, dest, com.raw_set.cfa) < 0);
+			break;
+#endif
+		case TYPESER:
+		case TYPEAVI:
+			siril_log_message("Requested converting a sequence file to single FITS image, should not happen\n");
+			retval = 1;
+			break;
+		case TYPEUNDEF:
+		default:	// when the ifdefs are not compiled, default happens!
+			siril_log_message("Error opening %s: file type not supported.\n", source);
+			retval = 1;
+	}
+
+	return retval;
+}
+

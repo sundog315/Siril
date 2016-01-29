@@ -552,7 +552,7 @@ void on_button_align_clicked(GtkButton *button, gpointer user_data) {
 	if (seq) free_sequence(seq, TRUE);
 	nb_layers = number_of_images_loaded();
 	if (nb_layers == 0 || nb_layers == 1) {
-		char *msg = siril_log_message("You must at least load two channels before !\n");
+		char *msg = siril_log_message("You must at least load two layers before!\n");
 		show_dialog(msg, "Warning", "gtk-dialog-warning");
 		return;
 	}
@@ -758,6 +758,7 @@ void luminance_and_colors_align_and_compose() {
 
 			/* converting back to RGB */
 			hsl_to_rgb(h,s,i, &pixel.red,&pixel.green,&pixel.blue);
+			rgb_pixel_limiter(&pixel);
 
 			/* and store in gfit */
 			gfit.pdata[RLAYER][j] = round_to_WORD(pixel.red * USHRT_MAX_DOUBLE);
@@ -1066,8 +1067,7 @@ void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 
 	/* update the real colours of layers from their saturated colour, based
 	 * on how much each colour of the composition overflows */
-	int channel;
-	/* amount of normalization to be done on each layer's image for each channel */
+	// amounts of normalization to be done on each layer's image for each channel
 	double to_redistribute_red = (max_pixel.red - 1.0) / (double)nb_images_red;
 	double to_redistribute_green = (max_pixel.green - 1.0) / (double)nb_images_green;
 	double to_redistribute_blue = (max_pixel.blue - 1.0) / (double)nb_images_blue;

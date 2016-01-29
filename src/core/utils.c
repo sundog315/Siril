@@ -125,10 +125,12 @@ int get_extension_index(const char *filename) {
 	return -1;
 }
 
+/* Get the extension of a file, without the dot.
+ * The returned pointed is from the filename itself or NULL. */
 const char *get_filename_ext(const char *filename) {
 	const char *dot = strrchr(filename, '.');
 	if (!dot || dot == filename)
-		return "";
+		return NULL;
 	return dot + 1;
 }
 
@@ -147,60 +149,45 @@ int is_readable_file(const char *filename) {
  * `type' is set according to the result of the test,
  * `realname' (optionnal) is set according to the found file name.
  * If filename contains an extension, only this file name is tested, else all
- * extensions are tested for the file name. */
-int stat_file(const char *filename2, image_type *type, char *realname) {
-	/* FIXME: these variables should not be size-limiter, and realname
-	 * should be a char ** to be allocated in the function */
-	char basename[256], filename[256], extension[6];
-	int separator_index, len, extension_len;
+ * extensions are tested for the file name until one is found. */
+int stat_file(const char *filename, image_type *type, char *realname) {
+	// FIXME: realname should be a char ** to be allocated in the function
+	char *test_name;
+	int k;
+	const char *ext = get_filename_ext(filename);
 	*type = TYPEUNDEF;	// default value
 
 	/* check for an extension in filename and isolate it, including the . */
-	if (!filename2 || filename2[0] == '\0')
+	if (!filename || filename[0] == '\0')
 		return 1;
-	len = strlen(filename2);
-	separator_index = get_extension_index(filename2);
-	extension_len = len - separator_index;
-	if (separator_index == -1 || extension_len < 4 || extension_len > 5) {
-		strncpy(basename, filename2, 255);
-		basename[255] = '\0';
-		extension[0] = '\0';
-	} else {
-		strncpy(basename, filename2, separator_index);
-		basename[separator_index] = '\0';
-		strncpy(extension, filename2 + separator_index, extension_len);
-		extension[extension_len] = '\0';
-	}
-	/* if filename2 had an extension, we only test for it */
-	if (extension[0] != '\0') {
-		if (is_readable_file(filename2)) {
+	/* if filename has an extension, we only test for it */
+	if (ext) {
+		if (is_readable_file(filename)) {
 			if (realname)
-				strcpy(realname, filename2);
-			*type = get_type_for_extension_name(extension);
+				strcpy(realname, filename);
+			*type = get_type_for_extension(ext);
 			return 0;
 		}
 		return 1;
 	}
 
+	test_name = malloc(strlen(filename) + 10);
 	/* else, we can test various file extensions */
 	/* first we test lowercase, then uppercase */
-	int k;
 	for (k = 0; k < 2; k++) {
 		int i = 0;
 		while (supported_extensions[i]) {
-			char *str = strdup(supported_extensions[i]);
-			if (k == 1) {
-				char *newstr = convtoupper(str);
-				free(str);
-				str = newstr;
-			}
-			snprintf(filename, 255, "%s%s", basename, str);
-			if (str)
-				free(str);
-			if (is_readable_file(filename)) {
-				*type = get_type_for_extension_name(supported_extensions[i]);
+			char *str;
+			if (k == 0)
+				str = strdup(supported_extensions[i]);
+			else str = convtoupper(supported_extensions[i]);
+			snprintf(test_name, 255, "%s%s", filename, str);
+			free(str);
+			if (is_readable_file(test_name)) {
+				*type = get_type_for_extension(supported_extensions[i]+1);
+				assert(*type != TYPEUNDEF);
 				if (realname)
-					strcpy(realname, filename);
+					strcpy(realname, test_name);
 				return 0;
 			}
 			i++;

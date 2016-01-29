@@ -72,9 +72,9 @@ char *convert_color_id_to_char(ser_color color_id) {
 		return "YMCY";
 	case SER_BAYER_MYYC:
 		return "MYYC";
-	case RGB:
+	case SER_RGB:
 		return "RGB";
-	case BGR:
+	case SER_BGR:
 		return "BGR";
 	default:
 		return "";
@@ -133,8 +133,8 @@ int _ser_read_header(struct ser_struct *ser_file) {
 	ser_file->telescope = strndup(header + 122, 40);
 
 	ser_file->number_of_planes =
-			((ser_file->color_id == RGB) || (ser_file->color_id == BGR)) ?
-					3 : 1;
+		((ser_file->color_id == SER_RGB) || (ser_file->color_id == SER_BGR)) ?
+		3 : 1;
 	return 0;
 }
 
@@ -149,10 +149,7 @@ int ser_write_header(struct ser_struct *ser_file) {
 	memcpy(header + 22, &ser_file->endianness, 4);
 	memcpy(header + 26, &ser_file->image_width, 4);
 	memcpy(header + 30, &ser_file->image_height, 4);
-	if (ser_file->pixel_depth == SER_PIXEL_DEPTH_8)
-		pdepth = 8;
-	else
-		pdepth = 16;
+	pdepth = (ser_file->pixel_depth == SER_PIXEL_DEPTH_8) ? 8 : 16;
 	memcpy(header + 34, &pdepth, 4);
 	memcpy(header + 38, &ser_file->frame_count, 4);
 	memcpy(header + 42, ser_file->observer, 40 + 1);
@@ -163,8 +160,36 @@ int ser_write_header(struct ser_struct *ser_file) {
 
 	if (sizeof(header) != write(ser_file->fd, header, sizeof(header))) {
 		perror("write");
+		return 1;
 	}
 	return 0;
+}
+
+int ser_create_file_with_header(const char *filename, struct ser_struct *ser_file, gboolean overwrite) {
+	if (overwrite)
+		unlink(filename);
+	ser_file->fd = open(filename, O_CREAT | O_RDWR,
+			S_IWRITE | S_IREAD);
+	if (ser_file->fd == -1) {
+		perror("open ser file for creation");
+		return 1;
+	}
+	return ser_write_header(ser_file);
+}
+
+void ser_header_from_fit(struct ser_struct *ser_file, fits *fit) {
+	ser_init_struct(ser_file);
+	ser_file->image_width = fit->rx;
+	ser_file->image_height = fit->ry;
+	if (fit->naxis == 1) {
+		// maybe it's read as CFA...
+		ser_file->color_id = SER_MONO;
+	} else if (fit->naxis == 3) {
+		ser_file->color_id = SER_RGB;
+	}
+	ser_file->pixel_depth = SER_PIXEL_DEPTH_16;
+
+	// copy data from the fit header?
 }
 
 int ser_open_file(char *filename, struct ser_struct *ser_file) {
@@ -266,7 +291,7 @@ int ser_read_frame(struct ser_struct *ser_file, int frame_no, fits *fit) {
 	 * RGB and BGR are not coming from raw data. In consequence CFA does
 	 * not exist for these kind of cam */
 	ser_color type_ser = ser_file->color_id;
-	if (com.raw_set.ser_cfa && type_ser != RGB && type_ser != BGR)
+	if (com.raw_set.ser_cfa && type_ser != SER_RGB && type_ser != SER_BGR)
 		type_ser = SER_MONO;
 
 	switch (type_ser) {
@@ -289,10 +314,10 @@ int ser_read_frame(struct ser_struct *ser_file, int frame_no, fits *fit) {
 			set_combo_box_bayer_pattern(type_ser);
 		debayer(fit, com.raw_set.bayer_inter);
 		break;
-	case BGR:
+	case SER_BGR:
 		swap = 2;
 		/* no break */
-	case RGB:
+	case SER_RGB:
 		tmp = malloc(frame_size * sizeof(WORD));
 		memcpy(tmp, fit->data, sizeof(WORD) * frame_size);
 		fit->naxes[0] = fit->rx = ser_file->image_width;
@@ -340,7 +365,7 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 	 * RGB and BGR are not coming from raw data. In consequence CFA does
 	 * not exist for these kind of cam */
 	type_ser = ser_file->color_id;
-	if (com.raw_set.ser_cfa && type_ser != RGB && type_ser != BGR)
+	if (com.raw_set.ser_cfa && type_ser != SER_RGB && type_ser != SER_BGR)
 		type_ser = SER_MONO;
 
 	switch (type_ser) {
@@ -442,8 +467,8 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 
 		free(demosaiced_buf);
 		break;
-	case BGR:
-	case RGB:
+	case SER_BGR:
+	case SER_RGB:
 		//siril_log_message("Work in progress... Available soon !!\n");
 		//return -1;
 		assert(ser_file->number_of_planes == 3);
@@ -484,7 +509,7 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 		ser_manage_endianess_and_depth(ser_file, rgb_buf, area->w * area->h * 3);
 
 		color_offset = layer;
-		if (type_ser == BGR) {
+		if (type_ser == SER_BGR) {
 			color_offset = 2 - layer;
 		}
 
@@ -509,6 +534,14 @@ int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit) {
 
 	if (!ser_file || ser_file->fd <= 0 || !fit)
 		return -1;
+	if (ser_file->image_width == 0) {
+		// first frame added, use it to pupulate the header
+		ser_header_from_fit(ser_file, fit);
+	}
+	if (fit->rx != ser_file->image_width || fit->ry != ser_file->image_height) {
+		siril_log_message("Trying to add an image of different size in a SER\n");
+		return 1;
+	}
 	frame_size = ser_file->image_width * ser_file->image_height;
 
 	fits_flip_top_to_bottom(fit);

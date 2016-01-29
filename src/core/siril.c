@@ -1013,22 +1013,21 @@ gpointer seqpreprocess(gpointer p) {
 		set_progress_bar_data(msg, PROGRESS_NONE);
 		savefits(dest_filename, com.uniq->fit);
 	} else {	// sequence
-		struct ser_struct *new_ser_file = calloc(1, sizeof(struct ser_struct));
+		struct ser_struct *new_ser_file;
 		char source_filename[256];
 		int i;
 
+		// creating a SER file if the input data is SER
 		if (com.seq.type == SEQ_SER) {
 			char new_ser[256];
 			new_ser[255] = '\0';
-
+			new_ser_file = calloc(1, sizeof(struct ser_struct));
 			memcpy(new_ser_file, com.seq.ser_file, sizeof(struct ser_struct));
 			snprintf(new_ser, 255, "%s%s", com.seq.ppprefix,
 					new_ser_file->filename);
-			unlink(new_ser);
-			new_ser_file->fd = open(new_ser, O_CREAT | O_RDWR,
-					S_IWRITE | S_IREAD);
-			ser_write_header(new_ser_file);
+			ser_create_file_with_header(new_ser, new_ser_file, TRUE);
 		}
+		fits *fit = calloc(1, sizeof(fits));
 		for (i = 0; i < com.seq.number; i++) {
 			if (!get_thread_run())
 				break;
@@ -1038,18 +1037,20 @@ gpointer seqpreprocess(gpointer p) {
 			msg[255] = '\0';
 			set_progress_bar_data(msg,
 					(double) (i + 1) / (double) com.seq.number);
-			if (seq_read_frame(&com.seq, i, &(wfit[4]))) {
+			if (seq_read_frame(&com.seq, i, fit)) {
 				snprintf(msg, 255, "Could not read one of the raw files: %s."
 						" Aborting preprocessing.", source_filename);
 				msg[255] = '\0';
 				set_progress_bar_data(msg, PROGRESS_RESET);
 				args->retval = 1;
-				close(new_ser_file->fd);
-				free(new_ser_file);
+				if (com.seq.type == SEQ_SER) {
+					close(new_ser_file->fd);
+					free(new_ser_file);
+				}
 				gdk_threads_add_idle(end_sequence_prepro, args);
 				return GINT_TO_POINTER(1);
 			}
-			preprocess(&(wfit[4]), offset, dark, flat, args->normalisation,
+			preprocess(fit, offset, dark, flat, args->normalisation,
 					args->use_ccd_formula);
 			snprintf(dest_filename, 255, "%s%s", com.seq.ppprefix,
 					source_filename);
@@ -1070,13 +1071,18 @@ gpointer seqpreprocess(gpointer p) {
 					gdk_threads_add_idle(end_sequence_prepro, args);
 					return GINT_TO_POINTER(1);
 				}
-				ser_write_frame_from_fit(new_ser_file, &(wfit[4]));
+				ser_write_frame_from_fit(new_ser_file, fit);
 			} else {
-				savefits(dest_filename, &(wfit[4]));
+				savefits(dest_filename, fit);
 			}
+			clearfits(fit);
 		}
-		close(new_ser_file->fd);
-		free(new_ser_file);
+		free(fit);
+		// closing SER file if it applies
+		if (com.seq.type == SEQ_SER) {
+			close(new_ser_file->fd);
+			free(new_ser_file);
+		}
 		set_progress_bar_data(PROGRESS_TEXT_RESET, PROGRESS_RESET);
 	}
 	args->retval = 0;
@@ -1128,7 +1134,6 @@ int backgroundnoise(fits* fit, double sigma[]) {
 		fprintf(stderr, "backgroundnoise: error allocating data\n");
 		return 1;
 	}
-
 
 	copyfits(fit, waveimage, CP_ALLOC | CP_FORMAT | CP_COPYA, 0);
 #ifdef HAVE_OPENCV	// a bit faster

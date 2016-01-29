@@ -529,6 +529,7 @@ int process_ls(int nb){
 	while ((entry = readdir(ptdir)) != NULL) {
 		struct stat entrystat;
 		char file_path[256];
+		const char *ext;
 		if (entry->d_name[0] == '.')
 			continue;	/* no hidden files */
 		if (filename[0] != '\0')
@@ -547,18 +548,16 @@ int process_ls(int nb){
 			siril_log_color_message("Directory: %s\n", "green", entry->d_name);
 			continue;
 		}
-		int fnlen = strlen(entry->d_name);
-		if (fnlen < 5) continue;
-		int extlen = strlen(get_filename_ext(entry->d_name));
-		if (get_type_for_extension_name(entry->d_name + fnlen - (extlen + 1)) != TYPEUNDEF){
-			if ((get_type_for_extension_name(entry->d_name + fnlen - (extlen + 1)) == TYPEAVI) ||
-					(get_type_for_extension_name(entry->d_name + fnlen - 4) == TYPESER))
-				siril_log_color_message("Video: %s\n", "salmon", entry->d_name);
-			else
-				siril_log_color_message("Image: %s\n", "red", entry->d_name);
+		ext = get_filename_ext(entry->d_name);
+		if (!ext) continue;
+		image_type type = get_type_for_extension(ext);
+		if (type != TYPEUNDEF) {
+			if (type == TYPEAVI || type == TYPESER)
+				siril_log_color_message("Sequence: %s\n", "salmon", entry->d_name);
+			else 	siril_log_color_message("Image: %s\n", "red", entry->d_name);
 		}
 		// RAW files are not listed with the above filter
-		if (!strncasecmp(entry->d_name + fnlen - 4, ".seq", 4))
+		else if (!strncmp(ext, ".seq", 4))
 			siril_log_color_message("Sequence: %s\n", "blue", entry->d_name);
 	}
 	siril_log_message("********* END OF THE LIST *********\n");

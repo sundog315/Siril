@@ -454,7 +454,7 @@ int stack_median(struct stacking_args *args) {
 		naxes[0] = args->seq->ser_file->image_width;
 		naxes[1] = args->seq->ser_file->image_height;
 		ser_color type_ser = args->seq->ser_file->color_id;
-		if (com.raw_set.ser_cfa && type_ser != RGB && type_ser != BGR)
+		if (com.raw_set.ser_cfa && type_ser != SER_RGB && type_ser != SER_BGR)
 			type_ser = SER_MONO;
 		naxes[2] = type_ser == SER_MONO ? 1 : 3;
 		naxis = type_ser == SER_MONO ? 2 : 3;
@@ -1288,7 +1288,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 		naxes[0] = args->seq->ser_file->image_width;
 		naxes[1] = args->seq->ser_file->image_height;
 		ser_color type_ser = args->seq->ser_file->color_id;
-		if (com.raw_set.ser_cfa && type_ser != RGB && type_ser != BGR)
+		if (com.raw_set.ser_cfa && type_ser != SER_RGB && type_ser != SER_BGR)
 			type_ser = SER_MONO;
 		naxes[2] = type_ser == SER_MONO ? 1 : 3;
 		naxis = type_ser == SER_MONO ? 2 : 3;
