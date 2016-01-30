@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 
+<!-- Generated with glade 3.19.0 
 
 Copyright (C) The free-astro development team, 2015
 
@@ -411,7 +411,7 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
     <property name="lower">10</property>
     <property name="upper">100</property>
     <property name="value">100</property>
-    <property name="step_increment">10</property>
+    <property name="step_increment">3</property>
     <property name="page_increment">10</property>
   </object>
   <object class="GtkAdjustment" id="adjustment_red">
@@ -1833,9 +1833,6 @@ enter a visible wavelength in nm</property>
           <object class="GtkButtonBox" id="dialog-action_area19">
             <property name="can_focus">False</property>
             <property name="layout_style">end</property>
-            <child>
-              <placeholder/>
-            </child>
             <child>
               <object class="GtkButton" id="button_bkg_extract_close">
                 <property name="label">gtk-close</property>
@@ -5982,24 +5979,6 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                             <property name="can_focus">False</property>
                             <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkCheckButton" id="checkbutton_CFA">
-                                <property name="label" translatable="yes">Create raw Bayer CFA image</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Create raw Bayer CFA monochrome image (no interpolation, no demosaicing). This option creates a picture from the Bayer matrix as is. It is useful for pre-processing.</property>
-                                <property name="xalign">0</property>
-                                <property name="active">True</property>
-                                <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="on_checkbutton_CFA_toggled" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
                               <object class="GtkCheckButton" id="checkbutton_multipliers">
                                 <property name="label" translatable="yes">Use automatic daylight multiplier</property>
                                 <property name="visible">True</property>
@@ -9416,7 +9395,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">3</property>
+                    <property name="position">2</property>
                   </packing>
                 </child>
                 <child>
@@ -9564,7 +9543,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
-                    <property name="position">5</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
@@ -9581,7 +9560,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">6</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
                 <child>
@@ -9593,7 +9572,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                       <object class="GtkLabel" id="label62">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Generic name:</property>
+                        <property name="label" translatable="yes">Sequence name:</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -9604,6 +9583,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                       <object class="GtkEntry" id="entry2">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">Enter the base name of the sequence, for example NGC_6822-L. It will create images in the form NGC_6822-L_00001.fit. The name can also end with .ser, which will create only one file for the entire conversion.</property>
                         <property name="hexpand">True</property>
                         <signal name="changed" handler="on_convtoroot_changed" swapped="no"/>
                       </object>
@@ -9618,12 +9598,28 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
+                          <object class="GtkLabel" id="label124">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="margin_bottom">3</property>
+                            <property name="label" translatable="yes">Colour image target</property>
+                            <attributes>
+                              <attribute name="style" value="italic"/>
+                            </attributes>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkRadioButton" id="radiobutton1">
-                            <property name="label" translatable="yes">1 3-channel fits file</property>
+                            <property name="label" translatable="yes">Keep three channels</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">Convert RGB source files into 3-channel files. This button is not relevant for 1-channel source files.</property>
+                            <property name="tooltip_text" translatable="yes">Keep the destination image with RGB channels, do not change the channels configuration.</property>
                             <property name="halign">start</property>
                             <property name="use_underline">True</property>
                             <property name="xalign">0</property>
@@ -9634,16 +9630,16 @@ Warning: ensure you have a good reason to change this value because it may degra
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
                           <object class="GtkRadioButton" id="radiobutton2">
-                            <property name="label" translatable="yes">3 1-channel fits files </property>
+                            <property name="label" translatable="yes">Create three images</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">Convert each RGB source files into three 1-channel files (Red, Green and Blue). This button is not relevant for 1-channel source files.</property>
+                            <property name="tooltip_text" translatable="yes">Split an RGB image into three images, R, G and B.</property>
                             <property name="halign">start</property>
                             <property name="use_underline">True</property>
                             <property name="xalign">0</property>
@@ -9655,13 +9651,33 @@ Warning: ensure you have a good reason to change this value because it may degra
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkRadioButton" id="radiobutton3">
+                            <property name="label" translatable="yes">Keep only first channel</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="tooltip_text" translatable="yes">For an RGB image, only keep R. Useful for grey images stored as RGB.</property>
+                            <property name="xalign">0</property>
+                            <property name="active">True</property>
+                            <property name="draw_indicator">True</property>
+                            <property name="group">radiobutton1</property>
+                            <signal name="toggled" handler="on_conv1_1plane_toggled" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">3</property>
                           </packing>
                         </child>
                       </object>
                       <packing>
                         <property name="left_attach">3</property>
                         <property name="top_attach">0</property>
+                        <property name="height">2</property>
                       </packing>
                     </child>
                     <child>
@@ -9680,73 +9696,75 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="top_attach">0</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkCheckButton" id="demosaicingButton">
+                        <property name="label" translatable="yes">Demosaicing</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Debayer single-channel images (CFA format) using the bayer matrix layout given in the settings. Only for RAW and FITS input images.
+Colour image target also applies to the debayer result.</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_demosaicing_toggled" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="box32">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="spacing">13</property>
+                        <child>
+                          <object class="GtkButton" id="convert_button">
+                            <property name="label">gtk-convert</property>
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">Start conversion of all source files into the configured output files, FITS or SER, with colour processing or not.</property>
+                            <property name="use_stock">True</property>
+                            <property name="always_show_image">True</property>
+                            <signal name="clicked" handler="on_convert_button_clicked" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="multipleSER">
+                            <property name="label" translatable="yes">Create as many SER files as input files</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="tooltip_text" translatable="yes">Tick this to create several SER files instead of a single SER file for all input elements. Use this if input elements don't share the same image size.</property>
+                            <property name="xalign">0</property>
+                            <property name="draw_indicator">True</property>
+			    <signal name="toggled" handler="on_multipleSER_toggled" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="pack_type">end</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">7</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkButtonBox" id="buttonbox1">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="layout_style">spread</property>
-                    <child>
-                      <object class="GtkButton" id="convert_button">
-                        <property name="label">gtk-convert</property>
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="use_stock">True</property>
-                        <property name="always_show_image">True</property>
-                        <signal name="clicked" handler="on_convert_button_clicked" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radiobutton_conv">
-                        <property name="label" translatable="yes">Convert</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="xalign">0</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkRadioButton" id="radiobutton_conv_cfa">
-                        <property name="label" translatable="yes">Debayer</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="xalign">0</property>
-                        <property name="draw_indicator">True</property>
-                        <property name="group">radiobutton_conv</property>
-                        <signal name="toggled" handler="on_radiobutton_conv_cfa_toggled" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">8</property>
+                    <property name="position">6</property>
                   </packing>
                 </child>
                 <child>
@@ -9760,43 +9778,52 @@ Warning: ensure you have a good reason to change this value because it may degra
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="padding">2</property>
-                    <property name="position">9</property>
+                    <property name="position">7</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkLabel" id="label72">
+                  <object class="GtkBox" id="box69">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="halign">start</property>
-                    <property name="label" translatable="yes">Supported file types are:</property>
-                    <property name="single_line_mode">True</property>
+                    <child>
+                      <object class="GtkLabel" id="label72">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="label" translatable="yes">Supported file types:</property>
+                        <property name="single_line_mode">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label_supported_types">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Supported types depend on compile-time libraries availability. See documentation.
+RAW images are raw images from digital cameras, like CR2 files for Canon or NEF for Nikon.
+Films of any type can be converted as FITS or SER.
+SER files are directly handled as a sequence, and are not yet available for conversion.</property>
+                        <property name="halign">start</property>
+                        <property name="valign">start</property>
+                        <property name="label" translatable="yes">- list is filled at runtime -</property>
+                        <property name="wrap">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="padding">5</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="position">9</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label9">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">Supported types depend on third-party applications available. See documentation.
-RAW images are RAW images from digital cameras, like CR2 files for Canon or NEF for Nikon.
-Special case of film: AVI files are now managed as sequences, but can be converted to separate images here.
-Enter the exact name of the video file if you want to do so.
-SER files are directly handled as a sequence, and are not available for conversion.</property>
-                    <property name="halign">start</property>
-                    <property name="valign">start</property>
-                    <property name="label" translatable="yes">- list is filled at runtime -</property>
-                    <property name="wrap">True</property>
-                    <property name="width_chars">45</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="padding">5</property>
-                    <property name="position">11</property>
+                    <property name="position">8</property>
                   </packing>
                 </child>
               </object>
@@ -12016,6 +12043,7 @@ However, multiplicative normalisation must be used with flat-field frames.</prop
               <object class="GtkLabel" id="labelcwd">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">The directory in which files will be read from and written to. Can be changed with the button Change dir on the right, or with the cd command.</property>
                 <property name="label" translatable="yes">/home/toto (filled at runtime)</property>
                 <property name="ellipsize">start</property>
               </object>
@@ -12204,7 +12232,7 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
             <property name="can_focus">False</property>
             <property name="margin_left">10</property>
             <property name="margin_right">10</property>
-            <property name="label" translatable="yes">Siril text, inserted at runtime.</property>
+            <property name="label" translatable="yes">Siril version, inserted at runtime.</property>
             <property name="justify">center</property>
             <attributes>
               <attribute name="font-desc" value="TeX Gyre Heros Cn Bold Condensed 40"/>

@@ -159,7 +159,7 @@ void fill_about_dialog() {
 
 	gtk_label_set_text(label_about, PACKAGE " v" VERSION );
 	markup = g_markup_printf_escaped ("<a href=\"%s\">Visit the Siril website</a>",
-			"http://free-astro.vinvin.tf/index.php/Siril");
+			"https://free-astro.org/index.php/Siril");
 	gtk_label_set_markup (url_about, markup);
 	g_free(markup);
 }

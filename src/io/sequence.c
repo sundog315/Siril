@@ -126,6 +126,7 @@ int check_seq(int force) {
 	while ((file = readdir(dir)) != NULL) {
 		sequence *new_seq;
 		int fnlen = strlen(file->d_name);
+		if (fnlen < 4) continue;
 		const char *ext = get_filename_ext(file->d_name);
 		if (!ext) continue;
 		if (!strcasecmp(ext, "ser")) {
@@ -202,6 +203,8 @@ int check_seq(int force) {
 					sequences[current_seq]->beg = curidx;
 				if (curidx > sequences[current_seq]->end)
 					sequences[current_seq]->end = curidx;
+				if (fixed > sequences[current_seq]->fixed)
+					sequences[current_seq]->fixed = fixed;
 			}
 		}
 	}

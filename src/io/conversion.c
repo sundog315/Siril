@@ -148,11 +148,56 @@ void check_for_conversion_form_completeness() {
 	update_statusbar_convert();
 }
 
+// truncates destroot if it's more than 120 characters, append a '_' if it
+// doesn't end with one or a '-'. SER extensions are accepted and unmodified.
 void on_convtoroot_changed (GtkEditable *editable, gpointer user_data){
+	static GtkWidget *multiple_ser = NULL;
 	const char *name = gtk_entry_get_text(GTK_ENTRY(editable));
+	if (!multiple_ser)
+		multiple_ser = lookup_widget("multipleSER");
 	if (destroot) free(destroot);
 	destroot = strdup(name);
+
+	const char *ext = get_filename_ext(destroot);
+	if (ext && !strcasecmp(ext, "ser")) {
+		convflags |= CONVDSTSER;
+		gtk_widget_set_visible(multiple_ser, TRUE);
+		return;
+	}
+	gtk_widget_set_visible(multiple_ser, FALSE);
+
+	int len = strlen(destroot);
+	if (len > 120) {
+		destroot[120] = '\0';
+	       	len = 120;
+	}
+	if (destroot[len-1] == '-' || destroot[len-1] == '_') {
+		return;
+	}
+
+	char *appended = malloc(len+2);
+	sprintf(appended, "%s_", destroot);
+	free(destroot);
+	destroot = appended;
+
 	check_for_conversion_form_completeness();
+}
+
+// TODO: check if com.raw_set.cfa conflicts
+void on_demosaicing_toggled (GtkToggleButton *togglebutton, gpointer user_data) {
+	static GtkToggleButton *but = NULL;
+	if (!but) but = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton1"));
+	if (gtk_toggle_button_get_active(togglebutton)) {
+		convflags |= CONVDEBAYER;
+		gtk_toggle_button_set_active(but, TRUE);
+	}
+	else convflags &= ~CONVDEBAYER;
+}
+
+void on_multipleSER_toggled (GtkToggleButton *togglebutton, gpointer user_data) {
+	if (gtk_toggle_button_get_active(togglebutton))
+		convflags |= CONVMULTIPLE;
+	else convflags &= ~CONVMULTIPLE;
 }
 
 void on_conv3planefit_toggled (GtkToggleButton *togglebutton, gpointer user_data){
@@ -165,34 +210,9 @@ void on_conv3_1plane_toggled (GtkToggleButton *togglebutton, gpointer user_data)
 	convflags &= ~(CONV1X1|CONV1X3);
 }
 
-void on_radiobutton_conv_cfa_toggled (GtkToggleButton *togglebutton, gpointer user_data) {
-	static GtkTreeView *tree_convert = NULL;
-	GtkTreeIter iter;
-	GtkTreeModel *model = NULL;
-	gboolean valid;
-	
-	if (tree_convert == NULL)
-		tree_convert = GTK_TREE_VIEW(gtk_builder_get_object(builder, "treeview_convert"));
-	model = gtk_tree_view_get_model(tree_convert);
-	valid = gtk_tree_model_get_iter_first(model, &iter);
-	com.is_cfa = gtk_toggle_button_get_active(togglebutton);
-	
-	while (valid) {
-		gchar *str_data, *msg;
-		gtk_tree_model_get (model, &iter, 0, &str_data, -1);	//0 for FILECOLUMN
-		GtkToggleButton *but = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_conv"));
-		const char *ext = get_filename_ext(str_data);
-		if (ext && com.is_cfa && strcasecmp(ext, "fit") &&
-				strcasecmp(ext, "fits") && strcasecmp(ext, "fts")) {
-			g_signal_handlers_block_by_func(but, on_radiobutton_conv_cfa_toggled, NULL);
-			gtk_toggle_button_set_active(but, TRUE);
-			g_signal_handlers_unblock_by_func(but, on_radiobutton_conv_cfa_toggled, NULL);
-			msg = siril_log_message("For demosaicing, all files must be in FITS format. At least one is not.\n");
-			show_dialog(msg, "ERROR", "gtk-dialog-error");
-			return;
-		}
-		valid = gtk_tree_model_iter_next (model, &iter);
-	}
+void on_conv1_1plane_toggled (GtkToggleButton *togglebutton, gpointer user_data) {
+	convflags |= CONV1X1;
+	convflags &= ~(CONV3X1|CONV1X3);
 }
 
 /*************************************************************************************/
@@ -329,7 +349,7 @@ void initialize_converters() {
 	if (!has_entry)
 		sprintf(text, "ERROR: no input file type supported for conversion.");
 	else strcat(text, ".");
-	label_supported = GTK_LABEL(gtk_builder_get_object(builder, "label9"));
+	label_supported = GTK_LABEL(gtk_builder_get_object(builder, "label_supported_types"));
 	gtk_label_set_text(label_supported, text);
 	siril_log_message("Supported file types: %s\n", text+1);
 }
@@ -378,29 +398,6 @@ image_type get_type_for_extension(const char *extension) {
 	return TYPEUNDEF; // not recognized or not supported
 }
 
-// truncates destroot if it's more than 120 characters, append a '_' if it
-// doesn't end with one or a '-'. SER extensions are accepted and unmodified.
-void verify_destroot_validity() {
-	if (!destroot) return;
-
-	const char *ext = get_filename_ext(destroot);
-	if (ext && !strcasecmp(ext, "ser")) return;
-
-	int len = strlen(destroot);
-	if (len > 120) len = 120;
-	if (destroot[len-1] == '-' || destroot[len-1] == '_') return;
-
-	char *newdest = realloc(destroot, len+2);
-	if (newdest == NULL) {
-		free(destroot);
-		destroot = NULL;
-	} else {
-		destroot = newdest;
-		destroot[len] = '_';
-		destroot[len+1] = '\0';
-	}
-}
-
 int count_selected_files() {
 	static GtkTreeView *tree_convert = NULL;
 	GtkTreeModel *model = NULL;
@@ -431,6 +428,7 @@ struct _convert_data {
 	GList *list;
 	int start;
 	int total;
+	int nb_converted;
 };
 
 void on_convert_button_clicked(GtkButton *button, gpointer user_data) {
@@ -450,7 +448,7 @@ void on_convert_button_clicked(GtkButton *button, gpointer user_data) {
 		startEntry = GTK_ENTRY(gtk_builder_get_object(builder, "startIndiceEntry"));
 	}
 
-	struct timeval t_start, t_end;
+	struct timeval t_start;
 	
 	if (get_thread_run()) {
 		siril_log_message("Another task is already in progress, ignoring new request.\n");
@@ -478,41 +476,33 @@ void on_convert_button_clicked(GtkButton *button, gpointer user_data) {
 	set_cursor_waiting(TRUE);
 	control_window_switch_to_tab(OUTPUT_LOGS);
 	
-	verify_destroot_validity();
-	
 	/* then, convert files to Siril's FITS format */
-
-		struct _convert_data *args;
-		set_cursor_waiting(TRUE);
-		char *tmpmsg;
-		if (!com.wd) {
-			tmpmsg = siril_log_message("Conversion: no working directory set.\n");
-			show_dialog(tmpmsg, "Warning", "gtk-dialog-warning");
-			set_cursor_waiting(FALSE);
-			return;
-		}
-		if((dir = opendir(com.wd)) == NULL){
-			tmpmsg = siril_log_message("Conversion: error opening working directory %s.\n", com.wd);
-			show_dialog(tmpmsg, "Error", "gtk-dialog-error");
-			set_cursor_waiting(FALSE);
-			return ;
-		}
-
-		args = malloc(sizeof(struct _convert_data));
-		args->start = (atof(indice) == 0 || atof(indice) > USHRT_MAX) ? 1 : atof(indice);
-		args->dir = dir;
-		args->list = list;
-		args->total = count;
-		args->t_start.tv_sec = t_start.tv_sec;
-		args->t_start.tv_usec = t_start.tv_usec;
-		start_in_new_thread(convert_thread_worker, args);
+	struct _convert_data *args;
+	set_cursor_waiting(TRUE);
+	char *tmpmsg;
+	if (!com.wd) {
+		tmpmsg = siril_log_message("Conversion: no working directory set.\n");
+		show_dialog(tmpmsg, "Warning", "gtk-dialog-warning");
+		set_cursor_waiting(FALSE);
 		return;
+	}
+	if((dir = opendir(com.wd)) == NULL){
+		tmpmsg = siril_log_message("Conversion: error opening working directory %s.\n", com.wd);
+		show_dialog(tmpmsg, "Error", "gtk-dialog-error");
+		set_cursor_waiting(FALSE);
+		return ;
+	}
 
-	// non-threaded end
-	update_used_memory();
-	set_cursor_waiting(FALSE);
-	gettimeofday(&t_end, NULL);
-	show_time(t_start, t_end);
+	args = malloc(sizeof(struct _convert_data));
+	args->start = (atof(indice) == 0 || atof(indice) > USHRT_MAX) ? 1 : atof(indice);
+	args->dir = dir;
+	args->list = list;
+	args->total = count;
+	args->nb_converted = 0;
+	args->t_start.tv_sec = t_start.tv_sec;
+	args->t_start.tv_usec = t_start.tv_usec;
+	start_in_new_thread(convert_thread_worker, args);
+	return;
 }
 
 static gpointer convert_thread_worker(gpointer p) {
@@ -526,10 +516,7 @@ static gpointer convert_thread_worker(gpointer p) {
 	args->list = g_list_first (args->list);
 	indice = args->start;
 
-	// convflags gives the input format, but we might get SER as output
-	// instead of the usual FITS sequence in Siril 16 bits format
-	const char *ext = get_filename_ext(destroot);
-	if (ext && !strcasecmp(ext, "ser")) {
+	if (convflags & CONVDSTSER) {
 		siril_log_message("NOT YET IMPLEMENTED\n");
 		/*if (convflags & CONV3X1) {
 			siril_log_color_message("SER output will take precedence over the 3-fit creation option.\n", "salmon");
@@ -617,6 +604,7 @@ static gpointer convert_thread_worker(gpointer p) {
 		free(src_filename);
 		set_progress_bar_data(msg_bar, progress/((double)args->total));
 		progress += 1.0;
+		args->nb_converted++;
 
 		args->list = g_list_next(args->list);
 	}
@@ -643,7 +631,7 @@ static gboolean end_convert_idle(gpointer p) {
 	struct _convert_data *args = (struct _convert_data *) p;
 	struct timeval t_end;
 	
-	if (get_thread_run()) {
+	if (get_thread_run() && args->nb_converted > 1) {
 		// load the sequence of debayered images
 		char *ppseqname = malloc(strlen(destroot) + 5);
 		sprintf(ppseqname, "%s.seq", destroot);

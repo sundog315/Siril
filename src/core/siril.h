@@ -131,11 +131,15 @@ typedef enum {
 #define CP_EXPAND	0x20	// expands a 16bit fits to a 48bit one.
 
 /* processing */
-#define CONVDEBAYER (1 << 7)
+#define CONVDEBAYER (1 << 1)
+/* SER flags */
+#define CONVDSTFITS (1 << 2)	// assumed as default
+#define CONVDSTSER (1 << 3)
+#define CONVMULTIPLE (1 << 4)
 /* channel conversion type */
-#define CONV1X3	(1 << 16)
-#define CONV3X1	(1 << 17)
-#define CONV1X1	(1 << 18)
+#define CONV1X3	(1 << 6)	// assumed as default
+#define CONV3X1	(1 << 7)
+#define CONV1X1	(1 << 8)
 
 /* operations on image data */
 #define OPER_ADD 'a'
@@ -518,7 +522,6 @@ struct cominf {
 	int hist_display;		// displayed index
 	char *swap_dir;
 
-	gboolean is_cfa;		// in order to know which conversion it is
 	libraw raw_set;			// the libraw setting
 
 	sequence seq;			// currently loaded sequence	TODO: *seq
