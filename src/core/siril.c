@@ -1019,13 +1019,11 @@ gpointer seqpreprocess(gpointer p) {
 
 		// creating a SER file if the input data is SER
 		if (com.seq.type == SEQ_SER) {
-			char new_ser[256];
-			new_ser[255] = '\0';
+			char new_ser_filename[256];
 			new_ser_file = calloc(1, sizeof(struct ser_struct));
-			memcpy(new_ser_file, com.seq.ser_file, sizeof(struct ser_struct));
-			snprintf(new_ser, 255, "%s%s", com.seq.ppprefix,
+			snprintf(new_ser_filename, 255, "%s%s", com.seq.ppprefix,
 					new_ser_file->filename);
-			ser_create_file_with_header(new_ser, new_ser_file, TRUE);
+			ser_create_file(new_ser_filename, new_ser_file, TRUE, com.seq.ser_file);
 		}
 		fits *fit = calloc(1, sizeof(fits));
 		for (i = 0; i < com.seq.number; i++) {
@@ -1044,7 +1042,7 @@ gpointer seqpreprocess(gpointer p) {
 				set_progress_bar_data(msg, PROGRESS_RESET);
 				args->retval = 1;
 				if (com.seq.type == SEQ_SER) {
-					close(new_ser_file->fd);
+					ser_close_file(new_ser_file);
 					free(new_ser_file);
 				}
 				gdk_threads_add_idle(end_sequence_prepro, args);
@@ -1064,7 +1062,7 @@ gpointer seqpreprocess(gpointer p) {
 							"You must preprocess your SER files without applying demosaicing.\n"
 							"Uncheck the corresponding box in settings.\n");
 					show_dialog(msg, "Warning", "gtk-dialog-warning");
-					close(new_ser_file->fd);
+					ser_close_file(new_ser_file);
 					free(new_ser_file);
 					set_progress_bar_data(PROGRESS_TEXT_RESET, PROGRESS_RESET);
 					args->retval = 1;

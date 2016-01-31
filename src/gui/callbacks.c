@@ -1928,10 +1928,9 @@ void set_GUI_CAMERA() {
 void set_GUI_LIBRAW() {
 
 	/**********COLOR ADJUSTEMENT**************/
-	gtk_toggle_button_set_active(
+	/*gtk_toggle_button_set_active(
 			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_CFA")),
-			com.raw_set.cfa);
-	update_raw_cfa_tooltip();
+			com.raw_set.cfa);*/
 
 	gtk_spin_button_set_value(
 			GTK_SPIN_BUTTON(lookup_widget("Brightness_spinbutton")),
@@ -2044,9 +2043,9 @@ void update_libraw_interface() {
 	/***** DEBAYER is updated with changed signal *******/
 
 	/**********COLOR ADJUSTEMENT**************/
-	com.raw_set.cfa = gtk_toggle_button_get_active(
+	/*com.raw_set.cfa = gtk_toggle_button_get_active(
 			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_CFA")));
-	update_raw_cfa_tooltip();
+	update_raw_cfa_tooltip();*/
 
 	com.raw_set.bright = gtk_spin_button_get_value(
 			GTK_SPIN_BUTTON(lookup_widget("Brightness_spinbutton")));

@@ -82,16 +82,6 @@ char *filter_pattern[] = {
 	"GRBG"
 };
 
-char *conversion_tips[] = {
-	//~ Color interpolation
-	"Your RAW files are being converted to interpolated colour-pictures. "
-	"It would be wrong to use this mode for pre-processing. "
-	"To change this behaviour, check the correspondant button in File->Settings->Raw images.",
-	//~ CFA conversion
-	"Your RAW files are being converted to CFA monochrome pictures. "
-	"To change this behaviour, uncheck the correspondant button in File->Settings->Raw images." 
-};
-
 static gpointer convert_thread_worker(gpointer p);
 static gboolean end_convert_idle(gpointer p);
 
@@ -216,11 +206,6 @@ void on_conv1_1plane_toggled (GtkToggleButton *togglebutton, gpointer user_data)
 }
 
 /*************************************************************************************/
-
-void update_raw_cfa_tooltip() {
-	GtkWidget* conv_button = lookup_widget("convert_button");
-	gtk_widget_set_tooltip_text(conv_button, conversion_tips[(int)com.raw_set.cfa]);
-}
 
 /* This function sets all default values of libraw settings in the com.raw_set
  * struct, as defined in the glade file.
@@ -509,7 +494,6 @@ static gpointer convert_thread_worker(gpointer p) {
 	char dest_filename[128], msg_bar[256];
 	int indice;
 	double progress = 0.0;
-	gboolean is_ser_output = FALSE;
 	struct ser_struct *ser_file = NULL;
 	struct _convert_data *args = (struct _convert_data *) p;
 	
@@ -517,16 +501,14 @@ static gpointer convert_thread_worker(gpointer p) {
 	indice = args->start;
 
 	if (convflags & CONVDSTSER) {
-		siril_log_message("NOT YET IMPLEMENTED\n");
-		/*if (convflags & CONV3X1) {
-			siril_log_color_message("SER output will take precedence over the 3-fit creation option.\n", "salmon");
+		//siril_log_message("NOT YET IMPLEMENTED\n");
+		if (convflags & CONV3X1) {
+			siril_log_color_message("SER output will take precedence over the one-channel per image creation option.\n", "salmon");
 			convflags &= ~CONV3X1;
 		} else {
-			is_ser_output = TRUE;
 			ser_file = malloc(sizeof(struct ser_struct));
-			ser_init_struct(ser_file);
-			ser_create_file_with_header(destroot, ser_file, TRUE);
-		}*/
+			ser_create_file(destroot, ser_file, TRUE, NULL);
+		}
 	}
 
 	while (args->list) {
@@ -555,10 +537,6 @@ static gpointer convert_thread_worker(gpointer p) {
 
 		if (imagetype == TYPEAVI) {
 			int frame;
-			if (convflags & CONV3X1) {
-				siril_log_color_message("SER output will take precedence over the 3-fit creation option.\n", "salmon");
-				convflags &= ~CONV3X1;
-			}
 			// we need to do a semi-recursive thing here,
 			// thankfully it's only one level deep
 			fits *fit = calloc(1, sizeof(fits));
@@ -574,7 +552,7 @@ static gpointer convert_thread_worker(gpointer p) {
 				}
 				
 				// save to the destination file
-				if (is_ser_output) {
+				if (convflags & CONVDSTSER) {
 					ser_write_frame_from_fit(ser_file, fit);
 				} else {
 					snprintf(dest_filename, 128, "%s%05d", destroot, indice++);
@@ -587,7 +565,7 @@ static gpointer convert_thread_worker(gpointer p) {
 		}
 		else {	// single image
 			fits *fit = any_to_new_fits(imagetype, src_filename);
-			if (is_ser_output) {
+			if (convflags & CONVDSTSER) {
 				ser_write_frame_from_fit(ser_file, fit);
 			} else {
 				snprintf(dest_filename, 128, "%s%05d", destroot, indice++);
@@ -616,8 +594,9 @@ static gpointer convert_thread_worker(gpointer p) {
 		args->list = g_list_next(args->list);
 	}
 
-	if (is_ser_output) {
+	if (convflags & CONVDSTSER) {
 		// verify that ser_file->frame_count is correct
+		ser_write_header(ser_file);
 		ser_close_file(ser_file);
 		free(ser_file);
 	}

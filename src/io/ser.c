@@ -16,6 +16,10 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Siril. If not, see <http://www.gnu.org/licenses/>.
+ *
+ *
+ * WARNING: the code in this file and its header will not work properly
+ * on big endian systems.
  */
 
 #include <sys/types.h>
@@ -89,8 +93,7 @@ void ser_display_info(struct ser_struct *ser_file) {
 	fprintf(stdout, "lu id: %d\n", ser_file->lu_id);
 	fprintf(stdout, "sensor type: %s\n", color);
 	fprintf(stdout, "image size: %d x %d (%d bits)\n", ser_file->image_width,
-			ser_file->image_height,
-			ser_file->pixel_depth == SER_PIXEL_DEPTH_8 ? 8 : 16);
+			ser_file->image_height, ser_file->bit_pixel_depth);
 	fprintf(stdout, "frame count: %u\n", ser_file->frame_count);
 	fprintf(stdout, "observer: %s\n", ser_file->observer);
 	fprintf(stdout, "instrument: %s\n", ser_file->instrument);
@@ -101,62 +104,56 @@ void ser_display_info(struct ser_struct *ser_file) {
 }
 
 int _ser_read_header(struct ser_struct *ser_file) {
-	char header[178];
-	int pdepth, endianness;
+	char header[SER_HEADER_LEN];
 	if (!ser_file || ser_file->fd <= 0)
 		return -1;
+	if ((off_t) -1 == lseek(ser_file->fd, 0, SEEK_SET)) {
+		perror("seek");
+		return -1;
+	}
 	if (sizeof(header) != read(ser_file->fd, header, sizeof(header))) {
 		perror("read");
 		return -1;
 	}
-	memcpy(&ser_file->lu_id, header + 14, 4);
-	memcpy(&ser_file->color_id, header + 18, 4);
-	memcpy(&endianness, header + 22, 4);
-	memcpy(&ser_file->image_width, header + 26, 4);
-	memcpy(&ser_file->image_height, header + 30, 4);
-	memcpy(&pdepth, header + 34, 4);
-	memcpy(&ser_file->frame_count, header + 38, 4);
-	memcpy(&ser_file->date, header + 162, 8);
-	memcpy(&ser_file->date_utc, header + 170, 8);
+	// modify this to support big endian
+	memcpy(&ser_file->lu_id, header + 14, 28);	// read all integers
+	memcpy(&ser_file->date, header + 162, 16);
 
-	if (endianness)
-		ser_file->endianness = SER_LITTLE_ENDIAN;
-	else
-		ser_file->endianness = SER_BIG_ENDIAN;
-	if (pdepth <= 8)
-		ser_file->pixel_depth = SER_PIXEL_DEPTH_8;
-	else
-		ser_file->pixel_depth = SER_PIXEL_DEPTH_16;
+	// strings
 	ser_file->file_id = strndup(header, 14);
 	ser_file->observer = strndup(header + 42, 40);
 	ser_file->instrument = strndup(header + 82, 40);
 	ser_file->telescope = strndup(header + 122, 40);
 
-	ser_file->number_of_planes =
-		((ser_file->color_id == SER_RGB) || (ser_file->color_id == SER_BGR)) ?
-		3 : 1;
+	/* internal representations of header data */
+	if (ser_file->bit_pixel_depth <= 8)
+		ser_file->byte_pixel_depth = SER_PIXEL_DEPTH_8;
+	else ser_file->byte_pixel_depth = SER_PIXEL_DEPTH_16;
+
+	if (ser_file->color_id == SER_RGB || ser_file->color_id == SER_BGR)
+		ser_file->number_of_planes = 3;
+	else ser_file->number_of_planes = 1;
+
 	return 0;
 }
 
 int ser_write_header(struct ser_struct *ser_file) {
-	char header[178];
-	int pdepth;
+	char header[SER_HEADER_LEN];
+	if (!ser_file || ser_file->fd <= 0)
+		return -1;
+	if ((off_t) -1 == lseek(ser_file->fd, 0, SEEK_SET)) {
+		perror("seek");
+		return -1;
+	}
 
-	memset(header, 0, 178);
-	memcpy(header, ser_file->file_id, 14 + 1);
-	memcpy(header + 14, &ser_file->lu_id, 4);
-	memcpy(header + 18, &ser_file->color_id, 4);
-	memcpy(header + 22, &ser_file->endianness, 4);
-	memcpy(header + 26, &ser_file->image_width, 4);
-	memcpy(header + 30, &ser_file->image_height, 4);
-	pdepth = (ser_file->pixel_depth == SER_PIXEL_DEPTH_8) ? 8 : 16;
-	memcpy(header + 34, &pdepth, 4);
-	memcpy(header + 38, &ser_file->frame_count, 4);
-	memcpy(header + 42, ser_file->observer, 40 + 1);
-	memcpy(header + 82, ser_file->instrument, 40 + 1);
-	memcpy(header + 122, ser_file->telescope, 40 + 1);
-	memcpy(header + 162, &ser_file->date, 8);
-	memcpy(header + 170, &ser_file->date_utc, 8);
+	// modify this to support big endian
+	memset(header, 0, sizeof(header));
+	memcpy(header, ser_file->file_id, 14);
+	memcpy(header + 14, &ser_file->lu_id, 28);
+	memcpy(header + 42, ser_file->observer, 40);
+	memcpy(header + 82, ser_file->instrument, 40);
+	memcpy(header + 122, ser_file->telescope, 40);
+	memcpy(header + 162, &ser_file->date, 16);
 
 	if (sizeof(header) != write(ser_file->fd, header, sizeof(header))) {
 		perror("write");
@@ -165,31 +162,79 @@ int ser_write_header(struct ser_struct *ser_file) {
 	return 0;
 }
 
-int ser_create_file_with_header(const char *filename, struct ser_struct *ser_file, gboolean overwrite) {
+/* ser_file must be allocated */
+int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean overwrite, struct ser_struct *copy_from) {
 	if (overwrite)
 		unlink(filename);
-	ser_file->fd = open(filename, O_CREAT | O_RDWR,
-			S_IWRITE | S_IREAD);
-	if (ser_file->fd == -1) {
-		perror("open ser file for creation");
+	if ((ser_file->fd = open(filename, O_CREAT | O_RDWR,
+			S_IWRITE | S_IREAD)) == -1) {
+		perror("open SER file for creation");
 		return 1;
 	}
-	return ser_write_header(ser_file);
+
+	if (copy_from) {
+		memcpy(&ser_file->lu_id, &ser_file->lu_id, 28);
+		memcpy(&ser_file->date, &ser_file->date, 16);
+		ser_file->file_id = strdup(copy_from->file_id);
+		ser_file->observer = strdup(copy_from->observer);
+		ser_file->instrument = strdup(copy_from->instrument);
+		ser_file->telescope = strdup(copy_from->telescope);
+		ser_file->byte_pixel_depth = copy_from->byte_pixel_depth;
+		ser_file->number_of_planes = copy_from->number_of_planes;
+		/* we write the header now, but it should be written again
+		 * before closing in case the number of the image in the new
+		 * SER changes from the copied SER */
+		ser_write_header(ser_file);
+	} else {	// new SER
+		ser_file->file_id = strdup("Made by Siril");
+		ser_file->little_endian = SER_LITTLE_ENDIAN; // what will it do on big endian machine?
+		ser_file->observer = strdup("");
+		ser_file->instrument = strdup("");
+		ser_file->telescope = strdup("");
+		memset(&ser_file->date, 0, 16);
+		ser_file->number_of_planes = 0;	// used as an indicator of new SER
+
+		/* next operation should be ser_write_frame_from_fit, which writes with no
+		 * seek and expects to be after the header */
+		if ((off_t) -1 == lseek(ser_file->fd, SER_HEADER_LEN, SEEK_SET)) {
+			perror("seek");
+			return -1;
+		}
+	}
+	ser_file->filename = strdup(filename);
+	ser_file->frame_count = 0;	// incremented on image add
+#ifdef _OPENMP
+	omp_init_lock(&ser_file->fd_lock);
+#endif
+	return 0;
 }
 
+/* populate fields that are not already set in ser_create_file */
 void ser_header_from_fit(struct ser_struct *ser_file, fits *fit) {
-	ser_init_struct(ser_file);
 	ser_file->image_width = fit->rx;
 	ser_file->image_height = fit->ry;
+	fprintf(stdout, "setting SER image size as %dx%d\n", fit->rx, fit->ry);
 	if (fit->naxis == 1) {
 		// maybe it's read as CFA...
 		ser_file->color_id = SER_MONO;
 	} else if (fit->naxis == 3) {
 		ser_file->color_id = SER_RGB;
 	}
-	ser_file->pixel_depth = SER_PIXEL_DEPTH_16;
+	if (ser_file->color_id == SER_RGB || ser_file->color_id == SER_BGR)
+		ser_file->number_of_planes = 3;
+	else ser_file->number_of_planes = 1;
 
-	// copy data from the fit header?
+	if (fit->bitpix == BYTE_IMG) {
+		ser_file->byte_pixel_depth = SER_PIXEL_DEPTH_8;
+		ser_file->bit_pixel_depth = 8;
+	} else if (fit->bitpix == USHORT_IMG) {
+		ser_file->byte_pixel_depth = SER_PIXEL_DEPTH_16;
+		ser_file->bit_pixel_depth = 16;
+	} else {
+		siril_log_message("Writing to SER files from larger than 16-bit FITS images is not yet implemented\n");
+	}
+
+	// TODO: copy data from the fit header: observer, instrument, telescope, dates
 }
 
 int ser_open_file(char *filename, struct ser_struct *ser_file) {
@@ -250,8 +295,8 @@ int ser_read_frame(struct ser_struct *ser_file, int frame_no, fits *fit) {
 	int retval, frame_size, i, j, swap = 0;
 	off_t offset;
 	WORD *olddata, *tmp;
-	if (!ser_file || ser_file->fd <= 0 || !fit || frame_no < 0
-			|| frame_no >= ser_file->frame_count)
+	if (!ser_file || ser_file->fd <= 0 || !ser_file->number_of_planes ||
+			!fit || frame_no < 0 || frame_no >= ser_file->frame_count)
 		return -1;
 	frame_size = ser_file->image_width * ser_file->image_height
 			* ser_file->number_of_planes;
@@ -264,9 +309,10 @@ int ser_read_frame(struct ser_struct *ser_file, int frame_no, fits *fit) {
 		return -1;
 	}
 
-	offset = 178 + (off_t)frame_size * (off_t)ser_file->pixel_depth * (off_t)frame_no;
+	offset = SER_HEADER_LEN + (off_t)frame_size *
+		(off_t)ser_file->byte_pixel_depth * (off_t)frame_no;
 	/*fprintf(stdout, "offset is %lu (frame %d, %d pixels, %d-byte)\n", offset,
-	 frame_no, frame_size, ser_file->pixel_depth);*/
+	 frame_no, frame_size, ser_file->pixel_bytedepth);*/
 #ifdef _OPENMP
 	omp_set_lock(&ser_file->fd_lock);
 #endif
@@ -276,16 +322,16 @@ int ser_read_frame(struct ser_struct *ser_file, int frame_no, fits *fit) {
 #endif
 		return -1;
 	}
-	retval = read(ser_file->fd, fit->data, frame_size * ser_file->pixel_depth);
+	retval = read(ser_file->fd, fit->data, frame_size * ser_file->byte_pixel_depth);
 #ifdef _OPENMP
 	omp_unset_lock(&ser_file->fd_lock);
 #endif
-	if (retval != frame_size * ser_file->pixel_depth)
+	if (retval != frame_size * ser_file->byte_pixel_depth)
 		return -1;
 
 	ser_manage_endianess_and_depth(ser_file, fit->data, frame_size);
 
-	fit->bitpix = (ser_file->pixel_depth == SER_PIXEL_DEPTH_8) ? BYTE_IMG : USHORT_IMG;
+	fit->bitpix = (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8) ? BYTE_IMG : USHORT_IMG;
 
 	/* If the user checks the SER CFA box, the video is opened in B&W
 	 * RGB and BGR are not coming from raw data. In consequence CFA does
@@ -359,7 +405,7 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 			|| frame_no >= ser_file->frame_count)
 		return -1;
 	frame_size = ser_file->image_width * ser_file->image_height *
-		ser_file->number_of_planes * ser_file->pixel_depth;
+		ser_file->number_of_planes * ser_file->byte_pixel_depth;
 
 	/* If the user checks the SER CFA box, the video is opened in B&W
 	 * RGB and BGR are not coming from raw data. In consequence CFA does
@@ -370,9 +416,9 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 
 	switch (type_ser) {
 	case SER_MONO:
-		offset = 178 + (off_t)frame_size * (off_t)frame_no +	// requested frame
+		offset = SER_HEADER_LEN + (off_t)frame_size * (off_t)frame_no +	// requested frame
 			(off_t)(area->y * ser_file->image_width + area->x)
-						* ser_file->pixel_depth;	// requested area
+						* ser_file->byte_pixel_depth;	// requested area
 #ifdef _OPENMP
 		omp_set_lock(&ser_file->fd_lock);
 #endif
@@ -382,7 +428,7 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 #endif
 			return -1;
 		}
-		read_size = area->w * area->h * ser_file->pixel_depth;
+		read_size = area->w * area->h * ser_file->byte_pixel_depth;
 		retval = read(ser_file->fd, buffer, read_size);
 #ifdef _OPENMP
 		omp_unset_lock(&ser_file->fd_lock);
@@ -412,9 +458,9 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 			.w = ser_file->image_width, .h = ser_file->image_height };
 		get_debayer_area(area, &debayer_area, &image_area, &xoffset, &yoffset);
 
-		offset = 178 + frame_size * frame_no +	// requested frame
+		offset = SER_HEADER_LEN + frame_size * frame_no +	// requested frame
 				(debayer_area.y * ser_file->image_width + debayer_area.x)
-						* ser_file->pixel_depth;	// requested area
+						* ser_file->byte_pixel_depth;	// requested area
 #ifdef _OPENMP
 		omp_set_lock(&ser_file->fd_lock);
 #endif
@@ -434,7 +480,7 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 			siril_log_message("Out of memory - aborting\n");
 			return -1;
 		}
-		read_size = debayer_area.w * debayer_area.h * ser_file->pixel_depth;
+		read_size = debayer_area.w * debayer_area.h * ser_file->byte_pixel_depth;
 		retval = read(ser_file->fd, rawbuf, read_size);
 #ifdef _OPENMP
 		omp_unset_lock(&ser_file->fd_lock);
@@ -473,9 +519,9 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 		//return -1;
 		assert(ser_file->number_of_planes == 3);
 
-		offset = 178 + frame_size * frame_no +	// requested frame
+		offset = SER_HEADER_LEN + frame_size * frame_no +	// requested frame
 			(area->y * ser_file->image_width + area->x) *
-			ser_file->pixel_depth * 3;	// requested area
+			ser_file->byte_pixel_depth * 3;	// requested area
 #ifdef _OPENMP
 		omp_set_lock(&ser_file->fd_lock);
 #endif
@@ -486,7 +532,7 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 			return -1;
 		}
 
-		read_size = area->w * area->h * ser_file->pixel_depth * 3;
+		read_size = area->w * area->h * ser_file->byte_pixel_depth * 3;
 		// allocating a buffer for WORD because it's going to be converted in-place
 		rgb_buf = malloc(area->w * area->h * 3 * sizeof(WORD));
 		if (!rgb_buf) {
@@ -529,42 +575,42 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 }
 
 int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit) {
-	int frame_size, i;
+	int frame_size, pixel, plane, dest;
 	BYTE *data;			// for 8-bit files
 
 	if (!ser_file || ser_file->fd <= 0 || !fit)
 		return -1;
-	if (ser_file->image_width == 0) {
-		// first frame added, use it to pupulate the header
+	if (ser_file->number_of_planes == 0) {
+		// adding first frame of a new sequence, use it to pupulate the header
 		ser_header_from_fit(ser_file, fit);
 	}
 	if (fit->rx != ser_file->image_width || fit->ry != ser_file->image_height) {
 		siril_log_message("Trying to add an image of different size in a SER\n");
 		return 1;
 	}
-	frame_size = ser_file->image_width * ser_file->image_height;
 
 	fits_flip_top_to_bottom(fit);
-	switch (ser_file->pixel_depth) {
-	case SER_PIXEL_DEPTH_8:
-		data = malloc(frame_size);
-		for (i = frame_size - 1; i >= 0; i--)
-			data[i] = (BYTE) (((WORD*) fit->data)[i]);
-		if (frame_size * ser_file->pixel_depth
-				!= write(ser_file->fd, data,
-						frame_size * ser_file->pixel_depth)) {
-			perror("write");
-		}
-		free(data);
-		break;
-	default:
-	case SER_PIXEL_DEPTH_16:
-		if (frame_size * ser_file->pixel_depth
-				!= write(ser_file->fd, fit->data,
-						frame_size * ser_file->pixel_depth)) {
-			perror("write");
+	frame_size = ser_file->image_width * ser_file->image_height *
+		ser_file->number_of_planes * ser_file->byte_pixel_depth;
+
+	data = malloc(frame_size);
+	for (plane = 0; plane < ser_file->number_of_planes; plane++) {
+		dest = plane;
+		for (pixel = 0; pixel < ser_file->image_width * ser_file->image_height;
+				pixel++) {
+			if (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8)
+				data[dest] = (BYTE)(fit->pdata[plane][pixel]);
+			else data[dest] = fit->pdata[plane][pixel];
+			dest += ser_file->number_of_planes;
 		}
 	}
+	if (write(ser_file->fd, data, frame_size) != frame_size) {
+		free(data);
+		perror("write image in SER");
+		return 1;
+	}
+	free(data);
+	ser_file->frame_count++;
 	return 0;
 }
 
@@ -596,11 +642,11 @@ void set_combo_box_bayer_pattern(ser_color pattern) {
 void ser_manage_endianess_and_depth(struct ser_struct *ser_file, WORD *data, int frame_size) {
 	WORD pixel;
 	int i;
-	if (ser_file->pixel_depth == SER_PIXEL_DEPTH_8) {
+	if (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8) {
 		// inline conversion to 16 bit
 		for (i = frame_size - 1; i >= 0; i--)
 			data[i] = (WORD) (((BYTE*)data)[i]);
-	} else if (ser_file->endianness == SER_LITTLE_ENDIAN) {	// TODO check if it is needed for big endian
+	} else if (ser_file->little_endian) {	// TODO check if it is needed for big endian
 		// inline conversion to big endian
 		for (i = frame_size - 1; i >= 0; i--) {
 			pixel = data[i];
