@@ -730,7 +730,7 @@ int any_to_fits(image_type imagetype, const char *source, fits *dest) {
 #endif
 #ifdef HAVE_LIBRAW
 		case TYPERAW:
-			retval = (open_raw_files(source, dest, com.raw_set.cfa) < 0);
+			retval = (open_raw_files(source, dest, !(convflags & CONVDEBAYER)) < 0);
 			break;
 #endif
 		case TYPESER:
