@@ -6084,7 +6084,6 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                                 <child>
                                   <object class="GtkBox" id="hbox9">
                                     <property name="visible">True</property>
-                                    <property name="sensitive">False</property>
                                     <property name="can_focus">False</property>
                                     <property name="halign">start</property>
                                     <property name="homogeneous">True</property>
