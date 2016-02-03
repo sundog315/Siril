@@ -2096,8 +2096,8 @@ void on_checkbutton_multipliers_toggled(GtkToggleButton *button,
 
 	active = gtk_toggle_button_get_active(button);
 
-	gtk_widget_set_sensitive(lookup_widget("hbox8"), active);
-	gtk_widget_set_sensitive(lookup_widget("hbox11"), active);
+	gtk_widget_set_sensitive(lookup_widget("hbox8"), !active);
+	gtk_widget_set_sensitive(lookup_widget("hbox11"), !active);
 	if (active) {
 		gtk_spin_button_set_value(
 				GTK_SPIN_BUTTON(lookup_widget("Red_spinbutton")), 1.0);
