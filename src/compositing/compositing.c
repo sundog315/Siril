@@ -1041,11 +1041,7 @@ void on_compositing_reset_clicked(GtkButton *button, gpointer user_data){
 void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 	int layer, nb_images_red = 0, nb_images_green = 0, nb_images_blue = 0;
 	GdkRGBA max_pixel;
-//	if (luminance_mode) {
-//		siril_log_message("auto adjusting colours is not yet "
-//				"implemented for luminance-based compositings\n");
-//		return;
-//	}
+
 	clear_pixel(&max_pixel);
 	/* sum the max per channel */
 	/* should we assume that fits mini and maxi are correct? */

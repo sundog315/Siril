@@ -488,21 +488,21 @@ double get_value_from_box(fits *fit, point box, size_t size, int layer) {
 }
 
 void update_bkg_interface() {
-	static GtkToggleButton *bgkAutoButton = NULL;
+	static GtkToggleButton *bgkManButton = NULL;
 	GtkWidget *frame24 = GTK_WIDGET(lookup_widget("frame24"));
 	GtkWidget *frame23 = GTK_WIDGET(lookup_widget("frame23"));
 	GtkWidget *label44 = GTK_WIDGET(lookup_widget("label44"));
 	GtkWidget *spinSeparation = GTK_WIDGET(lookup_widget("spinbutton_bkg_Box_sep"));
 	GtkWidget *drawBoxes = GTK_WIDGET(lookup_widget("checkbutton_bkg_boxes"));
-	gboolean autoButton;
+	gboolean manButton;
 
 	clearSamples();
 
-	if (bgkAutoButton == NULL) {
-		bgkAutoButton = GTK_TOGGLE_BUTTON(lookup_widget("bkgButtonAuto"));
+	if (bgkManButton == NULL) {
+		bgkManButton = GTK_TOGGLE_BUTTON(lookup_widget("bkgButtonManual"));
 	}
-	autoButton = gtk_toggle_button_get_active(bgkAutoButton);
-	if (autoButton) {
+	manButton = gtk_toggle_button_get_active(bgkManButton);
+	if (!manButton) {
 		gtk_widget_set_sensitive(frame23, TRUE);
 		gtk_widget_set_sensitive(frame24, TRUE);
 		gtk_widget_set_sensitive(label44, TRUE);

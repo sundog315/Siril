@@ -17,6 +17,7 @@ void update_raw_cfa_tooltip();
 void initialize_converters();
 int count_selected_files();
 int save_to_target_fits(fits *fit, const char *dest_filename);
+int debayer_if_needed(image_type imagetype, fits *fit);
 fits *any_to_new_fits(image_type imagetype, const char *source);
 int any_to_fits(image_type imagetype, const char *source, fits *dest);
 

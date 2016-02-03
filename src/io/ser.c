@@ -582,7 +582,7 @@ int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit) {
 	if (!ser_file || ser_file->fd <= 0 || !fit)
 		return -1;
 	if (ser_file->number_of_planes == 0) {
-		// adding first frame of a new sequence, use it to pupulate the header
+		// adding first frame of a new sequence, use it to populate the header
 		ser_header_from_fit(ser_file, fit);
 	}
 	if (fit->rx != ser_file->image_width || fit->ry != ser_file->image_height) {

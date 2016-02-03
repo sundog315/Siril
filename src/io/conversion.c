@@ -267,7 +267,6 @@ void initialize_converters() {
 	supported_extensions[count_ext++] = ".fits";
 	supported_extensions[count_ext++] = ".fts";
 	supported_extensions[count_ext++] = ".bmp";
-	//~ supported_extensions[count_ext++] = ".ser";			// it is like avi, it is not use here for now
 	supported_extensions[count_ext++] = ".ppm";
 	supported_extensions[count_ext++] = ".pgm";
 	supported_extensions[count_ext++] = ".pnm";
@@ -510,7 +509,6 @@ static gpointer convert_thread_worker(gpointer p) {
 	indice = args->start;
 
 	if (convflags & CONVDSTSER) {
-		//siril_log_message("NOT YET IMPLEMENTED\n");
 		if (convflags & CONV3X1) {
 			siril_log_color_message("SER output will take precedence over the one-channel per image creation option.\n", "salmon");
 			convflags &= ~CONV3X1;
@@ -545,11 +543,11 @@ static gpointer convert_thread_worker(gpointer p) {
 		}
 
 		if (imagetype == TYPEAVI) {
+#ifdef HAVE_FFMS2
 			int frame;
 			// we need to do a semi-recursive thing here,
 			// thankfully it's only one level deep
 			fits *fit = calloc(1, sizeof(fits));
-#ifdef HAVE_FFMS2
 			struct film_struct film_file;
 			if (film_open_file(src_filename, &film_file) != FILM_SUCCESS) {
 				break;
@@ -569,8 +567,8 @@ static gpointer convert_thread_worker(gpointer p) {
 				}
 				clearfits(fit);
 			}
-#endif
 			free(fit);
+#endif
 		}
 		else {	// single image
 			fits *fit = any_to_new_fits(imagetype, src_filename);
@@ -672,6 +670,30 @@ int save_to_target_fits(fits *fit, const char *dest_filename) {
 	return 0;
 }
 
+int debayer_if_needed(image_type imagetype, fits *fit) {
+	int retval = 0;
+	/* What the hell?
+	 * Siril's FITS are stored bottom to top, debayering will throw 
+	 * wrong results. So before demosacaing we need to transforme the image
+	 * with fits_flip_top_to_bottom() function */
+	if (imagetype == TYPEFITS && convflags & CONVDEBAYER) {
+		if (fit->naxes[2] != 1) {
+			siril_log_message("Cannot perform debayering on image with more than one channel\n");
+			return retval;
+		}
+		fits_flip_top_to_bottom(fit);
+		siril_log_message("Filter Pattern: %s\n",
+				filter_pattern[com.debayer.bayer_pattern]);
+		if (debayer(fit, com.debayer.bayer_inter)) {
+			siril_log_message("Cannot perform debayering\n");
+			retval = -1;
+		} else {
+			fits_flip_top_to_bottom(fit);
+		}
+	}
+	return retval;
+}
+
 /* open the file with path source from any image type and load it into a new FITS object */
 fits *any_to_new_fits(image_type imagetype, const char *source) {
 	int retval = 0;
@@ -680,21 +702,8 @@ fits *any_to_new_fits(image_type imagetype, const char *source) {
 
 	retval = any_to_fits(imagetype, source, tmpfit);
 
-	/* What the hell?
-	 * Siril's FITS are stored bottom to top, debayering will throw 
-	 * wrong results. So before demosacaing we need to transforme the image
-	 * with fits_flip_top_to_bottom() function */
-	if (imagetype == TYPEFITS && convflags & CONVDEBAYER) {
-		fits_flip_top_to_bottom(tmpfit);
-		siril_log_message("Filter Pattern: %s\n",
-				filter_pattern[com.debayer.bayer_pattern]);
-		if (debayer(tmpfit, com.debayer.bayer_inter)) {
-			siril_log_message("Cannot perform debayering\n");
-			retval = -1;
-		} else {
-			fits_flip_top_to_bottom(tmpfit);
-		}
-	}
+	if (!retval)
+		retval = debayer_if_needed(imagetype, tmpfit);
 
 	if (retval) {
 		clearfits(tmpfit);

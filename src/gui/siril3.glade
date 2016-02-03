@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.19.0 
+<!-- Generated with glade 3.18.3 
 
 Copyright (C) The free-astro development team, 2015
 
@@ -345,8 +345,8 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
   </object>
   <object class="GtkAdjustment" id="adjustment_bkg_size_box">
     <property name="lower">1</property>
-    <property name="upper">100</property>
-    <property name="value">5</property>
+    <property name="upper">300</property>
+    <property name="value">50</property>
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
@@ -1910,23 +1910,6 @@ enter a visible wavelength in nm</property>
                                 <property name="spacing">5</property>
                                 <property name="homogeneous">True</property>
                                 <child>
-                                  <object class="GtkRadioButton" id="bkgButtonAuto">
-                                    <property name="label" translatable="yes">Automatic</property>
-                                    <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="receives_default">False</property>
-                                    <property name="tooltip_text" translatable="yes">Siril picks background samples automatically.</property>
-                                    <property name="xalign">0</property>
-                                    <property name="active">True</property>
-                                    <property name="draw_indicator">True</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">False</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">0</property>
-                                  </packing>
-                                </child>
-                                <child>
                                   <object class="GtkRadioButton" id="bkgButtonManual">
                                     <property name="label" translatable="yes">Manual</property>
                                     <property name="visible">True</property>
@@ -1936,8 +1919,24 @@ enter a visible wavelength in nm</property>
                                     <property name="xalign">0</property>
                                     <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
-                                    <property name="group">bkgButtonAuto</property>
                                     <signal name="toggled" handler="on_bkgButtonManual_toggled" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkRadioButton" id="bkgButtonAuto">
+                                    <property name="label" translatable="yes">Automatic</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">Siril picks background samples automatically.</property>
+                                    <property name="xalign">0</property>
+                                    <property name="draw_indicator">True</property>
+                                    <property name="group">bkgButtonManual</property>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
@@ -2093,11 +2092,12 @@ enter a visible wavelength in nm</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">This is the radius in pixels of a background sample box. Multiply by 2 to have the length of a box.</property>
+                                        <property name="max_width_chars">3</property>
                                         <property name="adjustment">adjustment_bkg_size_box</property>
                                         <property name="climb_rate">1</property>
                                         <property name="snap_to_ticks">True</property>
                                         <property name="numeric">True</property>
-                                        <property name="value">10</property>
+                                        <property name="value">50</property>
                                       </object>
                                       <packing>
                                         <property name="left_attach">1</property>
@@ -2361,21 +2361,7 @@ enter a visible wavelength in nm</property>
                                       </packing>
                                     </child>
                                     <child>
-                                      <object class="GtkSpinButton" id="spinbutton_bkg_sizebox1">
-                                        <property name="visible">True</property>
-                                        <property name="can_focus">True</property>
-                                        <property name="tooltip_text" translatable="yes">This is the radius in pixels of a background sample box. Multiply by 2 to have the length of a box.</property>
-                                        <property name="text" translatable="yes">5</property>
-                                        <property name="adjustment">adjustment_bkg_size_box</property>
-                                        <property name="climb_rate">1</property>
-                                        <property name="snap_to_ticks">True</property>
-                                        <property name="numeric">True</property>
-                                        <property name="value">5</property>
-                                      </object>
-                                      <packing>
-                                        <property name="left_attach">1</property>
-                                        <property name="top_attach">0</property>
-                                      </packing>
+                                      <placeholder/>
                                     </child>
                                   </object>
                                 </child>
@@ -9731,7 +9717,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-			<property name="tooltip_text" translatable="yes">Debayer single-channel images (CFA format) using the bayer matrix layout given in the settings. Also applies to image opening, not only conversion.
+                        <property name="tooltip_text" translatable="yes">Debayer single-channel images (CFA format) using the bayer matrix layout given in the settings. Also applies to image opening, not only conversion.
 Only for RAW and FITS input images.
 Colour image target also applies to the debayer result for conversion.</property>
                         <property name="xalign">0</property>
@@ -9769,7 +9755,7 @@ Colour image target also applies to the debayer result for conversion.</property
                         <child>
                           <object class="GtkCheckButton" id="multipleSER">
                             <property name="label" translatable="yes">Create as many SER files as input files</property>
-			    <property name="sensitive">False</property>
+                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="tooltip_text" translatable="yes">- NOT YET IMPLEMENTED -
@@ -10687,7 +10673,6 @@ The next action for DSLR images would be to debayer the preprocessed images, go 
                 </child>
                 <child>
                   <object class="GtkGrid" id="grid24">
-                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="column_spacing">10</property>
                     <child>

@@ -2090,15 +2090,15 @@ void on_combobinning_changed(GtkComboBox *box, gpointer user_data) {
 	}
 }
 
-void on_checkbutton_multipliers_toggled(GtkButton *button, gpointer user_data) {
-	gtk_widget_set_sensitive(lookup_widget("Red_spinbutton"),
-			!(gtk_toggle_button_get_active(
-					GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_multipliers")))));
-	gtk_widget_set_sensitive(lookup_widget("Blue_spinbutton"),
-			!(gtk_toggle_button_get_active(
-					GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_multipliers")))));
-	if (gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_multipliers")))) {
+void on_checkbutton_multipliers_toggled(GtkToggleButton *button,
+		gpointer user_data) {
+	gboolean active;
+
+	active = gtk_toggle_button_get_active(button);
+
+	gtk_widget_set_sensitive(lookup_widget("hbox8"), active);
+	gtk_widget_set_sensitive(lookup_widget("hbox11"), active);
+	if (active) {
 		gtk_spin_button_set_value(
 				GTK_SPIN_BUTTON(lookup_widget("Red_spinbutton")), 1.0);
 		gtk_spin_button_set_value(
@@ -4697,8 +4697,10 @@ void on_menuitem_stat_activate(GtkMenuItem *menuitem, gpointer user_data) {
 
 void on_menuitem_bkg_extraction_activate(GtkMenuItem *menuitem,
 		gpointer user_data) {
-	if (single_image_is_loaded())
+	if (single_image_is_loaded()) {
+		update_bkg_interface();
 		gtk_widget_show(lookup_widget("Bkg_extract_window"));
+	}
 }
 
 void on_bkgButtonManual_toggled(GtkToggleButton *togglebutton,
@@ -4833,17 +4835,17 @@ void on_button_bkg_extract_close_clicked(GtkButton *button, gpointer user_data) 
 }
 
 void on_Bkg_extract_window_hide(GtkWidget *widget, gpointer user_data) {
-	static GtkToggleButton *imgbutton = NULL, *bkgbutton = NULL, *bgkAutoButton = NULL;
+	static GtkToggleButton *imgbutton = NULL, *bkgbutton = NULL, *bgkManButton = NULL;
 	int remap_option;
 
 	if (imgbutton == NULL) {
 		imgbutton = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_bkg_img"));
 		bkgbutton = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_bkg_bkg"));
-		bgkAutoButton = GTK_TOGGLE_BUTTON(lookup_widget("bkgButtonAuto"));
+		bgkManButton = GTK_TOGGLE_BUTTON(lookup_widget("bkgButtonManual"));
 	}
 	gtk_widget_set_sensitive(lookup_widget("frame_bkg_tools"), FALSE);
 	gtk_widget_set_sensitive(lookup_widget("button_bkg_correct"), FALSE);
-	gtk_toggle_button_set_active(bgkAutoButton, TRUE);
+	gtk_toggle_button_set_active(bgkManButton, TRUE);
 	remap_option = REMAP_NONE;
 
 	set_cursor_waiting(TRUE);
