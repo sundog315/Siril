@@ -549,8 +549,7 @@ void draw_empty_image(cairo_t *cr, guint width, guint height) {
  */
 gboolean redraw_drawingarea(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	int image_width, image_height, window_width, window_height;
-	//fits *fit=&(gfit);
-	int vport = -1;
+	int vport;
 	double zoom;
 
 	// we need to identify which vport is being redrawn
@@ -566,8 +565,6 @@ gboolean redraw_drawingarea(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	zoom = get_zoom_val();
 	image_width = (int) (((double) window_width) / zoom);
 	image_height = (int) (((double) window_height) / zoom);
-	//gtk_style_context_get_color (gtk_widget_get_style_context(widget), 0, &color);
-	//gdk_cairo_set_source_rgba (cr, &color);
 
 	if (vport == RGB_VPORT) {
 		if (com.rgbbuf) {
@@ -981,7 +978,7 @@ void remap(int vport) {
 
 	if (mode == HISTEQ_DISPLAY) {
 		double hist_sum;
-		double nb_pixels = 0.0;
+		double nb_pixels;
 		size_t hist_nb_bins;
 		gsl_histogram *histo = NULL;
 
@@ -4854,6 +4851,7 @@ void on_Bkg_extract_window_hide(GtkWidget *widget, gpointer user_data) {
 		remap_option = REMAP_ALL;
 	}
 	clearSamples();
+	mouse_status = MOUSE_ACTION_SELECT_REG_AREA;
 	redraw(com.cvport, remap_option);
 	redraw_previews();
 	clearfits(&wfit[0]);
