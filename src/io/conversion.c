@@ -173,15 +173,18 @@ void on_convtoroot_changed (GtkEditable *editable, gpointer user_data){
 	check_for_conversion_form_completeness();
 }
 
-// TODO: check if com.raw_set.cfa conflicts
 void on_demosaicing_toggled (GtkToggleButton *togglebutton, gpointer user_data) {
 	static GtkToggleButton *but = NULL;
 	if (!but) but = GTK_TOGGLE_BUTTON(lookup_widget("radiobutton1"));
 	if (gtk_toggle_button_get_active(togglebutton)) {
 		convflags |= CONVDEBAYER;
 		gtk_toggle_button_set_active(but, TRUE);
+		com.debayer.open_debayer = TRUE;
 	}
-	else convflags &= ~CONVDEBAYER;
+	else {
+		convflags &= ~CONVDEBAYER;	// used for conversion
+		com.debayer.open_debayer = FALSE;	// used for image opening
+	}
 }
 
 void on_multipleSER_toggled (GtkToggleButton *togglebutton, gpointer user_data) {
@@ -215,7 +218,6 @@ void on_conv1_1plane_toggled (GtkToggleButton *togglebutton, gpointer user_data)
  * not been initialized with the default GUI values (= initialized to 0).
  */
 void initialize_libraw_settings() {
-	com.raw_set.cfa = TRUE;		// CFA
 	com.raw_set.bright = 1.0;		// brightness
 	com.raw_set.mul[0] = 1.0;		// multipliers: red
 	com.raw_set.mul[1] = 1.0;		// multipliers: green, not used because always equal to 1
@@ -227,13 +229,13 @@ void initialize_libraw_settings() {
 	com.raw_set.user_qual = 1;		// type of interpolation. AHD by default
 	com.raw_set.gamm[0] = 1.0;		// gamm curve: linear by default
 	com.raw_set.gamm[1] = 1.0;
-	com.raw_set.bayer_pattern = BAYER_FILTER_RGGB;
-	com.raw_set.bayer_inter = BAYER_VNG;
 }
 
 void initialize_ser_debayer_settings() {
-	com.raw_set.ser_cfa = TRUE;
-	com.raw_set.ser_force_bayer = TRUE;
+	com.debayer.open_debayer = FALSE;
+	com.debayer.ser_use_bayer_header = TRUE;
+	com.debayer.bayer_pattern = BAYER_FILTER_RGGB;
+	com.debayer.bayer_inter = BAYER_VNG;
 }
  
 /* initialize converters (utilities used for different image types importing) *
@@ -301,9 +303,14 @@ void initialize_converters() {
 #ifdef HAVE_FFMS2
 	supported_filetypes |= TYPEAVI;
 	if (has_entry)	strcat(text, ", ");
-	strcat(text, "Videos");
+	strcat(text, "Films");
 	has_entry = TRUE;
 #endif
+
+	supported_filetypes |= TYPESER;
+	if (has_entry)	strcat(text, ", ");
+	strcat(text, "SER sequences");
+	has_entry = TRUE;
 
 	/* library converters (detected by configure) */
 #ifdef HAVE_LIBTIFF
@@ -376,6 +383,8 @@ image_type get_type_for_extension(const char *extension) {
 	} else if (supported_filetypes & TYPEAVI && !check_for_film_extensions(extension)) {
 		return TYPEAVI;
 #endif
+	} else if (supported_filetypes & TYPESER && !strcasecmp(extension, "ser")) {
+		return TYPESER;
 	} else if (!strcasecmp(extension, "fit") || !strcasecmp(extension, "fits") ||
 			!strcasecmp(extension, "fts")) {
 		return TYPEFITS;
@@ -678,8 +687,8 @@ fits *any_to_new_fits(image_type imagetype, const char *source) {
 	if (imagetype == TYPEFITS && convflags & CONVDEBAYER) {
 		fits_flip_top_to_bottom(tmpfit);
 		siril_log_message("Filter Pattern: %s\n",
-				filter_pattern[com.raw_set.bayer_pattern]);
-		if (debayer(tmpfit, com.raw_set.bayer_inter)) {
+				filter_pattern[com.debayer.bayer_pattern]);
+		if (debayer(tmpfit, com.debayer.bayer_inter)) {
 			siril_log_message("Cannot perform debayering\n");
 			retval = -1;
 		} else {

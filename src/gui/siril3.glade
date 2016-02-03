@@ -5957,228 +5957,472 @@ This is useful when modulation parameter is different to 1 helping the whole pro
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <child>
-              <object class="GtkGrid" id="grid2">
+              <object class="GtkBox" id="box27">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="row_spacing">5</property>
-                <property name="column_spacing">5</property>
                 <child>
-                  <object class="GtkFrame" id="frame2">
+                  <object class="GtkBox" id="box70">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label_xalign">0</property>
-                    <property name="shadow_type">none</property>
+                    <property name="orientation">vertical</property>
                     <child>
-                      <object class="GtkAlignment" id="alignment2">
+                      <object class="GtkFrame" id="frame2">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="left_padding">12</property>
+                        <property name="label_xalign">0</property>
+                        <property name="shadow_type">none</property>
                         <child>
-                          <object class="GtkBox" id="box27">
+                          <object class="GtkAlignment" id="alignment2">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="orientation">vertical</property>
+                            <property name="left_padding">12</property>
                             <child>
-                              <object class="GtkCheckButton" id="checkbutton_multipliers">
-                                <property name="label" translatable="yes">Use automatic daylight multiplier</property>
+                              <object class="GtkBox" id="box72">
                                 <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">When this option is enabled,  coefficients for each channel are automatically computed. You can choose your own multiplier by unchecking this box.</property>
-                                <property name="xalign">0</property>
-                                <property name="active">True</property>
-                                <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="on_checkbutton_multipliers_toggled" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="hbox8">
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
                                 <property name="can_focus">False</property>
-                                <property name="halign">start</property>
-                                <property name="homogeneous">True</property>
+                                <property name="orientation">vertical</property>
                                 <child>
-                                  <object class="GtkLabel" id="label51">
+                                  <object class="GtkCheckButton" id="checkbutton_multipliers">
+                                    <property name="label" translatable="yes">Use automatic daylight multiplier</property>
                                     <property name="visible">True</property>
-                                    <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Red</property>
-                                    <property name="justify">center</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">When this option is enabled,  coefficients for each channel are automatically computed. You can choose your own multiplier by unchecking this box.</property>
+                                    <property name="xalign">0</property>
+                                    <property name="active">True</property>
+                                    <property name="draw_indicator">True</property>
+                                    <signal name="toggled" handler="on_checkbutton_multipliers_toggled" swapped="no"/>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">False</property>
-                                    <property name="position">0</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSpinButton" id="Red_spinbutton">
+                                  <object class="GtkBox" id="hbox8">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="has_tooltip">True</property>
-                                    <property name="tooltip_markup" translatable="yes">Specify your own raw white balance. The value for the Red scale is relative to the Green.</property>
-                                    <property name="tooltip_text" translatable="yes">Specify your own raw white balance. The value for the Red scale is relative to the Green.</property>
-                                    <property name="invisible_char">●</property>
-                                    <property name="text" translatable="yes">1,00</property>
-                                    <property name="progress_pulse_step">0.0099999997764825821</property>
-                                    <property name="adjustment">adjustment_red</property>
-                                    <property name="climb_rate">0.001</property>
-                                    <property name="digits">2</property>
-                                    <property name="value">1</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">True</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="hbox11">
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">start</property>
-                                <property name="homogeneous">True</property>
-                                <child>
-                                  <object class="GtkLabel" id="label53">
-                                    <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Blue</property>
-                                    <property name="justify">center</property>
+                                    <property name="halign">start</property>
+                                    <property name="homogeneous">True</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label51">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Red</property>
+                                        <property name="justify">center</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton" id="Red_spinbutton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip_markup" translatable="yes">Specify your own raw white balance. The value for the Red scale is relative to the Green.</property>
+                                        <property name="tooltip_text" translatable="yes">Specify your own raw white balance. The value for the Red scale is relative to the Green.</property>
+                                        <property name="invisible_char">●</property>
+                                        <property name="text" translatable="yes">1,00</property>
+                                        <property name="progress_pulse_step">0.0099999997764825821</property>
+                                        <property name="adjustment">adjustment_red</property>
+                                        <property name="climb_rate">0.001</property>
+                                        <property name="digits">2</property>
+                                        <property name="value">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">False</property>
-                                    <property name="position">0</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">2</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSpinButton" id="Blue_spinbutton">
+                                  <object class="GtkBox" id="hbox11">
                                     <property name="visible">True</property>
                                     <property name="sensitive">False</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="has_tooltip">True</property>
-                                    <property name="tooltip_markup" translatable="yes">Specify your own raw white balance. The value for the Blue scale is relative to the Green.</property>
-                                    <property name="tooltip_text" translatable="yes">Specify your own raw white balance. The value for the Blue scale is relative to the Green.</property>
-                                    <property name="invisible_char">●</property>
-                                    <property name="text" translatable="yes">1,00</property>
-                                    <property name="progress_pulse_step">0.0099999997764825821</property>
-                                    <property name="adjustment">adjustment_blue</property>
-                                    <property name="climb_rate">0.01</property>
-                                    <property name="digits">2</property>
-                                    <property name="value">1</property>
-                                  </object>
-                                  <packing>
-                                    <property name="expand">True</property>
-                                    <property name="fill">True</property>
-                                    <property name="position">1</property>
-                                  </packing>
-                                </child>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">3</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkBox" id="hbox9">
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">start</property>
-                                <property name="homogeneous">True</property>
-                                <child>
-                                  <object class="GtkLabel" id="label52">
-                                    <property name="visible">True</property>
                                     <property name="can_focus">False</property>
-                                    <property name="label" translatable="yes">Brightness</property>
-                                    <property name="justify">center</property>
+                                    <property name="halign">start</property>
+                                    <property name="homogeneous">True</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label53">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Blue</property>
+                                        <property name="justify">center</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton" id="Blue_spinbutton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip_markup" translatable="yes">Specify your own raw white balance. The value for the Blue scale is relative to the Green.</property>
+                                        <property name="tooltip_text" translatable="yes">Specify your own raw white balance. The value for the Blue scale is relative to the Green.</property>
+                                        <property name="invisible_char">●</property>
+                                        <property name="text" translatable="yes">1,00</property>
+                                        <property name="progress_pulse_step">0.0099999997764825821</property>
+                                        <property name="adjustment">adjustment_blue</property>
+                                        <property name="climb_rate">0.01</property>
+                                        <property name="digits">2</property>
+                                        <property name="value">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
                                   </object>
                                   <packing>
                                     <property name="expand">False</property>
-                                    <property name="fill">False</property>
-                                    <property name="position">0</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">3</property>
                                   </packing>
                                 </child>
                                 <child>
-                                  <object class="GtkSpinButton" id="Brightness_spinbutton">
+                                  <object class="GtkBox" id="hbox9">
                                     <property name="visible">True</property>
-                                    <property name="can_focus">True</property>
-                                    <property name="has_tooltip">True</property>
-                                    <property name="tooltip_markup" translatable="yes">Divide the white level by this number.</property>
-                                    <property name="tooltip_text" translatable="yes">Divide the white level by this number.</property>
-                                    <property name="invisible_char">●</property>
-                                    <property name="text" translatable="yes">1,00</property>
-                                    <property name="progress_pulse_step">0.0099999997764825821</property>
-                                    <property name="adjustment">adjustment_brightness</property>
-                                    <property name="climb_rate">0.01</property>
-                                    <property name="digits">2</property>
-                                    <property name="value">1</property>
+                                    <property name="sensitive">False</property>
+                                    <property name="can_focus">False</property>
+                                    <property name="halign">start</property>
+                                    <property name="homogeneous">True</property>
+                                    <child>
+                                      <object class="GtkLabel" id="label52">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">False</property>
+                                        <property name="label" translatable="yes">Brightness</property>
+                                        <property name="justify">center</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
+                                        <property name="position">0</property>
+                                      </packing>
+                                    </child>
+                                    <child>
+                                      <object class="GtkSpinButton" id="Brightness_spinbutton">
+                                        <property name="visible">True</property>
+                                        <property name="can_focus">True</property>
+                                        <property name="has_tooltip">True</property>
+                                        <property name="tooltip_markup" translatable="yes">Divide the white level by this number.</property>
+                                        <property name="tooltip_text" translatable="yes">Divide the white level by this number.</property>
+                                        <property name="invisible_char">●</property>
+                                        <property name="text" translatable="yes">1,00</property>
+                                        <property name="progress_pulse_step">0.0099999997764825821</property>
+                                        <property name="adjustment">adjustment_brightness</property>
+                                        <property name="climb_rate">0.01</property>
+                                        <property name="digits">2</property>
+                                        <property name="value">1</property>
+                                      </object>
+                                      <packing>
+                                        <property name="expand">True</property>
+                                        <property name="fill">True</property>
+                                        <property name="position">1</property>
+                                      </packing>
+                                    </child>
                                   </object>
                                   <packing>
-                                    <property name="expand">True</property>
+                                    <property name="expand">False</property>
                                     <property name="fill">True</property>
-                                    <property name="position">1</property>
+                                    <property name="position">4</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkbutton_blackpoint">
+                                    <property name="label" translatable="yes">No black point correction</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">When this option is enabled, no black point correction is applied to raw images.</property>
+                                    <property name="xalign">0</property>
+                                    <property name="draw_indicator">True</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">5</property>
                                   </packing>
                                 </child>
                               </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">4</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="checkbutton_blackpoint">
-                                <property name="label" translatable="yes">No black point correction</property>
-                                <property name="visible">True</property>
-                                <property name="sensitive">False</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">When this option is enabled, no black point correction is applied to raw images.</property>
-                                <property name="xalign">0</property>
-                                <property name="draw_indicator">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">5</property>
-                              </packing>
                             </child>
                           </object>
                         </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label48">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="ypad">10</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Image Color Adjustement&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </object>
+                        </child>
                       </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
                     </child>
-                    <child type="label">
-                      <object class="GtkLabel" id="label48">
+                    <child>
+                      <object class="GtkFrame" id="frame3">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="ypad">10</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Image Color Adjustement&lt;/b&gt;</property>
-                        <property name="use_markup">True</property>
+                        <property name="label_xalign">0</property>
+                        <property name="shadow_type">none</property>
+                        <child>
+                          <object class="GtkAlignment" id="alignment5">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="left_padding">12</property>
+                            <child>
+                              <object class="GtkComboBoxText" id="combo_dcraw_inter">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="tooltip_text" translatable="yes">Select an interpolation method to perform demosaicing before opening image.</property>
+                                <property name="valign">center</property>
+                                <property name="active">1</property>
+                                <items>
+                                  <item translatable="yes">High-speed, low-quality bilinear</item>
+                                  <item translatable="yes">Adaptive Homogeneity-Directed (AHD)</item>
+                                  <item translatable="yes">Variable Number of Gradients (VNG)</item>
+                                  <item translatable="yes">Patterned Pixel Grouping (PPG)</item>
+                                </items>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label7">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="ypad">10</property>
+                            <property name="label" translatable="yes">Image Matrix Interpolation</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                          </object>
+                        </child>
                       </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
                     </child>
                   </object>
                   <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
+                <child>
+                  <object class="GtkBox" id="box24">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkFrame" id="frame19">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label_xalign">0</property>
+                        <property name="shadow_type">none</property>
+                        <child>
+                          <object class="GtkAlignment" id="alignment23">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="left_padding">12</property>
+                            <child>
+                              <object class="GtkBox" id="box71">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkRadioButton" id="radiobutton_gamm0">
+                                    <property name="label" translatable="yes">Linear</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">No gamma correction is applied to the image.</property>
+                                    <property name="xalign">0</property>
+                                    <property name="active">True</property>
+                                    <property name="draw_indicator">True</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkRadioButton" id="radiobutton_gamm1">
+                                    <property name="label" translatable="yes">BT.709 curve</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">Apply a specific gamma curve to the image.</property>
+                                    <property name="xalign">0</property>
+                                    <property name="draw_indicator">True</property>
+                                    <property name="group">radiobutton_gamm0</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">2</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkRadioButton" id="radiobutton_gamm2">
+                                    <property name="label" translatable="yes">sRGB curve</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">Apply a specific gamma curve to the image</property>
+                                    <property name="xalign">0</property>
+                                    <property name="draw_indicator">True</property>
+                                    <property name="group">radiobutton_gamm0</property>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">False</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">3</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label70">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="ypad">10</property>
+                            <property name="label" translatable="yes">&lt;b&gt;Image Gamma Correction&lt;/b&gt;</property>
+                            <property name="use_markup">True</property>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkFrame" id="frame4">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label_xalign">0</property>
+                        <property name="shadow_type">none</property>
+                        <child>
+                          <object class="GtkAlignment" id="alignment14">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="left_padding">12</property>
+                            <child>
+                              <object class="GtkBox" id="box28">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="orientation">vertical</property>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkbutton_cam">
+                                    <property name="label" translatable="yes">Use the white balance 
+specified by the camera</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">By default, libraw uses a fixed white balance based on a color chart illuminated with a standard D65 lamp. If you check this box, libraw will try to use data specified by your camera.</property>
+                                    <property name="xalign">0</property>
+                                    <property name="draw_indicator">True</property>
+                                    <signal name="toggled" handler="on_checkbutton_cam_toggled" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">0</property>
+                                  </packing>
+                                </child>
+                                <child>
+                                  <object class="GtkCheckButton" id="checkbutton_auto">
+                                    <property name="label" translatable="yes">Calculate the white balance 
+by averaging the entire image</property>
+                                    <property name="visible">True</property>
+                                    <property name="can_focus">True</property>
+                                    <property name="receives_default">False</property>
+                                    <property name="tooltip_text" translatable="yes">By default, libraw uses a fixed white balance based on a color chart illuminated with a standard D65 lamp. If you check this box, libraw will compute the white balance by averaging the entire image.</property>
+                                    <property name="xalign">0</property>
+                                    <property name="draw_indicator">True</property>
+                                    <signal name="toggled" handler="on_checkbutton_auto_toggled" swapped="no"/>
+                                  </object>
+                                  <packing>
+                                    <property name="expand">True</property>
+                                    <property name="fill">True</property>
+                                    <property name="position">1</property>
+                                  </packing>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                        <child type="label">
+                          <object class="GtkLabel" id="label5">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="ypad">10</property>
+                            <property name="label" translatable="yes">Image White Balance</property>
+                            <attributes>
+                              <attribute name="weight" value="bold"/>
+                            </attributes>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+            <child type="tab">
+              <object class="GtkLabel" id="label45">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">DSLR RAW file format decoder based on the libraw library.</property>
+                <property name="label" translatable="yes">DSLR RAW debayer</property>
+              </object>
+              <packing>
+                <property name="tab_fill">False</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="box25">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkFrame" id="frame11">
                     <property name="visible">True</property>
@@ -6191,29 +6435,12 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                         <property name="can_focus">False</property>
                         <property name="left_padding">12</property>
                         <child>
-                          <object class="GtkBox" id="box25">
+                          <object class="GtkBox" id="box73">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="orientation">vertical</property>
                             <child>
-                              <object class="GtkCheckButton" id="checkbutton_SER">
-                                <property name="label" translatable="yes">Create raw Bayer CFA video</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Open raw Bayer CFA monochrome video (no interpolation, no demosaicing). This option open the video from the Bayer matrix as is. It is useful for pre-processing.</property>
-                                <property name="xalign">0</property>
-                                <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="on_checkbutton_SER_toggled" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="checkbutton_SER_force_pattern">
+                              <object class="GtkCheckButton" id="checkbutton_SER_use_header">
                                 <property name="label" translatable="yes">Bayer pattern from file's header</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
@@ -6225,7 +6452,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                               <packing>
                                 <property name="expand">True</property>
                                 <property name="fill">True</property>
-                                <property name="position">1</property>
+                                <property name="position">0</property>
                               </packing>
                             </child>
                           </object>
@@ -6236,139 +6463,8 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                       <object class="GtkLabel" id="label3">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">SER Videos</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                        </attributes>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkFrame" id="frame19">
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">False</property>
-                    <property name="label_xalign">0</property>
-                    <property name="shadow_type">none</property>
-                    <child>
-                      <object class="GtkAlignment" id="alignment23">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="left_padding">12</property>
-                        <child>
-                          <object class="GtkBox" id="box24">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="orientation">vertical</property>
-                            <child>
-                              <object class="GtkRadioButton" id="radiobutton_gamm0">
-                                <property name="label" translatable="yes">Linear</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">No gamma correction is applied to the image.</property>
-                                <property name="xalign">0</property>
-                                <property name="active">True</property>
-                                <property name="draw_indicator">True</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radiobutton_gamm1">
-                                <property name="label" translatable="yes">BT.709 curve</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Apply a specific gamma curve to the image.</property>
-                                <property name="xalign">0</property>
-                                <property name="draw_indicator">True</property>
-                                <property name="group">radiobutton_gamm0</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">2</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkRadioButton" id="radiobutton_gamm2">
-                                <property name="label" translatable="yes">sRGB curve</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">Apply a specific gamma curve to the image</property>
-                                <property name="xalign">0</property>
-                                <property name="draw_indicator">True</property>
-                                <property name="group">radiobutton_gamm0</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">3</property>
-                              </packing>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child type="label">
-                      <object class="GtkLabel" id="label70">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
                         <property name="ypad">10</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Image Gamma Correction&lt;/b&gt;</property>
-                        <property name="use_markup">True</property>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">0</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkFrame" id="frame3">
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">False</property>
-                    <property name="label_xalign">0</property>
-                    <property name="shadow_type">none</property>
-                    <child>
-                      <object class="GtkAlignment" id="alignment5">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="left_padding">12</property>
-                        <child>
-                          <object class="GtkComboBoxText" id="combo_dcraw_inter">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="tooltip_text" translatable="yes">Select an interpolation method to perform demosaicing before opening image.</property>
-                            <property name="valign">center</property>
-                            <property name="active">1</property>
-                            <items>
-                              <item translatable="yes">High-speed, low-quality bilinear</item>
-                              <item translatable="yes">Adaptive Homogeneity-Directed (AHD)</item>
-                              <item translatable="yes">Variable Number of Gradients (VNG)</item>
-                              <item translatable="yes">Patterned Pixel Grouping (PPG)</item>
-                            </items>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child type="label">
-                      <object class="GtkLabel" id="label7">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Image Matrix Interpolation</property>
+                        <property name="label" translatable="yes">SER sequences</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
                         </attributes>
@@ -6376,81 +6472,9 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                     </child>
                   </object>
                   <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">1</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkFrame" id="frame4">
-                    <property name="visible">True</property>
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">False</property>
-                    <property name="label_xalign">0</property>
-                    <property name="shadow_type">none</property>
-                    <child>
-                      <object class="GtkAlignment" id="alignment14">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="left_padding">12</property>
-                        <child>
-                          <object class="GtkBox" id="box28">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="orientation">vertical</property>
-                            <child>
-                              <object class="GtkCheckButton" id="checkbutton_cam">
-                                <property name="label" translatable="yes">Use the white balance 
-specified by the camera</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">By default, libraw uses a fixed white balance based on a color chart illuminated with a standard D65 lamp. If you check this box, libraw will try to use data specified by your camera.</property>
-                                <property name="xalign">0</property>
-                                <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="on_checkbutton_cam_toggled" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkCheckButton" id="checkbutton_auto">
-                                <property name="label" translatable="yes">Calculate the white balance 
-by averaging the entire image</property>
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">By default, libraw uses a fixed white balance based on a color chart illuminated with a standard D65 lamp. If you check this box, libraw will compute the white balance by averaging the entire image.</property>
-                                <property name="xalign">0</property>
-                                <property name="draw_indicator">True</property>
-                                <signal name="toggled" handler="on_checkbutton_auto_toggled" swapped="no"/>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                    <child type="label">
-                      <object class="GtkLabel" id="label5">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Image White Balance</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                        </attributes>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">2</property>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
                 <child>
@@ -6469,7 +6493,7 @@ by averaging the entire image</property>
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="valign">start</property>
-                            <property name="margin_top">10</property>
+                            <property name="column_spacing">4</property>
                             <child>
                               <object class="GtkLabel" id="label91">
                                 <property name="visible">True</property>
@@ -6541,6 +6565,7 @@ by averaging the entire image</property>
                       <object class="GtkLabel" id="label15">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="ypad">10</property>
                         <property name="label" translatable="yes">Debayer</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
@@ -6549,20 +6574,24 @@ by averaging the entire image</property>
                     </child>
                   </object>
                   <packing>
-                    <property name="left_attach">1</property>
-                    <property name="top_attach">2</property>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
                   </packing>
                 </child>
               </object>
+              <packing>
+                <property name="position">1</property>
+              </packing>
             </child>
             <child type="tab">
-              <object class="GtkLabel" id="label45">
+              <object class="GtkLabel" id="label9">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">DSLR RAW file format decoder based on the libraw library.</property>
-                <property name="label" translatable="yes">RAW Files</property>
+                <property name="label" translatable="yes">Other debayer</property>
               </object>
               <packing>
+                <property name="position">1</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
@@ -6587,7 +6616,6 @@ by averaging the entire image</property>
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="halign">start</property>
-                            <property name="margin_top">10</property>
                             <child>
                               <object class="GtkLabel" id="label63">
                                 <property name="visible">True</property>
@@ -6756,17 +6784,17 @@ by averaging the entire image</property>
                 </child>
               </object>
               <packing>
-                <property name="position">1</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <child type="tab">
               <object class="GtkLabel" id="label11">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Camera &amp; Lens</property>
+                <property name="label" translatable="yes">Camera &amp; Optics</property>
               </object>
               <packing>
-                <property name="position">1</property>
+                <property name="position">2</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
@@ -6814,7 +6842,7 @@ by averaging the entire image</property>
                                 <property name="can_focus">False</property>
                                 <property name="halign">start</property>
                                 <property name="label" translatable="yes">/tmp</property>
-                                <property name="ellipsize">start</property>
+                                <property name="ellipsize">middle</property>
                                 <property name="max_width_chars">50</property>
                                 <property name="lines">1</property>
                               </object>
@@ -7025,6 +7053,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
+                            <property name="valign">start</property>
                             <property name="xalign">0</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="on_confirmDontShowButton_toggled" swapped="no"/>
@@ -7055,7 +7084,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                 </child>
               </object>
               <packing>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child type="tab">
@@ -7065,7 +7094,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                 <property name="label" translatable="yes">Misc.</property>
               </object>
               <packing>
-                <property name="position">2</property>
+                <property name="position">3</property>
                 <property name="tab_fill">False</property>
               </packing>
             </child>
@@ -9702,8 +9731,9 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">Debayer single-channel images (CFA format) using the bayer matrix layout given in the settings. Only for RAW and FITS input images.
-Colour image target also applies to the debayer result.</property>
+			<property name="tooltip_text" translatable="yes">Debayer single-channel images (CFA format) using the bayer matrix layout given in the settings. Also applies to image opening, not only conversion.
+Only for RAW and FITS input images.
+Colour image target also applies to the debayer result for conversion.</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_demosaicing_toggled" swapped="no"/>
@@ -9739,12 +9769,14 @@ Colour image target also applies to the debayer result.</property>
                         <child>
                           <object class="GtkCheckButton" id="multipleSER">
                             <property name="label" translatable="yes">Create as many SER files as input files</property>
+			    <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">Tick this to create several SER files instead of a single SER file for all input elements. Use this if input elements don't share the same image size.</property>
+                            <property name="tooltip_text" translatable="yes">- NOT YET IMPLEMENTED -
+Tick this to create several SER files instead of a single SER file for all input elements. Use this if input elements don't share the same image size.</property>
                             <property name="xalign">0</property>
                             <property name="draw_indicator">True</property>
-			    <signal name="toggled" handler="on_multipleSER_toggled" swapped="no"/>
+                            <signal name="toggled" handler="on_multipleSER_toggled" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>

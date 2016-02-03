@@ -116,10 +116,9 @@ int read_single_image(const char* filename, fits *dest, char **realname_out) {
 	if (imagetype == TYPESER || imagetype == TYPEAVI) {
 			/* Returns 3 if ok */
 		retval = read_single_sequence(realname, imagetype);
+	} else {
+		retval = any_to_fits(imagetype, realname, dest);
 	}
-
-	retval = any_to_fits(imagetype, realname, dest);
-
 	if (retval > 0 && retval < 3)
 		siril_log_message("Opening %s failed.\n", realname);
 	if (realname_out)

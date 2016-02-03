@@ -735,7 +735,7 @@ int debayer(fits* fit, interpolation_method interpolation) {
 	WORD *newbuf;
 
 	newbuf = debayer_buffer(buf, &width, &height, interpolation,
-			com.raw_set.bayer_pattern);
+			com.debayer.bayer_pattern);
 	if (newbuf == NULL) {
 		return 1;
 	}

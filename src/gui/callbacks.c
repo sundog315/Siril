@@ -1654,17 +1654,10 @@ void on_formula_button_1_toggled(GtkToggleButton *button, gpointer user_data) {
 }
 
 void set_filters_dialog(GtkFileChooser *chooser) {
-	gboolean is_cfa = FALSE;
-#ifdef HAVE_LIBRAW
-	GtkToggleButton *cfaButton = GTK_TOGGLE_BUTTON(
-			lookup_widget("radiobutton_conv_cfa"));
-	is_cfa = gtk_toggle_button_get_active(cfaButton);
-#endif
-
 	gtk_filter_add(chooser, "FITS Files (*.fit, *.fits, *.fts)",
 			"*.fit;*.FIT;*.fits;*.FITS;*.fts;*.FTS",
 			com.filter == TYPEFITS);
-	if (whichdial == OD_OPEN || (whichdial == OD_CONVERT && !is_cfa)) {
+	if (whichdial == OD_OPEN || whichdial == OD_CONVERT) {
 #ifdef HAVE_LIBRAW
 		/* RAW FILES */
 		int nb_raw;
@@ -1874,11 +1867,11 @@ void set_libraw_settings_menu_available(gboolean activate) {
 }
 
 void on_comboBayer_pattern_changed(GtkComboBox* box, gpointer user_data) {
-	com.raw_set.bayer_pattern = gtk_combo_box_get_active(box);
+	com.debayer.bayer_pattern = gtk_combo_box_get_active(box);
 }
 
 void on_comboBayer_inter_changed(GtkComboBox* box, gpointer user_data) {
-	com.raw_set.bayer_inter = gtk_combo_box_get_active(box);
+	com.debayer.bayer_inter = gtk_combo_box_get_active(box);
 }
 
 void set_GUI_CAMERA() {
@@ -1928,10 +1921,6 @@ void set_GUI_CAMERA() {
 void set_GUI_LIBRAW() {
 
 	/**********COLOR ADJUSTEMENT**************/
-	/*gtk_toggle_button_set_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_CFA")),
-			com.raw_set.cfa);*/
-
 	gtk_spin_button_set_value(
 			GTK_SPIN_BUTTON(lookup_widget("Brightness_spinbutton")),
 			com.raw_set.bright);
@@ -1978,33 +1967,14 @@ void set_GUI_LIBRAW() {
 	/********** DEBAYER ******************/
 	GtkComboBox *pattern = GTK_COMBO_BOX(lookup_widget("comboBayer_pattern"));
 	GtkComboBox *inter = GTK_COMBO_BOX(lookup_widget("comboBayer_inter"));
-	gtk_combo_box_set_active(pattern, com.raw_set.bayer_pattern);
-	gtk_combo_box_set_active(inter, com.raw_set.bayer_inter);
-
-	/************** SER *******************/
+	gtk_combo_box_set_active(pattern, com.debayer.bayer_pattern);
+	gtk_combo_box_set_active(inter, com.debayer.bayer_inter);
 	gtk_toggle_button_set_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_SER")),
-			com.raw_set.ser_cfa);
+			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_SER_use_header")),
+			com.debayer.ser_use_bayer_header);
 	gtk_toggle_button_set_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_SER_force_pattern")),
-			com.raw_set.ser_force_bayer);
-}
-
-void on_checkbutton_CFA_toggled(GtkToggleButton *button, gpointer user_data) {
-	GtkWidget *frame[8];
-	int i;
-
-	gboolean CFA_button = gtk_toggle_button_get_active(button);
-	frame[0] = lookup_widget("frame4");
-	frame[1] = lookup_widget("frame3");
-	frame[2] = lookup_widget("frame19");
-	frame[3] = lookup_widget("hbox8");
-	frame[4] = lookup_widget("hbox9");
-	frame[5] = lookup_widget("hbox11");
-	frame[6] = lookup_widget("checkbutton_multipliers");
-	frame[7] = lookup_widget("checkbutton_blackpoint");
-	for (i = 0; i < 8; i++)
-		gtk_widget_set_sensitive(frame[i], !CFA_button);
+			GTK_TOGGLE_BUTTON(lookup_widget("demosaicingButton")),
+			com.debayer.open_debayer);
 }
 
 void on_checkbutton_cam_toggled(GtkButton *button, gpointer user_data) {
@@ -2040,13 +2010,7 @@ void on_checkbutton_auto_toggled(GtkButton *button, gpointer user_data) {
 }
 
 void update_libraw_interface() {
-	/***** DEBAYER is updated with changed signal *******/
-
 	/**********COLOR ADJUSTEMENT**************/
-	/*com.raw_set.cfa = gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_CFA")));
-	update_raw_cfa_tooltip();*/
-
 	com.raw_set.bright = gtk_spin_button_get_value(
 			GTK_SPIN_BUTTON(lookup_widget("Brightness_spinbutton")));
 	com.raw_set.mul[0] = gtk_spin_button_get_value(
@@ -2087,10 +2051,8 @@ void update_libraw_interface() {
 	}
 	/* We write in config file */
 	/*************SER**********************/
-	com.raw_set.ser_cfa = gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_SER")));
-	com.raw_set.ser_force_bayer = gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_SER_force_pattern")));
+	com.debayer.ser_use_bayer_header = gtk_toggle_button_get_active(
+			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_SER_use_header")));
 	writeinitfile();
 }
 
@@ -2142,17 +2104,6 @@ void on_checkbutton_multipliers_toggled(GtkButton *button, gpointer user_data) {
 		gtk_spin_button_set_value(
 				GTK_SPIN_BUTTON(lookup_widget("Blue_spinbutton")), 1.0);
 	}
-}
-
-void on_checkbutton_SER_toggled(GtkToggleButton *button, gpointer user_data) {
-	static GtkWidget *SER_force_pattern = NULL;
-	gboolean is_checked;
-
-	if (SER_force_pattern == NULL) {
-		SER_force_pattern = lookup_widget("checkbutton_SER_force_pattern");
-	}
-	is_checked = gtk_toggle_button_get_active(button);
-	gtk_widget_set_sensitive(SER_force_pattern, !is_checked);
 }
 
 void reset_swapdir() {

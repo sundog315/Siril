@@ -337,7 +337,7 @@ int ser_read_frame(struct ser_struct *ser_file, int frame_no, fits *fit) {
 	 * RGB and BGR are not coming from raw data. In consequence CFA does
 	 * not exist for these kind of cam */
 	ser_color type_ser = ser_file->color_id;
-	if (com.raw_set.ser_cfa && type_ser != SER_RGB && type_ser != SER_BGR)
+	if (!com.debayer.open_debayer && type_ser != SER_RGB && type_ser != SER_BGR)
 		type_ser = SER_MONO;
 
 	switch (type_ser) {
@@ -356,9 +356,9 @@ int ser_read_frame(struct ser_struct *ser_file, int frame_no, fits *fit) {
 	case SER_BAYER_GRBG:
 		fit->naxes[0] = fit->rx = ser_file->image_width;
 		fit->naxes[1] = fit->ry = ser_file->image_height;
-		if (com.raw_set.ser_force_bayer)
+		if (com.debayer.ser_use_bayer_header)
 			set_combo_box_bayer_pattern(type_ser);
-		debayer(fit, com.raw_set.bayer_inter);
+		debayer(fit, com.debayer.bayer_inter);
 		break;
 	case SER_BGR:
 		swap = 2;
@@ -411,7 +411,8 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 	 * RGB and BGR are not coming from raw data. In consequence CFA does
 	 * not exist for these kind of cam */
 	type_ser = ser_file->color_id;
-	if (com.raw_set.ser_cfa && type_ser != SER_RGB && type_ser != SER_BGR)
+	if (!com.debayer.open_debayer && type_ser != SER_RGB && type_ser !=
+			SER_BGR)
 		type_ser = SER_MONO;
 
 	switch (type_ser) {
@@ -447,7 +448,7 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 		 * Original is monochrome, we demosaic it in an area slightly larger than the
 		 * requested area, giving 3 channels in form of RGBRGBRGB buffers, and finally
 		 * we extract one of the three channels and crop it to the requested area. */
-		if (com.raw_set.ser_force_bayer)
+		if (com.debayer.ser_use_bayer_header)
 			set_combo_box_bayer_pattern(type_ser);
 		if (layer < 0 || layer >= 3) {
 			siril_log_message("For a demosaiced image, layer has to be R, G or B (0 to 2).\n");
@@ -494,8 +495,8 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 		ser_manage_endianess_and_depth(ser_file, rawbuf, debayer_area.w * debayer_area.h);
 
 		demosaiced_buf = debayer_buffer(rawbuf, &debayer_area.w,
-				&debayer_area.h, com.raw_set.bayer_inter,
-				com.raw_set.bayer_pattern);
+				&debayer_area.h, com.debayer.bayer_inter,
+				com.debayer.bayer_pattern);
 		free(rawbuf);
 		if (demosaiced_buf == NULL) {
 			return -1;

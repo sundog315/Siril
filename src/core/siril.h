@@ -418,14 +418,18 @@ struct ffit {
  * Don't forget to update conversion.c:initialize_libraw_settings() data when
  * modifying the glade settings */
 struct libraw_config {
-	gboolean cfa, ser_cfa, ser_force_bayer;
 	double mul[3], bright;					// Color  & brightness adjustement mul[0] = red, mul[1] = green = 1, mul[2] = blue
 	int auto_mul, use_camera_wb, use_auto_wb;		// White Balance parameters
 	int user_qual;						// Index of the Matrix interpolation set in dcraw, 0: bilinear, 1: VNG, 2: PPG, 3: AHD
 	int user_black;						// black point correction
 	double gamm[2];						// Gamma correction
-	sensor_pattern bayer_pattern;
-	interpolation_method bayer_inter;					
+};
+
+struct debayer_config {
+	gboolean open_debayer;			// debayer images being opened
+	gboolean ser_use_bayer_header;		// use the pattern given in the SER header
+	sensor_pattern bayer_pattern;		// user-defined Bayer pattern
+	interpolation_method bayer_inter;	// interpolation method for non-libraw debayer
 };
 
 struct stack_config {
@@ -522,7 +526,8 @@ struct cominf {
 	int hist_display;		// displayed index
 	char *swap_dir;
 
-	libraw raw_set;			// the libraw setting
+	libraw raw_set;			// the libraw settings
+	struct debayer_config debayer;	// debayer settings
 
 	sequence seq;			// currently loaded sequence	TODO: *seq
 	single *uniq;			// currently loaded image, if outside sequence
@@ -540,7 +545,7 @@ struct cominf {
 	GThread *thread;		// the thread for processings
 	GMutex mutex;			// a mutex we use for this thread
 	gboolean run_thread;		// the main thread loop condition
-	int max_thread;		// maximum of thread used
+	int max_thread;			// maximum of thread used
 };
 
 /* this structure is used to characterize the statistics of the image */

@@ -1057,7 +1057,7 @@ gpointer seqpreprocess(gpointer p) {
 					dest_filename);
 			if (com.seq.type == SEQ_SER) {
 				if ((new_ser_file->color_id != SER_MONO)
-						&& (!com.raw_set.ser_cfa)) {
+						&& (!com.debayer.open_debayer)) {
 					char *msg = siril_log_message(
 							"You must preprocess your SER files without applying demosaicing.\n"
 							"Uncheck the corresponding box in settings.\n");

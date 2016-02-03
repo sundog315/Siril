@@ -1071,7 +1071,7 @@ gboolean sequence_is_rgb(sequence *seq) {
 		case SEQ_REGULAR:
 			return seq->nb_layers == 3;
 		case SEQ_SER:
-			return (seq->ser_file->color_id != SER_MONO && !com.raw_set.ser_cfa) ||
+			return (seq->ser_file->color_id != SER_MONO && com.debayer.open_debayer) ||
 				seq->ser_file->color_id == SER_RGB ||
 				seq->ser_file->color_id == SER_BGR;
 		default:

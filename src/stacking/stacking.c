@@ -454,12 +454,12 @@ int stack_median(struct stacking_args *args) {
 		naxes[0] = args->seq->ser_file->image_width;
 		naxes[1] = args->seq->ser_file->image_height;
 		ser_color type_ser = args->seq->ser_file->color_id;
-		if (com.raw_set.ser_cfa && type_ser != SER_RGB && type_ser != SER_BGR)
+		if (!com.debayer.open_debayer && type_ser != SER_RGB && type_ser != SER_BGR)
 			type_ser = SER_MONO;
 		naxes[2] = type_ser == SER_MONO ? 1 : 3;
 		naxis = type_ser == SER_MONO ? 2 : 3;
 		/* case of Super Pixel not handled yet */
-		if (com.raw_set.bayer_inter == BAYER_SUPER_PIXEL) {
+		if (com.debayer.bayer_inter == BAYER_SUPER_PIXEL) {
 			siril_log_message("Super-pixel is not handled yet for on the fly SER stacking\n");
 			retval = -1;
 			goto free_and_close;
@@ -1288,12 +1288,12 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 		naxes[0] = args->seq->ser_file->image_width;
 		naxes[1] = args->seq->ser_file->image_height;
 		ser_color type_ser = args->seq->ser_file->color_id;
-		if (com.raw_set.ser_cfa && type_ser != SER_RGB && type_ser != SER_BGR)
+		if (!com.debayer.open_debayer && type_ser != SER_RGB && type_ser != SER_BGR)
 			type_ser = SER_MONO;
 		naxes[2] = type_ser == SER_MONO ? 1 : 3;
 		naxis = type_ser == SER_MONO ? 2 : 3;
 		/* case of Super Pixel not handled yet */
-		if (com.raw_set.bayer_inter == BAYER_SUPER_PIXEL) {
+		if (com.debayer.bayer_inter == BAYER_SUPER_PIXEL) {
 			siril_log_message("Super-pixel is not handled yet for on the fly SER stacking\n");
 			retval = -1;
 			goto free_and_close;

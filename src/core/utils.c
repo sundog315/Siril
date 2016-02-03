@@ -53,10 +53,10 @@
 #include "io/single_image.h"
 
 static const char *keywords[] = { "working-directory", "libraw-settings",
-		"ser-settings", "preprocessing-settings", "registration-settings",
+		"debayer-settings", "preprocessing-settings", "registration-settings",
 		"stacking-settings", "misc-settings" };
 enum token_index {
-	WD = 0, RAW = 1, SER = 2, PRE = 3, REG = 4, STK = 5, MISC = 6, NOTOK
+	WD = 0, RAW = 1, BAY = 2, PRE = 3, REG = 4, STK = 5, MISC = 6, NOTOK
 };
 
 int round_to_int(double x) {
@@ -226,12 +226,6 @@ int readinitfile() {
 	/* Libraw setting */
 	config_setting_t *raw_setting = config_lookup(&config, keywords[RAW]);
 	if (raw_setting) {
-		config_setting_lookup_bool(raw_setting, "cfa", &com.raw_set.cfa);
-		int pattern, inter;
-		config_setting_lookup_int(raw_setting, "pattern", &pattern);
-		com.raw_set.bayer_pattern = pattern;
-		config_setting_lookup_int(raw_setting, "inter", &inter);
-		com.raw_set.bayer_inter = inter;
 		config_setting_lookup_float(raw_setting, "mul_0", &com.raw_set.mul[0]);
 		config_setting_lookup_float(raw_setting, "mul_2", &com.raw_set.mul[2]);
 		config_setting_lookup_float(raw_setting, "bright", &com.raw_set.bright);
@@ -250,13 +244,16 @@ int readinitfile() {
 				&com.raw_set.user_black);
 	}
 
-	/* SER setting */
-	config_setting_t *ser_setting = config_lookup(&config, keywords[SER]);
-	if (ser_setting) {
-		config_setting_lookup_bool(ser_setting, "ser_cfa",
-				&com.raw_set.ser_cfa);
-		config_setting_lookup_bool(ser_setting, "ser_force_bayer",
-				&com.raw_set.ser_force_bayer);
+	/* Debayer setting */
+	config_setting_t *debayer_setting = config_lookup(&config, keywords[BAY]);
+	if (debayer_setting) {
+		config_setting_lookup_bool(debayer_setting, "ser_use_bayer_header",
+				&com.debayer.ser_use_bayer_header);
+		config_setting_lookup_int(debayer_setting, "pattern",
+				&com.debayer.bayer_pattern);
+		int inter;
+		config_setting_lookup_int(debayer_setting, "inter", &inter);
+		com.debayer.bayer_inter = inter;
 	}
 
 	/* Prepro setting */
@@ -325,15 +322,6 @@ static void _save_libraw(config_t *config, config_setting_t *root) {
 
 	libraw_group = config_setting_add(root, keywords[RAW], CONFIG_TYPE_GROUP);
 
-	raw_setting = config_setting_add(libraw_group, "cfa", CONFIG_TYPE_BOOL);
-	config_setting_set_bool(raw_setting, com.raw_set.cfa);
-
-	raw_setting = config_setting_add(libraw_group, "pattern", CONFIG_TYPE_INT);
-	config_setting_set_int(raw_setting, com.raw_set.bayer_pattern);
-
-	raw_setting = config_setting_add(libraw_group, "inter", CONFIG_TYPE_INT);
-	config_setting_set_int(raw_setting, com.raw_set.bayer_inter);
-
 	raw_setting = config_setting_add(libraw_group, "mul_0", CONFIG_TYPE_FLOAT);
 	config_setting_set_float(raw_setting, com.raw_set.mul[0]);
 
@@ -367,17 +355,20 @@ static void _save_libraw(config_t *config, config_setting_t *root) {
 	config_setting_set_int(raw_setting, com.raw_set.user_black);
 }
 
-static void _save_ser(config_t *config, config_setting_t *root) {
-	config_setting_t *ser_group, *ser_setting;
+static void _save_debayer(config_t *config, config_setting_t *root) {
+	config_setting_t *debayer_group, *debayer_setting;
 
-	ser_group = config_setting_add(root, keywords[SER], CONFIG_TYPE_GROUP);
+	debayer_group = config_setting_add(root, keywords[BAY], CONFIG_TYPE_GROUP);
 
-	ser_setting = config_setting_add(ser_group, "ser_cfa", CONFIG_TYPE_BOOL);
-	config_setting_set_bool(ser_setting, com.raw_set.ser_cfa);
-
-	ser_setting = config_setting_add(ser_group, "ser_force_bayer",
+	debayer_setting = config_setting_add(debayer_group, "ser_use_bayer_header",
 			CONFIG_TYPE_BOOL);
-	config_setting_set_bool(ser_setting, com.raw_set.ser_force_bayer);
+	config_setting_set_bool(debayer_setting, com.debayer.ser_use_bayer_header);
+
+	debayer_setting = config_setting_add(debayer_group, "pattern", CONFIG_TYPE_INT);
+	config_setting_set_int(debayer_setting, com.debayer.bayer_pattern);
+
+	debayer_setting = config_setting_add(debayer_group, "inter", CONFIG_TYPE_INT);
+	config_setting_set_int(debayer_setting, com.debayer.bayer_inter);
 }
 
 static void _save_preprocess(config_t *config, config_setting_t *root) {
@@ -437,7 +428,7 @@ int writeinitfile() {
 
 	_save_wd(&config, root);
 	_save_libraw(&config, root);
-	_save_ser(&config, root);
+	_save_debayer(&config, root);
 	_save_preprocess(&config, root);
 	_save_registration(&config, root);
 	_save_stacking(&config, root);
