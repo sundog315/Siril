@@ -9597,7 +9597,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                       <object class="GtkEntry" id="entry2">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="tooltip_text" translatable="yes">Enter the base name of the sequence, for example NGC_6822-L. It will create images in the form NGC_6822-L_00001.fit. The name can also end with .ser, which will create only one file for the entire conversion.</property>
+                        <property name="tooltip_text" translatable="yes">Enter the base name of the sequence, for example NGC_6822-L. It will create images in the form NGC_6822-L_00001.fit. The name can also end with .ser, which will enable SER output format for the conversion.</property>
                         <property name="hexpand">True</property>
                         <signal name="changed" handler="on_convtoroot_changed" swapped="no"/>
                       </object>
@@ -9754,11 +9754,9 @@ Colour image target also applies to the debayer result for conversion.</property
                         <child>
                           <object class="GtkCheckButton" id="multipleSER">
                             <property name="label" translatable="yes">Create as many SER files as input files</property>
-                            <property name="sensitive">False</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">- NOT YET IMPLEMENTED -
-Tick this to create several SER files instead of a single SER file for all input elements. Use this if input elements don't share the same image size.</property>
+                            <property name="tooltip_text" translatable="yes">Tick this to create several SER files instead of a single SER file for all input elements. Use this if input elements (films) don't share the same image size or must not be processed together.</property>
                             <property name="xalign">0</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="on_multipleSER_toggled" swapped="no"/>

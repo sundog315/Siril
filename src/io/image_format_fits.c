@@ -1119,3 +1119,14 @@ int new_fit_image(fits *fit, int width, int height, int nblayer) {
 		return 1;
 }
 
+void keep_first_channel_from_fits(fits *fit) {
+	if (fit->naxis == 1)
+		return;
+	fit->naxis = 1;
+	fit->naxes[2] = 1;
+	fit->data = realloc(fit->data, fit->rx * fit->ry * sizeof(WORD));
+	fit->pdata[RLAYER] = fit->data;
+	fit->pdata[GLAYER] = fit->data;
+	fit->pdata[BLAYER] = fit->data;
+	// mini and maxi could be wrong now
+}

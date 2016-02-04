@@ -138,6 +138,29 @@ void check_for_conversion_form_completeness() {
 	update_statusbar_convert();
 }
 
+// input is destroot
+char *create_sequence_filename(int counter, char *output, int outsize) {
+	const char *ext = get_filename_ext(destroot);
+	if (ext) {
+		/* we need to insert a number before the extension */
+		char *the_ext = strdup(ext);
+		char *the_root = strdup(destroot);
+		if (the_ext == the_root) {
+			snprintf(output, outsize, "%s", destroot);
+			return output;
+		}
+		the_root[ext-destroot-1] = '\0';
+		char last_char = the_root[strlen(the_root)-1];
+		if (last_char == '-' || last_char == '_')
+			snprintf(output, outsize, "%s%05d.%s", the_root, counter, the_ext);
+		else 	snprintf(output, outsize, "%s_%05d.%s", the_root, counter, the_ext);
+	} else {
+		/* create the file name with destroot_number */
+		snprintf(output, outsize, "%s%05d", destroot, counter);
+	}
+	return output;
+}
+
 // truncates destroot if it's more than 120 characters, append a '_' if it
 // doesn't end with one or a '-'. SER extensions are accepted and unmodified.
 void on_convtoroot_changed (GtkEditable *editable, gpointer user_data){
@@ -504,8 +527,9 @@ static gpointer convert_thread_worker(gpointer p) {
 	double progress = 0.0;
 	struct ser_struct *ser_file = NULL;
 	struct _convert_data *args = (struct _convert_data *) p;
+	GList *list;
 	
-	args->list = g_list_first (args->list);
+	list = g_list_first(args->list);
 	indice = args->start;
 
 	if (convflags & CONVDSTSER) {
@@ -514,18 +538,27 @@ static gpointer convert_thread_worker(gpointer p) {
 			convflags &= ~CONV3X1;
 		} else {
 			ser_file = malloc(sizeof(struct ser_struct));
-			ser_create_file(destroot, ser_file, TRUE, NULL);
+			if (!(convflags & CONVMULTIPLE)) {
+				if (ser_create_file(destroot, ser_file, TRUE, NULL)) {
+					siril_log_message("Creating the SER file failed, aborting.\n");
+					goto clean_exit;
+				}
+			}
 		}
 	}
 
-	while (args->list) {
-		char *src_filename = (char *)args->list->data;
+	while (list) {
+		char *src_filename = (char *)list->data;
 		const char *src_ext = get_filename_ext(src_filename);
 		image_type imagetype;
 
 		if (!get_thread_run()) {
 			break;
 		}
+		char *name = strrchr(src_filename, '/');
+		if (name)
+			snprintf(msg_bar, 256, "Converting %s...", name + 1);
+		else snprintf(msg_bar, 256, "Converting %s...", src_filename);
 
 		imagetype = get_type_for_extension(src_ext);
 		if (imagetype == TYPEUNDEF) {
@@ -543,68 +576,89 @@ static gpointer convert_thread_worker(gpointer p) {
 		}
 
 		if (imagetype == TYPEAVI) {
-#ifdef HAVE_FFMS2
-			int frame;
 			// we need to do a semi-recursive thing here,
 			// thankfully it's only one level deep
+#ifdef HAVE_FFMS2
+			int frame;
 			fits *fit = calloc(1, sizeof(fits));
 			struct film_struct film_file;
 			if (film_open_file(src_filename, &film_file) != FILM_SUCCESS) {
+				siril_log_message("Error while opening film %s, aborting.\n", src_filename);
 				break;
+			}
+			if (convflags & CONVMULTIPLE) {
+				if (ser_create_file(create_sequence_filename(indice++, dest_filename, 128),
+							ser_file, TRUE, NULL)) {
+					siril_log_message("Creating the SER file failed, aborting.\n");
+					goto clean_exit;
+				}
 			}
 			for (frame = 0; frame < film_file.frame_count; frame++) {
 				// read frame from the film
 				if (film_read_frame(&film_file, frame, fit) != FILM_SUCCESS) {
-					break;
+					siril_log_message("Error while reading frame %d from %s, aborting.\n",
+							frame, src_filename);
+					goto clean_exit;
 				}
-				
+
 				// save to the destination file
 				if (convflags & CONVDSTSER) {
-					ser_write_frame_from_fit(ser_file, fit);
+					if (convflags & CONV1X1)
+						keep_first_channel_from_fits(fit);
+					if (ser_write_frame_from_fit(ser_file, fit)) {
+						siril_log_message("Error while converting to SER (no space left?)\n");
+						goto clean_exit;
+					}
 				} else {
 					snprintf(dest_filename, 128, "%s%05d", destroot, indice++);
-					save_to_target_fits(fit, dest_filename);
+					if (save_to_target_fits(fit, dest_filename)) {
+						siril_log_message("Error while converting to FITS (no space left?)\n");
+						goto clean_exit;
+					}
 				}
 				clearfits(fit);
+			}
+			if (convflags & CONVMULTIPLE) {
+				ser_write_and_close(ser_file);
 			}
 			free(fit);
 #endif
 		}
+		else if (imagetype == TYPESER) {
+			siril_log_message("Converting from SER is not yet supported\n");
+			break;
+		}
 		else {	// single image
 			fits *fit = any_to_new_fits(imagetype, src_filename);
 			if (convflags & CONVDSTSER) {
-				ser_write_frame_from_fit(ser_file, fit);
+				if (convflags & CONV1X1)
+					keep_first_channel_from_fits(fit);
+				if (ser_write_frame_from_fit(ser_file, fit)) {
+					siril_log_message("Error while converting to SER (no space left?)\n");
+					break;
+				}
 			} else {
 				snprintf(dest_filename, 128, "%s%05d", destroot, indice++);
-				save_to_target_fits(fit, dest_filename);
+				if (save_to_target_fits(fit, dest_filename)) {
+					siril_log_message("Error while converting to FITS (no space left?)\n");
+					break;
+				}
 			}
 			clearfits(fit);
 			free(fit);
 		}
 
-		char *name = strrchr(src_filename, '/');
-		if (name)
-			snprintf(msg_bar, 256, "Converting %s...", name + 1);
-		else snprintf(msg_bar, 256, "Converting %s...", src_filename);
-		free(src_filename);
 		set_progress_bar_data(msg_bar, progress/((double)args->total));
 		progress += 1.0;
 		args->nb_converted++;
 
-		args->list = g_list_next(args->list);
+		list = g_list_next(list);
 	}
 
-	// free the remaining if there was a break
-	while (args->list) {
-		char *src_filename = (char *)args->list->data;
-		free(src_filename);
-		args->list = g_list_next(args->list);
-	}
-
+clean_exit:
 	if (convflags & CONVDSTSER) {
-		// verify that ser_file->frame_count is correct
-		ser_write_header(ser_file);
-		ser_close_file(ser_file);
+		if (!(convflags & CONVMULTIPLE))
+			ser_write_and_close(ser_file);
 		free(ser_file);
 	}
 
@@ -631,12 +685,7 @@ static gboolean end_convert_idle(gpointer p) {
 	gettimeofday(&t_end, NULL);
 	show_time(args->t_start, t_end);
 	stop_processing_thread();
-	args->list = g_list_first(args->list);
-	while (args->list) {
-		g_free(args->list->data);
-		args->list = g_list_next(args->list);
-	}
-	g_list_free (args->list);
+	g_list_free_full(args->list, free);
 	free(args);
 	return FALSE;
 }
@@ -655,16 +704,24 @@ int save_to_target_fits(fits *fit, const char *dest_filename) {
 			return 1;
 		}
 		sprintf(filename, "g_%s", dest_filename);
-		save1fits16(filename, fit, GLAYER);
+		if (save1fits16(filename, fit, GLAYER)) {
+			siril_log_message("tofits: save1fit8 error, CONV3X1\n");
+			return 1;
+		}
 		sprintf(filename, "b_%s", dest_filename);
-		save1fits16(filename, fit, BLAYER);
+		if (save1fits16(filename, fit, BLAYER)) {
+			siril_log_message("tofits: save1fit8 error, CONV3X1\n");
+			return 1;
+		}
 	} else if (convflags & CONV1X1) { // a single FITS to convert from an RGB grey image
 		if (save1fits16(dest_filename, fit, RLAYER)) {
 			siril_log_message("tofits: save1fit8 error, CONV1X1\n");
+			return 1;
 		}
 	} else {			// normal FITS save, any format
 		if (savefits(dest_filename, fit)) {
 			siril_log_message("tofits: savefit error, CONV1X3\n");
+			return 1;
 		}
 	}
 	return 0;

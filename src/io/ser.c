@@ -162,6 +162,11 @@ int ser_write_header(struct ser_struct *ser_file) {
 	return 0;
 }
 
+void ser_write_and_close(struct ser_struct *ser_file) {
+	ser_write_header(ser_file);	// writes the header
+	ser_close_file(ser_file);	// closes, frees and zeroes
+}
+
 /* ser_file must be allocated */
 int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean overwrite, struct ser_struct *copy_from) {
 	if (overwrite)
@@ -206,6 +211,7 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean 
 #ifdef _OPENMP
 	omp_init_lock(&ser_file->fd_lock);
 #endif
+	siril_log_message("Created SER file %s\n", filename);
 	return 0;
 }
 
