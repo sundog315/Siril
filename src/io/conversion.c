@@ -154,6 +154,8 @@ char *create_sequence_filename(int counter, char *output, int outsize) {
 		if (last_char == '-' || last_char == '_')
 			snprintf(output, outsize, "%s%05d.%s", the_root, counter, the_ext);
 		else 	snprintf(output, outsize, "%s_%05d.%s", the_root, counter, the_ext);
+		free(the_ext);
+		free(the_root);
 	} else {
 		/* create the file name with destroot_number */
 		snprintf(output, outsize, "%s%05d", destroot, counter);

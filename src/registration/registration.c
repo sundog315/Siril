@@ -620,7 +620,7 @@ int register_star_alignment(struct registration_args *args) {
 }
 
 int register_ecc(struct registration_args *args) {
-	int frame, ref_image, ret;
+	int frame, ref_image, ret, failed = 0;
 	float nb_frames, cur_nb;
 	regdata *current_regdata;
 	fits ref, im;
@@ -694,8 +694,11 @@ int register_ecc(struct registration_args *args) {
 				memset(&reg_param, 0, sizeof(reg_ecc));
 
 				if (findTransform(&ref, &im, args->layer, &reg_param)) {
-					siril_log_message("Cannot perform ECC alignment\n");
-					break;
+					siril_log_message("Cannot perform ECC alignment for frame %d\n", frame);
+					/* We exclude this frame */
+					com.seq.imgparam[frame].incl = FALSE;
+					++failed;
+					continue;
 				}
 				// We don't need fit anymore, we can destroy it.
 				current_regdata[frame].quality = QualityEstimate(&im, args->layer,
@@ -717,6 +720,8 @@ int register_ecc(struct registration_args *args) {
 	args->seq->regparam[args->layer] = current_regdata;
 	update_used_memory();
 	siril_log_message("Registration finished.\n");
+	if (failed)
+		siril_log_color_message("%d frames were excluded.\n", "red", failed);
 	siril_log_color_message("Best frame: #%d with quality=%g.\n", "bold",
 			q_index, q_max);
 

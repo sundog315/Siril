@@ -646,9 +646,15 @@ int process_psf(int nb){
 	return 0;
 }
 
+gboolean end_psf_thread(void *arg) {
+	stop_processing_thread();
+	return FALSE;
+}
+
 void *_psf_thread(void *arg) {
 	int layer = (intptr_t) arg;
 	do_fwhm_sequence_processing(&com.seq, layer, 1);
+	gdk_threads_add_idle(end_psf_thread, arg);
 	return NULL;
 }
 
