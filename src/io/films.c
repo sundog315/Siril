@@ -261,7 +261,7 @@ int film_read_frame(struct film_struct *film, int frame_no, fits *fit) {
 
 			} while (pixel_tested < 100 && n < nb_pixels * 3);
 			free(randIndex);
-//			printf("total n = %d et k = %d et npixel = %d\n", n, pixel_tested, nb_pixels);
+			printf("total n = %d et k = %d et npixel = %d\n", n, pixel_tested, nb_pixels);
 		}
 	}
 	if (convert_rgb_to_gray)

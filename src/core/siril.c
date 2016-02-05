@@ -933,24 +933,16 @@ int lrgb(fits *l, fits *r, fits *g, fits *b, fits *lrgb) {
 
 /* In this function, offset has already been subtracted to the flat
  * and the dark. */
-int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float level,
-		gboolean use_ccd_formula) {
-
-	if (use_ccd_formula && (com.preprostatus & USE_OFFSET))
-		imoper(brut, offset, OPER_SUB);
+int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float level) {
 
 	if (com.preprostatus & USE_DARK)
 		imoper(brut, dark, OPER_SUB);
 
 	if (com.preprostatus & USE_FLAT) {
-#ifdef USE_FLAT_AUTOLEVEL		// is it needed anymore ?
-		ndiv(brut, flat);
-#else
 		if (fdiv(brut, flat, level) > 0)
 			siril_log_message(
 					"Overflow detected, change level value in settings: %0.2lf is too high.\n",
 					level);
-#endif
 	}
 
 	return 0;
@@ -974,12 +966,6 @@ gpointer seqpreprocess(gpointer p) {
 	} else
 		return GINT_TO_POINTER(1);
 
-	if (args->use_ccd_formula && (com.preprostatus & USE_DARK)
-			&& (com.preprostatus & USE_OFFSET)) {
-		set_progress_bar_data("Substracting offset to dark...", PROGRESS_NONE);
-		imoper(dark, offset, OPER_SUB);
-	}
-
 	if ((com.preprostatus & USE_OFFSET) && (com.preprostatus & USE_FLAT)) {
 		set_progress_bar_data("Substracting offset to flat...", PROGRESS_NONE);
 		imoper(flat, offset, OPER_SUB);
@@ -1002,8 +988,7 @@ gpointer seqpreprocess(gpointer p) {
 		msg[255] = '\0';
 		set_progress_bar_data(msg, 0.5);
 
-		preprocess(com.uniq->fit, offset, dark, flat, args->normalisation,
-				args->use_ccd_formula);
+		preprocess(com.uniq->fit, offset, dark, flat, args->normalisation);
 
 		snprintf(dest_filename, 255, "%s%s", com.uniq->ppprefix,
 		basename(com.uniq->filename));
@@ -1048,8 +1033,7 @@ gpointer seqpreprocess(gpointer p) {
 				gdk_threads_add_idle(end_sequence_prepro, args);
 				return GINT_TO_POINTER(1);
 			}
-			preprocess(fit, offset, dark, flat, args->normalisation,
-					args->use_ccd_formula);
+			preprocess(fit, offset, dark, flat, args->normalisation);
 			snprintf(dest_filename, 255, "%s%s", com.seq.ppprefix,
 					source_filename);
 			dest_filename[255] = '\0';
@@ -1086,15 +1070,6 @@ gpointer seqpreprocess(gpointer p) {
 	args->retval = 0;
 	gdk_threads_add_idle(end_sequence_prepro, args);
 	return GINT_TO_POINTER(0);
-}
-
-void initialize_preprocessing() {
-	char str[17];
-
-	sprintf(str, "formula_button_%d", com.preproformula);
-	GtkToggleButton *formula_button = GTK_TOGGLE_BUTTON(lookup_widget(str));
-
-	gtk_toggle_button_set_active(formula_button, TRUE);
 }
 
 /* computes the background value using the histogram and/or median value.

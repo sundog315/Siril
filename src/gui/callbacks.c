@@ -1640,16 +1640,6 @@ void on_open1_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	opendial();
 }
 
-void on_formula_button_0_toggled(GtkToggleButton *button, gpointer user_data) {
-	com.preproformula = 0;
-	writeinitfile();
-}
-
-void on_formula_button_1_toggled(GtkToggleButton *button, gpointer user_data) {
-	com.preproformula = 1;
-	writeinitfile();
-}
-
 void set_filters_dialog(GtkFileChooser *chooser) {
 	gtk_filter_add(chooser, "FITS Files (*.fit, *.fits, *.fts)",
 			"*.fit;*.FIT;*.fits;*.FITS;*.fts;*.FTS",
@@ -3227,9 +3217,6 @@ void on_prepro_button_clicked(GtkButton *button, gpointer user_data) {
 				gtk_builder_get_object(builder, "entry_flat_norm"));
 		args->normalisation = atof(gtk_entry_get_text(norm_entry));
 	}
-	GtkWidget *CCD_formula = lookup_widget("formula_button_1");
-	args->use_ccd_formula = gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(CCD_formula));
 
 	if (single_image_is_loaded()) {
 		int success = 0;

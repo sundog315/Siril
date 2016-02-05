@@ -53,10 +53,10 @@
 #include "io/single_image.h"
 
 static const char *keywords[] = { "working-directory", "libraw-settings",
-		"debayer-settings", "preprocessing-settings", "registration-settings",
-		"stacking-settings", "misc-settings" };
+		"debayer-settings", "registration-settings", "stacking-settings",
+		"misc-settings" };
 enum token_index {
-	WD = 0, RAW = 1, BAY = 2, PRE = 3, REG = 4, STK = 5, MISC = 6, NOTOK
+	WD = 0, RAW = 1, BAY = 2, REG = 3, STK = 4, MISC = 5, NOTOK
 };
 
 int round_to_int(double x) {
@@ -256,12 +256,6 @@ int readinitfile() {
 		com.debayer.bayer_inter = inter;
 	}
 
-	/* Prepro setting */
-	config_setting_t *pre_setting = config_lookup(&config, keywords[PRE]);
-	if (pre_setting) {
-		config_setting_lookup_int(pre_setting, "formula", &com.preproformula);
-	}
-
 	/* Registration setting */
 	config_setting_t *reg_setting = config_lookup(&config, keywords[REG]);
 	if (reg_setting) {
@@ -371,15 +365,6 @@ static void _save_debayer(config_t *config, config_setting_t *root) {
 	config_setting_set_int(debayer_setting, com.debayer.bayer_inter);
 }
 
-static void _save_preprocess(config_t *config, config_setting_t *root) {
-	config_setting_t *pre_group, *pre_setting;
-
-	pre_group = config_setting_add(root, keywords[PRE], CONFIG_TYPE_GROUP);
-
-	pre_setting = config_setting_add(pre_group, "formula", CONFIG_TYPE_INT);
-	config_setting_set_int(pre_setting, com.preproformula);
-}
-
 static void _save_registration(config_t *config, config_setting_t *root) {
 	config_setting_t *reg_group, *reg_setting;
 
@@ -429,7 +414,6 @@ int writeinitfile() {
 	_save_wd(&config, root);
 	_save_libraw(&config, root);
 	_save_debayer(&config, root);
-	_save_preprocess(&config, root);
 	_save_registration(&config, root);
 	_save_stacking(&config, root);
 	_save_misc(&config, root);

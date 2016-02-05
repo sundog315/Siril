@@ -205,7 +205,6 @@ typedef int (*sequence_proc)(sequence *seq, int seq_layer, int frame_no, fits *f
 struct preprocessing_data {
 	struct timeval t_start;
 	gboolean autolevel;
-	gboolean use_ccd_formula;
 	float normalisation;
 	int retval;
 };
@@ -479,7 +478,6 @@ struct cominf {
 	sliders_mode sliders;		// 0: min/max, 1: MIPS-LO/HI, 2: user
 	gboolean leveldrag;		// middle click being dragged if true
 	int preprostatus;
-	int preproformula;		// 0: APN, 1: CCD
 	gboolean show_excluded;		// show excluded images in sequences NOT USED!
 	double zoom_value;		// 1.0 is normal zoom, use get_zoom_val() to access it
 

@@ -278,9 +278,6 @@ int main(int argc, char *argv[]) {
 
 	g_free(csspath);
 
-	/* initialize prepreocess-related stuff */
-	initialize_preprocessing();
-	
 	/* initialize registration methods */
 	initialize_registration_methods();
 
