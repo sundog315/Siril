@@ -44,6 +44,7 @@
 #include "io/single_image.h"
 #include "algos/gradient.h"
 #include "algos/fft.h"
+#include "stacking/stacking.h"
 
 #ifdef HAVE_OPENCV
 #include "opencv/opencv.h"
@@ -132,6 +133,7 @@ command commande[] = {
 #endif
 	{"split", 3, "split R G B", process_split},
 	{"stat", 0, "stat", process_stat},
+	{"stackall", 0, "stackall", process_stackall},
 	
 #ifdef _OPENMP
 	{"setcpu", 1, "setcpu number", process_set_cpu},
@@ -646,15 +648,10 @@ int process_psf(int nb){
 	return 0;
 }
 
-gboolean end_psf_thread(void *arg) {
-	stop_processing_thread();
-	return FALSE;
-}
-
 void *_psf_thread(void *arg) {
 	int layer = (intptr_t) arg;
 	do_fwhm_sequence_processing(&com.seq, layer, 1);
-	gdk_threads_add_idle(end_psf_thread, arg);
+	gdk_threads_add_idle(end_generic, NULL);
 	return NULL;
 }
 
@@ -1064,6 +1061,59 @@ int process_stat(int nb){
 	}
 	return 0;
 }
+
+gpointer stackall_worker(gpointer args) {
+	DIR *dir;
+	struct dirent *file;
+	int number_of_loaded_sequences = 0, retval = 0;
+
+	siril_log_message("Looking for sequences in current working directory...\n");
+	if (check_seq(0) || (dir = opendir(com.wd)) == NULL) {
+		siril_log_message("Error while searching sequences or opening the directory.\n");
+		com.wd[0] = '\0';
+		gdk_threads_add_idle(end_generic, NULL);
+		return NULL;
+	}
+	siril_log_message("Starting stacking of found sequences...\n");
+	while ((file = readdir(dir)) != NULL) {
+		char *suf;
+
+		if ((suf = strstr(file->d_name, ".seq")) && strlen(suf) == 4) {
+			sequence *seq = readseqfile(file->d_name);
+			if (seq != NULL) {
+				char filename[256];
+				struct stacking_args args;
+				//args.method = stack_summing;
+				args.seq = seq;
+				args.filtering_criterion = stack_filter_all;
+				args.nb_images_to_stack = seq->number;
+				snprintf(filename, 256, "%s%sstacked.fit", seq->seqname,
+						ends_with(seq->seqname, "_") ? "" : "_");
+				gettimeofday(&args.t_start, NULL);
+
+				retval = stack_summing(&args);
+				if (savefits(filename, &gfit))
+					siril_log_message("Could not save the stacking result %s\n",
+							filename);
+
+				free_sequence(seq, TRUE);
+				++number_of_loaded_sequences;
+				if (retval) break;
+			}
+		}
+	}
+	closedir(dir);
+	siril_log_message("Stacked %d sequences %s.\n", number_of_loaded_sequences,
+			retval ? "with errors" : "successfully");
+	gdk_threads_add_idle(end_generic, NULL);
+	return NULL;
+}
+
+int process_stackall(int nb) {
+	start_in_new_thread(stackall_worker, NULL);
+	return 0;
+}
+
 
 #ifdef _OPENMP
 int process_set_cpu(int nb){

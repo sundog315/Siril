@@ -224,6 +224,14 @@ int stack_summing(struct stacking_args *args) {
 			goto free_and_reset_progress_bar;
 		}
 
+		if (args->seq->nb_layers == -1) {
+			/* sequence has not been opened before, this is set in set_seq.
+			 * It happens with the stackall command that stacks a
+			 * sequence right after readseqfile.
+			 */
+			args->seq->rx = fit->rx; args->seq->ry = fit->ry;
+			args->seq->nb_layers = fit->naxes[2];
+		}
 		assert(args->seq->nb_layers == 1 || args->seq->nb_layers == 3);
 		assert(fit->naxes[2] == args->seq->nb_layers);
 

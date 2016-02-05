@@ -109,8 +109,8 @@ int check_seq(int force) {
 	int curidx, fixed;
 	DIR *dir;
 	struct dirent *file;
-	sequence *sequences[40];
-	int i, nb_seq = 0;
+	sequence **sequences;
+	int i, nb_seq = 0, max_seq = 10;
 
 	if (!com.wd) {
 		siril_log_message("Current working directory is not set, aborting.\n");
@@ -122,6 +122,8 @@ int check_seq(int force) {
 		com.wd = NULL;
 		return 1;
 	}
+
+	sequences = malloc(sizeof(sequence *) * max_seq);
 
 	while ((file = readdir(dir)) != NULL) {
 		sequence *new_seq;
@@ -181,10 +183,6 @@ int check_seq(int force) {
 				}
 				/* not found */
 				if (current_seq == -1) {
-					if (nb_seq == 40) {
-						fprintf(stderr, "too many sequences\n");
-						continue;
-					}
 					new_seq = calloc(1, sizeof(sequence));
 					initialize_sequence(new_seq, TRUE);
 					new_seq->seqname = basename;
@@ -207,6 +205,16 @@ int check_seq(int force) {
 					sequences[current_seq]->fixed = fixed;
 			}
 		}
+		if (nb_seq == max_seq) {
+			max_seq *= 2;
+			sequence **tmp = realloc(sequences, sizeof(sequence *) * max_seq);
+			if (tmp)
+				sequences = tmp;
+			else {
+				siril_log_message("Could not allocate more space for the large number of sequences found.\n");
+				break;
+			}
+		}
 	}
 	closedir(dir);
 	if (nb_seq > 0) {
@@ -222,8 +230,10 @@ int check_seq(int force) {
 			}
 			free_sequence(sequences[i], TRUE);
 		}
+		free(sequences);
 		return retval;
 	}
+	free(sequences);
 	return 1;	// no sequence found
 }
 

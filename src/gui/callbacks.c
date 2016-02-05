@@ -3664,6 +3664,14 @@ gboolean get_thread_run() {
 	return retval;
 }
 
+/* should be called in a threaded function if nothing special has to be done at the end.
+ * gdk_threads_add_idle(generic_end, NULL);
+ */
+gboolean end_generic(void *arg) {
+	stop_processing_thread();
+	return FALSE;
+}
+
 void on_processes_button_cancel_clicked(GtkButton *button, gpointer user_data) {
 	if (com.thread != NULL)
 		siril_log_color_message("Process aborted by user\n", "red");

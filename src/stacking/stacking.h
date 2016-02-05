@@ -67,4 +67,7 @@ int stack_addmin(struct stacking_args *args);
 void start_stacking();
 void update_stack_interface();
 
+int stack_filter_all(sequence *seq, int nb_img, double any);
+int stack_filter_included(sequence *seq, int nb_img, double any);
+
 #endif

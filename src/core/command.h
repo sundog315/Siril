@@ -101,6 +101,7 @@ int	process_fixbanding(int nb);
 int process_split(int nb);
 int process_select(int nb);
 int	process_stat(int nb);
+int	process_stackall(int nb);
 #ifdef _OPENMP
 int process_set_cpu(int nb);
 #endif
