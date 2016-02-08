@@ -10422,7 +10422,7 @@ The next action for DSLR images would be to debayer the preprocessed images, go 
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">5</property>
+                        <property name="top_attach">6</property>
                         <property name="width">2</property>
                       </packing>
                     </child>
@@ -10436,7 +10436,7 @@ The next action for DSLR images would be to debayer the preprocessed images, go 
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
-                        <property name="top_attach">4</property>
+                        <property name="top_attach">5</property>
                       </packing>
                     </child>
                     <child>
@@ -10449,7 +10449,7 @@ The next action for DSLR images would be to debayer the preprocessed images, go 
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">4</property>
+                        <property name="top_attach">5</property>
                         <property name="width">2</property>
                       </packing>
                     </child>
@@ -10490,6 +10490,21 @@ If this occurs gives overflows you must choose manually.</property>
                         <property name="left_attach">0</property>
                         <property name="top_attach">3</property>
                         <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label25">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Output sequence</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">4</property>
+                        <property name="width">3</property>
                       </packing>
                     </child>
                     <child>
@@ -10561,6 +10576,7 @@ If this occurs gives overflows you must choose manually.</property>
                   <object class="GtkLabel" id="label13">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_bottom">6</property>
                     <property name="label" translatable="yes">Image registration</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
@@ -10573,7 +10589,7 @@ If this occurs gives overflows you must choose manually.</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="hbox30">
+                  <object class="GtkBox" id="box10">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">center</property>
@@ -10585,7 +10601,7 @@ If this occurs gives overflows you must choose manually.</property>
                         <property name="receives_default">False</property>
                         <property name="border_width">2</property>
                         <property name="use_underline">True</property>
-                        <property name="xalign">0.5</property>
+                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_register_all_toggle" swapped="no"/>
@@ -10605,7 +10621,7 @@ If this occurs gives overflows you must choose manually.</property>
                         <property name="receives_default">False</property>
                         <property name="border_width">2</property>
                         <property name="use_underline">True</property>
-                        <property name="xalign">0.5</property>
+                        <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">regallbutton</property>
                       </object>
@@ -10619,8 +10635,8 @@ If this occurs gives overflows you must choose manually.</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">3</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
                   </packing>
                 </child>
                 <child>
@@ -10632,7 +10648,7 @@ If this occurs gives overflows you must choose manually.</property>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="padding">5</property>
-                    <property name="position">4</property>
+                    <property name="position">5</property>
                   </packing>
                 </child>
                 <child>
@@ -10697,7 +10713,7 @@ When processing images, registration data is taken from the default layer if ava
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="padding">2</property>
-                    <property name="position">5</property>
+                    <property name="position">6</property>
                   </packing>
                 </child>
                 <child>
@@ -10736,7 +10752,7 @@ When processing images, registration data is taken from the default layer if ava
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="padding">2</property>
-                    <property name="position">6</property>
+                    <property name="position">7</property>
                   </packing>
                 </child>
                 <child>
@@ -10781,7 +10797,7 @@ When processing images, registration data is taken from the default layer if ava
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="padding">2</property>
-                    <property name="position">7</property>
+                    <property name="position">8</property>
                   </packing>
                 </child>
                 <child>
@@ -10793,13 +10809,14 @@ When processing images, registration data is taken from the default layer if ava
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="padding">5</property>
-                    <property name="position">8</property>
+                    <property name="position">9</property>
                   </packing>
                 </child>
                 <child>
                   <object class="GtkLabel" id="label98">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="margin_bottom">6</property>
                     <property name="label" translatable="yes">Manual registration</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
@@ -10808,14 +10825,16 @@ When processing images, registration data is taken from the default layer if ava
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
-                    <property name="position">9</property>
+                    <property name="position">10</property>
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="box15">
+                  <object class="GtkGrid" id="grid2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="spacing">8</property>
+                    <property name="hexpand">True</property>
+                    <property name="row_spacing">3</property>
+                    <property name="column_spacing">5</property>
                     <child>
                       <object class="GtkCheckButton" id="checkbutton_displayref">
                         <property name="label" translatable="yes">display reference image</property>
@@ -10830,79 +10849,19 @@ To be enabled, the reference image must have been explicitly set and already dis
                         <signal name="toggled" handler="on_checkbutton_displayref_toggled" swapped="no"/>
                       </object>
                       <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
                       </packing>
                     </child>
-                    <child>
-                      <object class="GtkToggleButton" id="togglebutton2">
-                        <property name="label" translatable="yes">Set first preview</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">Allows a preview area to be displayed just below. After clicking on this button, click on the image to position the preview area's centre</property>
-                        <signal name="toggled" handler="on_toggle_preview_toggled" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToggleButton" id="togglebutton3">
-                        <property name="label" translatable="yes">Set second preview</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">Allows a preview area to be displayed just below. After clicking on this button, click on the image to position the preview area's centre</property>
-                        <signal name="toggled" handler="on_toggle_preview_toggled" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkToggleButton" id="togglebutton1">
-                        <property name="label" translatable="yes">Set rotation center</property>
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">Set rotation centre manually instead of the default image centre.
-NOT YET IMPLEMENTED</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">3</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">10</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox" id="box14">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="spacing">6</property>
                     <child>
                       <object class="GtkLabel" id="label38">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">X translation</property>
+                        <property name="label" translatable="yes">X translation:</property>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
                       </packing>
                     </child>
                     <child>
@@ -10910,27 +10869,29 @@ NOT YET IMPLEMENTED</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Change this value, using mouse wheel or up and down arrows, to align the image with the reference image on the X axis.</property>
+                        <property name="halign">start</property>
                         <property name="invisible_char">●</property>
+                        <property name="width_chars">3</property>
+                        <property name="max_width_chars">3</property>
+                        <property name="text" translatable="yes">0</property>
                         <property name="adjustment">adjustment_shiftx</property>
+                        <property name="numeric">True</property>
                         <signal name="value-changed" handler="on_spinbut_shift_value_change" swapped="no"/>
                       </object>
                       <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkLabel" id="label39">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="margin_left">14</property>
-                        <property name="label" translatable="yes">Y translation</property>
+                        <property name="label" translatable="yes">Y translation:</property>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">2</property>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">1</property>
                       </packing>
                     </child>
                     <child>
@@ -10938,51 +10899,68 @@ NOT YET IMPLEMENTED</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Change this value, using mouse wheel or up and down arrows, to align the image with the reference image on the Y axis.</property>
+                        <property name="halign">start</property>
                         <property name="invisible_char">●</property>
+                        <property name="width_chars">3</property>
+                        <property name="max_width_chars">3</property>
+                        <property name="text" translatable="yes">0</property>
                         <property name="adjustment">adjustment_shifty</property>
+                        <property name="numeric">True</property>
                         <signal name="value-changed" handler="on_spinbut_shift_value_change" swapped="no"/>
                       </object>
                       <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">3</property>
+                        <property name="left_attach">3</property>
+                        <property name="top_attach">1</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkLabel" id="label40">
+                      <object class="GtkButtonBox" id="buttonbox1">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">NOT YET IMPLEMENTED</property>
-                        <property name="margin_left">14</property>
-                        <property name="label" translatable="yes">Angle</property>
-                        <property name="justify">center</property>
+                        <property name="hexpand">True</property>
+                        <property name="layout_style">center</property>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton2">
+                            <property name="label" translatable="yes">Set first preview</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">Allows a preview area to be displayed just below. After clicking on this button, click on the image to position the preview area's centre</property>
+                            <signal name="toggled" handler="on_toggle_preview_toggled" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkToggleButton" id="togglebutton3">
+                            <property name="label" translatable="yes">Set second preview</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">Allows a preview area to be displayed just below. After clicking on this button, click on the image to position the preview area's centre</property>
+                            <signal name="toggled" handler="on_toggle_preview_toggled" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkSpinButton" id="spinbutton3">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="tooltip_text" translatable="yes">NOT YET IMPLEMENTED</property>
-                        <property name="invisible_char">●</property>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">5</property>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                        <property name="width">3</property>
                       </packing>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
-                    <property name="padding">2</property>
-                    <property name="position">11</property>
+                    <property name="position">12</property>
                   </packing>
                 </child>
                 <child>
@@ -11019,7 +10997,7 @@ NOT YET IMPLEMENTED</property>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="padding">2</property>
-                    <property name="position">12</property>
+                    <property name="position">13</property>
                   </packing>
                 </child>
               </object>

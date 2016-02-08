@@ -196,6 +196,10 @@ void on_spinbut_shift_value_change(GtkSpinButton *spinbutton, gpointer user_data
 
 	/* current layer: com.cvport or selected reg layer? */
 	current_layer = gtk_combo_box_get_active(cbbt_layers);
+	if (current_layer != com.cvport) {
+		siril_log_message("Switching to the registration layer\n");
+		activate_tab(current_layer);
+	}
 	if (com.seq.regparam[current_layer] == NULL) {
 		siril_log_message("Allocating registration data for this layer\n");
 		com.seq.regparam[current_layer] = calloc(com.seq.number, sizeof(regdata));
@@ -209,7 +213,8 @@ void on_spinbut_shift_value_change(GtkSpinButton *spinbutton, gpointer user_data
 	if (spinbutton == spin_shiftx)
 		com.seq.regparam[current_layer][com.seq.current].shiftx = new_value;
 	else com.seq.regparam[current_layer][com.seq.current].shifty = new_value;
-	writeseqfile(&com.seq);	
+	writeseqfile(&com.seq);
+	fill_sequence_list(&com.seq, current_layer);	// update list with new regparam
 	redraw_previews();
 }
 
