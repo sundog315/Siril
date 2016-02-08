@@ -9413,15 +9413,75 @@ Warning: ensure you have a good reason to change this value because it may degra
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="box41">
+                  <object class="GtkBox" id="box74">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="valign">start</property>
                     <child>
-                      <object class="GtkButtonBox" id="buttonbox_convert">
+                      <object class="GtkScrolledWindow" id="scrolledwindow8">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkTreeView" id="treeview_convert">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="model">liststore_convert</property>
+                            <property name="headers_clickable">False</property>
+                            <property name="reorderable">True</property>
+                            <property name="search_column">0</property>
+                            <child internal-child="selection">
+                              <object class="GtkTreeSelection" id="treeview-selection5"/>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="treeviewcolumn17">
+                                <property name="resizable">True</property>
+                                <property name="title" translatable="yes">Name</property>
+                                <property name="expand">True</property>
+                                <property name="clickable">True</property>
+                                <property name="reorderable">True</property>
+                                <property name="sort_indicator">True</property>
+                                <property name="sort_column_id">0</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="cellrenderer_files"/>
+                                  <attributes>
+                                    <attribute name="text">0</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                            </child>
+                            <child>
+                              <object class="GtkTreeViewColumn" id="treeviewcolumn18">
+                                <property name="resizable">True</property>
+                                <property name="title" translatable="yes">Date</property>
+                                <property name="clickable">True</property>
+                                <property name="reorderable">True</property>
+                                <property name="sort_indicator">True</property>
+                                <property name="sort_column_id">1</property>
+                                <child>
+                                  <object class="GtkCellRendererText" id="cellrenderertext7"/>
+                                  <attributes>
+                                    <attribute name="text">1</attribute>
+                                  </attributes>
+                                </child>
+                              </object>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="box8">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="layout_style">start</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">2</property>
                         <child>
                           <object class="GtkButton" id="select_convert_button">
                             <property name="visible">True</property>
@@ -9477,9 +9537,21 @@ Warning: ensure you have a good reason to change this value because it may degra
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">0</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="box41">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">start</property>
                     <child>
                       <object class="GtkLabel" id="statuslabel_convert">
                         <property name="visible">True</property>
@@ -9496,66 +9568,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                   </object>
                   <packing>
                     <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkScrolledWindow" id="scrolledwindow8">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="hexpand">True</property>
-                    <property name="vexpand">True</property>
-                    <property name="shadow_type">in</property>
-                    <child>
-                      <object class="GtkTreeView" id="treeview_convert">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="model">liststore_convert</property>
-                        <property name="headers_clickable">False</property>
-                        <property name="reorderable">True</property>
-                        <property name="search_column">0</property>
-                        <child internal-child="selection">
-                          <object class="GtkTreeSelection" id="treeview-selection8"/>
-                        </child>
-                        <child>
-                          <object class="GtkTreeViewColumn" id="treeviewcolumn17">
-                            <property name="resizable">True</property>
-                            <property name="title" translatable="yes">Name</property>
-                            <property name="expand">True</property>
-                            <property name="clickable">True</property>
-                            <property name="reorderable">True</property>
-                            <property name="sort_indicator">True</property>
-                            <property name="sort_column_id">0</property>
-                            <child>
-                              <object class="GtkCellRendererText" id="cellrenderer_files"/>
-                              <attributes>
-                                <attribute name="text">0</attribute>
-                              </attributes>
-                            </child>
-                          </object>
-                        </child>
-                        <child>
-                          <object class="GtkTreeViewColumn" id="treeviewcolumn18">
-                            <property name="resizable">True</property>
-                            <property name="title" translatable="yes">Date</property>
-                            <property name="clickable">True</property>
-                            <property name="reorderable">True</property>
-                            <property name="sort_indicator">True</property>
-                            <property name="sort_column_id">1</property>
-                            <child>
-                              <object class="GtkCellRendererText" id="cellrenderertext7"/>
-                              <attributes>
-                                <attribute name="text">1</attribute>
-                              </attributes>
-                            </child>
-                          </object>
-                        </child>
-                      </object>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">True</property>
                     <property name="fill">True</property>
                     <property name="position">4</property>
                   </packing>
@@ -10164,172 +10176,6 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                     <property name="position">8</property>
                   </packing>
                 </child>
-                <child>
-                  <object class="GtkSeparator" id="separator8">
-                    <property name="can_focus">False</property>
-                    <property name="margin_top">6</property>
-                    <property name="margin_bottom">6</property>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="padding">2</property>
-                    <property name="position">9</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkLabel" id="label37">
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">False</property>
-                    <property name="margin_bottom">6</property>
-                    <property name="label" translatable="yes">Image layer color assignment</property>
-                    <property name="justify">center</property>
-                    <attributes>
-                      <attribute name="weight" value="bold"/>
-                    </attributes>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="position">10</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox" id="box8">
-                    <property name="sensitive">False</property>
-                    <property name="can_focus">False</property>
-                    <property name="spacing">5</property>
-                    <child>
-                      <object class="GtkLabel" id="label25">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Assign
-layer:</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkComboBoxText" id="cbbt_layers_assign">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="tooltip_text" translatable="yes">The list of layers available for the current sequence.</property>
-                        <property name="valign">center</property>
-                        <signal name="changed" handler="on_layer_assign_selected" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkBox" id="box10">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="orientation">vertical</property>
-                        <property name="spacing">3</property>
-                        <property name="homogeneous">True</property>
-                        <child>
-                          <object class="GtkBox" id="box11">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="spacing">8</property>
-                            <child>
-                              <object class="GtkLabel" id="label36">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">to predefined color</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkComboBoxText" id="cbbt_colors">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip_text" translatable="yes">Assign a color to a layer. For now it's only LRGB, more will be available soon, as well as user-defined wavelengths.</property>
-                                <items>
-                                  <item translatable="yes">Luminance</item>
-                                  <item translatable="yes">Red</item>
-                                  <item translatable="yes">Green</item>
-                                  <item translatable="yes">Blue</item>
-                                </items>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
-                          </packing>
-                        </child>
-                        <child>
-                          <object class="GtkBox" id="box12">
-                            <property name="visible">True</property>
-                            <property name="can_focus">False</property>
-                            <property name="spacing">8</property>
-                            <child>
-                              <object class="GtkEntry" id="entrycolor">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip_text" translatable="yes">Name of the layer, usually the name of the color or band</property>
-                                <property name="invisible_char">●</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkEntry" id="entrywavelen">
-                                <property name="visible">True</property>
-                                <property name="can_focus">True</property>
-                                <property name="tooltip_text" translatable="yes">Wavelength associated to the layer's color or band</property>
-                                <property name="editable">False</property>
-                                <property name="invisible_char">●</property>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
-                          </packing>
-                        </child>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="padding">6</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">False</property>
-                    <property name="padding">5</property>
-                    <property name="position">11</property>
-                  </packing>
-                </child>
               </object>
               <packing>
                 <property name="position">1</property>
@@ -10391,6 +10237,7 @@ layer:</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="tooltip_text" translatable="yes">The single file is often called the master file, which is the result of the processing of several frames, for each type of master image.</property>
+                    <property name="margin_bottom">6</property>
                     <property name="label" translatable="yes">Dark, offset (bias) and flat files can only be a single FITS file.</property>
                     <attributes>
                       <attribute name="weight" value="bold"/>
@@ -10407,9 +10254,9 @@ layer:</property>
                   <object class="GtkGrid" id="grid18">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="hexpand">False</property>
-                    <property name="row_spacing">2</property>
-                    <property name="column_spacing">8</property>
+                    <property name="row_spacing">5</property>
+                    <property name="column_spacing">10</property>
+                    <property name="row_homogeneous">True</property>
                     <child>
                       <object class="GtkCheckButton" id="useflat_button">
                         <property name="label" translatable="yes">Use flat</property>
@@ -10445,12 +10292,13 @@ All images in the sequence will be divided by the master flat image (each pixel 
                     </child>
                     <child>
                       <object class="GtkButton" id="flatfile_button">
-                        <property name="label" translatable="yes">Browse</property>
+                        <property name="label" translatable="yes">Browse...</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">All images in the sequence will be divided by the master flat image (each pixel value). If available above, the bias will be removed from the flat before doing so.</property>
-                        <property name="border_width">4</property>
+                        <property name="halign">start</property>
+                        <property name="border_width">5</property>
                         <property name="use_underline">True</property>
                         <signal name="clicked" handler="on_flatfile_button_clicked" swapped="no"/>
                       </object>
@@ -10479,12 +10327,13 @@ All images in the sequence will be divided by the master flat image (each pixel 
                     </child>
                     <child>
                       <object class="GtkButton" id="darkfile_button">
-                        <property name="label" translatable="yes">Browse</property>
+                        <property name="label" translatable="yes">Browse...</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">The dark master image will be removed from all images in the sequence.</property>
-                        <property name="border_width">4</property>
+                        <property name="halign">start</property>
+                        <property name="border_width">5</property>
                         <property name="use_underline">True</property>
                         <signal name="clicked" handler="on_darkfile_button_clicked" swapped="no"/>
                       </object>
@@ -10543,18 +10392,83 @@ The bias/offset master image will be removed from all images in the sequence, bu
                     </child>
                     <child>
                       <object class="GtkButton" id="offsetfile_button">
-                        <property name="label" translatable="yes">Browse</property>
+                        <property name="label" translatable="yes">Browse...</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">The bias/offset master image will be removed from all images in the sequence, but also from the flat image if it is used.</property>
-                        <property name="border_width">4</property>
+                        <property name="halign">start</property>
+                        <property name="border_width">5</property>
                         <property name="use_underline">True</property>
                         <signal name="clicked" handler="on_offsetfile_button_clicked" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
                         <property name="top_attach">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="prepro_button">
+                        <property name="label" translatable="yes">Start pre-processing</property>
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Pre-process sequence with the above master files, resulting sequence will be in pp_&lt;seq.name&gt; or another prefix given aside.
+Once completed, the sequence of pre-processed images is automatically loaded as the current sequence.
+The next action for DSLR images would be to debayer the preprocessed images, go to the Conversion tab.</property>
+                        <property name="use_underline">True</property>
+                        <signal name="clicked" handler="on_prepro_button_clicked" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">5</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="preproseqname_entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">Prefix of the image names resulting from the pre-processing.</property>
+                        <property name="max_length">4</property>
+                        <property name="text">pp_</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">4</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="preproseqname_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">Store resulting sequence with prefix:</property>
+                        <property name="justify">center</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">4</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="entry_flat_norm">
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">Choose your own normalisation value.
+After preprocessing, check that no overflow have been detected in the console output.</property>
+                        <property name="max_length">5</property>
+                        <property name="max_width_chars">5</property>
+                        <property name="text" translatable="yes">5000</property>
+                        <property name="primary_icon_tooltip_text" translatable="yes">Normalisation value for flat division</property>
+                        <property name="input_purpose">number</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">3</property>
                       </packing>
                     </child>
                     <child>
@@ -10573,25 +10487,9 @@ If this occurs gives overflows you must choose manually.</property>
                         <signal name="toggled" handler="on_checkbutton_auto_evaluate_toggled" swapped="no"/>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
+                        <property name="left_attach">0</property>
                         <property name="top_attach">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="entry_flat_norm">
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="tooltip_text" translatable="yes">Choose your own normalisation value.
-After preprocessing, check that no overflow have been detected in the console output.</property>
-                        <property name="halign">start</property>
-                        <property name="max_length">5</property>
-                        <property name="text" translatable="yes">5000</property>
-                        <property name="primary_icon_tooltip_text" translatable="yes">Normalisation value for flat division</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">3</property>
+                        <property name="width">2</property>
                       </packing>
                     </child>
                     <child>
@@ -10602,70 +10500,6 @@ After preprocessing, check that no overflow have been detected in the console ou
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="position">3</property>
-                  </packing>
-                </child>
-                <child>
-                  <object class="GtkBox" id="hbox10">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="spacing">4</property>
-                    <child>
-                      <object class="GtkButton" id="prepro_button">
-                        <property name="label" translatable="yes">Start pre-processing</property>
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">Pre-process sequence with the above master files, resulting sequence will be in pp_&lt;seq.name&gt; or another prefix given aside.
-Once completed, the sequence of pre-processed images is automatically loaded as the current sequence.
-The next action for DSLR images would be to debayer the preprocessed images, go to the Conversion tab.</property>
-                        <property name="margin_left">20</property>
-                        <property name="margin_right">24</property>
-                        <property name="margin_top">5</property>
-                        <property name="margin_bottom">5</property>
-                        <property name="border_width">6</property>
-                        <property name="use_underline">True</property>
-                        <signal name="clicked" handler="on_prepro_button_clicked" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="padding">4</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="preproseqname_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Store resulting sequence with prefix:</property>
-                        <property name="justify">center</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="preproseqname_entry">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="tooltip_text" translatable="yes">Prefix of the image names resulting from the pre-processing.</property>
-                        <property name="text">pp_</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">2</property>
-                      </packing>
-                    </child>
-                  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="padding">5</property>
-                    <property name="position">4</property>
                   </packing>
                 </child>
               </object>
@@ -11865,6 +11699,7 @@ However, multiplicative normalisation must be used with flat-field frames.</prop
                         <property name="wrap_mode">word</property>
                         <property name="cursor_visible">False</property>
                         <property name="accepts_tab">False</property>
+                        <property name="monospace">True</property>
                       </object>
                     </child>
                   </object>
@@ -12132,7 +11967,7 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
             </child>
           </object>
           <packing>
-            <property name="expand">True</property>
+            <property name="expand">False</property>
             <property name="fill">True</property>
             <property name="padding">2</property>
             <property name="position">8</property>

@@ -2822,14 +2822,9 @@ void display_filename() {
 
 /* set available layers in the layer list of registration */
 void set_layers_for_assign() {
-	static GtkComboBoxText *cbbt_layers = NULL;
 	int i;
-	if (cbbt_layers == NULL)
-		cbbt_layers = GTK_COMBO_BOX_TEXT(
-				gtk_builder_get_object(builder, "cbbt_layers_assign"));
 	if (!com.seq.layers)
 		return;
-	gtk_combo_box_text_remove_all(cbbt_layers);
 	for (i = 0; i < com.seq.nb_layers; i++) {
 		char layer[100];
 		if (!com.seq.layers[i].name) {
@@ -2849,9 +2844,7 @@ void set_layers_for_assign() {
 			}
 		}
 		g_snprintf(layer, sizeof(layer), "%d: %s", i, com.seq.layers[i].name);
-		gtk_combo_box_text_append_text(cbbt_layers, layer);
 	}
-	gtk_combo_box_set_active(GTK_COMBO_BOX(cbbt_layers), 0);
 }
 
 void set_layers_for_registration() {
