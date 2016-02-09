@@ -28,13 +28,18 @@ mouse_status_enum mouse_status;
 gboolean redraw_preview(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	int current_preview, shiftx = 0, shifty = 0;
 	static GtkToggleButton *check_display_ref = NULL;
+	static GtkWidget *labelRegRef = NULL;
 	guint area_width = gtk_widget_get_allocated_width (widget);
 	guint area_height = gtk_widget_get_allocated_height (widget);
 	gboolean display_ref_image;
-	if (check_display_ref == NULL)
+
+	if (check_display_ref == NULL) {
 		check_display_ref = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder, "checkbutton_displayref"));
-	display_ref_image = com.refimage_regbuffer && com.refimage_surface &&
-		gtk_toggle_button_get_active(check_display_ref);
+		labelRegRef = lookup_widget("labelRegRef");
+	}
+	display_ref_image = com.refimage_regbuffer && com.refimage_surface
+			&& gtk_toggle_button_get_active(check_display_ref)
+							&& !gtk_widget_get_visible(labelRegRef);
 
 	if (widget == com.preview_area[0]) current_preview = 0;
 	else if (widget == com.preview_area[1]) current_preview = 1;

@@ -1254,15 +1254,17 @@ void free_reference_image() {
 /* enables or disables the "display reference" checkbox in registration preview */
 void enable_view_reference_checkbox(gboolean status) {
 	static GtkToggleButton *check_display_ref = NULL;
-	static GtkWidget *widget = NULL;
+	static GtkWidget *widget = NULL, *labelRegRef = NULL;
 	if (check_display_ref == NULL) {
 		check_display_ref = GTK_TOGGLE_BUTTON(
 				gtk_builder_get_object(builder, "checkbutton_displayref"));
 		widget = GTK_WIDGET(check_display_ref);
+		labelRegRef = lookup_widget("labelRegRef");
 	}
 	if (status && gtk_widget_get_sensitive(widget))
 		return;	// may be already enabled but deactivated by user, don't force it again
 	gtk_widget_set_sensitive(widget, status);
+	gtk_widget_set_visible(labelRegRef, !status);
 	gtk_toggle_button_set_active(check_display_ref, status);
 }
 
@@ -5680,13 +5682,17 @@ void on_clear_convert_button_clicked(GtkButton *button, gpointer user_data) {
 
 void on_remove_convert_button_clicked(GtkWidget *button, gpointer user_data) {
 	GtkTreeSelection *selection = GTK_TREE_SELECTION(
-			gtk_builder_get_object(builder, "treeview-selection8"));
+			gtk_builder_get_object(builder, "treeview-selection5"));
 	GtkTreeIter iter;
 	GtkTreeModel *model;
+	gchararray string;
 
 	if (gtk_tree_selection_get_selected(selection, &model, &iter)) {//get selected item
-		gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
-		gtk_tree_selection_unselect_all(selection);
+		gtk_tree_model_get(model, &iter, 0, &string, -1);
+		if (string) {
+			gtk_list_store_remove(GTK_LIST_STORE(model), &iter);
+			gtk_tree_selection_unselect_all(selection);
+		}
 	}
 	check_for_conversion_form_completeness();
 }

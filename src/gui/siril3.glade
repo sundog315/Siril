@@ -1820,7 +1820,7 @@ enter a visible wavelength in nm</property>
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Background Extraction</property>
     <property name="resizable">False</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <signal name="hide" handler="on_Bkg_extract_window_hide" swapped="no"/>
@@ -2825,7 +2825,7 @@ Division: it is mainly used to correct multiplicative phenomena, such as vignett
     <property name="title" translatable="yes">Median Filter</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
@@ -3025,7 +3025,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
     <property name="title" translatable="yes">Subtractive Chromatic Green Noise Reduction</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <signal name="show" handler="on_SCNR_dialog_show" swapped="no"/>
@@ -3180,7 +3180,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
     <property name="title" translatable="yes">Canon Banding Reduction</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="urgency_hint">True</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
@@ -3323,7 +3323,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Image compositing</property>
     <property name="destroy_with_parent">True</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
@@ -3659,7 +3659,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
     <property name="title" translatable="yes">Crop sequence</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox33">
@@ -3756,7 +3756,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
     <property name="can_focus">False</property>
     <property name="border_width">5</property>
     <property name="destroy_with_parent">True</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
@@ -3922,7 +3922,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
     <property name="border_width">5</property>
     <property name="title" translatable="yes">Fourier Transform</property>
     <property name="resizable">False</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
@@ -4221,7 +4221,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
     <property name="title" translatable="yes">Channel Extraction</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
@@ -4416,7 +4416,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
     <property name="title" translatable="yes">Wavelets Layers Extraction</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
@@ -5053,7 +5053,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
     <property name="title" translatable="yes">Color saturation</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
@@ -5208,7 +5208,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
     <property name="resizable">False</property>
     <property name="modal">True</property>
     <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="skip_taskbar_hint">True</property>
     <property name="urgency_hint">True</property>
     <property name="transient_for">main_window</property>
@@ -8457,7 +8457,7 @@ Warning: ensure you have a good reason to change this value because it may degra
     <property name="title" translatable="yes">Resample</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
@@ -8659,7 +8659,7 @@ Warning: ensure you have a good reason to change this value because it may degra
     <property name="title" translatable="yes">Rotation</property>
     <property name="resizable">False</property>
     <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
@@ -10920,6 +10920,21 @@ To be enabled, the reference image must have been explicitly set and already dis
                         <property name="hexpand">True</property>
                         <property name="layout_style">center</property>
                         <child>
+                          <object class="GtkLabel" id="labelRegRef">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Set reference image first.</property>
+                            <attributes>
+                              <attribute name="foreground" value="#bfb200000000"/>
+                            </attributes>
+                          </object>
+                          <packing>
+                            <property name="expand">True</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkToggleButton" id="togglebutton2">
                             <property name="label" translatable="yes">Set first preview</property>
                             <property name="visible">True</property>
@@ -10931,7 +10946,7 @@ To be enabled, the reference image must have been explicitly set and already dis
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
@@ -10946,7 +10961,7 @@ To be enabled, the reference image must have been explicitly set and already dis
                           <packing>
                             <property name="expand">True</property>
                             <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="position">2</property>
                           </packing>
                         </child>
                       </object>
@@ -12215,7 +12230,7 @@ and the Siril Development Team</property>
     <property name="can_focus">False</property>
     <property name="title" translatable="yes">Color Calibration</property>
     <property name="resizable">False</property>
-    <property name="type_hint">dialog</property>
+    <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">

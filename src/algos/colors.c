@@ -888,7 +888,7 @@ void on_calibration_apply_button_clicked(GtkButton *button, gpointer user_data) 
 	white_selection.w = gtk_spin_button_get_value(selection_white_value[2]);
 	white_selection.h = gtk_spin_button_get_value(selection_white_value[3]);
 
-	if (!white_selection.w || !white_selection.h) {
+	if ((!white_selection.w || !white_selection.h) && !is_manual) {
 		show_dialog("Make a selection of the white area before", "Warning",
 				"gtk-dialog-warning");
 		return;
