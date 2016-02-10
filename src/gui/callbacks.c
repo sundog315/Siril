@@ -1754,6 +1754,23 @@ void set_prepro_button_sensitiveness() {
 					&& (gtk_toggle_button_get_active(udark)
 							|| gtk_toggle_button_get_active(uoffset)
 							|| gtk_toggle_button_get_active(uflat)));
+	gtk_widget_set_sensitive(lookup_widget("grid24"),
+			gtk_toggle_button_get_active(udark));
+}
+
+void on_cosmEnabledCheck_toggled(GtkToggleButton *button, gpointer user_data) {
+	GtkWidget *CFA, *Sig, *label;
+	gboolean is_active;
+
+	CFA = lookup_widget("cosmCFACheck");
+	Sig = lookup_widget("spinSigCosme");
+	label = lookup_widget("label37");
+
+	is_active = gtk_toggle_button_get_active(button);
+
+	gtk_widget_set_sensitive(CFA, is_active);
+	gtk_widget_set_sensitive(Sig, is_active);
+	gtk_widget_set_sensitive(label, is_active);
 }
 
 void on_settings_activate(GtkMenuItem *menuitem, gpointer user_data) {
@@ -3194,6 +3211,15 @@ void on_prepro_button_clicked(GtkButton *button, gpointer user_data) {
 			}
 		}
 	}
+
+	// if cosmetic correction selected
+	tbutton = GTK_TOGGLE_BUTTON(
+			gtk_builder_get_object(builder, "cosmEnabledCheck"));
+	if (gtk_toggle_button_get_active(tbutton) == TRUE) {
+		com.preprostatus |= USE_COSME;
+	}
+
+
 	if (com.preprostatus == 0)
 		return;
 
@@ -3202,6 +3228,8 @@ void on_prepro_button_clicked(GtkButton *button, gpointer user_data) {
 	struct preprocessing_data *args = malloc(sizeof(struct preprocessing_data));
 	siril_log_color_message("Preprocessing...\n", "red");
 	gettimeofday(&args->t_start, NULL);
+
+	/* Get parameters */
 	GtkWidget *autobutton = lookup_widget("checkbutton_auto_evaluate");
 	args->autolevel = gtk_toggle_button_get_active(
 			GTK_TOGGLE_BUTTON(autobutton));
@@ -3212,6 +3240,16 @@ void on_prepro_button_clicked(GtkButton *button, gpointer user_data) {
 				gtk_builder_get_object(builder, "entry_flat_norm"));
 		args->normalisation = atof(gtk_entry_get_text(norm_entry));
 	}
+	GtkToggleButton *CFA;
+	GtkSpinButton *Sig;
+
+	CFA = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"cosmCFACheck"));
+	Sig = GTK_SPIN_BUTTON(gtk_builder_get_object(builder,"spinSigCosme"));
+
+	args->sigma = gtk_spin_button_get_value(Sig);
+	args->is_cfa = gtk_toggle_button_get_active(CFA);
+
+	/****/
 
 	if (single_image_is_loaded()) {
 		int success = 0;

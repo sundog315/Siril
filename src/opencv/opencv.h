@@ -17,6 +17,7 @@ int cvRotateImage(fits *, double, int, int);
 int cvTransformImage(fits *, TRANS, int);
 int cvUnsharpFilter(fits*, double, double);
 int cvComputeFinestScale(fits *image);
+int cvCosmeticCorrection(fits *image, point *p, int size, int is_CFA);
 #ifdef __cplusplus
 }
 #endif

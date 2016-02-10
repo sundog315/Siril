@@ -95,6 +95,7 @@ typedef enum {
 #define USE_DARK	0x01
 #define USE_FLAT	0x02
 #define USE_OFFSET	0x04
+#define USE_COSME   0x08	/* cosmetic correction */
 
 /* cookies for the file chooser */
 #define OD_NULL 	0
@@ -205,6 +206,8 @@ typedef int (*sequence_proc)(sequence *seq, int seq_layer, int frame_no, fits *f
 struct preprocessing_data {
 	struct timeval t_start;
 	gboolean autolevel;
+	double sigma;
+	gboolean is_cfa;
 	float normalisation;
 	int retval;
 };

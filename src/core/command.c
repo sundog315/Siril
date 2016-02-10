@@ -75,7 +75,7 @@ command commande[] = {
 	{"fill", 1, "fill value", process_fill},
 	{"fill2", 1, "fill2 value [x y width height]", process_fill2},
 	{"findstar", 0, "findstar", process_findstar},
-	//~ {"find_hot", 2, "find_hot file threshold", process_findhot},
+	{"find_hot", 2, "find_hot threshold", process_findhot},
 	{"fmedian", 2, "fmedian ksize modulation", process_fmedian},
 	{"fftd", 2, "fftd magnitude phase", process_fft},
 	{"ffti", 2, "ffti magnitude phase", process_fft},
@@ -868,16 +868,27 @@ int process_findstar(int nb){
 	return 0;
 }
 
-/* FIXME */
 int process_findhot(int nb){
-	double sigma = atof(word[2]);
-	int count;
+	double k = atof(word[2]);
+	int count, i;
+	if (gfit.naxes[2] != 1) {
+		siril_log_message("find_hot must be applied on an one-channel master-dark frame");
+		return 1;
+	}
+	FILE* cosme_file = NULL;
+	strcat(word[1], ".lst");
+	cosme_file = fopen(word[1], "w");
 	
-	count = find_hot_pixels(&gfit, sigma, word[1]);
+	point *p = find_hot_pixels(&gfit, k, &count);
 	siril_log_message("Number of hot pixels: %d\n", count);
-	//~ adjust_cutoff_from_updated_gfit();
-	//~ redraw(com.cvport, REMAP_ALL);
-	//~ redraw_previews();
+	for (i = 0; i < count; i++)
+		fprintf(cosme_file, "P %d %d\n", p[i].x, p[i].y);
+
+	free(p);
+	fclose(cosme_file);
+	adjust_cutoff_from_updated_gfit();
+	redraw(com.cvport, REMAP_ALL);
+	redraw_previews();
 	return 0;
 }
 

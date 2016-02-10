@@ -990,6 +990,15 @@ gpointer seqpreprocess(gpointer p) {
 
 		preprocess(com.uniq->fit, offset, dark, flat, args->normalisation);
 
+		if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK)) {
+			/* Cosmetic correction */
+			int n;
+			point *p = find_hot_pixels(dark, args->sigma, &n);
+			siril_log_message("Removing %d hot pixels...\n", n);
+			cosmeticCorrection(com.uniq->fit, p, n, args->is_cfa);
+			free(p);
+		}
+
 		snprintf(dest_filename, 255, "%s%s", com.uniq->ppprefix,
 		basename(com.uniq->filename));
 		dest_filename[255] = '\0';
@@ -1000,7 +1009,8 @@ gpointer seqpreprocess(gpointer p) {
 	} else {	// sequence
 		struct ser_struct *new_ser_file;
 		char source_filename[256];
-		int i;
+		int i, n;
+		point *p = NULL;
 
 		// creating a SER file if the input data is SER
 		if (com.seq.type == SEQ_SER) {
@@ -1010,6 +1020,12 @@ gpointer seqpreprocess(gpointer p) {
 					new_ser_file->filename);
 			ser_create_file(new_ser_filename, new_ser_file, TRUE, com.seq.ser_file);
 		}
+
+		if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK)) {
+			p = find_hot_pixels(dark, args->sigma, &n);
+			siril_log_message("Removing %d hot pixels...\n", n);
+		}
+
 		fits *fit = calloc(1, sizeof(fits));
 		for (i = 0; i < com.seq.number; i++) {
 			if (!get_thread_run())
@@ -1030,10 +1046,15 @@ gpointer seqpreprocess(gpointer p) {
 					ser_close_file(new_ser_file);
 					free(new_ser_file);
 				}
+				if (p) free(p);
 				gdk_threads_add_idle(end_sequence_prepro, args);
 				return GINT_TO_POINTER(1);
 			}
 			preprocess(fit, offset, dark, flat, args->normalisation);
+
+			if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK))
+				cosmeticCorrection(fit, p, n, args->is_cfa);
+
 			snprintf(dest_filename, 255, "%s%s", com.seq.ppprefix,
 					source_filename);
 			dest_filename[255] = '\0';
@@ -1048,6 +1069,7 @@ gpointer seqpreprocess(gpointer p) {
 					show_dialog(msg, "Warning", "gtk-dialog-warning");
 					ser_close_file(new_ser_file);
 					free(new_ser_file);
+					if (p) free(p);
 					set_progress_bar_data(PROGRESS_TEXT_RESET, PROGRESS_RESET);
 					args->retval = 1;
 					gdk_threads_add_idle(end_sequence_prepro, args);
@@ -1066,6 +1088,7 @@ gpointer seqpreprocess(gpointer p) {
 			free(new_ser_file);
 		}
 		set_progress_bar_data(PROGRESS_TEXT_RESET, PROGRESS_RESET);
+		if (p) free(p);
 	}
 	args->retval = 0;
 	gdk_threads_add_idle(end_sequence_prepro, args);
@@ -1334,38 +1357,92 @@ int get_wavelet_layers(fits *fit, int Nbr_Plan, int Plan, int Type, int reqlayer
 	return 0;
 }
 
-int find_hot_pixels(fits *fit, double sigma, char *filename) {
-	int x, y, count = 0;
+point *find_hot_pixels(fits *fit, double k, int *count) {
+	int x, y, i;
 	WORD *buf = fit->pdata[RLAYER];
-	FILE* cosme_file = NULL;
-	strcat(filename, ".lst");
-	cosme_file = fopen(filename, "w");
+	imstats *stat;
+	double sigma, median, threshold;
+	point *p;
 
-	for (y = 1; y < fit->ry - 1; y++) {
-		for (x = 1; x < fit->rx - 1; x++) {
-			WORD tab[8];
-			tab[0] = buf[x - 1 + y * fit->rx];
-			tab[1] = buf[x + 1 + y * fit->rx];
-			tab[2] = buf[x + (y - 1) * fit->rx];
-			tab[3] = buf[x + (y + 1) * fit->rx];
-			tab[4] = buf[x - 1 + (y - 1) * fit->rx];
-			tab[5] = buf[x + 1 + (y - 1) * fit->rx];
-			tab[6] = buf[x - 1 + (y + 1) * fit->rx];
-			tab[7] = buf[x + 1 + (y + 1) * fit->rx];
-			quicksort_s(tab, 8);
-			//~ double median = gsl_stats_median_from_sorted_data (tab, 1, 8);
-			double mean = gsl_stats_ushort_mean(tab, 1, 8);
-			double absdev = gsl_stats_ushort_absdev_m(tab, 1, 8, mean);
+	/** statistics **/
+	stat = statistics(fit, RLAYER, NULL, STATS_SIGMA);
+	sigma = stat->sigma;
+	median = stat->median;
+	threshold = (k * sigma) + median;
+	free(stat);
+
+	/** First we count hot pixels **/
+	/** FIXME: use histogram instead */
+	*count = 0;
+	for (i = 0; i < fit->rx * fit->ry; i++)
+		if (buf[i] > threshold) (*count)++;
+
+	/** Second we store hot pixels in p*/
+	int n = *count;
+	p = calloc(n, sizeof(point));
+	i = 0;
+	for (y = 0; y < fit->ry; y++) {
+		for (x = 0; x < fit->rx; x++) {
 			double pixel = (double) buf[x + y * fit->rx];
-			if ((pixel - mean) > absdev * sigma) {
-				fprintf(cosme_file, "P %d %d\n", x, y);
-				count++;
+			if (pixel > threshold) {
+				p[i].x = x;
+				p[i].y = y;
+				i++;
 			}
 		}
 	}
-	fclose(cosme_file);
-	return count;
+	return p;
 }
+
+int cosmeticCorrection(fits *fit, point *p, int size, gboolean is_CFA) {
+	int i, x, y;
+	WORD *buf = fit->pdata[RLAYER];
+
+	for (i = 0; i < size; i++) {
+		int xx = (int) p[i].x;
+		int yy = (int) p[i].y;
+		double mean = 0;
+
+		if (is_CFA) {
+			/** FIXME: handle edges **/
+			if (xx == 0 || yy == 0)
+				continue;
+			if (xx == 1 || yy == 1)
+				continue;
+			if (xx == fit->rx - 1 || yy == fit->ry - 1)
+				continue;
+			if (xx == fit->rx - 2 || yy == fit->ry - 2)
+				continue;
+
+			for (y = yy - 2; y <= yy + 2; y += 2) {
+				for (x = xx - 2; x <= xx + 2; x += 2) {
+					if ((x != xx) || (y != yy)) {
+						mean += (double) buf[x + y * fit->rx];
+					}
+				}
+			}
+
+		} else {
+			/** FIXME: handle edges **/
+			if (xx == 0 || yy == 0)
+				continue;
+			if (xx == fit->rx - 1 || yy == fit->ry - 1)
+				continue;
+
+			for (y = yy - 1; y <= yy + 1; ++y) {
+				for (x = xx - 1; x <= xx + 1; ++x) {
+					if ((x != xx) || (y != yy)) {
+						mean += (double) buf[x + y * fit->rx];
+					}
+				}
+			}
+		}
+		mean /= 8;
+		buf[xx + yy * fit->rx] = round_to_WORD(mean);
+	}
+	return 0;
+}
+
 
 // idle function executed at the end of the median_filter processing
 gboolean end_median_filter(gpointer p) {

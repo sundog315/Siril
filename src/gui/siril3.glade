@@ -177,6 +177,12 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
+  <object class="GtkAdjustment" id="adjSigCosme">
+    <property name="upper">50</property>
+    <property name="value">3</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+  </object>
   <object class="GtkAdjustment" id="adj_bkg_unbalance">
     <property name="upper">10</property>
     <property name="value">1.8</property>
@@ -10254,9 +10260,7 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                   <object class="GtkGrid" id="grid18">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="row_spacing">5</property>
                     <property name="column_spacing">10</property>
-                    <property name="row_homogeneous">True</property>
                     <child>
                       <object class="GtkCheckButton" id="useflat_button">
                         <property name="label" translatable="yes">Use flat</property>
@@ -10298,7 +10302,6 @@ All images in the sequence will be divided by the master flat image (each pixel 
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">All images in the sequence will be divided by the master flat image (each pixel value). If available above, the bias will be removed from the flat before doing so.</property>
                         <property name="halign">start</property>
-                        <property name="border_width">5</property>
                         <property name="use_underline">True</property>
                         <signal name="clicked" handler="on_flatfile_button_clicked" swapped="no"/>
                       </object>
@@ -10333,7 +10336,6 @@ All images in the sequence will be divided by the master flat image (each pixel 
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">The dark master image will be removed from all images in the sequence.</property>
                         <property name="halign">start</property>
-                        <property name="border_width">5</property>
                         <property name="use_underline">True</property>
                         <signal name="clicked" handler="on_darkfile_button_clicked" swapped="no"/>
                       </object>
@@ -10398,59 +10400,12 @@ The bias/offset master image will be removed from all images in the sequence, bu
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">The bias/offset master image will be removed from all images in the sequence, but also from the flat image if it is used.</property>
                         <property name="halign">start</property>
-                        <property name="border_width">5</property>
                         <property name="use_underline">True</property>
                         <signal name="clicked" handler="on_offsetfile_button_clicked" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
                         <property name="top_attach">0</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkButton" id="prepro_button">
-                        <property name="label" translatable="yes">Start pre-processing</property>
-                        <property name="visible">True</property>
-                        <property name="sensitive">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">Pre-process sequence with the above master files, resulting sequence will be in pp_&lt;seq.name&gt; or another prefix given aside.
-Once completed, the sequence of pre-processed images is automatically loaded as the current sequence.
-The next action for DSLR images would be to debayer the preprocessed images, go to the Conversion tab.</property>
-                        <property name="use_underline">True</property>
-                        <signal name="clicked" handler="on_prepro_button_clicked" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">6</property>
-                        <property name="width">2</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkEntry" id="preproseqname_entry">
-                        <property name="visible">True</property>
-                        <property name="can_focus">True</property>
-                        <property name="tooltip_text" translatable="yes">Prefix of the image names resulting from the pre-processing.</property>
-                        <property name="max_length">4</property>
-                        <property name="text">pp_</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">5</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="preproseqname_label">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">end</property>
-                        <property name="label" translatable="yes">Store resulting sequence with prefix:</property>
-                        <property name="justify">center</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">5</property>
-                        <property name="width">2</property>
                       </packing>
                     </child>
                     <child>
@@ -10492,29 +10447,197 @@ If this occurs gives overflows you must choose manually.</property>
                         <property name="width">2</property>
                       </packing>
                     </child>
-                    <child>
-                      <object class="GtkLabel" id="label25">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Output sequence</property>
-                        <attributes>
-                          <attribute name="weight" value="bold"/>
-                        </attributes>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
-                        <property name="top_attach">4</property>
-                        <property name="width">3</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <placeholder/>
-                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">False</property>
                     <property name="position">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label36">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_bottom">6</property>
+                    <property name="label" translatable="yes">Cosmetic correction (using master-dark)</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">4</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkGrid" id="grid24">
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">False</property>
+                    <property name="column_spacing">5</property>
+                    <property name="column_homogeneous">True</property>
+                    <child>
+                      <object class="GtkCheckButton" id="cosmCFACheck">
+                        <property name="label" translatable="yes">CFA</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Check if the target frames are CFA images.
+Uncheck if images come from a monochrome sensor.</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="spinSigCosme">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">How many times the standard deviation, the pixel value must differ to be considered as defective.</property>
+                        <property name="halign">start</property>
+                        <property name="width_chars">6</property>
+                        <property name="max_width_chars">6</property>
+                        <property name="input_purpose">number</property>
+                        <property name="adjustment">adjSigCosme</property>
+                        <property name="digits">3</property>
+                        <property name="numeric">True</property>
+                        <property name="value">3</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="label37">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">sigma:</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="cosmEnabledCheck">
+                        <property name="label" translatable="yes">Enable Cosmectic Correction</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Check if you want to apply a hot pixel removal.
+Hot pixels are located on the master-dark.</property>
+                        <property name="xalign">0</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_cosmEnabledCheck_toggled" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                        <property name="width">3</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">5</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSeparator" id="hseparator2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_top">6</property>
+                    <property name="margin_bottom">6</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="padding">2</property>
+                    <property name="position">6</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label25">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_bottom">6</property>
+                    <property name="label" translatable="yes">Output sequence</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">7</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="box11">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="halign">end</property>
+                    <property name="spacing">5</property>
+                    <child>
+                      <object class="GtkLabel" id="preproseqname_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">Store resulting sequence with prefix:</property>
+                        <property name="justify">center</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="preproseqname_entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">Prefix of the image names resulting from the pre-processing.</property>
+                        <property name="max_length">4</property>
+                        <property name="text">pp_</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">8</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="prepro_button">
+                    <property name="label" translatable="yes">Start pre-processing</property>
+                    <property name="visible">True</property>
+                    <property name="sensitive">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Pre-process sequence with the above master files, resulting sequence will be in pp_&lt;seq.name&gt; or another prefix given aside.
+Once completed, the sequence of pre-processed images is automatically loaded as the current sequence.
+The next action for DSLR images would be to debayer the preprocessed images, go to the Conversion tab.</property>
+                    <property name="use_underline">True</property>
+                    <signal name="clicked" handler="on_prepro_button_clicked" swapped="no"/>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">9</property>
                   </packing>
                 </child>
               </object>
