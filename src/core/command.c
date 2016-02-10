@@ -882,7 +882,7 @@ int process_findhot(int nb){
 	point *p = find_hot_pixels(&gfit, k, &count);
 	siril_log_message("Number of hot pixels: %d\n", count);
 	for (i = 0; i < count; i++)
-		fprintf(cosme_file, "P %d %d\n", p[i].x, p[i].y);
+		fprintf(cosme_file, "P %d %d\n", (int)p[i].x, (int)p[i].y);
 
 	free(p);
 	fclose(cosme_file);
