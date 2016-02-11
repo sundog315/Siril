@@ -925,5 +925,5 @@ char *format_basename(char *root) {
 	char *appended = malloc(len+2);
 	sprintf(appended, "%s_", root);
 	free(root);
-	return root;
+	return appended;
 }

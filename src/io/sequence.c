@@ -1194,12 +1194,9 @@ gpointer export_sequence(gpointer ptr) {
 			shiftx = 0;
 			shifty = 0;
 		}
-#ifdef STACK_DEBUG
-		printf("Stack image %d with shift x=%d y=%d\n", i, shiftx, shifty);
-#endif
 
 		/* fill the image with shift data */
-		for (layer=0; layer<fit.naxis; ++layer) {
+		for (layer=0; layer<fit.naxes[2]; ++layer) {
 			for (y=0; y < fit.ry; ++y){
 				for (x=0; x < fit.rx; ++x){
 					nx = x - shiftx;
@@ -1215,7 +1212,7 @@ gpointer export_sequence(gpointer ptr) {
 
 		switch (args->convflags) {
 			case TYPEFITS:
-				snprintf(dest, 255, "%s%05d.%s", args->basename, i, com.ext);
+				snprintf(dest, 255, "%s%05d%s", args->basename, i, com.ext);
 				savefits(dest, &fit);
 				break;
 			case TYPESER:
