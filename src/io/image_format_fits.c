@@ -593,6 +593,7 @@ int read_opened_fits_partial(sequence *seq, int layer, int index, WORD *buffer,
 	return 0;
 }
 
+/* creates, saves and closes the file associated to f, overwriting previous  */
 int savefits(const char *name, fits *f) {
 	int status, i;
 	long orig[3] = { 1L, 1L, 1L }, pixel_count;

@@ -10238,7 +10238,6 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                       <object class="GtkButton" id="buttonExportSeq">
                         <property name="label" translatable="yes">Export sequence</property>
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <signal name="clicked" handler="on_buttonExportSeq_clicked" swapped="no"/>

@@ -1131,6 +1131,7 @@ gpointer export_sequence(gpointer ptr) {
 	memset(&destfit, 0, sizeof(fits));
 
 	reglayer = get_registration_layer(args->seq);
+	siril_log_message("Using registration information from layer %d to export sequence\n", reglayer);
 
 	if (args->convflags == TYPESER) {
 	}
@@ -1163,8 +1164,8 @@ gpointer export_sequence(gpointer ptr) {
 			destfit.header = NULL;
 			destfit.fptr = NULL;
 			nbdata = fit.ry * fit.rx;
-			nb_layers = fit.naxis;
-			destfit.data = calloc(nbdata * fit.naxis, sizeof(WORD));
+			nb_layers = fit.naxes[2];
+			destfit.data = calloc(nbdata * fit.naxes[2], sizeof(WORD));
 			if (!destfit.data) {
 				siril_log_message("Could not allocate memory for the export, aborting\n");
 				retval = -1;
@@ -1172,18 +1173,18 @@ gpointer export_sequence(gpointer ptr) {
 			}
 
 			destfit.pdata[0] = destfit.data;
-			if (fit.naxis == 3) {
+			if (fit.naxes[2] == 3) {
 				destfit.pdata[1] = destfit.data + nbdata * sizeof(WORD);
 				destfit.pdata[2] = destfit.data + nbdata * sizeof(WORD) * 2;
 			}
 		}
-		else if (fit.ry * fit.rx != nbdata || nb_layers != fit.naxis) {
+		else if (fit.ry * fit.rx != nbdata || nb_layers != fit.naxes[2]) {
 			siril_log_message("Stacking: image in args->sequence doesn't has the same dimensions\n");
 			retval = -3;
 			goto free_and_reset_progress_bar;
 		}
 		else {
-			memset(destfit.data, 0, sizeof(nbdata * fit.naxis * sizeof(WORD)));
+			memset(destfit.data, 0, nbdata * fit.naxes[2] * sizeof(WORD));
 		}
 
 		/* load registration data for current image */
@@ -1194,16 +1195,17 @@ gpointer export_sequence(gpointer ptr) {
 			shiftx = 0;
 			shifty = 0;
 		}
+		printf("shifts: %d, %d\n", shiftx, shifty);
 
 		/* fill the image with shift data */
 		for (layer=0; layer<fit.naxes[2]; ++layer) {
 			for (y=0; y < fit.ry; ++y){
 				for (x=0; x < fit.rx; ++x){
-					nx = x - shiftx;
-					ny = y - shifty;
+					nx = x + shiftx;
+					ny = y + shifty;
 					if (nx >= 0 && nx < fit.rx && ny >= 0 && ny < fit.ry) {
 						destfit.pdata[layer][nx + ny*fit.rx] =
-							fit.pdata[layer][x+y*fit.rx];
+							fit.pdata[layer][x + y*fit.rx];
 					}
 				}
 			}
@@ -1213,7 +1215,10 @@ gpointer export_sequence(gpointer ptr) {
 		switch (args->convflags) {
 			case TYPEFITS:
 				snprintf(dest, 255, "%s%05d%s", args->basename, i, com.ext);
-				savefits(dest, &fit);
+				if (savefits(dest, &destfit)) {
+					retval = -1;
+					goto free_and_reset_progress_bar;
+				}
 				break;
 			case TYPESER:
 				break;
@@ -1233,6 +1238,7 @@ free_and_reset_progress_bar:
 
 	if (retval)
 		siril_log_message("Sequence export failed\n");
+	else siril_log_message("Sequence export succeeded.\n");
 
 	free(args->basename);
 	free(args);
