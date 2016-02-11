@@ -76,7 +76,7 @@ void start_in_new_thread(gpointer(*f)(gpointer p), gpointer p);
 void stop_processing_thread();
 void set_thread_run(gboolean b);
 gboolean get_thread_run();
-gboolean end_generic(void *arg);
+gboolean end_generic(gpointer arg);
 void progress_bar_reset_ready();
 void set_progress_bar_data(const char *text, double percent);
 void on_combozoom_changed(GtkComboBox *widget, gpointer user_data);

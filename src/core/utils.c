@@ -910,3 +910,20 @@ char* str_append(char** data, const char* newdata) {
 	return *data;
 }
 
+/* cut a base name to 120 characters and add a trailing underscore if needed.
+ * WARNING: may return a newly allocated string and free the argument */
+char *format_basename(char *root) {
+	int len = strlen(root);
+	if (len > 120) {
+		root[120] = '\0';
+		len = 120;
+	}
+	if (root[len-1] == '-' || root[len-1] == '_') {
+		return root;
+	}
+
+	char *appended = malloc(len+2);
+	sprintf(appended, "%s_", root);
+	free(root);
+	return root;
+}

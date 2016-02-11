@@ -181,19 +181,7 @@ void on_convtoroot_changed (GtkEditable *editable, gpointer user_data){
 	}
 	gtk_widget_set_visible(multiple_ser, FALSE);
 
-	int len = strlen(destroot);
-	if (len > 120) {
-		destroot[120] = '\0';
-	       	len = 120;
-	}
-	if (destroot[len-1] == '-' || destroot[len-1] == '_') {
-		return;
-	}
-
-	char *appended = malloc(len+2);
-	sprintf(appended, "%s_", destroot);
-	free(destroot);
-	destroot = appended;
+	destroot = format_basename(destroot);
 
 	check_for_conversion_form_completeness();
 }

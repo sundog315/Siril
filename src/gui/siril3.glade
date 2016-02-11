@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 
+<!-- Generated with glade 3.19.0 
 
 Copyright (C) The free-astro development team, 2015
 
@@ -21,7 +21,7 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <interface>
   <requires lib="gtk+" version="3.6"/>
-  <!-- interface-local-resource-path /home/lock/Projet/siril/pixmaps -->
+  <!-- interface-local-resource-path pixmaps -->
   <!-- interface-license-type gplv3 -->
   <!-- interface-name Siril -->
   <!-- interface-description Tool for astronomy image processing -->
@@ -9376,7 +9376,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                   <object class="GtkLabel" id="label55">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">This conversion tab is used to import files and convert them into a format with which Siril can work: FITS</property>
+                    <property name="label" translatable="yes">This conversion tab is used to import files and convert them into a format with which Siril can work: FITS or SER.</property>
                     <property name="single_line_mode">True</property>
                     <attributes>
                       <attribute name="style" value="italic"/>
@@ -9554,23 +9554,11 @@ Warning: ensure you have a good reason to change this value because it may degra
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkBox" id="box41">
+                  <object class="GtkLabel" id="statuslabel_convert">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="valign">start</property>
-                    <child>
-                      <object class="GtkLabel" id="statuslabel_convert">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">end</property>
-                        <property name="hexpand">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="position">1</property>
-                      </packing>
-                    </child>
+                    <property name="halign">end</property>
+                    <property name="hexpand">True</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -9931,7 +9919,7 @@ SER files are directly handled as a sequence, and are not yet available for conv
                   <object class="GtkBox" id="hbox28">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="spacing">4</property>
+                    <property name="spacing">7</property>
                     <child>
                       <object class="GtkLabel" id="seqtoproc_label">
                         <property name="visible">True</property>
@@ -9959,7 +9947,7 @@ SER files are directly handled as a sequence, and are not yet available for conv
                     </child>
                     <child>
                       <object class="GtkButton" id="checkseqbutton">
-                        <property name="label" translatable="yes">search sequences</property>
+                        <property name="label" translatable="yes">Search sequences</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -10158,28 +10146,115 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkCheckButton" id="showexcluded_button">
-                        <property name="label" translatable="yes">display all</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">When browsing the sequence, whether or not to display images that have been excluded from processing</property>
-                        <property name="valign">center</property>
-                        <property name="use_underline">True</property>
-                        <property name="xalign">0</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                        <signal name="toggled" handler="on_showexcluded_button_toggled" swapped="no"/>
-                      </object>
-                      <packing>
-                        <property name="left_attach">2</property>
-                        <property name="top_attach">1</property>
-                      </packing>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">8</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkSeparator" id="hseparator3">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_top">6</property>
+                    <property name="margin_bottom">6</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="padding">2</property>
+                    <property name="position">9</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label40">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_bottom">6</property>
+                    <property name="label" translatable="yes">Sequence export</property>
+                    <property name="justify">center</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">10</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkBox" id="box12">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="spacing">7</property>
+                    <child>
+                      <object class="GtkLabel" id="label97">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Base name:</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="entryExportSeq">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">Base name for the exported sequence</property>
+                        <property name="width_chars">50</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="comboExport">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Export sequence format</property>
+                        <property name="active">0</property>
+                        <items>
+                          <item>FITS</item>
+                          <item>SER</item>
+                          <item>GIF</item>
+                        </items>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkButton" id="buttonExportSeq">
+                        <property name="label" translatable="yes">Export sequence</property>
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">True</property>
+                        <signal name="clicked" handler="on_buttonExportSeq_clicked" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">False</property>
+                        <property name="padding">20</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">11</property>
                   </packing>
                 </child>
               </object>
@@ -10213,7 +10288,7 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                   <object class="GtkLabel" id="label33">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Pre-processing is an optionnal step to apply to a sequence of images.</property>
+                    <property name="label" translatable="yes">Pre-processing is an optional step to apply to a sequence of images.</property>
                     <property name="single_line_mode">True</property>
                     <attributes>
                       <attribute name="style" value="italic"/>

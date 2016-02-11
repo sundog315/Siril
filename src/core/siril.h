@@ -89,7 +89,8 @@ typedef enum {
 	TYPEPIC = (1 << 8),
 	TYPERAW = (1 << 9),
 	TYPEAVI = (1 << 10),
-	TYPESER = (1 << 11)
+	TYPESER = (1 << 11),
+	TYPEGIF = (1 << 12)
 } image_type;
 
 #define USE_DARK	0x01

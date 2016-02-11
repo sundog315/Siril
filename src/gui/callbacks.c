@@ -3685,9 +3685,9 @@ gboolean get_thread_run() {
 }
 
 /* should be called in a threaded function if nothing special has to be done at the end.
- * gdk_threads_add_idle(generic_end, NULL);
+ * gdk_threads_add_idle(end_generic, NULL);
  */
-gboolean end_generic(void *arg) {
+gboolean end_generic(gpointer arg) {
 	stop_processing_thread();
 	return FALSE;
 }

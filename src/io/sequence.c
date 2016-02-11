@@ -1115,3 +1115,162 @@ void check_area_is_in_image(rectangle *area, sequence *seq) {
 		area->y = seq->ry - area->h;
 }
 
+struct exportseq_args {
+	sequence *seq;
+	char *basename;
+	int convflags;
+};
+
+gpointer export_sequence(gpointer ptr) {
+	int i, x, y, nx, ny, shiftx, shifty, layer, retval = 0, reglayer, nb_layers;
+	unsigned int nbdata = 0;
+	fits fit, destfit;
+	char filename[256], dest[256];
+	struct exportseq_args *args = (struct exportseq_args *)ptr;
+	memset(&fit, 0, sizeof(fits));
+	memset(&destfit, 0, sizeof(fits));
+
+	reglayer = get_registration_layer(args->seq);
+
+	if (args->convflags == TYPESER) {
+	}
+
+	for (i=0; i<args->seq->number; ++i){
+		if (!get_thread_run()) {
+			retval = -1;
+			goto free_and_reset_progress_bar;
+		}
+		if (!args->seq->imgparam[i].incl) continue;
+
+		if (!seq_get_image_filename(args->seq, i, filename)) {
+			retval = -1;
+			goto free_and_reset_progress_bar;
+		}
+		/*tmpmsg = strdup("Processing image ");
+		tmpmsg = str_append(&tmpmsg, filename);
+		set_progress_bar_data(tmpmsg, (double)cur_nb/((double)nb_frames+1.));
+		free(tmpmsg);*/
+
+		if (seq_read_frame(args->seq, i, &fit)) {
+			siril_log_message("Stacking: could not read frame, aborting\n");
+			retval = -3;
+			goto free_and_reset_progress_bar;
+		}
+
+
+		if (!nbdata) {
+			memcpy(&destfit, &fit, sizeof(fits));
+			destfit.header = NULL;
+			destfit.fptr = NULL;
+			nbdata = fit.ry * fit.rx;
+			nb_layers = fit.naxis;
+			destfit.data = calloc(nbdata * fit.naxis, sizeof(WORD));
+			if (!destfit.data) {
+				siril_log_message("Could not allocate memory for the export, aborting\n");
+				retval = -1;
+				goto free_and_reset_progress_bar;
+			}
+
+			destfit.pdata[0] = destfit.data;
+			if (fit.naxis == 3) {
+				destfit.pdata[1] = destfit.data + nbdata * sizeof(WORD);
+				destfit.pdata[2] = destfit.data + nbdata * sizeof(WORD) * 2;
+			}
+		}
+		else if (fit.ry * fit.rx != nbdata || nb_layers != fit.naxis) {
+			siril_log_message("Stacking: image in args->sequence doesn't has the same dimensions\n");
+			retval = -3;
+			goto free_and_reset_progress_bar;
+		}
+		else {
+			memset(destfit.data, 0, sizeof(nbdata * fit.naxis * sizeof(WORD)));
+		}
+
+		/* load registration data for current image */
+		if (reglayer != -1 && args->seq->regparam[reglayer]) {
+			shiftx = args->seq->regparam[reglayer][i].shiftx;
+			shifty = args->seq->regparam[reglayer][i].shifty;
+		} else {
+			shiftx = 0;
+			shifty = 0;
+		}
+#ifdef STACK_DEBUG
+		printf("Stack image %d with shift x=%d y=%d\n", i, shiftx, shifty);
+#endif
+
+		/* fill the image with shift data */
+		for (layer=0; layer<fit.naxis; ++layer) {
+			for (y=0; y < fit.ry; ++y){
+				for (x=0; x < fit.rx; ++x){
+					nx = x - shiftx;
+					ny = y - shifty;
+					if (nx >= 0 && nx < fit.rx && ny >= 0 && ny < fit.ry) {
+						destfit.pdata[layer][nx + ny*fit.rx] =
+							fit.pdata[layer][x+y*fit.rx];
+					}
+				}
+			}
+		}
+
+
+		switch (args->convflags) {
+			case TYPEFITS:
+				snprintf(dest, 255, "%s%05d.%s", args->basename, i, com.ext);
+				savefits(dest, &fit);
+				break;
+			case TYPESER:
+				break;
+			case TYPEGIF:
+				break;
+		}
+
+		clearfits(&fit);
+	}
+
+free_and_reset_progress_bar:
+	if (args->convflags == TYPESER) {
+	}
+
+	clearfits(&fit);	// in case of goto
+	clearfits(&destfit);
+
+	if (retval)
+		siril_log_message("Sequence export failed\n");
+
+	free(args->basename);
+	free(args);
+	gdk_threads_add_idle(end_generic, args);
+	return NULL;
+}
+
+void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
+	int selected = gtk_combo_box_get_active(GTK_COMBO_BOX(lookup_widget("comboExport")));
+	const char *bname = gtk_entry_get_text(GTK_ENTRY(lookup_widget("entryExportSeq")));
+	struct exportseq_args *args;
+
+	if (bname[0] == '\0') return;
+	if (selected == -1) return;
+
+	args = malloc(sizeof(struct exportseq_args));
+	args->basename = strdup(bname);
+	args->basename = format_basename(args->basename);
+	args->seq = &com.seq;
+
+	switch (selected) {
+		case 0:
+			args->convflags = TYPEFITS;
+			break;
+		case 1:
+			siril_log_message("SER export is not yet supported\n");
+			return;
+			args->convflags = TYPESER;
+			break;
+		case 2:
+			siril_log_message("GIF export is not yet supported\n");
+			return;
+			args->convflags = TYPEGIF;
+			break;
+	}
+
+	start_in_new_thread(export_sequence, args);
+}
