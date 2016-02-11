@@ -52,8 +52,21 @@ gboolean redraw_preview(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	com.seq.previewH[current_preview] = area_height;
 
 	/* display current image with shifts */
-	if (!com.preview_surface[current_preview]) return TRUE;
-	cairo_translate(cr, area_width/2.0-com.seq.previewX[current_preview],
+	if (!com.preview_surface[current_preview]) {
+		gchar text[10];
+		cairo_set_source_rgba(cr, 0.5, 0.5, 0.5, 0.5);
+		cairo_rectangle(cr, 0, 0, area_width, area_height);
+		cairo_fill(cr);
+		cairo_select_font_face(cr, "Arial", CAIRO_FONT_SLANT_NORMAL,
+				CAIRO_FONT_WEIGHT_BOLD);
+		cairo_set_font_size(cr, 15);
+		cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+		cairo_move_to(cr, area_width / 2.0 - 30, area_height / 2.0);
+		g_snprintf(text, sizeof(text), "Preview %d", current_preview + 1);
+		cairo_show_text(cr, text);
+		return TRUE;
+	}
+	cairo_translate(cr, area_width / 2.0 - com.seq.previewX[current_preview],
 			area_height/2.0-com.seq.previewY[current_preview]);
 	if (com.seq.regparam && com.seq.regparam[com.cvport]) {
 		shiftx = com.seq.regparam[com.cvport][com.seq.current].shiftx;
