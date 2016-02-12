@@ -178,8 +178,8 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean 
 	}
 
 	if (copy_from) {
-		memcpy(&ser_file->lu_id, &ser_file->lu_id, 28);
-		memcpy(&ser_file->date, &ser_file->date, 16);
+		memcpy(&ser_file->lu_id, &copy_from->lu_id, 28);
+		memcpy(&ser_file->date, &copy_from->date, 16);
 		ser_file->file_id = strdup(copy_from->file_id);
 		ser_file->observer = strdup(copy_from->observer);
 		ser_file->instrument = strdup(copy_from->instrument);
@@ -192,6 +192,7 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean 
 		ser_write_header(ser_file);
 	} else {	// new SER
 		ser_file->file_id = strdup("Made by Siril");
+		ser_file->lu_id = 0;
 		ser_file->little_endian = SER_LITTLE_ENDIAN; // what will it do on big endian machine?
 		ser_file->observer = strdup("");
 		ser_file->instrument = strdup("");
@@ -220,10 +221,10 @@ void ser_header_from_fit(struct ser_struct *ser_file, fits *fit) {
 	ser_file->image_width = fit->rx;
 	ser_file->image_height = fit->ry;
 	fprintf(stdout, "setting SER image size as %dx%d\n", fit->rx, fit->ry);
-	if (fit->naxis == 1) {
+	if (fit->naxes[2] == 1) {
 		// maybe it's read as CFA...
 		ser_file->color_id = SER_MONO;
-	} else if (fit->naxis == 3) {
+	} else if (fit->naxes[2] == 3) {
 		ser_file->color_id = SER_RGB;
 	}
 	if (ser_file->color_id == SER_RGB || ser_file->color_id == SER_BGR)
@@ -233,14 +234,15 @@ void ser_header_from_fit(struct ser_struct *ser_file, fits *fit) {
 	if (fit->bitpix == BYTE_IMG) {
 		ser_file->byte_pixel_depth = SER_PIXEL_DEPTH_8;
 		ser_file->bit_pixel_depth = 8;
-	} else if (fit->bitpix == USHORT_IMG) {
+	} else if (fit->bitpix == USHORT_IMG || fit->bitpix == SHORT_IMG) {
 		ser_file->byte_pixel_depth = SER_PIXEL_DEPTH_16;
 		ser_file->bit_pixel_depth = 16;
 	} else {
 		siril_log_message("Writing to SER files from larger than 16-bit FITS images is not yet implemented\n");
 	}
-
-	// TODO: copy data from the fit header: observer, instrument, telescope, dates
+	if (fit->instrume[0] != 0)
+		ser_file->instrument = strdup(fit->instrume);
+	// TODO: copy data from the fit header: observer, telescope, dates
 }
 
 int ser_open_file(char *filename, struct ser_struct *ser_file) {
@@ -583,7 +585,8 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 
 int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit) {
 	int frame_size, pixel, plane, dest;
-	BYTE *data;			// for 8-bit files
+	BYTE *data8 = NULL;			// for 8-bit files
+	WORD *data16 = NULL;		// for 16-bit files
 
 	if (!ser_file || ser_file->fd <= 0 || !fit)
 		return -1;
@@ -600,23 +603,38 @@ int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit) {
 	frame_size = ser_file->image_width * ser_file->image_height *
 		ser_file->number_of_planes * ser_file->byte_pixel_depth;
 
-	data = malloc(frame_size);
+	if (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8)
+		data8 = malloc(frame_size);
+	else
+		data16 = malloc(frame_size);
+
 	for (plane = 0; plane < ser_file->number_of_planes; plane++) {
 		dest = plane;
 		for (pixel = 0; pixel < ser_file->image_width * ser_file->image_height;
 				pixel++) {
 			if (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8)
-				data[dest] = (BYTE)(fit->pdata[plane][pixel]);
-			else data[dest] = fit->pdata[plane][pixel];
+				data8[dest] = (BYTE)(fit->pdata[plane][pixel]);
+			else data16[dest] = fit->pdata[plane][pixel] >> 8;
 			dest += ser_file->number_of_planes;
 		}
 	}
-	if (write(ser_file->fd, data, frame_size) != frame_size) {
-		free(data);
-		perror("write image in SER");
-		return 1;
+	if (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8) {
+		if (write(ser_file->fd, data8, frame_size) != frame_size) {
+			free(data8);
+			perror("write image in SER");
+			return 1;
+		}
+	} else {
+		if (write(ser_file->fd, data16, frame_size) != frame_size) {
+			free(data16);
+			perror("write image in SER");
+			return 1;
+		}
 	}
-	free(data);
+	if (data8)
+		free(data8);
+	if (data16)
+		free(data16);
 	ser_file->frame_count++;
 	return 0;
 }

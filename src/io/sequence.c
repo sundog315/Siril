@@ -1123,9 +1123,11 @@ struct exportseq_args {
 
 gpointer export_sequence(gpointer ptr) {
 	int i, x, y, nx, ny, shiftx, shifty, layer, retval = 0, reglayer, nb_layers;
+	float cur_nb = 0.f, nb_frames;
 	unsigned int nbdata = 0;
 	fits fit, destfit;
 	char filename[256], dest[256];
+	struct ser_struct *ser_file = NULL;
 	struct exportseq_args *args = (struct exportseq_args *)ptr;
 	memset(&fit, 0, sizeof(fits));
 	memset(&destfit, 0, sizeof(fits));
@@ -1134,8 +1136,15 @@ gpointer export_sequence(gpointer ptr) {
 	siril_log_message("Using registration information from layer %d to export sequence\n", reglayer);
 
 	if (args->convflags == TYPESER) {
+		ser_file = malloc(sizeof(struct ser_struct));
+		snprintf(dest, 255, "%s.ser", args->basename);
+		if (ser_create_file(dest, ser_file, TRUE, NULL))
+			siril_log_message("Creating the SER file failed, aborting.\n");
 	}
 
+	nb_frames = (float)args->seq->number;
+
+	set_progress_bar_data(NULL, PROGRESS_RESET);
 	for (i=0; i<args->seq->number; ++i){
 		if (!get_thread_run()) {
 			retval = -1;
@@ -1147,10 +1156,11 @@ gpointer export_sequence(gpointer ptr) {
 			retval = -1;
 			goto free_and_reset_progress_bar;
 		}
-		/*tmpmsg = strdup("Processing image ");
+		char *tmpmsg = strdup("Processing image ");
 		tmpmsg = str_append(&tmpmsg, filename);
-		set_progress_bar_data(tmpmsg, (double)cur_nb/((double)nb_frames+1.));
-		free(tmpmsg);*/
+		set_progress_bar_data(tmpmsg,
+				(double) cur_nb / ((double) nb_frames + 1.));
+		free(tmpmsg);
 
 		if (seq_read_frame(args->seq, i, &fit)) {
 			siril_log_message("Stacking: could not read frame, aborting\n");
@@ -1221,10 +1231,14 @@ gpointer export_sequence(gpointer ptr) {
 				}
 				break;
 			case TYPESER:
+				if (ser_write_frame_from_fit(ser_file, &destfit))
+					siril_log_message("Error while converting to SER (no space left?)\n");
 				break;
 			case TYPEGIF:
 				break;
 		}
+		cur_nb += 1.f;
+		set_progress_bar_data(NULL, cur_nb / nb_frames);
 
 		clearfits(&fit);
 	}
@@ -1235,10 +1249,19 @@ free_and_reset_progress_bar:
 
 	clearfits(&fit);	// in case of goto
 	clearfits(&destfit);
+	if (args->convflags == TYPESER) {
+		ser_write_and_close(ser_file);
+		free(ser_file);
+	}
 
-	if (retval)
+	if (retval) {
+		set_progress_bar_data("Sequence export failed. Check the log.", PROGRESS_RESET);
 		siril_log_message("Sequence export failed\n");
-	else siril_log_message("Sequence export succeeded.\n");
+	}
+	else {
+		set_progress_bar_data("Sequence export succeeded.", PROGRESS_RESET);
+		siril_log_message("Sequence export succeeded.\n");
+	}
 
 	free(args->basename);
 	free(args);
@@ -1264,8 +1287,6 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 			args->convflags = TYPEFITS;
 			break;
 		case 1:
-			siril_log_message("SER export is not yet supported\n");
-			return;
 			args->convflags = TYPESER;
 			break;
 		case 2:
@@ -1274,6 +1295,6 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 			args->convflags = TYPEGIF;
 			break;
 	}
-
+	set_cursor_waiting(TRUE);
 	start_in_new_thread(export_sequence, args);
 }
