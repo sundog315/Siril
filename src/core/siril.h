@@ -395,6 +395,7 @@ struct ffit {
 	float pixel_size_x, pixel_size_y;	// XPIXSZ and YPIXSZ keys
 	unsigned int binning_x, binning_y;		// XBINNING and YBINNING keys
 	char date_obs[FLEN_VALUE];		// YYYY-MM-DDThh:mm:ss observation start, UT
+	char date[FLEN_VALUE];		// YYYY-MM-DDThh:mm:ss creation of file, UT
 	char instrume[FLEN_VALUE];		// INSTRUME key
 	/* data obtained from FITS or RAW files */
 	double focal_length, iso_speed, exposure, aperture, ccd_temp;

@@ -317,6 +317,10 @@ void read_fits_header(fits *fit) {
 	fits_read_key(fit->fptr, TSTRING, "DATE-OBS", &(fit->date_obs), NULL,
 			&status);
 
+	status = 0;
+	fits_read_key(fit->fptr, TSTRING, "DATE", &(fit->date), NULL,
+			&status);
+
 	tryToFindKeywordsDouble(fit, Focal, &fit->focal_length);
 	if (!sequence_is_loaded() || com.seq.current == 0)
 		fprintf(stdout,

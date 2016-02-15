@@ -1238,12 +1238,16 @@ gpointer export_sequence(gpointer ptr) {
 				break;
 			case TYPEGIF:
 				/* for now, it's one gif image for each input image */
+#ifdef HAVE_LIBGIF
 				snprintf(dest, 255, "%s%05d.gif", args->basename, i);
 				if (savegif(dest, &destfit)) {
 					retval = -1;
-					goto free_and_reset_progress_bar;
-				}
-				break;
+				goto free_and_reset_progress_bar;
+			}
+#else
+			siril_log_message("You must install the Giflib library to convert into Gif formats.\n");
+#endif
+			break;
 		}
 		cur_nb += 1.f;
 		set_progress_bar_data(NULL, cur_nb / nb_frames);
@@ -1287,12 +1291,12 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 
 	args = malloc(sizeof(struct exportseq_args));
 	args->basename = strdup(bname);
-	args->basename = format_basename(args->basename);
 	args->seq = &com.seq;
 
 	switch (selected) {
 		case 0:
 			args->convflags = TYPEFITS;
+			args->basename = format_basename(args->basename);
 			break;
 		case 1:
 			args->convflags = TYPESER;

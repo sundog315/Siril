@@ -46,6 +46,8 @@ int display_date(uint64_t date, char *txt) {
 	char str[256];
 	time_t t_sec;
 
+	if (date <= 0)
+		return -1;
 	t_sec = (time_t) (date - epochTicks) / ticksPerSecond;
 	if (t_sec < 0)
 		return -1;
@@ -53,6 +55,37 @@ int display_date(uint64_t date, char *txt) {
 	strcpy(str, txt);
 	strftime(str + strlen(txt), 255, "%F %r", timeinfo);
 	puts(str);
+	return 0;
+}
+
+static int gmtoffset(void) {
+	struct tm *dummy;
+	time_t t = 0;
+	dummy = localtime(&t);
+	return dummy->tm_gmtoff;
+}
+
+int convert_char_to_time(char *date, uint64_t *utc, uint64_t *local) {
+	struct tm timeinfo = { };
+	time_t ut, t;
+	char year[5], month[3], day[3], hours[3], minutes[3], sec[3];
+
+	if (date[0] == '\0')
+		return -1;
+	strptime(date, "%FT%T", &timeinfo); /* YYYY-MM-DDThh:mm:ss */
+	timeinfo.tm_isdst = -1;
+	ut = mktime (&timeinfo);
+	ut += gmtoffset();
+	t = ut + gmtoffset();
+
+	ut *= ticksPerSecond;
+	ut += epochTicks;
+	*utc = (uint64_t) ut;
+
+	t *= ticksPerSecond;
+	t += epochTicks;
+	*local = (uint64_t) t;
+
 	return 0;
 }
 
@@ -240,9 +273,14 @@ void ser_header_from_fit(struct ser_struct *ser_file, fits *fit) {
 	} else {
 		siril_log_message("Writing to SER files from larger than 16-bit FITS images is not yet implemented\n");
 	}
-	if (fit->instrume[0] != 0)
+	if (fit->instrume[0] != 0) {
+		free(ser_file->instrument);
 		ser_file->instrument = strdup(fit->instrume);
-	// TODO: copy data from the fit header: observer, telescope, dates
+	}
+	int ret = convert_char_to_time(fit->date_obs, &ser_file->date_utc, &ser_file->date);
+	if (ret == -1)
+		convert_char_to_time(fit->date, &ser_file->date_utc, &ser_file->date);
+	// TODO: copy data from the fit header: observer, telescope
 }
 
 int ser_open_file(char *filename, struct ser_struct *ser_file) {
