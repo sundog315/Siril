@@ -5763,6 +5763,14 @@ void on_crop_Apply_clicked (GtkButton *button, gpointer user_data) {
 		return;
 	}
 
+	if (com.seq.type == SEQ_AVI) {
+		siril_log_message("Crop does not work with avi film. Please, convert your file to SER first.\n");
+		return;
+	}
+	if (com.seq.type == SEQ_INTERNAL) {
+		siril_log_message("Not a valid sequence for cropping.\n");
+	}
+
 	struct crop_sequence_data *args = malloc(sizeof(struct crop_sequence_data));
 
 	GtkEntry *cropped_entry = GTK_ENTRY(lookup_widget("cropped_entry"));

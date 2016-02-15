@@ -133,6 +133,7 @@ struct crop_sequence_data {
 	sequence *seq;
 	rectangle *area;
 	const char *prefix;
+	int retvalue;
 };
 
 /* median filter data from GUI */

@@ -60,11 +60,23 @@ int display_date(uint64_t date, char *txt) {
 	return 0;
 }
 
-static int gmtoffset(void) {
-	struct tm *dummy;
-	time_t t = 0;
-	dummy = localtime(&t);
-	return dummy->tm_gmtoff;
+/* Comes from http://linux.die.net/man/3/timegm
+ * This is not thread-safe
+ */
+static time_t __timegm(struct tm *tm) {
+	time_t ret;
+	char *tz;
+
+	tz = getenv("TZ");
+	setenv("TZ", "", 1);
+	tzset();
+	ret = mktime(tm);
+	if (tz)
+		setenv("TZ", tz, 1);
+	else
+		unsetenv("TZ");
+	tzset();
+	return ret;
 }
 
 int convert_char_to_time(char *date, uint64_t *utc, uint64_t *local) {
@@ -76,14 +88,15 @@ int convert_char_to_time(char *date, uint64_t *utc, uint64_t *local) {
 		return -1;
 	strptime(date, "%FT%T", &timeinfo); /* YYYY-MM-DDThh:mm:ss */
 	timeinfo.tm_isdst = -1;
-	ut = mktime (&timeinfo);
-	ut += gmtoffset();
-	t = ut + gmtoffset();
 
+	/* get UTC time from timeinfo* */
+	ut = __timegm(&timeinfo);
 	ut *= ticksPerSecond;
 	ut += epochTicks;
 	*utc = (uint64_t) ut;
 
+	/* get local time from timeinfo* */
+	t = mktime(&timeinfo);
 	t *= ticksPerSecond;
 	t += epochTicks;
 	*local = (uint64_t) t;
@@ -215,6 +228,7 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean 
 	if (copy_from) {
 		memcpy(&ser_file->lu_id, &copy_from->lu_id, 28);
 		memcpy(&ser_file->date, &copy_from->date, 16);
+		memcpy(&ser_file->date_utc, &copy_from->date_utc, 16);
 		ser_file->file_id = strdup(copy_from->file_id);
 		ser_file->observer = strdup(copy_from->observer);
 		ser_file->instrument = strdup(copy_from->instrument);

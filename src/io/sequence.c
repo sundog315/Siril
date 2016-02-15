@@ -1035,16 +1035,20 @@ int internal_sequence_find_index(sequence *seq, fits *fit) {
 
 gboolean end_crop_sequence(gpointer p) {
 	struct crop_sequence_data *args = (struct crop_sequence_data *) p;
-	stop_processing_thread();// can it be done here in case there is no thread?
-	char *rseqname = malloc(strlen(args->prefix) + strlen(com.seq.seqname) + 5);
 
-	sprintf(rseqname, "%s%s.seq", args->prefix, com.seq.seqname);
-	check_seq(0);
-	update_sequences_list(rseqname);
+	stop_processing_thread();// can it be done here in case there is no thread?
+	if (!args->retvalue) {
+		char *rseqname = malloc(
+				strlen(args->prefix) + strlen(com.seq.seqname) + 5);
+
+		sprintf(rseqname, "%s%s.seq", args->prefix, com.seq.seqname);
+		check_seq(0);
+		update_sequences_list(rseqname);
+		free(rseqname);
+	}
 	set_cursor_waiting(FALSE);
 	update_used_memory();
 	free(args);
-	free(rseqname);
 	return FALSE;
 }
 
@@ -1052,6 +1056,22 @@ gpointer crop_sequence(gpointer p) {
 	struct crop_sequence_data *args = (struct crop_sequence_data *) p;
 	int frame, ret;
 	float cur_nb;
+	struct ser_struct *ser_file = NULL;
+
+	args->retvalue = 0;
+
+	if (args->seq->type == SEQ_SER) {
+		char dest[256];
+
+		ser_file = malloc(sizeof(struct ser_struct));
+		sprintf(dest, "%s%s.ser", args->prefix, args->seq->seqname);
+		if (ser_create_file(dest, ser_file, TRUE, NULL)) {
+			siril_log_message("Creating the SER file failed, aborting.\n");
+			free(ser_file);
+			args->retvalue = 1;
+			gdk_threads_add_idle(end_crop_sequence, args);
+		}
+	}
 
 	for (frame = 0, cur_nb = 0.f; frame < args->seq->number; frame++) {
 		if (!get_thread_run())
@@ -1061,14 +1081,32 @@ gpointer crop_sequence(gpointer p) {
 			char dest[256], filename[256];
 
 			crop(&(wfit[0]), args->area);
-			fit_sequence_get_image_filename(args->seq, frame, filename, TRUE);
-
-			sprintf(dest, "%s%s", args->prefix, filename);
-			savefits(dest, &wfit[0]);
+			switch (args->seq->type) {
+			case SEQ_REGULAR:
+				fit_sequence_get_image_filename(args->seq, frame, filename,
+				TRUE);
+				sprintf(dest, "%s%s", args->prefix, filename);
+				savefits(dest, &wfit[0]);
+				break;
+			case SEQ_SER:
+				if (ser_write_frame_from_fit(ser_file, &wfit[0])) {
+					siril_log_message(
+							"Error while converting to SER (no space left?)\n");
+				}
+				break;
+			default:
+				args->retvalue = 1;	// should not happend
+			}
 
 			cur_nb += 1.f;
 			set_progress_bar_data(NULL, cur_nb / args->seq->number);
 		}
+	}
+	if (args->seq->type == SEQ_SER) {
+		memcpy(&ser_file->date, &args->seq->ser_file->date, 16);
+		memcpy(&ser_file->date_utc, &args->seq->ser_file->date_utc, 16);
+		ser_write_and_close(ser_file);
+		free(ser_file);
 	}
 	gdk_threads_add_idle(end_crop_sequence, args);
 	return 0;
