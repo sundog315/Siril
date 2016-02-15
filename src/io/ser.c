@@ -21,6 +21,8 @@
  * WARNING: the code in this file and its header will not work properly
  * on big endian systems.
  */
+#define __USE_XOPEN
+#define _GNU_SOURCE
 
 #include <sys/types.h>
 #include <sys/time.h>
