@@ -89,6 +89,10 @@ int readraw_in_cfa(const char *, fits *);
 int open_raw_files(const char *, fits *, int);
 #endif
 
+#ifdef HAVE_LIBGIF
+int savegif(char *filename, fits *fit);
+#endif
+
 /****************** utils.h ******************/
 int	round_to_int(double x);
 WORD	round_to_WORD(double x);

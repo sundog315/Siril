@@ -1183,7 +1183,10 @@ gpointer export_sequence(gpointer ptr) {
 			}
 
 			destfit.pdata[0] = destfit.data;
-			if (fit.naxes[2] == 3) {
+			if (fit.naxes[2] == 1) {
+				destfit.pdata[1] = destfit.data;
+				destfit.pdata[2] = destfit.data;
+			} else {
 				destfit.pdata[1] = destfit.data + nbdata * sizeof(WORD);
 				destfit.pdata[2] = destfit.data + nbdata * sizeof(WORD) * 2;
 			}
@@ -1205,7 +1208,6 @@ gpointer export_sequence(gpointer ptr) {
 			shiftx = 0;
 			shifty = 0;
 		}
-		printf("shifts: %d, %d\n", shiftx, shifty);
 
 		/* fill the image with shift data */
 		for (layer=0; layer<fit.naxes[2]; ++layer) {
@@ -1235,6 +1237,12 @@ gpointer export_sequence(gpointer ptr) {
 					siril_log_message("Error while converting to SER (no space left?)\n");
 				break;
 			case TYPEGIF:
+				/* for now, it's one gif image for each input image */
+				snprintf(dest, 255, "%s%05d.gif", args->basename, i);
+				if (savegif(dest, &destfit)) {
+					retval = -1;
+					goto free_and_reset_progress_bar;
+				}
 				break;
 		}
 		cur_nb += 1.f;
@@ -1290,8 +1298,6 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 			args->convflags = TYPESER;
 			break;
 		case 2:
-			siril_log_message("GIF export is not yet supported\n");
-			return;
 			args->convflags = TYPEGIF;
 			break;
 	}

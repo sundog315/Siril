@@ -37,10 +37,14 @@
 #ifdef HAVE_LIBRAW
 #include <libraw/libraw.h>
 #endif
+#ifdef HAVE_LIBGIF
+#include <gif_lib.h>
+#endif
 
 #include "core/siril.h"
 #include "core/proto.h"
 #include "gui/callbacks.h"
+#include "single_image.h"
 
 /********************* TIFF IMPORT AND EXPORT *********************/
 
@@ -893,3 +897,129 @@ int open_raw_files(const char *name, fits *fit, int type) {
 	return retvalue;
 }
 #endif
+
+
+/********************* GIF EXPORT *********************/
+#ifdef HAVE_LIBGIF
+
+int savegif(char *filename, fits *fit) {
+	/* convert the fits to RGB 8-bit buffers, using the min/max scale */
+	BYTE *rgb[3];
+	BYTE map[USHRT_MAX + 1];
+	WORD tmp_pixel_value, hi, lo;
+	int i, nb_pixels, channel;
+	float pente;
+
+	nb_pixels = fit->rx * fit->ry;
+	rgb[0] = malloc(nb_pixels);
+	if (rgb[0] == NULL) {
+		siril_log_message("Failed to allocate memory required, aborted.\n");
+		return 1;
+	}
+	rgb[1] = malloc(nb_pixels);
+	if (rgb[1] == NULL) {
+		siril_log_message("Failed to allocate memory required, aborted.\n");
+		return 1;
+	}
+	rgb[2] = malloc(nb_pixels);
+	if (rgb[2] == NULL) {
+		siril_log_message("Failed to allocate memory required, aborted.\n");
+		return 1;
+	}
+
+	image_find_minmax(fit, 0);
+	hi = fit->maxi;
+	lo = fit->mini;
+	pente = UCHAR_MAX_SINGLE / (float) (hi - lo);
+	
+	for (i = 0; i <= USHRT_MAX; i++) {
+		map[i] = round_to_BYTE((float) i * pente);
+		if (map[i] == UCHAR_MAX)
+			break;
+	}
+	if (i != USHRT_MAX + 1) {
+		/* no more computation needed, just fill with max value */
+		for (++i; i <= USHRT_MAX; i++)
+			map[i] = UCHAR_MAX;
+	}
+	/* doing the WORD to BYTE conversion, bottom-up and with the minmax mapping */
+	for (channel = 0; channel < 3; channel++) {
+		int x, y;
+		WORD *src = fit->pdata[channel];
+		BYTE *dst = rgb[channel];
+		for (y = 0; y < fit->ry; y++) {
+			int desty = fit->ry-y-1;
+			int srcpixel = y * fit->rx;
+			int dstpixel = desty * fit->rx;
+			for (x = 0; x < fit->rx; x++, srcpixel++, dstpixel++) {
+				// linear scaling
+				if (src[srcpixel] - lo < 0)
+					tmp_pixel_value = 0;
+				else 	tmp_pixel_value = src[srcpixel] - lo;
+				dst[dstpixel] = map[tmp_pixel_value];
+			}
+		}
+	}
+
+	/* transform to GIF data */
+	GifByteType *OutputBuffer = NULL;
+	ColorMapObject *OutputColorMap = NULL;
+	int ColorMapSize = 256;
+
+	if ((OutputColorMap = GifMakeMapObject(ColorMapSize, NULL)) == NULL ||
+			(OutputBuffer = malloc(nb_pixels * sizeof(GifByteType))) == NULL) {
+		free(rgb[0]); free(rgb[1]); free(rgb[2]);
+		siril_log_message("Failed to allocate memory required, aborted.\n");
+		return 1;
+	}
+
+	if (GifQuantizeBuffer(fit->rx, fit->ry, &ColorMapSize,
+				rgb[0], rgb[1], rgb[2],
+				OutputBuffer, OutputColorMap->Colors) == GIF_ERROR) {
+		free(rgb[0]); free(rgb[1]); free(rgb[2]); free(OutputBuffer);
+		siril_log_message("Failed to convert data into GIF data format\n");
+		return 1;
+	}
+
+	for (channel = 0; channel < 3; channel++)
+		free(rgb[channel]);
+
+
+	/*********** code from SaveGif function **********/
+	int error;
+	GifFileType *GifFile;
+	GifByteType *Ptr = OutputBuffer;
+
+	if ((GifFile = EGifOpenFileName(filename, FALSE, &error)) == NULL) {
+		siril_log_message("Error opening GIF file: %s\n", GifErrorString(error));
+		free(OutputBuffer);
+		return 1;
+	}
+
+	if (EGifPutScreenDesc(GifFile, fit->rx, fit->ry, 8, 0, OutputColorMap) == GIF_ERROR ||
+			EGifPutImageDesc(GifFile, 0, 0, fit->rx, fit->ry, false, NULL) == GIF_ERROR) {
+		siril_log_message("Error opening GIF file: %s\n", GifErrorString(error));
+		EGifCloseFile(GifFile, NULL);
+		free(OutputBuffer);
+		return 1;
+	}
+
+	for (i = 0; i < fit->ry; i++) {
+		if (EGifPutLine(GifFile, Ptr, fit->rx) == GIF_ERROR)
+		{
+			EGifCloseFile(GifFile, NULL);
+			free(OutputBuffer);
+			return 1;
+		}
+		Ptr += fit->rx;
+	}
+	free(OutputBuffer);
+
+	if (EGifCloseFile(GifFile, &error) == GIF_ERROR) {
+		siril_log_message("Error opening GIF file: %s\n", GifErrorString(error));
+		return 1;
+	}
+	return 0;
+}
+#endif
+

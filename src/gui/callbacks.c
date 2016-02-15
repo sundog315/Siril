@@ -1047,16 +1047,18 @@ void remap(int vport) {
 			switch (color) {
 			default:
 			case NORMAL_COLOR:
-				r = g = b = (double) dst_pixel_value;
+				dst[j++] = round_to_BYTE(dst_pixel_value);
+				dst[j++] = round_to_BYTE(dst_pixel_value);
+				dst[j++] = round_to_BYTE(dst_pixel_value);
 				break;
 			case RAINBOW_COLOR:
 				r = (double) rainbow_index[(int) dst_pixel_value][0];
 				g = (double) rainbow_index[(int) dst_pixel_value][1];
 				b = (double) rainbow_index[(int) dst_pixel_value][2];
+				dst[j++] = round_to_BYTE(b);
+				dst[j++] = round_to_BYTE(g);
+				dst[j++] = round_to_BYTE(r);
 			}
-			dst[j++] = round_to_BYTE(b);
-			dst[j++] = round_to_BYTE(g);
-			dst[j++] = round_to_BYTE(r);
 			j++; /* 8-bit padding for the 32-bit cairo RGB24 format */
 		}
 		j -= 2 * com.surface_stride[vport];
