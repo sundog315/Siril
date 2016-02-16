@@ -1169,15 +1169,24 @@ gpointer export_sequence(gpointer ptr) {
 	struct exportseq_args *args = (struct exportseq_args *)ptr;
 	memset(&fit, 0, sizeof(fits));
 	memset(&destfit, 0, sizeof(fits));
+#ifdef HAVE_LIBGIF
+	GifFileType *gif = NULL;
+	char giffilename[256];
+#endif
 
 	reglayer = get_registration_layer(args->seq);
 	siril_log_message("Using registration information from layer %d to export sequence\n", reglayer);
 
 	if (args->convflags == TYPESER) {
 		ser_file = malloc(sizeof(struct ser_struct));
-		snprintf(dest, 255, "%s.ser", args->basename);
+		snprintf(dest, 256, "%s.ser", args->basename);
 		if (ser_create_file(dest, ser_file, TRUE, NULL))
 			siril_log_message("Creating the SER file failed, aborting.\n");
+	}
+	else if (args->convflags == TYPEGIF) {
+#ifdef HAVE_LIBGIF
+		snprintf(giffilename, 256, "%s.gif", args->basename);
+#endif
 	}
 
 	nb_frames = (float)args->seq->number;
@@ -1275,17 +1284,13 @@ gpointer export_sequence(gpointer ptr) {
 					siril_log_message("Error while converting to SER (no space left?)\n");
 				break;
 			case TYPEGIF:
-				/* for now, it's one gif image for each input image */
 #ifdef HAVE_LIBGIF
-				snprintf(dest, 255, "%s%05d.gif", args->basename, i);
-				if (savegif(dest, &destfit)) {
+				if (savegif(giffilename, &destfit, 1, &gif, 10, 3)) {
 					retval = -1;
-				goto free_and_reset_progress_bar;
-			}
-#else
-			siril_log_message("You must install the Giflib library to convert into Gif formats.\n");
+					goto free_and_reset_progress_bar;
+				}
 #endif
-			break;
+				break;
 		}
 		cur_nb += 1.f;
 		set_progress_bar_data(NULL, cur_nb / nb_frames);
@@ -1303,6 +1308,12 @@ free_and_reset_progress_bar:
 		ser_write_and_close(ser_file);
 		free(ser_file);
 	}
+#ifdef HAVE_LIBGIF
+	else if (args->convflags == TYPEGIF) {
+		if (gif)
+			closegif(&gif);
+	}
+#endif
 
 	if (retval) {
 		set_progress_bar_data("Sequence export failed. Check the log.", PROGRESS_RESET);
@@ -1340,7 +1351,12 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 			args->convflags = TYPESER;
 			break;
 		case 2:
+#ifdef HAVE_LIBGIF
 			args->convflags = TYPEGIF;
+#else
+			siril_log_message("GIF support was not compiled, aborting.\n");
+			return;
+#endif
 			break;
 	}
 	set_cursor_waiting(TRUE);

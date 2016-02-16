@@ -11,6 +11,10 @@
 #include <tiffio.h>
 #endif
 
+#ifdef HAVE_LIBGIF
+#include <gif_lib.h>
+#endif
+
 /****************** image_format_fits.h ******************/
 int	readfits(const char *filename, fits *fit, char *realname);
 void	read_fits_header(fits *fit);
@@ -90,7 +94,8 @@ int open_raw_files(const char *, fits *, int);
 #endif
 
 #ifdef HAVE_LIBGIF
-int savegif(char *filename, fits *fit);
+int savegif(char *filename, fits *fit, int anim, GifFileType **gif, int delay, int loop_count);
+void closegif(GifFileType **gif);
 #endif
 
 /****************** utils.h ******************/
