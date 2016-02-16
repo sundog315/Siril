@@ -147,6 +147,8 @@ char *create_sequence_filename(int counter, char *output, int outsize) {
 		char *the_root = strdup(destroot);
 		if (the_ext == the_root) {
 			snprintf(output, outsize, "%s", destroot);
+			free(the_ext);
+			free(the_root);
 			return output;
 		}
 		the_root[ext-destroot-1] = '\0';

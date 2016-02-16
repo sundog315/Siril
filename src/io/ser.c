@@ -83,7 +83,6 @@ static time_t __timegm(struct tm *tm) {
 int convert_char_to_time(char *date, uint64_t *utc, uint64_t *local) {
 	struct tm timeinfo = { };
 	time_t ut, t;
-	char year[5], month[3], day[3], hours[3], minutes[3], sec[3];
 
 	if (date[0] == '\0')
 		return -1;

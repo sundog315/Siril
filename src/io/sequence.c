@@ -261,7 +261,10 @@ int check_only_one_film_seq(char* name) {
 	if (!strcasecmp(ext, "ser")) {
 		struct ser_struct *ser_file = malloc(sizeof(struct ser_struct));
 		ser_init_struct(ser_file);
-		if (ser_open_file(name, ser_file)) return 1;
+		if (ser_open_file(name, ser_file)) {
+			closedir(dir);
+			return 1;
+		}
 
 		new_seq = calloc(1, sizeof(sequence));
 		initialize_sequence(new_seq, TRUE);
@@ -277,6 +280,7 @@ int check_only_one_film_seq(char* name) {
 		struct film_struct *film_file = malloc(sizeof(struct film_struct));
 		if (film_open_file(name, film_file)) {
 			free(film_file);
+			closedir(dir);
 			return 1;
 		}
 		new_seq = calloc(1, sizeof(sequence));
@@ -1299,9 +1303,6 @@ gpointer export_sequence(gpointer ptr) {
 	}
 
 free_and_reset_progress_bar:
-	if (args->convflags == TYPESER) {
-	}
-
 	clearfits(&fit);	// in case of goto
 	clearfits(&destfit);
 	if (args->convflags == TYPESER) {
