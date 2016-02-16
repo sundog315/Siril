@@ -22,6 +22,9 @@
  * on big endian systems.
  */
 
+#define __USE_XOPEN
+#define _GNU_SOURCE
+
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
