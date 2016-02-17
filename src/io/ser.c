@@ -639,6 +639,7 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 
 int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit) {
 	int frame_size, pixel, plane, dest;
+	int retval = 0;
 	BYTE *data8 = NULL;			// for 8-bit files
 	WORD *data16 = NULL;		// for 16-bit files
 
@@ -674,23 +675,24 @@ int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit) {
 	}
 	if (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8) {
 		if (write(ser_file->fd, data8, frame_size) != frame_size) {
-			free(data8);
 			perror("write image in SER");
-			return 1;
+			retval = 1;
+			goto free_and_quit;
 		}
 	} else {
 		if (write(ser_file->fd, data16, frame_size) != frame_size) {
-			free(data16);
 			perror("write image in SER");
-			return 1;
+			retval = 1;
+			goto free_and_quit;
 		}
 	}
-	if (data8)
-		free(data8);
-	if (data16)
-		free(data16);
 	ser_file->frame_count++;
-	return 0;
+	retval = 0;
+
+	free_and_quit:
+	if (data8) free(data8);
+	if (data16) free(data16);
+	return retval;
 }
 
 void set_combo_box_bayer_pattern(ser_color pattern) {
