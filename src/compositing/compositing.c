@@ -737,7 +737,8 @@ void luminance_and_colors_align_and_compose() {
 	for (y = 0; y < gfit.ry; y++) {
 		for (x = 0; x < gfit.rx; x++) {
 			int layer;
-			gdouble h, s, i;
+			gdouble X, Y, Z;
+			gdouble a, b, i;
 			/* get color information */
 			GdkRGBA pixel;
 			clear_pixel(&pixel);
@@ -750,14 +751,16 @@ void luminance_and_colors_align_and_compose() {
 			}
 			rgb_pixel_limiter(&pixel);
 
-			rgb_to_hsl(pixel.red,pixel.green,pixel.blue, &h,&s,&i);
+			rgb_to_xyz(pixel.red, pixel.green, pixel.blue, &X, &Y, &Z);
+			xyz_to_LAB(X, Y, Z, &i, &a, &b);
 
 			/* add luminance by replacing it in the HSI */
 			i = (double)get_composition_pixel_value(0, 0, x, y) /
 				(double)(layers[0]->the_fit.maxi);
 
 			/* converting back to RGB */
-			hsl_to_rgb(h,s,i, &pixel.red,&pixel.green,&pixel.blue);
+			LAB_to_xyz(i, a, b, &X, &Y, &Z);
+			xyz_to_rgb(X, Y, Z, &pixel.red, &pixel.green, &pixel.blue);
 			rgb_pixel_limiter(&pixel);
 
 			/* and store in gfit */
