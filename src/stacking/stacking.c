@@ -28,9 +28,6 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-#ifdef HAVE_CONFIG_H
-#include <config.h>
-#endif
 
 #include "core/siril.h"
 #include "core/proto.h"

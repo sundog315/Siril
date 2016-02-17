@@ -668,7 +668,7 @@ int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit) {
 				pixel++) {
 			if (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8)
 				data8[dest] = (BYTE)(fit->pdata[plane][pixel]);
-			else data16[dest] = fit->pdata[plane][pixel] >> 8;
+			else data16[dest] = (fit->pdata[plane][pixel] >> 8 | fit->pdata[plane][pixel] << 8);
 			dest += ser_file->number_of_planes;
 		}
 	}
