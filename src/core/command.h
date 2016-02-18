@@ -20,7 +20,7 @@ int	process_trichro(int nb);
 int	process_composervb(int nb);
 int	process_bmp2fits(int nb);
 #endif
-int process_satu(int nb);
+int	process_satu(int nb);
 int	process_save(int nb);
 int	process_savebmp(int nb);
 
@@ -90,16 +90,17 @@ int	process_ddp(int nb);
 int	process_new(int nb);
 int	process_visu(int nb);
 int	process_fill2(int nb);
-int process_findstar(int nb);
-int process_findhot(int nb);
-int process_fmedian(int nb);
+int	process_findstar(int nb);
+int	process_findhot(int nb);
+int	process_fmedian(int nb);
 int	process_fill(int nb);
 int	process_offset(int nb);
 int	process_scnr(int nb);
 int	process_fft(int nb);
 int	process_fixbanding(int nb);
-int process_split(int nb);
-int process_select(int nb);
+int	process_split(int nb);
+int	process_select(int nb);
+int	process_unselect(int nb);
 int	process_stat(int nb);
 int	process_stackall(int nb);
 #ifdef _OPENMP
@@ -115,7 +116,7 @@ int	process_lrgb(int nb);
 #endif
 int	process_help(int nb);
 int	process_exit(int nb);
-int process_extract(int nb);
+int	process_extract(int nb);
 int	processcommand(const char *line);
 
 #endif

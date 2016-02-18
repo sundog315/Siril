@@ -781,10 +781,6 @@ int get_registration_layer(sequence *seq) {
  * selected images, if argument is false.
  * Verifies that enough images are selected and an area is selected.
  */
-/* Selects the "register all" or "register selected" according to the number of
- * selected images, if argument is false.
- * Verifies that enough images are selected and an area is selected.
- */
 void update_reg_interface(gboolean dont_change_reg_radio) {
 	static GtkWidget *go_register = NULL, *newSequence = NULL;
 	static GtkLabel *labelreginfo = NULL;

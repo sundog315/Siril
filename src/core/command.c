@@ -45,6 +45,7 @@
 #include "algos/gradient.h"
 #include "algos/fft.h"
 #include "stacking/stacking.h"
+#include "registration/registration.h"
 
 #ifdef HAVE_OPENCV
 #include "opencv/opencv.h"
@@ -131,6 +132,9 @@ command commande[] = {
 	{"savetif", 1, "savetif filename (save current image in tif 16bits)", process_savetif},
 	{"savetif8", 1, "savetif8 filename (save current image in tif 8bits)", process_savetif},
 #endif
+	{"select", 2, "select from to", process_select},
+	{"unselect", 2, "unselect from to", process_unselect},
+
 	{"split", 3, "split R G B", process_split},
 	{"stat", 0, "stat", process_stat},
 	{"stackall", 0, "stackall", process_stackall},
@@ -1038,6 +1042,48 @@ int process_fixbanding(int nb) {
 	start_in_new_thread(BandingEngine, args);
 	
 	return 0;
+}
+
+int select_unselect(gboolean select) {
+	if (!sequence_is_loaded()) {
+		siril_log_message("Use this command to select images in a sequence, load a sequence first.\n");
+		return 1;
+	}
+	int from = atoi(word[1]);
+	int to = atoi(word[2]);
+	if (from < 0 || from >= com.seq.number) {
+		siril_log_message("The first argument must be between 0 and the number of images minus one.\n");
+		return 1;
+	}
+	int i;
+	gboolean current_updated = FALSE;
+	for (i=from; i<=to; i++) {
+		if (i >= com.seq.number) break;
+		if (i == com.seq.current) current_updated = TRUE;
+		com.seq.imgparam[i].incl = select;
+		sequence_list_change_selection_index(i);
+		if (select)
+			com.seq.selnum++;
+		else	com.seq.selnum--;
+	}
+
+	if (current_updated) {
+		adjust_exclude(com.seq.current, TRUE);
+	}
+
+	update_reg_interface(FALSE);
+	writeseqfile(&com.seq);
+	siril_log_message("selection update finished, %d images are selected in the sequence\n", com.seq.selnum);
+
+	return 0;
+}
+
+int process_select(int nb){
+	return select_unselect(TRUE);
+}
+
+int process_unselect(int nb){
+	return select_unselect(FALSE);
 }
 
 int process_split(int nb){
