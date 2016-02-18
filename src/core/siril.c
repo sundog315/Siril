@@ -997,7 +997,7 @@ gpointer seqpreprocess(gpointer p) {
 			point *p = find_deviant_pixels(dark, args->sigma, &n);
 			siril_log_message("Removing %d hot pixels...\n", n);
 			cosmeticCorrection(com.uniq->fit, p, n, args->is_cfa);
-			free(p);
+			if (p) free(p);
 		}
 
 		snprintf(dest_filename, 255, "%s%s", com.uniq->ppprefix,

@@ -30,7 +30,7 @@ static WORD getMedian5x5(WORD *buf, const int xx, const int yy, const int w,
 		const int h, gboolean is_cfa) {
 	int step, radius, x, y;
 	int width, height;
-	WORD *value;
+	WORD *value, median;
 
 	if (is_cfa) {
 		step = 2;
@@ -49,14 +49,15 @@ static WORD getMedian5x5(WORD *buf, const int xx, const int yy, const int w,
 				if (x >= 0 && x < w) {
 					if ((x != xx) || (y != yy)) {
 						value[n++] = buf[x + y * w];
-						n++;
 					}
 				}
 			}
 		}
 	}
 	quicksort_s(value, 24);
-	return get_median_value_from_sorted_word_data(value);
+	median = get_median_value_from_sorted_word_data(value);
+	free(value);
+	return median;
 }
 */
 
@@ -88,6 +89,9 @@ static WORD getAverage3x3(WORD *buf, const int xx, const int yy, const int w,
 	return round_to_WORD(value / n);
 }
 
+/* Gives a list of point p containing deviant pixel coordinates
+ * p MUST be freed after the call
+ */
 point *find_deviant_pixels(fits *fit, double k, int *count) {
 	int x, y, i;
 	WORD *buf = fit->pdata[RLAYER];
@@ -109,6 +113,7 @@ point *find_deviant_pixels(fits *fit, double k, int *count) {
 
 	/** Second we store hot pixels in p*/
 	int n = *count;
+	if (n <= 0) return NULL;
 	p = calloc(n, sizeof(point));
 	i = 0;
 	for (y = 0; y < fit->ry; y++) {
