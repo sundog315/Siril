@@ -42,6 +42,7 @@ static WORD getMedian5x5(WORD *buf, const int xx, const int yy, const int w,
 	}
 
 	int n = 0;
+	int start;
 	value = calloc(24, sizeof(WORD));
 	for (y = yy - radius; y <= yy + radius; y += step) {
 		for (x = xx - radius; x <= xx + radius; x += step) {
@@ -54,8 +55,9 @@ static WORD getMedian5x5(WORD *buf, const int xx, const int yy, const int w,
 			}
 		}
 	}
+	start = 24 - n - 1;
 	quicksort_s(value, 24);
-	median = get_median_value_from_sorted_word_data(value);
+	median = get_median_value_from_sorted_word_data(value + start, n);
 	free(value);
 	return median;
 }
