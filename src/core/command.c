@@ -74,14 +74,14 @@ command commande[] = {
 	{"extract", 1, "extract NbPlans", process_extract},
 	
 	{"fdiv", 2, "fdiv filename scalar", process_fdiv},
-	{"fill", 1, "fill value", process_fill},
-	{"fill2", 1, "fill2 value [x y width height]", process_fill2},
-	{"findstar", 0, "findstar", process_findstar},
-	{"find_hot", 2, "find_hot threshold", process_findhot},
-	{"fmedian", 2, "fmedian ksize modulation", process_fmedian},
 	{"fftd", 2, "fftd magnitude phase", process_fft},
 	{"ffti", 2, "ffti magnitude phase", process_fft},
-	{"fixbanding", 2, "fixbanding amount", process_fixbanding},
+	{"fill", 1, "fill value", process_fill},
+	{"fill2", 1, "fill2 value [x y width height]", process_fill2},
+	{"find_hot", 2, "find_hot filename threshold", process_findhot},
+	{"findstar", 0, "findstar", process_findstar},
+	{"fmedian", 2, "fmedian ksize modulation", process_fmedian},
+	{"fixbanding", 2, "fixbanding amount sigma", process_fixbanding},
 	
 	{"gauss", 1, "gauss sigma ", process_gauss},	
 	//~ {"gauss2", 1, "gauss sigma", process_gauss2},
@@ -134,20 +134,19 @@ command commande[] = {
 	{"savetif8", 1, "savetif8 filename (save current image in tif 8bits)", process_savetif},
 #endif
 	{"select", 2, "select from to", process_select},
-	{"unselect", 2, "unselect from to", process_unselect},
-
+#ifdef _OPENMP
+	{"setcpu", 1, "setcpu number", process_set_cpu},
+#endif
 	{"split", 3, "split R G B", process_split},
 	{"stat", 0, "stat", process_stat},
 	{"stackall", 0, "stackall", process_stackall},
 	
-#ifdef _OPENMP
-	{"setcpu", 1, "setcpu number", process_set_cpu},
-#endif
 	{"threshlo", 1, "threshlo level", process_threshlo},
 	{"threshhi", 1, "threshi level", process_threshhi}, 
 	{"thresh", 2, "thresh hi lo (threshes hi and lo)", process_thresh}, /* threshes hi and lo */
 	
 	/* unsharp masking of current image or genname sequence */
+	{"unselect", 2, "unselect from to", process_unselect},
 	{"unsharp", 2, "unsharp sigma multi", process_unsharp},
 //	{"unsharp2", 5, "unsharp2 sigma multi src dest number", process_unsharp2},
 
