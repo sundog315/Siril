@@ -67,7 +67,6 @@ static WORD getMedian5x5(WORD *buf, const int xx, const int yy, const int w,
 static WORD getAverage3x3(WORD *buf, const int xx, const int yy, const int w,
 		const int h, gboolean is_cfa) {
 	int step, radius, x, y;
-	int width, height;
 	double value = 0;
 
 	if (is_cfa)
@@ -132,7 +131,7 @@ point *find_deviant_pixels(fits *fit, double k, int *count) {
 }
 
 int cosmeticCorrection(fits *fit, point *p, int size, gboolean is_cfa) {
-	int i, x, y, radius, step;
+	int i;
 	WORD *buf = fit->pdata[RLAYER];		// Cosmetic correction, as developed here, is only used on 1-channel images
 	int width = fit->rx;
 	int height = fit->ry;
