@@ -202,8 +202,6 @@ int	verbose_rotate_image(fits *, double, int, int);
 #endif
 double gauss_cvf(double p);
 int get_wavelet_layers(fits *fit, int Nbr_Plan, int Plan, int Type, int reqlayer);
-point *find_hot_pixels(fits *fit, double k, int *count);
-int cosmeticCorrection(fits *fit, point *p, int size, gboolean is_CFA);
 gpointer median_filter(gpointer p);
 gpointer BandingEngine(gpointer p);
 gpointer noise(gpointer p);

@@ -883,7 +883,7 @@ int process_findhot(int nb){
 	strcat(word[1], ".lst");
 	cosme_file = fopen(word[1], "w");
 	
-	point *p = find_hot_pixels(&gfit, k, &count);
+	point *p = find_deviant_pixels(&gfit, k, &count);
 	siril_log_message("Number of hot pixels: %d\n", count);
 	for (i = 0; i < count; i++)
 		fprintf(cosme_file, "P %d %d\n", (int)p[i].x, (int)p[i].y);
