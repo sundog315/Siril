@@ -44,6 +44,7 @@
 #include "io/single_image.h"
 #include "algos/gradient.h"
 #include "algos/fft.h"
+#include "algos/cosmetic_correction.h"
 #include "stacking/stacking.h"
 #include "registration/registration.h"
 
