@@ -1238,8 +1238,8 @@ gpointer export_sequence(gpointer ptr) {
 				destfit.pdata[1] = destfit.data;
 				destfit.pdata[2] = destfit.data;
 			} else {
-				destfit.pdata[1] = destfit.data + nbdata * sizeof(WORD);
-				destfit.pdata[2] = destfit.data + nbdata * sizeof(WORD) * 2;
+				destfit.pdata[1] = destfit.data + nbdata;
+				destfit.pdata[2] = destfit.data + nbdata * 2;
 			}
 		}
 		else if (fit.ry * fit.rx != nbdata || nb_layers != fit.naxes[2]) {
