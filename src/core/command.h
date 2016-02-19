@@ -55,6 +55,7 @@ int	process_unsharp2(int nb);
 int	process_fwhm(int nb);
 #endif
 int	process_crop(int nb);
+int	process_seq_crop(int nb);
 
 #if 0
 int	process_crop2(int nb);

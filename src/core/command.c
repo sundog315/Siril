@@ -65,7 +65,6 @@ command commande[] = {
 	{"clearstar", 0, "clearstar", process_clearstar},
 	{"contrast", 0, "contrast", process_contrast},
 	{"crop", 0, "crop [x y width height]", process_crop}, 
-//	{"crop2", 3, "crop2 genname outname number [x y width height]", process_crop2}, 
 
 	{"ddp", 3, "ddp level coef sigma", process_ddp}, 
 	
@@ -111,7 +110,6 @@ command commande[] = {
 	{"offset", 1, "offset value", process_offset},
 	
 	{"psf", 0, "psf", process_psf},
-	{"seqpsf", 0, "seqpsf", process_seq_psf},
 	
 #ifdef HAVE_OPENCV
 	{"resample", 1, "resample factor", process_resample},
@@ -134,6 +132,8 @@ command commande[] = {
 	{"savetif8", 1, "savetif8 filename (save current image in tif 8bits)", process_savetif},
 #endif
 	{"select", 2, "select from to", process_select},
+	{"seqcrop", 0, "seqcrop", process_seq_crop},
+	{"seqpsf", 0, "seqpsf", process_seq_psf},
 #ifdef _OPENMP
 	{"setcpu", 1, "setcpu number", process_set_cpu},
 #endif
@@ -355,7 +355,7 @@ int process_unsharp(int nb){
 
 int process_crop(int nb){
 	rectangle area;
-	if (!com.drawn || com.drawing){		// TODO: what's that test?
+	if ((!com.selection.h) || (!com.selection.w)) {
 		if (nb==5){
 			if (atoi(word[1])<0 || atoi(word[2])<0){
 				siril_log_message("Crop: x and y must be positive values.\n");
@@ -685,6 +685,29 @@ int process_seq_psf(int nb) {
 		siril_log_message("This command can be used only when a sequence is loaded\n");
 		return 1;
 	}
+}
+
+int process_seq_crop(int nb) {
+	rectangle area;
+
+	if (get_thread_run()) {
+		siril_log_message(
+				"Another task is already in progress, ignoring new request.\n");
+		return 1;
+	}
+
+	if (com.selection.w != 0 || com.selection.h != 0)
+		return 1;
+
+	struct crop_sequence_data *args = malloc(sizeof(struct crop_sequence_data));
+
+	args->seq = &com.seq;
+	args->area = &com.selection;
+	args->prefix = "cropped_";
+
+	set_cursor_waiting(TRUE);
+	start_in_new_thread(crop_sequence, args);
+	return 0;
 }
 
 int process_bg(int nb){
@@ -1451,38 +1474,6 @@ int process_unsharp2(int nb){
 			savefits(buildfilename(word[4], i), &(gfit));
 		}
 	}
-	return 0;
-}
-
-int process_crop2(int nb){
-	int i, err;
-	char ofilename[256];
-
-	if (!com.drawn){
-		if (nb==8){
-			com.rectX = atoi(word[4]);
-			com.rectY = atoi(word[5]);
-			com.rectW = atoi(word[6]);
-			com.rectH = atoi(word[7]);
-		}
-		else {
-			siril_log_message("Crop2: select a region or provide x,y,width,height\n");
-			return 1;
-		}
-	}
-
-	for (i=1;i<=atoi(word[3]);++i){	
-		buildfilename(word[1],i);
-		snprintf(ofilename,255,"%s%d",word[2],i);
-		err=readfits(com.formname,&(gfit), NULL);
-		if (err){
-			siril_log_message("Crop2: aborted\n");
-			return 1;
-		}
-		crop(&(gfit));
-		savefits(ofilename,&(gfit));
-	}
-	redraw(com.cvport, REMAP_ALL);
 	return 0;
 }
 
