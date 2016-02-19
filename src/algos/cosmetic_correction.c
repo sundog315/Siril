@@ -24,8 +24,6 @@
 #include "core/proto.h"
 #include "algos/cosmetic_correction.h"
 
-/* This function is used for cold pixel */
-/*
 static WORD getMedian5x5(WORD *buf, const int xx, const int yy, const int w,
 		const int h, gboolean is_cfa) {
 	int step, radius, x, y;
@@ -61,9 +59,8 @@ static WORD getMedian5x5(WORD *buf, const int xx, const int yy, const int w,
 	free(value);
 	return median;
 }
-*/
 
-/* This function is used for hot pixels */
+/*
 static WORD getAverage3x3(WORD *buf, const int xx, const int yy, const int w,
 		const int h, gboolean is_cfa) {
 	int step, radius, x, y;
@@ -89,6 +86,7 @@ static WORD getAverage3x3(WORD *buf, const int xx, const int yy, const int w,
 	}
 	return round_to_WORD(value / n);
 }
+*/
 
 /* Gives a list of point p containing deviant pixel coordinates
  * p MUST be freed after the call
@@ -140,7 +138,7 @@ int cosmeticCorrection(fits *fit, point *p, int size, gboolean is_cfa) {
 		int xx = (int) p[i].x;
 		int yy = (int) p[i].y;
 
-		WORD mean = getAverage3x3(buf, xx, yy, width, height, is_cfa);
+		WORD mean = getMedian5x5(buf, xx, yy, width, height, is_cfa);
 
 		buf[xx + yy * fit->rx] = mean;
 	}
