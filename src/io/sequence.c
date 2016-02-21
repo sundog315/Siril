@@ -1349,8 +1349,10 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 	int selected = gtk_combo_box_get_active(GTK_COMBO_BOX(lookup_widget("comboExport")));
 	const char *bname = gtk_entry_get_text(GTK_ENTRY(lookup_widget("entryExportSeq")));
 	struct exportseq_args *args;
+#ifdef HAVE_LIBGIF
 	GtkEntry *delayEntry, *loopsEntry;
 	GtkToggleButton *gifNormalize;
+#endif
 
 	if (bname[0] == '\0') return;
 	if (selected == -1) return;
