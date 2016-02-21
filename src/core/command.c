@@ -688,8 +688,6 @@ int process_seq_psf(int nb) {
 }
 
 int process_seq_crop(int nb) {
-	rectangle area;
-
 	if (get_thread_run()) {
 		siril_log_message(
 				"Another task is already in progress, ignoring new request.\n");

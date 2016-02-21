@@ -27,7 +27,6 @@
 static WORD getMedian5x5(WORD *buf, const int xx, const int yy, const int w,
 		const int h, gboolean is_cfa) {
 	int step, radius, x, y;
-	int width, height;
 	WORD *value, median;
 
 	if (is_cfa) {

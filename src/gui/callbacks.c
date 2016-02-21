@@ -1808,41 +1808,31 @@ void on_close_settings_button_clicked(GtkButton *button, gpointer user_data) {
 	gtk_widget_hide(lookup_widget("settings_window"));
 }
 
-void on_focal_entry_changed(GtkEditable *editable, gpointer user_data) {
-	const gchar* focal_entry = gtk_entry_get_text(
-			GTK_ENTRY(lookup_widget("focal_entry")));
+void update_fwhm_units_ok() {
 	GtkWidget *label_ok = GTK_WIDGET(lookup_widget("label_ok"));
 
-	gfit.focal_length = atof(focal_entry);
-
-	if (!gfit.focal_length || !gfit.pixel_size_x || !gfit.pixel_size_y)
+	if (gfit.focal_length > 0.0 &&
+			gfit.pixel_size_x > 0.0f && gfit.pixel_size_y > 0.0f)
 		gtk_widget_set_visible(label_ok, FALSE);
-	else
-		gtk_widget_set_visible(label_ok, TRUE);
+	else gtk_widget_set_visible(label_ok, TRUE);
+}
+
+void on_focal_entry_changed(GtkEditable *editable, gpointer user_data) {
+	const gchar* focal_entry = gtk_entry_get_text(GTK_ENTRY(editable));
+	gfit.focal_length = atof(focal_entry);
+	update_fwhm_units_ok();
 }
 
 void on_pitchX_entry_changed(GtkEditable *editable, gpointer user_data) {
-	const gchar* pitchX_entry = gtk_entry_get_text(
-			GTK_ENTRY(lookup_widget("pitchX_entry")));
-	GtkWidget *label_ok = GTK_WIDGET(lookup_widget("label_ok"));
-
-	gfit.pixel_size_x = atof(pitchX_entry);
-	if (!gfit.focal_length || !gfit.pixel_size_x || !gfit.pixel_size_y)
-		gtk_widget_set_visible(label_ok, FALSE);
-	else
-		gtk_widget_set_visible(label_ok, TRUE);
+	const gchar* pitchX_entry = gtk_entry_get_text(GTK_ENTRY(editable));
+	gfit.pixel_size_x = (float)atof(pitchX_entry);
+	update_fwhm_units_ok();
 }
 
 void on_pitchY_entry_changed(GtkEditable *editable, gpointer user_data) {
-	const gchar* pitchY_entry = gtk_entry_get_text(
-			GTK_ENTRY(lookup_widget("pitchY_entry")));
-	GtkWidget *label_ok = GTK_WIDGET(lookup_widget("label_ok"));
-
-	gfit.pixel_size_y = atof(pitchY_entry);
-	if (!gfit.focal_length || !gfit.pixel_size_x || !gfit.pixel_size_y)
-		gtk_widget_set_visible(label_ok, FALSE);
-	else
-		gtk_widget_set_visible(label_ok, TRUE);
+	const gchar* pitchY_entry = gtk_entry_get_text(GTK_ENTRY(editable));
+	gfit.pixel_size_y = (float)atof(pitchY_entry);
+	update_fwhm_units_ok();
 }
 
 void clear_sampling_setting_box() {

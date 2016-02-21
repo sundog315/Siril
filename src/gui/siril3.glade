@@ -6590,6 +6590,7 @@ by averaging the entire image</property>
               <object class="GtkGrid" id="grid14">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="row_spacing">20</property>
                 <child>
                   <object class="GtkFrame" id="frame15">
                     <property name="visible">True</property>
@@ -6771,6 +6772,23 @@ by averaging the entire image</property>
                   <packing>
                     <property name="left_attach">0</property>
                     <property name="top_attach">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label101">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_left">15</property>
+                    <property name="margin_right">15</property>
+                    <property name="label" translatable="yes">Warning: these fields are automatically read from FITS file on opening and setting them here will only work for the currently loaded file.</property>
+                    <property name="wrap">True</property>
+                    <attributes>
+                      <attribute name="style" value="italic"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
                   </packing>
                 </child>
               </object>
