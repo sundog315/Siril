@@ -1161,6 +1161,8 @@ struct exportseq_args {
 	sequence *seq;
 	char *basename;
 	int convflags;
+	gboolean normalize;
+	int gif_delay, gif_loops;
 };
 
 gpointer export_sequence(gpointer ptr) {
@@ -1190,6 +1192,18 @@ gpointer export_sequence(gpointer ptr) {
 	else if (args->convflags == TYPEGIF) {
 #ifdef HAVE_LIBGIF
 		snprintf(giffilename, 256, "%s.gif", args->basename);
+		/*if (args->normalize) {
+			struct stacking_args stackargs;
+			norm_coeff coeff;
+			coeff.offset = malloc(nb_frames * sizeof(double));
+			coeff.mul = malloc(nb_frames * sizeof(double));
+			coeff.scale = malloc(nb_frames * sizeof(double));
+			stackargs.force_norm = FALSE;
+			stackargs.nb_images_to_stack = ;
+			stackargs.seq = &com.seq;
+			stackargs.image_indices =;
+			compute_normalization(&stackargs, , ADDITIVE_SCALING);
+		}*/
 #endif
 	}
 
@@ -1289,7 +1303,7 @@ gpointer export_sequence(gpointer ptr) {
 				break;
 			case TYPEGIF:
 #ifdef HAVE_LIBGIF
-				if (savegif(giffilename, &destfit, 1, &gif, 10, 3)) {
+				if (savegif(giffilename, &destfit, 1, &gif, args->gif_delay, args->gif_loops)) {
 					retval = -1;
 					goto free_and_reset_progress_bar;
 				}
@@ -1335,6 +1349,8 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 	int selected = gtk_combo_box_get_active(GTK_COMBO_BOX(lookup_widget("comboExport")));
 	const char *bname = gtk_entry_get_text(GTK_ENTRY(lookup_widget("entryExportSeq")));
 	struct exportseq_args *args;
+	GtkEntry *delayEntry, *loopsEntry;
+	GtkToggleButton *gifNormalize;
 
 	if (bname[0] == '\0') return;
 	if (selected == -1) return;
@@ -1353,6 +1369,12 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 			break;
 		case 2:
 #ifdef HAVE_LIBGIF
+			delayEntry = GTK_ENTRY(lookup_widget("entryGifDelay"));
+			args->gif_delay = atoi(gtk_entry_get_text(delayEntry));
+			loopsEntry = GTK_ENTRY(lookup_widget("entryGifLoops"));
+			args->gif_loops = atoi(gtk_entry_get_text(loopsEntry));
+			gifNormalize = GTK_TOGGLE_BUTTON(lookup_widget("gifNormalize"));
+			args->normalize = gtk_toggle_button_get_active(gifNormalize);
 			args->convflags = TYPEGIF;
 #else
 			siril_log_message("GIF support was not compiled, aborting.\n");
@@ -1362,4 +1384,9 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 	}
 	set_cursor_waiting(TRUE);
 	start_in_new_thread(export_sequence, args);
+}
+
+void on_comboExport_changed(GtkComboBox *box, gpointer user_data) {
+	GtkWidget *gif_options = lookup_widget("boxGifOptions");
+	gtk_widget_set_visible(gif_options, 2 == gtk_combo_box_get_active(box));
 }

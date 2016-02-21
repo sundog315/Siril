@@ -71,7 +71,7 @@ void initialize_stacking_methods() {
 }
 
 static int _compute_normalization_for_image(struct stacking_args *args, int i,
-		double *offset, double *mul, double *scale, int mode, double *scale0,
+		double *offset, double *mul, double *scale, normalization mode, double *scale0,
 		double *mul0, double *offset0) {
 	imstats *stat = NULL;
 
@@ -115,7 +115,7 @@ static int _compute_normalization_for_image(struct stacking_args *args, int i,
 	return 0;
 }
 
-static int compute_normalization(struct stacking_args *args, norm_coeff *coeff, int mode) {
+int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normalization mode) {
 	int i, retval = 0, cur_nb = 0;
 	double scale0, mul0, offset0;
 	char *tmpmsg;

@@ -70,4 +70,6 @@ void update_stack_interface();
 int stack_filter_all(sequence *seq, int nb_img, double any);
 int stack_filter_included(sequence *seq, int nb_img, double any);
 
+int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normalization mode);
+
 #endif
