@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.19.0 
+<!-- Generated with glade 3.18.3 
 
 Copyright (C) The free-astro development team, 2015
 
@@ -6780,8 +6780,10 @@ by averaging the entire image</property>
                     <property name="can_focus">False</property>
                     <property name="margin_left">15</property>
                     <property name="margin_right">15</property>
+                    <property name="margin_bottom">4</property>
                     <property name="label" translatable="yes">Warning: these fields are automatically read from FITS file on opening and setting them here will only work for the currently loaded file.</property>
                     <property name="wrap">True</property>
+                    <property name="max_width_chars">0</property>
                     <attributes>
                       <attribute name="style" value="italic"/>
                     </attributes>
@@ -10279,6 +10281,26 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                   <object class="GtkBox" id="boxGifOptions">
                     <property name="can_focus">False</property>
                     <child>
+                      <object class="GtkCheckButton" id="gifNormalize">
+                        <property name="label" translatable="yes">Normalize images</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Activate image normalisation for the export. This will make all images the same brightness and is thus recommended for sequences with inconsistent exposures or pixel values.
+A first computation pass will be done on all images before exporting, it may take some time, only the first export of a sequence.
+			</property>
+                        <property name="margin_left">35</property>
+                        <property name="xalign">0</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="padding">10</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkLabel" id="label145">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -10343,27 +10365,6 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                         <property name="fill">False</property>
                         <property name="padding">4</property>
                         <property name="position">4</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkCheckButton" id="gifNormalize">
-                        <property name="label" translatable="yes">Normalize images</property>
-                        <property name="visible">False</property>
-                        <property name="can_focus">True</property>
-                        <property name="receives_default">False</property>
-			<property name="tooltip_text" translatable="yes">Activate image normalisation for the export. This will make all images the same brightness and is thus recommended for sequences with inconsistent exposures or pixel values.
-A first computation pass will be done on all images before exporting, it may take some time, only the first export of a sequence.
-			</property>
-                        <property name="margin_left">35</property>
-                        <property name="xalign">0</property>
-                        <property name="active">True</property>
-                        <property name="draw_indicator">True</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">True</property>
-                        <property name="padding">10</property>
-                        <property name="position">5</property>
                       </packing>
                     </child>
                   </object>
