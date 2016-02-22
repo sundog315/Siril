@@ -1179,9 +1179,14 @@ gpointer export_sequence(gpointer ptr) {
 	GifFileType *gif = NULL;
 	char giffilename[256];
 #endif
+	norm_coeff coeff;
 
 	reglayer = get_registration_layer(args->seq);
 	siril_log_message("Using registration information from layer %d to export sequence\n", reglayer);
+
+	coeff.offset = malloc(args->seq->number * sizeof(double));
+	coeff.mul = malloc(args->seq->number * sizeof(double)); // not used in ADDITIVE_SCALING but needed to avoid crash in compute_normalization
+	coeff.scale = malloc(args->seq->number * sizeof(double));
 
 	if (args->convflags == TYPESER) {
 		ser_file = malloc(sizeof(struct ser_struct));
@@ -1192,18 +1197,17 @@ gpointer export_sequence(gpointer ptr) {
 	else if (args->convflags == TYPEGIF) {
 #ifdef HAVE_LIBGIF
 		snprintf(giffilename, 256, "%s.gif", args->basename);
-		/*if (args->normalize) {
+		if (args->normalize) {
 			struct stacking_args stackargs;
-			norm_coeff coeff;
-			coeff.offset = malloc(nb_frames * sizeof(double));
-			coeff.mul = malloc(nb_frames * sizeof(double));
-			coeff.scale = malloc(nb_frames * sizeof(double));
+
 			stackargs.force_norm = FALSE;
-			stackargs.nb_images_to_stack = ;
+			stackargs.nb_images_to_stack = args->seq->number;
 			stackargs.seq = &com.seq;
-			stackargs.image_indices =;
-			compute_normalization(&stackargs, , ADDITIVE_SCALING);
-		}*/
+			stackargs.image_indices = malloc(stackargs.nb_images_to_stack * sizeof(int));
+			fill_list_of_unfiltered_images(stackargs.image_indices);
+			compute_normalization(&stackargs, &coeff, ADDITIVE_SCALING);
+			free(stackargs.image_indices);
+		}
 #endif
 	}
 
@@ -1228,7 +1232,7 @@ gpointer export_sequence(gpointer ptr) {
 		free(tmpmsg);
 
 		if (seq_read_frame(args->seq, i, &fit)) {
-			siril_log_message("Stacking: could not read frame, aborting\n");
+			siril_log_message("Export: could not read frame, aborting\n");
 			retval = -3;
 			goto free_and_reset_progress_bar;
 		}
@@ -1257,7 +1261,7 @@ gpointer export_sequence(gpointer ptr) {
 			}
 		}
 		else if (fit.ry * fit.rx != nbdata || nb_layers != fit.naxes[2]) {
-			siril_log_message("Stacking: image in args->sequence doesn't has the same dimensions\n");
+			siril_log_message("Export: image in args->sequence doesn't has the same dimensions\n");
 			retval = -3;
 			goto free_and_reset_progress_bar;
 		}
@@ -1281,8 +1285,12 @@ gpointer export_sequence(gpointer ptr) {
 					nx = x + shiftx;
 					ny = y + shifty;
 					if (nx >= 0 && nx < fit.rx && ny >= 0 && ny < fit.ry) {
-						destfit.pdata[layer][nx + ny*fit.rx] =
-							fit.pdata[layer][x + y*fit.rx];
+						double tmp = fit.pdata[layer][x + y * fit.rx];
+						if (args->normalize) {
+							tmp *= coeff.scale[i];
+							tmp -= coeff.offset[i];
+						}
+						destfit.pdata[layer][nx + ny * fit.rx] = round_to_WORD(tmp);
 					}
 				}
 			}
@@ -1319,6 +1327,9 @@ gpointer export_sequence(gpointer ptr) {
 free_and_reset_progress_bar:
 	clearfits(&fit);	// in case of goto
 	clearfits(&destfit);
+	free(coeff.offset);
+	free(coeff.mul);
+	free(coeff.scale);
 	if (args->convflags == TYPESER) {
 		ser_write_and_close(ser_file);
 		free(ser_file);
@@ -1351,7 +1362,7 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 	struct exportseq_args *args;
 #ifdef HAVE_LIBGIF
 	GtkEntry *delayEntry, *loopsEntry;
-	GtkToggleButton *gifNormalize;
+	GtkToggleButton *exportNormalize;
 #endif
 
 	if (bname[0] == '\0') return;
@@ -1375,8 +1386,8 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 			args->gif_delay = atoi(gtk_entry_get_text(delayEntry));
 			loopsEntry = GTK_ENTRY(lookup_widget("entryGifLoops"));
 			args->gif_loops = atoi(gtk_entry_get_text(loopsEntry));
-			gifNormalize = GTK_TOGGLE_BUTTON(lookup_widget("gifNormalize"));
-			args->normalize = gtk_toggle_button_get_active(gifNormalize);
+			exportNormalize = GTK_TOGGLE_BUTTON(lookup_widget("exportNormalize"));
+			args->normalize = gtk_toggle_button_get_active(exportNormalize);
 			args->convflags = TYPEGIF;
 #else
 			siril_log_message("GIF support was not compiled, aborting.\n");

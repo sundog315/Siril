@@ -10281,7 +10281,7 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                   <object class="GtkBox" id="boxGifOptions">
                     <property name="can_focus">False</property>
                     <child>
-                      <object class="GtkCheckButton" id="gifNormalize">
+                      <object class="GtkCheckButton" id="exportNormalize">
                         <property name="label" translatable="yes">Normalize images</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -10292,6 +10292,7 @@ A first computation pass will be done on all images before exporting, it may tak
                         <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
+                        <property name="visible">True</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>

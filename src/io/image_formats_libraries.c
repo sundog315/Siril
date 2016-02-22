@@ -944,9 +944,15 @@ int savegif(char *filename, fits *fit, int anim, GifFileType **gif, int delay, i
 		return 1;
 	}
 
-	image_find_minmax(fit, 1);	// somehow, without forcing it doesn't work
-	hi = fit->maxi;
-	lo = fit->mini;
+	if (sequence_is_loaded() && !single_image_is_loaded()) {
+		hi = com.seq.layers[RLAYER].hi;
+		lo = com.seq.layers[RLAYER].lo;
+	}
+	else {
+		hi = com.uniq->layers[RLAYER].hi;
+		lo = com.uniq->layers[RLAYER].lo;
+	}
+
 	pente = UCHAR_MAX_SINGLE / (float) (hi - lo);
 	
 	for (i = 0; i <= USHRT_MAX; i++) {
@@ -959,7 +965,7 @@ int savegif(char *filename, fits *fit, int anim, GifFileType **gif, int delay, i
 		for (++i; i <= USHRT_MAX; i++)
 			map[i] = UCHAR_MAX;
 	}
-	/* doing the WORD to BYTE conversion, bottom-up and with the minmax mapping */
+	/* doing the WORD to BYTE conversion, bottom-up */
 	for (channel = 0; channel < 3; channel++) {
 		int x, y;
 		WORD *src = fit->pdata[channel];
