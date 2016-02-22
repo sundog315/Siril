@@ -1502,6 +1502,8 @@ gpointer BandingEngine(gpointer p) {
 
 	siril_log_color_message("Canon Banding Reducing: processing...\n", "red");
 	gettimeofday(&t_start, NULL);
+	if (args->applyRotation)
+		cvRotateImage(args->fit, 90, OPENCV_LINEAR, 0);
 
 	new_fit_image(fiximage, args->fit->rx, args->fit->ry, args->fit->naxes[2]);
 
@@ -1559,6 +1561,9 @@ gpointer BandingEngine(gpointer p) {
 	imoper(args->fit, fiximage, OPER_ADD);
 
 	clearfits(fiximage);
+	if (args->applyRotation)
+		cvRotateImage(args->fit, -90, OPENCV_LINEAR, 0);
+
 	gettimeofday(&t_end, NULL);
 	show_time(t_start, t_end);
 	gdk_threads_add_idle(end_BandingEngine, args);

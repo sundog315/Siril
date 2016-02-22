@@ -58,6 +58,8 @@ struct stacking_args {
 
 void initialize_stacking_methods();
 
+void fill_list_of_unfiltered_images(int *indices);
+
 int stack_summing(struct stacking_args *args);
 int stack_median(struct stacking_args *args);
 int stack_mean_with_rejection(struct stacking_args *args);

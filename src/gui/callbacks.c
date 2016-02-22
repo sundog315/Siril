@@ -5593,7 +5593,7 @@ void on_button_ok_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 void on_button_apply_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 	static GtkRange *range_amount = NULL;
 	static GtkRange *range_invsigma = NULL;
-	static GtkToggleButton *toggle_protect_highlights_banding = NULL;
+	static GtkToggleButton *toggle_protect_highlights_banding = NULL, *vertical = NULL;
 	double amount, invsigma;
 	gboolean protect_highlights;
 
@@ -5610,6 +5610,7 @@ void on_button_apply_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 		range_invsigma = GTK_RANGE(lookup_widget("scale_fixbanding_invsigma"));
 		toggle_protect_highlights_banding = GTK_TOGGLE_BUTTON(
 				lookup_widget("checkbutton_fixbanding"));
+		vertical = GTK_TOGGLE_BUTTON(lookup_widget("checkBandingVertical"));
 	}
 	amount = gtk_range_get_value(range_amount);
 	invsigma = gtk_range_get_value(range_invsigma);
@@ -5622,11 +5623,11 @@ void on_button_apply_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 		undo_save_state("Processing: Canon Banding Reduction (amount=%.2lf, Protect=TRUE, invsigma=%.2lf)",
 				amount, invsigma);
 
-
 	args->fit = &gfit;
 	args->protect_highlights = protect_highlights;
 	args->amount = amount;
 	args->sigma = invsigma;
+	args->applyRotation = gtk_toggle_button_get_active(vertical);
 	set_cursor_waiting(TRUE);
 	start_in_new_thread(BandingEngine, args);
 }

@@ -611,7 +611,7 @@ int process_rotate(int nb) {
 	
 	set_cursor_waiting(TRUE);
 	degree = atof(word[1]);
-	verbose_rotate_image(&gfit, degree, 1, OPENCV_LINEAR);	//INTER_LINEAR
+	verbose_rotate_image(&gfit, degree, OPENCV_LINEAR, 1);	//INTER_LINEAR
 	redraw(com.cvport, REMAP_ALL);
 	redraw_previews();
 	set_cursor_waiting(FALSE);
@@ -621,7 +621,7 @@ int process_rotate(int nb) {
 
 int process_rotatepi(int nb){
 #ifdef HAVE_OPENCV
-	verbose_rotate_image(&gfit, 180.0, 1, OPENCV_LINEAR);
+	verbose_rotate_image(&gfit, 180.0, OPENCV_LINEAR, 1);
 #else
 	fits_rotate_pi(&gfit);
 #endif

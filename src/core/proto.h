@@ -155,6 +155,7 @@ struct banding_data {
 	double sigma;
 	double amount;
 	gboolean protect_highlights;
+	gboolean applyRotation;
 };
 
 /* Noise data from GUI */
