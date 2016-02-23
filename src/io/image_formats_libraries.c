@@ -911,7 +911,7 @@ int open_raw_files(const char *name, fits *fit, int type) {
  * if anim, gif must be finalized with gifclose(gif).
  * if positive, delay and loop_count are used for animation. Delay is in centiseconds.
  */
-int savegif(char *filename, fits *fit, int anim, GifFileType **gif, int delay, int loop_count) {
+int savegif(const char *filename, fits *fit, int anim, GifFileType **gif, int delay, int loop_count) {
 	/* convert the fits to RGB 8-bit buffers, using the min/max scale */
 	BYTE *rgb[3];
 	BYTE map[USHRT_MAX + 1];

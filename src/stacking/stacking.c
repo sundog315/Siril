@@ -2152,18 +2152,19 @@ int compute_nb_filtered_images() {
 	return count;
 }
 
-/* fill the image_indices mapping in a pre-allocated array */
-void fill_list_of_unfiltered_images(int *indices) {
-	int i, j = 0;
-	if (!sequence_is_loaded()) return;
-	for (i=0, j=0; i<com.seq.number; i++) {
-		if (stackparam.filtering_criterion(
+/* fill the image_indices mapping for the args->image_indices array, which has
+ * to be already allocated to the correct size at least */
+void fill_list_of_unfiltered_images(struct stacking_args *args) {
+	int i, j;
+	for (i=0, j=0; i<args->seq->number; i++) {
+		if (args->filtering_criterion(
 					&com.seq, i,
-					stackparam.filtering_parameter)) {
-			indices[j] = i;
+					args->filtering_parameter)) {
+			args->image_indices[j] = i;
 			j++;
 		}
 	}
+	assert(j <= args->nb_images_to_stack);
 }
 
 /****************************************************************/
@@ -2256,6 +2257,8 @@ void update_stack_interface() {	// was adjuststackspin
 		widgetnormalize = lookup_widget("combonormalize");
 
 	}
+	if (!sequence_is_loaded()) return;
+	stackparam.seq = &com.seq;
 
 	switch (gtk_combo_box_get_active(method_combo)) {
 		default:
@@ -2328,7 +2331,7 @@ void update_stack_interface() {	// was adjuststackspin
 	if (stackparam.nb_images_to_stack >= 2) {
 		if (stackparam.image_indices) free(stackparam.image_indices);
 		stackparam.image_indices = malloc(stackparam.nb_images_to_stack * sizeof(int));
-		fill_list_of_unfiltered_images(stackparam.image_indices);
+		fill_list_of_unfiltered_images(&stackparam);
 		gtk_widget_set_sensitive(go_stack, TRUE);
 	} else {
 		gtk_widget_set_sensitive(go_stack, FALSE);

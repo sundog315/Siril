@@ -1184,10 +1184,6 @@ gpointer export_sequence(gpointer ptr) {
 	reglayer = get_registration_layer(args->seq);
 	siril_log_message("Using registration information from layer %d to export sequence\n", reglayer);
 
-	coeff.offset = malloc(args->seq->number * sizeof(double));
-	coeff.mul = malloc(args->seq->number * sizeof(double)); // not used in ADDITIVE_SCALING but needed to avoid crash in compute_normalization
-	coeff.scale = malloc(args->seq->number * sizeof(double));
-
 	if (args->convflags == TYPESER) {
 		ser_file = malloc(sizeof(struct ser_struct));
 		snprintf(dest, 256, "%s.ser", args->basename);
@@ -1197,18 +1193,31 @@ gpointer export_sequence(gpointer ptr) {
 	else if (args->convflags == TYPEGIF) {
 #ifdef HAVE_LIBGIF
 		snprintf(giffilename, 256, "%s.gif", args->basename);
-		if (args->normalize) {
-			struct stacking_args stackargs;
-
-			stackargs.force_norm = FALSE;
-			stackargs.nb_images_to_stack = args->seq->number;
-			stackargs.seq = &com.seq;
-			stackargs.image_indices = malloc(stackargs.nb_images_to_stack * sizeof(int));
-			fill_list_of_unfiltered_images(stackargs.image_indices);
-			compute_normalization(&stackargs, &coeff, ADDITIVE_SCALING);
-			free(stackargs.image_indices);
-		}
 #endif
+	}
+	if (args->normalize) {
+		struct stacking_args stackargs;
+
+		coeff.offset = malloc(args->seq->number * sizeof(double));
+		// mul is not used in ADDITIVE_SCALING but needed to avoid crash in compute_normalization
+		coeff.mul = malloc(args->seq->number * sizeof(double));
+		coeff.scale = malloc(args->seq->number * sizeof(double));
+
+		stackargs.force_norm = FALSE;
+		stackargs.seq = args->seq;
+		stackargs.nb_images_to_stack = args->seq->selnum;
+		stackargs.filtering_criterion = stack_filter_included;
+		// alternative arguments for no filter (see other XXX):
+		//stackargs.nb_images_to_stack = args->seq->number;
+		//stackargs.filtering_criterion = stack_filter_all;
+
+		stackargs.image_indices = malloc(stackargs.nb_images_to_stack * sizeof(int));
+		fill_list_of_unfiltered_images(&stackargs);
+		compute_normalization(&stackargs, &coeff, ADDITIVE_SCALING);
+		// the image_indices are not used in the rest of this function for now
+		free(stackargs.image_indices);
+		if (args->seq->needs_saving)	// if we had to compute new stats
+			writeseqfile(args->seq);
 	}
 
 	nb_frames = (float)args->seq->number;
@@ -1219,6 +1228,7 @@ gpointer export_sequence(gpointer ptr) {
 			retval = -1;
 			goto free_and_reset_progress_bar;
 		}
+		// XXX to remove for all images
 		if (!args->seq->imgparam[i].incl) continue;
 
 		if (!seq_get_image_filename(args->seq, i, filename)) {
@@ -1327,9 +1337,11 @@ gpointer export_sequence(gpointer ptr) {
 free_and_reset_progress_bar:
 	clearfits(&fit);	// in case of goto
 	clearfits(&destfit);
-	free(coeff.offset);
-	free(coeff.mul);
-	free(coeff.scale);
+	if (args->normalize) {
+		free(coeff.offset);
+		free(coeff.mul);
+		free(coeff.scale);
+	}
 	if (args->convflags == TYPESER) {
 		ser_write_and_close(ser_file);
 		free(ser_file);
@@ -1360,9 +1372,9 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 	int selected = gtk_combo_box_get_active(GTK_COMBO_BOX(lookup_widget("comboExport")));
 	const char *bname = gtk_entry_get_text(GTK_ENTRY(lookup_widget("entryExportSeq")));
 	struct exportseq_args *args;
+	GtkToggleButton *exportNormalize;
 #ifdef HAVE_LIBGIF
 	GtkEntry *delayEntry, *loopsEntry;
-	GtkToggleButton *exportNormalize;
 #endif
 
 	if (bname[0] == '\0') return;
@@ -1371,6 +1383,8 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 	args = malloc(sizeof(struct exportseq_args));
 	args->basename = strdup(bname);
 	args->seq = &com.seq;
+	exportNormalize = GTK_TOGGLE_BUTTON(lookup_widget("exportNormalize"));
+	args->normalize = gtk_toggle_button_get_active(exportNormalize);
 
 	switch (selected) {
 		case 0:
@@ -1386,8 +1400,6 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 			args->gif_delay = atoi(gtk_entry_get_text(delayEntry));
 			loopsEntry = GTK_ENTRY(lookup_widget("entryGifLoops"));
 			args->gif_loops = atoi(gtk_entry_get_text(loopsEntry));
-			exportNormalize = GTK_TOGGLE_BUTTON(lookup_widget("exportNormalize"));
-			args->normalize = gtk_toggle_button_get_active(exportNormalize);
 			args->convflags = TYPEGIF;
 #else
 			siril_log_message("GIF support was not compiled, aborting.\n");

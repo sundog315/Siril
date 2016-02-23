@@ -94,7 +94,7 @@ int open_raw_files(const char *, fits *, int);
 #endif
 
 #ifdef HAVE_LIBGIF
-int savegif(char *filename, fits *fit, int anim, GifFileType **gif, int delay, int loop_count);
+int savegif(const char *filename, fits *fit, int anim, GifFileType **gif, int delay, int loop_count);
 void closegif(GifFileType **gif);
 #endif
 
