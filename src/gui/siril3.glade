@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.19.0 
+<!-- Generated with glade 3.18.3 
 
 Copyright (C) The free-astro development team, 2015
 
@@ -10305,6 +10305,7 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                         <property name="tooltip_text" translatable="yes">Activate image normalisation for the export. This will make all images the same brightness and is thus recommended for sequences with inconsistent exposures or pixel values.
 A first computation pass will be done on all images before exporting, it may take some time, only the first export of a sequence.
 			</property>
+                        <property name="vexpand">True</property>
                         <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
