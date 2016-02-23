@@ -3313,6 +3313,7 @@ void on_ref_frame_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
 	}
 	sequence_list_change_reference();
 	adjust_sellabel();	// reference image is named in the label
+	writeseqfile(&com.seq);
 }
 
 // from registration window
