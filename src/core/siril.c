@@ -579,72 +579,37 @@ int rshift2(char *genname, char *outname, int number, char *shiftfile) {
 }
 #endif
 
-
-/* code borrowed from Lynkeos */
-/* this function will be removed after validation of the new entropy below */
-double old_entropy(WORD *image, unsigned int rx, unsigned int ry) {
-	// Padded width for in place transform
-	double e = 0, bmax = 0;
-	unsigned long x, y;
-
-	// Compute the quadratic pixel sum
-	for (y = 0; y < ry; y++)
-		for (x = 0; x < rx; x++)
-			bmax += image[y * rx + x] * image[y * rx + x];
-
-	bmax = sqrt(bmax);
-
-	// Compute the entropy
-	for (y = 0; y < ry; y++) {
-		for (x = 0; x < rx; x++) {
-			double b = image[y * rx + x] / bmax;
-			if (b > 0.0)
-				e -= b * log(b);
-		}
-	}
-	return (e);
-}
-
 /* This entropy function computes the entropy for the image in gfit for its
- * layer 'layer', in the area designated by area which must be non-NULL.
+ * layer 'layer', in the area designated by area which can be NULL.
  * An optional imstats parameter can be used to provide the background and
  * sigma value, and when it is given, the entropy will only be computed for
  * pixels with values above background + 1 * sigma. It must be NULL otherwise.
  */
 double entropy(fits *fit, int layer, rectangle *area, imstats *opt_stats) {
-	double e = 0.0, bmax = 0.0, threshold = 0.0;
-	int i, j, stridebuf;
-	WORD *buf;
-	stridebuf = fit->rx - area->w;
+	double e = 0.0, threshold = 0.0;
+	gsl_histogram *histo;
+	size_t i, size, n;
+
 	if (opt_stats && opt_stats->median >= 0.0 && opt_stats->sigma >= 0.0)
 		threshold = opt_stats->median + 1 * opt_stats->sigma;
 
-	// Compute the quadratic pixel sum
-	buf = fit->pdata[layer] + (fit->ry - area->y - area->h) * fit->rx + area->x;
-	for (i = 0; i < area->h; ++i) {
-		for (j = 0; j < area->w; ++j) {
-			double b = (double) (*buf);
-			if (b > threshold)
-				bmax += b * b;
-			buf++;
-		}
-	}
-	bmax = sqrt(bmax);
+	if (area == NULL)
+		histo = computeHisto(fit, layer);
+	else
+		histo = computeHisto_Selection(fit, layer, area);
 
-	// Compute the entropy
-	buf = fit->pdata[layer] + (fit->ry - area->y - area->h) * fit->rx + area->x;
-	for (i = 0; i < area->h; ++i) {
-		for (j = 0; j < area->w; ++j) {
-			double b = (double) (*buf);
-			double bm = b / bmax;
-			if (b > threshold /*&& bm > 0.0*/) /* can't be 0 */
-				e -= bm * log(bm);
-			buf++;
-		}
-		buf += stridebuf;
+	n = fit->rx * fit->ry;
+	assert (n > 0);
+	size = gsl_histogram_bins(histo);
+	for (i = 0; i < size; i++) {
+		double p = gsl_histogram_get(histo, i);
+		p /= n;
+		if (p > threshold && p < size)
+			e += p * log(p);
 	}
+	gsl_histogram_free(histo);
 
-	return e;
+	return -e;
 }
 
 int loglut(fits *fit, int dir) {

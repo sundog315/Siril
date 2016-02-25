@@ -317,15 +317,16 @@ int process_fdiv(int nb){
 
 int process_entropy(int nb){
 	rectangle area;
-	if (com.selection.w > 0 && com.selection.h > 0)
+	double e;
+
+	if (com.selection.w > 0 && com.selection.h > 0) {
 		memcpy(&area, &com.selection, sizeof(rectangle));
-	else {
-		area.x = area.y = 0;
-		area.h = gfit.ry;
-		area.w = gfit.rx;
+		e = entropy(&gfit, com.cvport, &area, NULL);
 	}
-	double ent = entropy(&gfit, com.cvport, &area, NULL);
-	siril_log_message("entropy: %10.2f\n", ent);
+	else {
+		e = entropy(&gfit, com.cvport, NULL, NULL);
+	}
+	siril_log_message("entropy: %10.3f\n", e);
 	return 0;
 }
 
