@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.19.0 
+<!-- Generated with glade 3.18.3 
 
 Copyright (C) The free-astro development team, 2015
 
@@ -3242,7 +3242,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="row_spacing">10</property>
-            <property name="column_spacing">5</property>
+            <property name="column_spacing">6</property>
             <property name="row_homogeneous">True</property>
             <child>
               <object class="GtkScale" id="scale_fixbanding_amount">
@@ -3257,22 +3257,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
               <packing>
                 <property name="left_attach">1</property>
                 <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkScale" id="scale_fixbanding_invsigma">
-                <property name="visible">True</property>
-                <property name="sensitive">False</property>
-                <property name="can_focus">True</property>
-                <property name="hexpand">False</property>
-                <property name="adjustment">adj_fixbanding_invsigma</property>
-                <property name="round_digits">2</property>
-                <property name="digits">2</property>
-                <property name="value_pos">right</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">2</property>
+                <property name="width">2</property>
               </packing>
             </child>
             <child>
@@ -3285,18 +3270,6 @@ This is useful when modulation parameter is different to 1 helping the whole pro
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkLabel" id="label_invsigma">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="halign">start</property>
-                <property name="label" translatable="yes">1/SigmaFactor:</property>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">2</property>
               </packing>
             </child>
             <child>
@@ -3321,6 +3294,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Check this box if banding is vertical.</property>
                 <property name="xalign">0</property>
                 <property name="draw_indicator">True</property>
               </object>
@@ -3343,8 +3317,78 @@ This is useful when modulation parameter is different to 1 helping the whole pro
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">4</property>
-                <property name="width">2</property>
               </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="label152">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Output prefix:</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkEntry" id="entryBandingSeq">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Prefix of the image names resulting from the unband process.</property>
+                <property name="max_length">10</property>
+                <property name="width_chars">10</property>
+                <property name="text" translatable="yes">unband_</property>
+              </object>
+              <packing>
+                <property name="left_attach">2</property>
+                <property name="top_attach">4</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="bandingHighlightBox">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkLabel" id="label157">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">1/Sigma Factor</property>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkScale" id="scale_fixbanding_invsigma">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="hexpand">True</property>
+                    <property name="adjustment">adj_fixbanding_invsigma</property>
+                    <property name="round_digits">2</property>
+                    <property name="digits">2</property>
+                    <property name="value_pos">right</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">2</property>
+                <property name="width">3</property>
+              </packing>
+            </child>
+            <child>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
@@ -3756,6 +3800,9 @@ This is useful when modulation parameter is different to 1 helping the whole pro
               <object class="GtkEntry" id="cropped_entry">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+                <property name="tooltip_text" translatable="yes">Prefix of the image names resulting from the cropping process.</property>
+                <property name="max_length">10</property>
+                <property name="width_chars">10</property>
                 <property name="text" translatable="yes">cropped_</property>
               </object>
               <packing>
@@ -11087,6 +11134,8 @@ When processing images, registration data is taken from the default layer if ava
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Prefix of the image names resulting from the registration.</property>
+                        <property name="max_length">10</property>
+                        <property name="width_chars">10</property>
                         <property name="text">r_</property>
                       </object>
                       <packing>

@@ -139,7 +139,7 @@ int soper(fits *a, double scalar, char oper) {
  * a = a oper b
  * returns 0 on success */
 int imoper(fits *a, fits *b, char oper) {
-	int i, j, layer;
+	int i, layer;
 
 	if (a->rx != b->rx || a->ry != b->ry) {
 		siril_log_message(
@@ -1413,7 +1413,7 @@ int banding_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) {
 			banding_args->protect_highlights, banding_args->applyRotation);
 	if (retval) return retval;
 
-	snprintf(dest, 255, "unband_%s%05d%s", args->seq->seqname, i, com.ext);
+	snprintf(dest, 255, "%s%s%05d%s", banding_args->seqEntry, args->seq->seqname, i, com.ext);
 	return savefits(dest, fit);
 }
 
@@ -1454,7 +1454,7 @@ gpointer BandingEngineThreaded(gpointer p) {
 	struct banding_data *args = (struct banding_data *) p;
 	struct timeval t_start, t_end;
 
-	siril_log_color_message("Canon Banding Reducing: processing...\n", "red");
+	siril_log_color_message("Banding Reducing: processing...\n", "red");
 	gettimeofday(&t_start, NULL);
 
 	int retval = BandingEngine(args->fit, args->sigma, args->amount, args->protect_highlights, args->applyRotation);

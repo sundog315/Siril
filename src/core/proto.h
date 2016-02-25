@@ -156,6 +156,7 @@ struct banding_data {
 	double amount;
 	gboolean protect_highlights;
 	gboolean applyRotation;
+	const gchar *seqEntry;
 };
 
 /* Noise data from GUI */
@@ -173,7 +174,6 @@ int	soper(fits *a, double scalar, char oper);
 int	imoper(fits *a, fits *b, char oper);
 int sub_background(fits* image, fits* background, int layer);
 int 	addmax(fits *a, fits *b);
-int fmul(fits *a, int layer, float coeff);
 int	fdiv(fits *a, fits *b, float scalar);
 int ndiv(fits *a, fits *b);
 double 	gaussienne(double sigma, int size, double *gauss);

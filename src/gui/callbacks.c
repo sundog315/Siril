@@ -5546,6 +5546,7 @@ void on_button_apply_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 	static GtkRange *range_invsigma = NULL;
 	static GtkToggleButton *toggle_protect_highlights_banding = NULL,
 		*vertical = NULL, *seq = NULL;
+	static GtkEntry *bandingSeqEntry = NULL;
 	double amount, invsigma;
 	gboolean protect_highlights;
 
@@ -5564,6 +5565,7 @@ void on_button_apply_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 				lookup_widget("checkbutton_fixbanding"));
 		vertical = GTK_TOGGLE_BUTTON(lookup_widget("checkBandingVertical"));
 		seq = GTK_TOGGLE_BUTTON(lookup_widget("checkBandingSeq"));
+		bandingSeqEntry = GTK_ENTRY(lookup_widget("entryBandingSeq"));
 	}
 	amount = gtk_range_get_value(range_amount);
 	invsigma = gtk_range_get_value(range_invsigma);
@@ -5581,9 +5583,12 @@ void on_button_apply_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 	args->amount = amount;
 	args->sigma = invsigma;
 	args->applyRotation = gtk_toggle_button_get_active(vertical);
+	args->seqEntry = gtk_entry_get_text(bandingSeqEntry);
 	set_cursor_waiting(TRUE);
 
 	if (gtk_toggle_button_get_active(seq) && sequence_is_loaded()) {
+		if (args->seqEntry[0] == '\0')
+			args->seqEntry = "unband_";
 		apply_banding_to_sequence(args);
 	} else {
 		start_in_new_thread(BandingEngineThreaded, args);
@@ -5592,15 +5597,15 @@ void on_button_apply_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 
 void on_checkbutton_fixbanding_toggled(GtkToggleButton *togglebutton,
 		gpointer user_data) {
-	static GtkWidget *scale_invsigma = NULL;
+	static GtkWidget *bandingHighlightBox = NULL;
 	gboolean is_active;
 
-	if (scale_invsigma == NULL) {
-		scale_invsigma = lookup_widget("scale_fixbanding_invsigma");
+	if (bandingHighlightBox == NULL) {
+		bandingHighlightBox = lookup_widget("bandingHighlightBox");
 	}
 
 	is_active = gtk_toggle_button_get_active(togglebutton);
-	gtk_widget_set_sensitive(scale_invsigma, is_active);
+	gtk_widget_set_sensitive(bandingHighlightBox, is_active);
 }
 
 /**********************************************************************
