@@ -150,47 +150,26 @@ int imoper(fits *a, fits *b, char oper) {
 	for (layer = 0; layer < a->naxes[2]; ++layer) {
 		WORD *buf = b->pdata[layer];
 		WORD *gbuf = a->pdata[layer];
+		int n = a->rx * a->ry;
 		switch (oper) {
 		case OPER_ADD:
-			for (i = 0; i < b->rx; ++i) {
-				for (j = 0; j < b->ry; ++j) {
-					if ((*buf + *gbuf) > USHRT_MAX) {
-						*(gbuf++) = USHRT_MAX;			// avoid clipping
-						buf++;
-					} else
-						*(gbuf++) += *(buf++);
-				}
+			for (i = 0; i < n; ++i) {
+				gbuf[i] = round_to_WORD(gbuf[i] + buf[i]);
 			}
 			break;
 		case OPER_SUB:
-			for (i = 0; i < b->rx; ++i) {
-				for (j = 0; j < b->ry; ++j) {
-					if (*buf <= *gbuf) {
-						*(gbuf++) -= *(buf++);
-					} else {
-						*(gbuf++) = 0;
-						buf++;
-					}
-				}
+			for (i = 0; i < n; ++i) {
+				gbuf[i] = round_to_WORD(gbuf[i] - buf[i]);
 			}
 			break;
 		case OPER_MUL:
-			for (i = 0; i < b->rx; ++i) {
-				for (j = 0; j < b->ry; ++j) {
-					*(gbuf++) *= *(buf++);
-				}
+			for (i = 0; i < n; ++i) {
+				gbuf[i] = round_to_WORD(gbuf[i] * buf[i]);
 			}
 			break;
 		case OPER_DIV:
-			for (i = 0; i < b->rx; ++i) {
-				for (j = 0; j < b->ry; ++j) {
-					if (*buf == 0) {
-						*(gbuf++) = USHRT_MAX;
-						buf++;
-					} else {
-						*(gbuf++) /= *(buf++);
-					}
-				}
+			for (i = 0; i < n; ++i) {
+				gbuf[i] = round_to_WORD(gbuf[i] / buf[i]);
 			}
 			break;
 		}
@@ -259,19 +238,6 @@ int addmax(fits *a, fits *b) {
 		}
 	}
 	//~ siril_log_message("addmax was applied\n");
-	return 0;
-}
-
-int fmul(fits *a, int layer, float coeff) {
-	WORD *buf;
-	int i;
-
-	if (coeff < 0.0)
-		return 1;
-	buf = a->pdata[layer];
-	for (i = 0; i < a->rx * a->ry; ++i) {
-		buf[i] = round_to_WORD(buf[i] * coeff);
-	}
 	return 0;
 }
 
@@ -893,8 +859,6 @@ int lrgb(fits *l, fits *r, fits *g, fits *b, fits *lrgb) {
 	return 0;
 }
 
-/* In this function, offset has already been subtracted to the flat
- * and the dark. */
 int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float level) {
 
 	if (com.preprostatus & USE_DARK)
@@ -1427,6 +1391,19 @@ gpointer median_filter(gpointer p) {
 	gdk_threads_add_idle(end_median_filter, args);
 
 	return GINT_TO_POINTER(0);
+}
+
+static int fmul(fits *a, int layer, float coeff) {
+	WORD *buf;
+	int i;
+
+	if (coeff < 0.0)
+		return 1;
+	buf = a->pdata[layer];
+	for (i = 0; i < a->rx * a->ry; ++i) {
+		buf[i] = round_to_WORD(buf[i] * coeff);
+	}
+	return 0;
 }
 
 int banding_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) {
