@@ -100,39 +100,34 @@ int nozero(fits *fit, int level) {
 /* equivalent to (map simple_operation a), with simple_operation being
  * (lambda (pixel) (oper pixel scalar))
  * oper is a for addition, s for substraction (i for difference) and so on. */
-int soper(fits *a, float scalar, char oper) {
+int soper(fits *a, double scalar, char oper) {
 	WORD *gbuf;
 	int i, layer;
+	int n = a->rx * a->ry;
+
+	assert(n > 0);
 
 	for (layer = 0; layer < a->naxes[2]; ++layer) {
 		gbuf = a->pdata[layer];
 		switch (oper) {
 		case OPER_ADD:
-			for (i = 0; i < a->rx * a->ry; ++i) {
-				gbuf[i] =
-						gbuf[i] + scalar < USHRT_MAX ?
-								gbuf[i] + scalar : USHRT_MAX;
+			for (i = 0; i < n; ++i) {
+				gbuf[i] = round_to_WORD((double) gbuf[i] + scalar);
 			}
 			break;
 		case OPER_SUB:
-			for (i = 0; i < a->rx * a->ry; ++i) {
-				if (scalar <= *gbuf) {
-					gbuf[i] -= scalar;
-				} else {
-					gbuf[i] = 0;
-				}
+			for (i = 0; i < n; ++i) {
+				gbuf[i] = round_to_WORD((double) gbuf[i] - scalar);
 			}
 			break;
 		case OPER_MUL:
-			for (i = 0; i < a->rx * a->ry; ++i) {
-				gbuf[i] =
-						gbuf[i] * scalar < USHRT_MAX ?
-								gbuf[i] * scalar : USHRT_MAX;
+			for (i = 0; i < n; ++i) {
+				gbuf[i] = round_to_WORD((double) gbuf[i] * scalar);
 			}
 			break;
 		case OPER_DIV:
-			for (i = 0; i < a->rx * a->ry; ++i) {
-				gbuf[i] /= scalar;
+			for (i = 0; i < n; ++i) {
+				gbuf[i] = round_to_WORD((double) gbuf[i] / scalar);
 			}
 			break;
 		}
@@ -651,10 +646,10 @@ double contrast(fits* fit, int layer) {
 int ddp(fits *a, int level, float coeff, float sigma) {
 	copyfits(a, &wfit[0], CP_ALLOC | CP_COPYA | CP_FORMAT, 0);
 	unsharp(&wfit[0], sigma, 0, FALSE);
-	soper(&wfit[0], level, OPER_ADD);
+	soper(&wfit[0], (double) level, OPER_ADD);
 	nozero(&wfit[0], 1);
 	fdiv(a, &wfit[0], level);
-	soper(a, coeff, OPER_MUL);
+	soper(a, (double) coeff, OPER_MUL);
 	clearfits(&wfit[0]);
 	return 0;
 }

@@ -169,7 +169,7 @@ struct noise_data {
 int 	threshlo(fits *fit, int level);
 int 	threshhi(fits *fit, int level);
 int 	nozero(fits *fit, int level);
-int	soper(fits *a, float scalar, char oper);
+int	soper(fits *a, double scalar, char oper);
 int	imoper(fits *a, fits *b, char oper);
 int sub_background(fits* image, fits* background, int layer);
 int 	addmax(fits *a, fits *b);

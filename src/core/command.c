@@ -292,7 +292,7 @@ int process_imoper(int nb){
 }
 
 int process_mult(int nb) {
-	float k = atof(word[1]);
+	double k = atof(word[1]);
 	if (k < 0) {
 		siril_log_message("Coefficient MUST be a positive value\n");
 		return 1;
@@ -340,7 +340,7 @@ int process_entropy(int nb){
 	else {
 		e = entropy(&gfit, com.cvport, NULL, NULL);
 	}
-	siril_log_message("entropy: %10.3f\n", e);
+	siril_log_message("entropy: %.3lf\n", e);
 	return 0;
 }
 

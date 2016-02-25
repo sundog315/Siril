@@ -260,7 +260,7 @@ void initialize_ser_debayer_settings() {
 void initialize_converters() {
 	GtkLabel *label_supported;
 	gchar text[256];
-	gboolean has_entry = FALSE;	// true if something is supported
+	gboolean has_entry;			// true if something is supported
 	sprintf(text, "\t");		// if changed, change its removal before log_message
 	//text[0] = '\0';
 	int count_ext = 0;

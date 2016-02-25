@@ -518,7 +518,7 @@ int stack_median(struct stacking_args *args) {
 	/* Define some useful constants */
 	double total = (double)(naxes[2] * naxes[1] + 2);	// only used for progress bar
 
-	int nb_threads = 1;
+	int nb_threads;
 #ifdef _OPENMP
 	nb_threads = com.max_thread;
 	if (args->seq->type == SEQ_REGULAR && fits_is_reentrant()) {
@@ -531,6 +531,8 @@ int stack_median(struct stacking_args *args) {
 				" stacking will be executed on only one core\n");
 		siril_log_message("Your version of cfitsio does not support multi-threading\n");
 	}
+#else
+	nb_threads = 1;
 #endif
 
 	int nb_channels = naxes[2];
@@ -1352,7 +1354,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 	/* Define some useful constants */
 	double total = (double)(naxes[2] * naxes[1] + 2);	// only used for progress bar
 
-	int nb_threads = 1;
+	int nb_threads;
 #ifdef _OPENMP
 	nb_threads = com.max_thread;
 	if (args->seq->type == SEQ_REGULAR && fits_is_reentrant()) {
@@ -1365,6 +1367,8 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 				" stacking will be executed on only one core\n");
 		siril_log_message("Your version of cfitsio does not support multi-threading\n");
 	}
+#else
+	nb_threads = 1;
 #endif
 
 	int nb_channels = naxes[2];
