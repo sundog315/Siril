@@ -28,6 +28,7 @@
 #include "gui/callbacks.h"
 #include "core/siril.h"
 #include "core/proto.h"
+#include "core/processing.h"
 #include "io/single_image.h"
 #include "algos/fft.h"
 

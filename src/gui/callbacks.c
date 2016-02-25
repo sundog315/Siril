@@ -3636,63 +3636,6 @@ void set_cursor_waiting(gboolean waiting) {
 	g_free(list);
 }
 
-// This function is reentrant
-void start_in_new_thread(gpointer (*f)(gpointer p), gpointer p) {
-	g_mutex_lock(&com.mutex);
-	if (com.run_thread || com.thread != NULL) {
-		fprintf(stderr, "The processing thread is busy, stop it first.\n");
-		g_mutex_unlock(&com.mutex);
-		return;
-	}
-
-	com.run_thread = TRUE;
-	g_mutex_unlock(&com.mutex);
-	com.thread = g_thread_new("processing", f, p);
-}
-
-void stop_processing_thread() {
-	if (com.thread == NULL) {
-		fprintf(stderr,
-				"The processing thread is not running, cannot stop it.\n");
-		return;
-	}
-
-	set_thread_run(FALSE);
-
-	g_thread_join(com.thread);
-	com.thread = NULL;
-}
-
-void set_thread_run(gboolean b) {
-	g_mutex_lock(&com.mutex);
-	com.run_thread = b;
-	g_mutex_unlock(&com.mutex);
-}
-
-gboolean get_thread_run() {
-	gboolean retval;
-	g_mutex_lock(&com.mutex);
-	retval = com.run_thread;
-	g_mutex_unlock(&com.mutex);
-	return retval;
-}
-
-/* should be called in a threaded function if nothing special has to be done at the end.
- * gdk_threads_add_idle(end_generic, NULL);
- */
-gboolean end_generic(gpointer arg) {
-	stop_processing_thread();
-	update_used_memory();
-	set_cursor_waiting(FALSE);
-	return FALSE;
-}
-
-void on_processes_button_cancel_clicked(GtkButton *button, gpointer user_data) {
-	if (com.thread != NULL)
-		siril_log_color_message("Process aborted by user\n", "red");
-	stop_processing_thread();
-}
-
 /* http://developer.gnome.org/gtk3/3.4/GtkProgressBar.html */
 static void progress_bar_set_percent(double percent) {
 	static GtkProgressBar *pbar = NULL;
@@ -4318,10 +4261,15 @@ void on_processing_activate(GtkMenuItem *menuitem, gpointer user_data) {
 		gtk_widget_set_sensitive(lookup_widget("menu_channel_separation"),
 		FALSE);
 	}
-	if (single_image_is_loaded() || (sequence_is_loaded()))
+	if (single_image_is_loaded() || (sequence_is_loaded())) {
 		gtk_widget_set_sensitive(lookup_widget("menuitem_histo"), TRUE);
-	else
+	} else {
 		gtk_widget_set_sensitive(lookup_widget("menuitem_histo"), FALSE);
+	}
+
+	if ((sequence_is_loaded() && com.seq.type == SEQ_REGULAR) || single_image_is_loaded())
+		gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"), TRUE);
+	else gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"), FALSE);
 
 	if (single_image_is_loaded()
 			&& (!sequence_is_loaded()
@@ -4349,8 +4297,6 @@ void on_processing_activate(GtkMenuItem *menuitem, gpointer user_data) {
 		TRUE);
 		gtk_widget_set_sensitive(lookup_widget("menuitem_medianfilter"),
 		TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"),
-		TRUE);
 	} else {
 		gtk_widget_set_sensitive(lookup_widget("menuitem_resample"), FALSE);
 		gtk_widget_set_sensitive(lookup_widget("menuitem_rotation"), FALSE);
@@ -4367,8 +4313,6 @@ void on_processing_activate(GtkMenuItem *menuitem, gpointer user_data) {
 		gtk_widget_set_sensitive(lookup_widget("menu_wavelet_separation"),
 		FALSE);
 		gtk_widget_set_sensitive(lookup_widget("menuitem_medianfilter"),
-		FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"),
 		FALSE);
 	}
 }
@@ -5583,8 +5527,14 @@ void on_Median_Apply_clicked(GtkButton *button, gpointer user_data) {
 /***************** GUI for Canon Banding Reduction ********************/
 
 void on_menuitem_fixbanding_activate(GtkMenuItem *menuitem, gpointer user_data) {
-	if (single_image_is_loaded())
-		gtk_widget_show(lookup_widget("canon_fixbanding_dialog"));
+	if (sequence_is_loaded()) {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lookup_widget("checkBandingSeq")), TRUE);
+	}
+	else if (single_image_is_loaded()) {
+		// not a processing result
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lookup_widget("checkBandingSeq")), FALSE);
+	}
+	gtk_widget_show(lookup_widget("canon_fixbanding_dialog"));
 }
 
 void on_button_ok_fixbanding_clicked(GtkButton *button, gpointer user_data) {
@@ -5594,7 +5544,8 @@ void on_button_ok_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 void on_button_apply_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 	static GtkRange *range_amount = NULL;
 	static GtkRange *range_invsigma = NULL;
-	static GtkToggleButton *toggle_protect_highlights_banding = NULL, *vertical = NULL;
+	static GtkToggleButton *toggle_protect_highlights_banding = NULL,
+		*vertical = NULL, *seq = NULL;
 	double amount, invsigma;
 	gboolean protect_highlights;
 
@@ -5612,6 +5563,7 @@ void on_button_apply_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 		toggle_protect_highlights_banding = GTK_TOGGLE_BUTTON(
 				lookup_widget("checkbutton_fixbanding"));
 		vertical = GTK_TOGGLE_BUTTON(lookup_widget("checkBandingVertical"));
+		seq = GTK_TOGGLE_BUTTON(lookup_widget("checkBandingSeq"));
 	}
 	amount = gtk_range_get_value(range_amount);
 	invsigma = gtk_range_get_value(range_invsigma);
@@ -5630,7 +5582,12 @@ void on_button_apply_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 	args->sigma = invsigma;
 	args->applyRotation = gtk_toggle_button_get_active(vertical);
 	set_cursor_waiting(TRUE);
-	start_in_new_thread(BandingEngine, args);
+
+	if (gtk_toggle_button_get_active(seq) && sequence_is_loaded()) {
+		apply_banding_to_sequence(args);
+	} else {
+		start_in_new_thread(BandingEngineThreaded, args);
+	}
 }
 
 void on_checkbutton_fixbanding_toggled(GtkToggleButton *togglebutton,

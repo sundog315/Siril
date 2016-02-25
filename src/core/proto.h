@@ -204,7 +204,9 @@ int	verbose_rotate_image(fits *, double, int, int);
 double gauss_cvf(double p);
 int get_wavelet_layers(fits *fit, int Nbr_Plan, int Plan, int Type, int reqlayer);
 gpointer median_filter(gpointer p);
-gpointer BandingEngine(gpointer p);
+void apply_banding_to_sequence(struct banding_data *banding_args);
+gpointer BandingEngineThreaded(gpointer p);
+int BandingEngine(fits *fit, double sigma, double amount, gboolean protect_highlights, gboolean applyRotation);
 gpointer noise(gpointer p);
 
 /****************** sequence.h ******************/

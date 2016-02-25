@@ -25,6 +25,7 @@
 #include <float.h>
 
 #include "core/siril.h"
+#include "core/processing.h"
 #include "gui/callbacks.h"
 #include "io/single_image.h"
 #include "gui/histogram.h"

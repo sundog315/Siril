@@ -32,6 +32,7 @@
 #include "core/siril.h"
 #include "core/command.h"
 #include "core/proto.h"
+#include "core/processing.h"
 #include "io/conversion.h"
 #include "gui/callbacks.h"
 #include "algos/colors.h"
@@ -1060,7 +1061,7 @@ int process_fixbanding(int nb) {
 	args->fit = &gfit;
 
 	set_cursor_waiting(TRUE);
-	start_in_new_thread(BandingEngine, args);
+	start_in_new_thread(BandingEngineThreaded, args);
 	
 	return 0;
 }

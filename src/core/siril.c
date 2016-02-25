@@ -39,6 +39,7 @@
 
 #include "core/siril.h"
 #include "core/proto.h"
+#include "core/processing.h"
 #include "gui/callbacks.h"
 #include "algos/colors.h"
 #include "gui/histogram.h"
@@ -1468,6 +1469,33 @@ gpointer median_filter(gpointer p) {
 	return GINT_TO_POINTER(0);
 }
 
+int banding_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) {
+	char dest[256];
+	struct banding_data *banding_args = (struct banding_data *)args->user;
+	int retval = BandingEngine(fit, banding_args->sigma, banding_args->amount,
+			banding_args->protect_highlights, banding_args->applyRotation);
+	if (retval) return retval;
+
+	snprintf(dest, 255, "unband_%s%05d%s", args->seq->seqname, i, com.ext);
+	return savefits(dest, fit);
+}
+
+void apply_banding_to_sequence(struct banding_data *banding_args) {
+	struct generic_seq_args *args = malloc(sizeof(struct generic_seq_args));
+	args->seq = &com.seq;
+	args->filtering_criterion = seq_filter_included;
+	args->nb_filtered_images = com.seq.selnum;
+	args->prepare_hook = NULL;
+	args->image_hook = banding_image_hook;
+	args->finalize_hook = NULL;
+	args->idle_function = NULL;
+	args->user = banding_args;
+
+	banding_args->fit = NULL;	// not used here
+
+	start_in_new_thread(generic_sequence_worker, args);
+}
+
 // idle function executed at the end of the BandingEngine processing
 gboolean end_BandingEngine(gpointer p) {
 	struct banding_data *args = (struct banding_data *) p;
@@ -1485,58 +1513,68 @@ gboolean end_BandingEngine(gpointer p) {
  * This code come from CanonBandingReduction.js v0.9.1, a script of
  * PixInsight, originally written by Georg Viehoever and
  * distributed under the terms of the GNU General Public License ******/
-gpointer BandingEngine(gpointer p) {
+gpointer BandingEngineThreaded(gpointer p) {
 	struct banding_data *args = (struct banding_data *) p;
+	struct timeval t_start, t_end;
+
+	siril_log_color_message("Canon Banding Reducing: processing...\n", "red");
+	gettimeofday(&t_start, NULL);
+
+	int retval = BandingEngine(args->fit, args->sigma, args->amount, args->protect_highlights, args->applyRotation);
+
+	gettimeofday(&t_end, NULL);
+	show_time(t_start, t_end);
+	gdk_threads_add_idle(end_BandingEngine, args);
+	
+	return GINT_TO_POINTER(retval);
+}
+
+int BandingEngine(fits *fit, double sigma, double amount, gboolean protect_highlights, gboolean applyRotation) {
 	int chan, row, i;
 	WORD *line, *fixline;
 	double minimum = DBL_MAX, globalsigma = 0.0;
 	fits *fiximage;
-	double invsigma = 1.0 / args->sigma;
-	struct timeval t_start, t_end;
+	double invsigma = 1.0 / sigma;
 
 	fiximage = calloc(1, sizeof(fits));
 	if (fiximage == NULL) {
 		fprintf(stderr, "BandingEngine: error allocating data\n");
-		return GINT_TO_POINTER(1);
+		return 1;
 	}
 
-	siril_log_color_message("Canon Banding Reducing: processing...\n", "red");
-	gettimeofday(&t_start, NULL);
-	if (args->applyRotation)
-		cvRotateImage(args->fit, 90, OPENCV_LINEAR, 0);
+	if (applyRotation)
+		cvRotateImage(fit, 90, OPENCV_LINEAR, 0);
 
-	new_fit_image(fiximage, args->fit->rx, args->fit->ry, args->fit->naxes[2]);
+	new_fit_image(fiximage, fit->rx, fit->ry, fit->naxes[2]);
 
-	for (chan = 0; chan < args->fit->naxes[2]; chan++) {
-		imstats *stat = statistics(args->fit, chan, NULL, STATS_MAD);
+	for (chan = 0; chan < fit->naxes[2]; chan++) {
+		imstats *stat = statistics(fit, chan, NULL, STATS_MAD);
 		double background = stat->median;
-		double *rowvalue = calloc(args->fit->ry, sizeof(double));
+		double *rowvalue = calloc(fit->ry, sizeof(double));
 		if (rowvalue == NULL) {
 			fprintf(stderr, "BandingEngine: error allocating data\n");
 			free(stat);
-			gdk_threads_add_idle(end_BandingEngine, args);
-			return GINT_TO_POINTER(1);
+			return 1;
 		}
-		if (args->protect_highlights) {
+		if (protect_highlights) {
 			globalsigma = stat->mad * MAD_NORM;
 		}
-		for (row = 0; row < args->fit->ry; row++) {
-			line = args->fit->pdata[chan] + row * args->fit->rx;
-			WORD *cpyline = calloc(args->fit->rx, sizeof(WORD));
+		for (row = 0; row < fit->ry; row++) {
+			line = fit->pdata[chan] + row * fit->rx;
+			WORD *cpyline = calloc(fit->rx, sizeof(WORD));
 			if (cpyline == NULL) {
 				fprintf(stderr, "BandingEngine: error allocating data\n");
 				free(stat);
 				free(rowvalue);
-				gdk_threads_add_idle(end_BandingEngine, args);
-				return GINT_TO_POINTER(1);
+				return 1;
 			}
-			memcpy(cpyline, line, args->fit->rx * sizeof(WORD));
-			int n = args->fit->rx;
+			memcpy(cpyline, line, fit->rx * sizeof(WORD));
+			int n = fit->rx;
 			quicksort_s(cpyline, n);
-			if (args->protect_highlights) {
+			if (protect_highlights) {
 				WORD reject = round_to_WORD(
 						background + invsigma * globalsigma);
-				for (i = args->fit->rx - 1; i >= 0; i--) {
+				for (i = fit->rx - 1; i >= 0; i--) {
 					if (cpyline[i] < reject)
 						break;
 					n--;
@@ -1548,27 +1586,22 @@ gpointer BandingEngine(gpointer p) {
 			minimum = min(minimum, rowvalue[row]);
 			free(cpyline);
 		}
-		for (row = 0; row < args->fit->ry; row++) {
+		for (row = 0; row < fit->ry; row++) {
 			fixline = fiximage->pdata[chan] + row * fiximage->rx;
-			for (i = 0; i < args->fit->rx; i++)
+			for (i = 0; i < fit->rx; i++)
 				fixline[i] = round_to_WORD(rowvalue[row] - minimum);
 		}
 		free(rowvalue);
 		free(stat);
 	}
-	for (chan = 0; chan < args->fit->naxes[2]; chan++)
-		fmul(fiximage, chan, args->amount);
-	imoper(args->fit, fiximage, OPER_ADD);
+	for (chan = 0; chan < fit->naxes[2]; chan++)
+		fmul(fiximage, chan, amount);
+	imoper(fit, fiximage, OPER_ADD);
 
 	clearfits(fiximage);
-	if (args->applyRotation)
-		cvRotateImage(args->fit, -90, OPENCV_LINEAR, 0);
-
-	gettimeofday(&t_end, NULL);
-	show_time(t_start, t_end);
-	gdk_threads_add_idle(end_BandingEngine, args);
-
-	return GINT_TO_POINTER(0);
+	if (applyRotation)
+		cvRotateImage(fit, -90, OPENCV_LINEAR, 0);
+	return 0;
 }
 
 gboolean end_noise(gpointer p) {

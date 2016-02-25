@@ -1415,3 +1415,4 @@ void on_comboExport_changed(GtkComboBox *box, gpointer user_data) {
 	GtkWidget *gif_options = lookup_widget("boxGifOptions");
 	gtk_widget_set_visible(gif_options, 2 == gtk_combo_box_get_active(box));
 }
+

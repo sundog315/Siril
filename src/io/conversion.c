@@ -35,6 +35,7 @@
 #include <dirent.h>
 #include "core/siril.h"
 #include "core/proto.h"
+#include "core/processing.h"
 #include "io/conversion.h"
 #include "io/films.h"
 #include "io/ser.h"
