@@ -104,6 +104,7 @@ command commande[] = {
 	
 	{"mirrorx", 0, "mirrorx", process_mirrorx},
 	{"mirrory", 0, "mirrory", process_mirrory},
+	{"mult", 1, "mult scalar", process_mult},
 	
 	{"new", 2, "new width height nb_layers", process_new},
 	{"nozero", 1, "nozero level (replaces null values by level)", process_nozero}, /* replaces null values by level */
@@ -284,6 +285,19 @@ int process_imoper(int nb){
 	clearfits(&(wfit[4]));
 	readfits(word[1], &(wfit[4]), NULL);
 	imoper(&gfit, &wfit[4], word[0][1]);
+	adjust_cutoff_from_updated_gfit();
+	redraw(com.cvport, REMAP_ALL);
+	redraw_previews();
+	return 0;
+}
+
+int process_mult(int nb) {
+	float k = atof(word[1]);
+	if (k < 0) {
+		siril_log_message("Coefficient MUST be a positive value\n");
+		return 1;
+	}
+	soper(&gfit, k, OPER_MUL);
 	adjust_cutoff_from_updated_gfit();
 	redraw(com.cvport, REMAP_ALL);
 	redraw_previews();
