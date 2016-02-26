@@ -97,6 +97,7 @@ typedef enum {
 #define USE_FLAT	0x02
 #define USE_OFFSET	0x04
 #define USE_COSME   0x08	/* cosmetic correction */
+#define USE_OPTD    0x10	/* dark optimization */
 
 /* cookies for the file chooser */
 #define OD_NULL 	0

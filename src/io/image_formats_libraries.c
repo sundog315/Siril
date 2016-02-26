@@ -971,14 +971,12 @@ int savegif(const char *filename, fits *fit, int anim, GifFileType **gif, int de
 		WORD *src = fit->pdata[channel];
 		BYTE *dst = rgb[channel];
 		for (y = 0; y < fit->ry; y++) {
-			int desty = fit->ry-y-1;
+			int desty = fit->ry - y - 1;
 			int srcpixel = y * fit->rx;
 			int dstpixel = desty * fit->rx;
 			for (x = 0; x < fit->rx; x++, srcpixel++, dstpixel++) {
 				// linear scaling
-				if (src[srcpixel] - lo < 0)
-					tmp_pixel_value = 0;
-				else 	tmp_pixel_value = src[srcpixel] - lo;
+				tmp_pixel_value = round_to_BYTE(src[srcpixel] - lo);
 				dst[dstpixel] = map[tmp_pixel_value];
 			}
 		}
