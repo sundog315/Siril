@@ -10549,7 +10549,7 @@ A first computation pass will be done on all images before exporting, it may tak
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">2</property>
+                        <property name="top_attach">3</property>
                       </packing>
                     </child>
                     <child>
@@ -10564,7 +10564,7 @@ All images in the sequence will be divided by the master flat image (each pixel 
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
-                        <property name="top_attach">2</property>
+                        <property name="top_attach">3</property>
                       </packing>
                     </child>
                     <child>
@@ -10580,7 +10580,7 @@ All images in the sequence will be divided by the master flat image (each pixel 
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
-                        <property name="top_attach">2</property>
+                        <property name="top_attach">3</property>
                       </packing>
                     </child>
                     <child>
@@ -10696,7 +10696,7 @@ After preprocessing, check that no overflow have been detected in the console ou
                       </object>
                       <packing>
                         <property name="left_attach">2</property>
-                        <property name="top_attach">3</property>
+                        <property name="top_attach">4</property>
                       </packing>
                     </child>
                     <child>
@@ -10716,9 +10716,29 @@ If this occurs gives overflows you must choose manually.</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
-                        <property name="top_attach">3</property>
+                        <property name="top_attach">4</property>
                         <property name="width">2</property>
                       </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="checkDarkOptimize">
+                        <property name="label" translatable="yes">Dark optimization</property>
+                        <property name="visible">True</property>
+                        <property name="sensitive">False</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="halign">end</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">2</property>
+                        <property name="width">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <placeholder/>
                     </child>
                   </object>
                   <packing>

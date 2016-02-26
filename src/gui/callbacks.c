@@ -1758,6 +1758,8 @@ void set_prepro_button_sensitiveness() {
 							|| gtk_toggle_button_get_active(uflat)));
 	gtk_widget_set_sensitive(lookup_widget("grid24"),
 			gtk_toggle_button_get_active(udark));
+	gtk_widget_set_sensitive(lookup_widget("checkDarkOptimize"),
+			gtk_toggle_button_get_active(udark));
 }
 
 void on_cosmEnabledCheck_toggled(GtkToggleButton *button, gpointer user_data) {
@@ -3130,6 +3132,19 @@ void on_prepro_button_clicked(GtkButton *button, gpointer user_data) {
 				}
 			}
 		}
+		// if dark optimization selected
+		tbutton = GTK_TOGGLE_BUTTON(
+				gtk_builder_get_object(builder, "checkDarkOptimize"));
+		if (gtk_toggle_button_get_active(tbutton) == TRUE) {
+			com.preprostatus |= USE_OPTD;
+		}
+
+		// if cosmetic correction selected
+		tbutton = GTK_TOGGLE_BUTTON(
+				gtk_builder_get_object(builder, "cosmEnabledCheck"));
+		if (gtk_toggle_button_get_active(tbutton) == TRUE) {
+			com.preprostatus |= USE_COSME;
+		}
 	}
 
 	// if flat selected
@@ -3203,14 +3218,6 @@ void on_prepro_button_clicked(GtkButton *button, gpointer user_data) {
 			}
 		}
 	}
-
-	// if cosmetic correction selected
-	tbutton = GTK_TOGGLE_BUTTON(
-			gtk_builder_get_object(builder, "cosmEnabledCheck"));
-	if (gtk_toggle_button_get_active(tbutton) == TRUE) {
-		com.preprostatus |= USE_COSME;
-	}
-
 
 	if (com.preprostatus == 0)
 		return;
