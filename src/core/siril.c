@@ -878,7 +878,6 @@ static double evaluateEntropyOfCalibratedImage(fits *fit, fits *dark, double k) 
 
 	clearfits(&wfit[0]);
 	clearfits(&wfit[1]);
-
 	return e;
 }
 
@@ -931,7 +930,7 @@ int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float level) {
 		if (com.preprostatus & USE_OPTD) {
 			double k = 1.0;
 			double lo = 0.1;
-			double up = 2.0;
+			double up = 1.0;
 			double step = 0.1;
 			double k_guess;
 
