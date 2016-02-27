@@ -10703,6 +10703,7 @@ After preprocessing, check that no overflow have been detected in the console ou
                       <object class="GtkCheckButton" id="checkbutton_auto_evaluate">
                         <property name="label" translatable="yes">Auto evaluate normalisation value</property>
                         <property name="visible">True</property>
+                        <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">If this box is checked, Siril will auto-evaluate the normalisation value.
@@ -10727,8 +10728,9 @@ If this occurs gives overflows you must choose manually.</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">Dark subtraction can be optionally optimized so that the entropy of the resulting picture (light frame minus dark frame) is minimized by applying a coefficient between 0 and 1 to the dark frame.
-This option is useful when dark frames have not been taken in optimal conditions.</property>
+                        <property name="tooltip_text" translatable="yes">Dark subtraction can be optionally optimized so that the entropy of the resulting picture (light frame minus dark frame) is minimized by applying a coefficient between 0 and 1 to the dark frame. This option is useful when dark frames have not been taken in optimal conditions.
+
+WARNING: Do not apply Dark optimization on master-dark if master-bias was not subtracted.</property>
                         <property name="halign">end</property>
                         <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>

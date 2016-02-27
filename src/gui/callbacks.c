@@ -1742,7 +1742,8 @@ void gtk_filter_add(GtkFileChooser *file_chooser, const gchar *title,
 }
 
 void set_prepro_button_sensitiveness() {
-	static GtkToggleButton *udark = NULL, *uoffset = NULL, *uflat = NULL;
+	static GtkToggleButton *udark = NULL, *uoffset = NULL, *uflat = NULL,
+			*checkAutoEvaluate = NULL;
 	if (udark == NULL) {
 		udark = GTK_TOGGLE_BUTTON(
 				gtk_builder_get_object(builder, "usedark_button"));
@@ -1750,7 +1751,10 @@ void set_prepro_button_sensitiveness() {
 				gtk_builder_get_object(builder, "useoffset_button"));
 		uflat = GTK_TOGGLE_BUTTON(
 				gtk_builder_get_object(builder, "useflat_button"));
+		checkAutoEvaluate = GTK_TOGGLE_BUTTON(
+				gtk_builder_get_object(builder, "checkbutton_auto_evaluate"));
 	}
+
 	gtk_widget_set_sensitive(lookup_widget("prepro_button"),
 			(sequence_is_loaded() || single_image_is_loaded())
 					&& (gtk_toggle_button_get_active(udark)
@@ -1760,6 +1764,11 @@ void set_prepro_button_sensitiveness() {
 			gtk_toggle_button_get_active(udark));
 	gtk_widget_set_sensitive(lookup_widget("checkDarkOptimize"),
 			gtk_toggle_button_get_active(udark));
+	gtk_widget_set_sensitive(lookup_widget("checkbutton_auto_evaluate"),
+			gtk_toggle_button_get_active(uflat));
+	gtk_widget_set_sensitive(lookup_widget("entry_flat_norm"),
+			gtk_toggle_button_get_active(uflat)
+					&& !gtk_toggle_button_get_active(checkAutoEvaluate));
 }
 
 void on_cosmEnabledCheck_toggled(GtkToggleButton *button, gpointer user_data) {
