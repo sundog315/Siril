@@ -863,28 +863,37 @@ int lrgb(fits *l, fits *r, fits *g, fits *b, fits *lrgb) {
  * As images are usually digitized and stored with a very limited precision (e.g. 8 or 16 bits per value)
  * this is normally true.
  */
-/* XXX: not yet parallelizable because of wfit */
 static double evaluateEntropyOfCalibratedImage(fits *fit, fits *dark, double k) {
 	double e;
+	fits *dark_tmp;
+	fits *fit_tmp;
 
-	copyfits(dark, &wfit[0], CP_ALLOC | CP_EXTRACT, 0);
-	copyfits(fit, &wfit[1], CP_ALLOC | CP_EXTRACT, 0);
+	dark_tmp = calloc(1, sizeof(fits));
+	fit_tmp = calloc(1, sizeof(fits));
 
-	soper(&wfit[0], k, OPER_MUL);
-	imoper(&wfit[1], &wfit[0], OPER_SUB);
+	new_fit_image(dark_tmp, dark->rx, dark->ry, 1);
+	new_fit_image(fit_tmp, fit->rx, fit->ry, 1);
+
+	copyfits(dark, dark_tmp, CP_ALLOC | CP_EXTRACT, 0);
+	copyfits(fit, fit_tmp, CP_ALLOC | CP_EXTRACT, 0);
+
+	soper(dark_tmp, k, OPER_MUL);
+	imoper(fit_tmp, dark_tmp, OPER_SUB);
 
 	/* TODO: evaluate on several channels ? */
-	e = entropy(&wfit[1], RLAYER, NULL, NULL);
+	e = entropy(fit_tmp, RLAYER, NULL, NULL);
+	printf("e=%lf, k=%lf\n", e, k);
 
-	clearfits(&wfit[0]);
-	clearfits(&wfit[1]);
+	clearfits(dark_tmp);
+	clearfits(fit_tmp);
+
 	return e;
 }
 
 static double findAGuess(fits *fit, fits *dark, double a, double b, double step) {
 	double k, e, e_min = DBL_MAX, k_min = 1.0;
 
-	for (k = a; k <= b; k += step) {
+	for (k = b; k >= a; k -= step) {
 		e = evaluateEntropyOfCalibratedImage(fit, dark, k);
 		if (e < e_min){
 			e_min = e;
@@ -928,22 +937,35 @@ int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float level) {
 	if (com.preprostatus & USE_DARK) {
 		/* If optimization checked */
 		if (com.preprostatus & USE_OPTD) {
-			double k = 1.0;
+			double k;
 			double lo = 0.1;
 			double up = 1.0;
 			double step = 0.1;
 			double k_guess;
+			fits *dark_tmp;
 
 			/* Calculation of a guess for coefficient k */
 			k_guess = findAGuess(brut, dark, lo, up, step);
 			/* Minimization of entropy to find better k */
-			k = goldenSectionSearch(brut, dark, k_guess - step, k_guess, k_guess + step, 1E-4);
+			k = goldenSectionSearch(brut, dark, k_guess - step, k_guess, k_guess + step, 1E-3);
 
 			siril_log_message("Dark optimization: %.3lf\n", k);
+			/* save original dark in dark_tmp */
+			dark_tmp = calloc(1, sizeof(fits));
+			new_fit_image(dark_tmp, dark->rx, dark->ry, 1);
+			copyfits(dark, dark_tmp, CP_ALLOC | CP_EXTRACT, 0);
 			/* Multiply coefficient to master-dark */
-			soper(dark, k, OPER_MUL);
+			if (com.preprostatus & USE_OFFSET)
+				imoper(dark_tmp, offset, OPER_SUB);
+			soper(dark_tmp, k, OPER_MUL);
+			if (com.preprostatus & USE_OFFSET)
+				imoper(brut, offset, OPER_SUB);
+			imoper(brut, dark_tmp, OPER_SUB);
+
+			clearfits(dark_tmp);
 		}
-		imoper(brut, dark, OPER_SUB);
+		else
+			imoper(brut, dark, OPER_SUB);
 	}
 
 	if (com.preprostatus & USE_FLAT) {

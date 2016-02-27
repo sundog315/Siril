@@ -239,7 +239,7 @@ imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
 		gsl_stats_ushort_minmax(&min, &max, data, 1, count);
 
 	/* Calculation of Bidweight Midvariance */
-	if (option & (STATS_BWMV | STATS_MAD))
+	if ((option & STATS_BWMV) && (option & STATS_MAD))
 		bwmv = siril_stats_ushort_bwmv(data, count, mad, median);
 
 	/* Calculation of IKSS. Used for stacking */
