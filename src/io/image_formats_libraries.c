@@ -902,7 +902,7 @@ int open_raw_files(const char *name, fits *fit, int type) {
 /********************* GIF EXPORT *********************/
 #ifdef HAVE_LIBGIF
 
-/* save a fit as gif.
+/* save a grey fit as gif.
  * If anim is true, if gif is nul, it is set to the created GIF handle. If it's
  * not nul it's used as is and a new image is added to the GIF.
  * If an error occurs, everything is freed and the file may be closed, in that
@@ -910,14 +910,21 @@ int open_raw_files(const char *name, fits *fit, int type) {
  * No check is done on filename actually corresponding to gif.
  * if anim, gif must be finalized with gifclose(gif).
  * if positive, delay and loop_count are used for animation. Delay is in centiseconds.
+ *
+ * palette code inspired by https://github.com/schani/animatedgif/blob/master/writegif.c
  */
 int savegif(const char *filename, fits *fit, int anim, GifFileType **gif, int delay, int loop_count) {
 	/* convert the fits to RGB 8-bit buffers, using the min/max scale */
-	BYTE *rgb[3];
 	BYTE map[USHRT_MAX + 1];
+	GifByteType *gif_buffer = NULL;
 	WORD tmp_pixel_value, hi, lo;
-	int i, nb_pixels, channel;
+	int i, nb_pixels;
 	float pente;
+
+	if (fit->naxes[2] != 1) {
+		siril_log_message("Saving as gif is not supported for colour images because GIF can only have 256 colours.\n");
+		return 1;
+	}
 
 	if (anim && gif == NULL) {
 		siril_log_message("gif should not be NULL in anim mode\n");
@@ -925,22 +932,11 @@ int savegif(const char *filename, fits *fit, int anim, GifFileType **gif, int de
 	}
 
 	nb_pixels = fit->rx * fit->ry;
-	rgb[0] = malloc(nb_pixels);
-	if (rgb[0] == NULL) {
+	/*  gif_buffer contains values of the palette, which in our case of
+	 *  linear grey palette are the same as the pixel values */
+	gif_buffer = malloc(nb_pixels);
+	if (!gif_buffer) {
 		siril_log_message("Failed to allocate memory required, aborted.\n");
-		if (anim) *gif = NULL;
-		return 1;
-	}
-	rgb[1] = malloc(nb_pixels);
-	if (rgb[1] == NULL) {
-		siril_log_message("Failed to allocate memory required, aborted.\n");
-		if (anim) *gif = NULL;
-		return 1;
-	}
-	rgb[2] = malloc(nb_pixels);
-	if (rgb[2] == NULL) {
-		siril_log_message("Failed to allocate memory required, aborted.\n");
-		if (anim) *gif = NULL;
 		return 1;
 	}
 
@@ -965,65 +961,53 @@ int savegif(const char *filename, fits *fit, int anim, GifFileType **gif, int de
 		for (++i; i <= USHRT_MAX; i++)
 			map[i] = UCHAR_MAX;
 	}
+
 	/* doing the WORD to BYTE conversion, bottom-up */
-	for (channel = 0; channel < 3; channel++) {
-		int x, y;
-		WORD *src = fit->pdata[channel];
-		BYTE *dst = rgb[channel];
-		for (y = 0; y < fit->ry; y++) {
-			int desty = fit->ry - y - 1;
-			int srcpixel = y * fit->rx;
-			int dstpixel = desty * fit->rx;
-			for (x = 0; x < fit->rx; x++, srcpixel++, dstpixel++) {
-				// linear scaling
-				tmp_pixel_value = round_to_BYTE(src[srcpixel] - lo);
-				dst[dstpixel] = map[tmp_pixel_value];
-			}
+	int x, y;
+	WORD *src = fit->data;
+	BYTE *dst = gif_buffer;
+	for (y = 0; y < fit->ry; y++) {
+		int desty = fit->ry - y - 1;
+		int srcpixel = y * fit->rx;
+		int dstpixel = desty * fit->rx;
+		for (x = 0; x < fit->rx; x++, srcpixel++, dstpixel++) {
+			// linear scaling
+			tmp_pixel_value = src[srcpixel] - lo;
+			dst[dstpixel] = map[tmp_pixel_value];
 		}
 	}
 
 	/* transform to GIF data */
-	GifByteType *OutputBuffer = NULL;
 	ColorMapObject *OutputColorMap = NULL;
 	int ColorMapSize = 256;
 
-	if ((OutputColorMap = GifMakeMapObject(ColorMapSize, NULL)) == NULL ||
-			(OutputBuffer = malloc(nb_pixels * sizeof(GifByteType))) == NULL) {
-		free(rgb[0]); free(rgb[1]); free(rgb[2]);
+	GifColorType gif_colors[256];	// the palette (a.k.a. color map)
+	for (i = 0; i < 256; i++) {
+		gif_colors[i].Red = gif_colors[i].Green = gif_colors[i].Blue = i;
+	}
+
+	if ((OutputColorMap = GifMakeMapObject(ColorMapSize, gif_colors)) == NULL) {
+		free(gif_buffer);
 		siril_log_message("Failed to allocate memory required, aborted.\n");
 		if (anim) *gif = NULL;
 		return 1;
 	}
 
-	if (GifQuantizeBuffer(fit->rx, fit->ry, &ColorMapSize,
-				rgb[0], rgb[1], rgb[2],
-				OutputBuffer, OutputColorMap->Colors) == GIF_ERROR) {
-		free(rgb[0]); free(rgb[1]); free(rgb[2]); free(OutputBuffer);
-		siril_log_message("Failed to convert data into GIF data format\n");
-		if (anim) *gif = NULL;
-		GifFreeMapObject(OutputColorMap);
-		return 1;
-	}
-
-	for (channel = 0; channel < 3; channel++)
-		free(rgb[channel]);
-
 	/*********** code from SaveGif function **********/
 	int error;
 	GifFileType *GifFile;
-	GifByteType *Ptr = OutputBuffer;
 	if (!anim || *gif == NULL) {
 		if ((GifFile = EGifOpenFileName(filename, FALSE, &error)) == NULL) {
 			siril_log_message("Error opening GIF file: %s\n", GifErrorString(error));
-			free(OutputBuffer);
+			free(gif_buffer);
 			GifFreeMapObject(OutputColorMap);
 			return 1;
 		}
 
-		if (EGifPutScreenDesc(GifFile, fit->rx, fit->ry, 8, 0, OutputColorMap) == GIF_ERROR) {
+		if (EGifPutScreenDesc(GifFile, fit->rx, fit->ry, 256, 0, OutputColorMap) == GIF_ERROR) {
 			siril_log_message("Error describing GIF file: %s\n", GifErrorString(error));
 			EGifCloseFile(GifFile, NULL);
-			free(OutputBuffer);
+			free(gif_buffer);
 			GifFreeMapObject(OutputColorMap);
 			return 1;
 		}
@@ -1065,16 +1049,17 @@ int savegif(const char *filename, fits *fit, int anim, GifFileType **gif, int de
 	if (EGifPutImageDesc(GifFile, 0, 0, fit->rx, fit->ry, FALSE, OutputColorMap) == GIF_ERROR) {
 		siril_log_message("Error describing GIF file: %s\n", GifErrorString(error));
 		EGifCloseFile(GifFile, NULL);
-		free(OutputBuffer);
+		free(gif_buffer);
 		if (anim) *gif = NULL;
 		GifFreeMapObject(OutputColorMap);
 		return 1;
 	}
 
+	GifByteType *Ptr = gif_buffer;
 	for (i = 0; i < fit->ry; i++) {
 		if (EGifPutLine(GifFile, Ptr, fit->rx) == GIF_ERROR) {
 			EGifCloseFile(GifFile, NULL);
-			free(OutputBuffer);
+			free(gif_buffer);
 			if (anim) *gif = NULL;
 			GifFreeMapObject(OutputColorMap);
 			return 1;
@@ -1083,7 +1068,7 @@ int savegif(const char *filename, fits *fit, int anim, GifFileType **gif, int de
 	}
 	/* end of for each image */
 
-	free(OutputBuffer);
+	free(gif_buffer);
 	GifFreeMapObject(OutputColorMap);
 
 	if (!anim) {
