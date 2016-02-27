@@ -882,7 +882,7 @@ static double evaluateEntropyOfCalibratedImage(fits *fit, fits *dark, double k) 
 
 	/* TODO: evaluate on several channels ? */
 	e = entropy(fit_tmp, RLAYER, NULL, NULL);
-	printf("e=%lf, k=%lf\n", e, k);
+	//printf("e=%lf, k=%lf\n", e, k);
 
 	clearfits(dark_tmp);
 	clearfits(fit_tmp);
