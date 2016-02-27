@@ -932,41 +932,14 @@ static double goldenSectionSearch(fits *brut, fits *dark, double a, double b, do
 	}
 }
 
-int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float level) {
+static int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float level) {
 
-	if (com.preprostatus & USE_DARK) {
-		/* If optimization checked */
-		if (com.preprostatus & USE_OPTD) {
-			double k;
-			double lo = 0.1;
-			double up = 1.0;
-			double step = 0.1;
-			double k_guess;
-			fits *dark_tmp;
+	if (com.preprostatus & USE_OFFSET)
+		imoper(brut, offset, OPER_SUB);
 
-			/* Calculation of a guess for coefficient k */
-			k_guess = findAGuess(brut, dark, lo, up, step);
-			/* Minimization of entropy to find better k */
-			k = goldenSectionSearch(brut, dark, k_guess - step, k_guess, k_guess + step, 1E-3);
-
-			siril_log_message("Dark optimization: %.3lf\n", k);
-			/* save original dark in dark_tmp */
-			dark_tmp = calloc(1, sizeof(fits));
-			new_fit_image(dark_tmp, dark->rx, dark->ry, 1);
-			copyfits(dark, dark_tmp, CP_ALLOC | CP_EXTRACT, 0);
-			/* Multiply coefficient to master-dark */
-			if (com.preprostatus & USE_OFFSET)
-				imoper(dark_tmp, offset, OPER_SUB);
-			soper(dark_tmp, k, OPER_MUL);
-			if (com.preprostatus & USE_OFFSET)
-				imoper(brut, offset, OPER_SUB);
-			imoper(brut, dark_tmp, OPER_SUB);
-
-			clearfits(dark_tmp);
-		}
-		else
-			imoper(brut, dark, OPER_SUB);
-	}
+	/* if dark optimization, the master-dark has already been subtracted */
+	if ((com.preprostatus & USE_DARK) && !(com.preprostatus & USE_DARK))
+		imoper(brut, dark, OPER_SUB);
 
 	if (com.preprostatus & USE_FLAT) {
 		if (fdiv(brut, flat, level) > 0)
@@ -974,6 +947,34 @@ int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float level) {
 					"Overflow detected, change level value in settings: %0.2lf is too high.\n",
 					level);
 	}
+
+	return 0;
+}
+
+static int darkOptimization(fits *brut, fits *dark, fits *offset) {
+	double k;
+	double lo = 0.1;
+	double up = 1.0;
+	double step = 0.1;
+	double k_guess;
+
+	fits *dark_tmp = calloc(1, sizeof(fits));
+	new_fit_image(dark_tmp, dark->rx, dark->ry, 1);
+	copyfits(dark, dark_tmp, CP_ALLOC | CP_EXTRACT, 0);
+
+	/* Calculation of a guess for coefficient k */
+	k_guess = findAGuess(brut, dark_tmp, lo, up, step);
+	/* Minimization of entropy to find better k */
+	k = goldenSectionSearch(brut, dark_tmp, k_guess - step, k_guess, k_guess + step, 1E-3);
+
+	siril_log_message("Dark optimization: %.3lf\n", k);
+	/* Multiply coefficient to master-dark */
+	if (com.preprostatus & USE_OFFSET)
+		imoper(dark_tmp, offset, OPER_SUB);
+	soper(dark_tmp, k, OPER_MUL);
+	imoper(brut, dark_tmp, OPER_SUB);
+
+	clearfits(dark_tmp);
 
 	return 0;
 }
@@ -996,11 +997,6 @@ gpointer seqpreprocess(gpointer p) {
 	} else
 		return GINT_TO_POINTER(1);
 
-	if ((com.preprostatus & USE_OFFSET) && (com.preprostatus & USE_FLAT)) {
-		set_progress_bar_data("Substracting offset to flat...", PROGRESS_NONE);
-		imoper(flat, offset, OPER_SUB);
-	}
-
 	if (com.preprostatus & USE_FLAT) {
 		if (args->autolevel) {
 			/* TODO: evaluate the layer to apply but generally RLAYER is a good choice.
@@ -1017,6 +1013,9 @@ gpointer seqpreprocess(gpointer p) {
 		snprintf(msg, 255, "Pre-processing image %s", com.uniq->filename);
 		msg[255] = '\0';
 		set_progress_bar_data(msg, 0.5);
+
+		if ((com.preprostatus & USE_OPTD) && (com.preprostatus & USE_DARK))
+			darkOptimization(com.uniq->fit, dark, offset);
 
 		preprocess(com.uniq->fit, offset, dark, flat, args->normalisation);
 
@@ -1057,6 +1056,7 @@ gpointer seqpreprocess(gpointer p) {
 		}
 
 		fits *fit = calloc(1, sizeof(fits));
+
 		for (i = 0; i < com.seq.number; i++) {
 			if (!get_thread_run())
 				break;
@@ -1080,6 +1080,9 @@ gpointer seqpreprocess(gpointer p) {
 				gdk_threads_add_idle(end_sequence_prepro, args);
 				return GINT_TO_POINTER(1);
 			}
+			if ((com.preprostatus & USE_OPTD) && (com.preprostatus & USE_DARK))
+				darkOptimization(fit, dark, offset);
+
 			preprocess(fit, offset, dark, flat, args->normalisation);
 
 			if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK))
