@@ -401,6 +401,8 @@ struct ffit {
 	/* data obtained from FITS or RAW files */
 	double focal_length, iso_speed, exposure, aperture, ccd_temp;
 
+	double bgnoise;		// 3rd order estimate of noise in image background level
+
 	/* data used in the Fourrier space */
 	double dft_norm[3];			// Normalization value
 	char dft_type[FLEN_VALUE];		// spectrum, phase

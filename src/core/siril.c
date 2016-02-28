@@ -858,13 +858,8 @@ int lrgb(fits *l, fits *r, fits *g, fits *b, fits *lrgb) {
 	return 0;
 }
 
-/* The entropy is only a meaningful measure for the information content of a real image
- * if the number of used elements of the alphabet is much smaller than the number of pixels.
- * As images are usually digitized and stored with a very limited precision (e.g. 8 or 16 bits per value)
- * this is normally true.
- */
-static double evaluateEntropyOfCalibratedImage(fits *fit, fits *dark, double k) {
-	double e;
+static double evaluateNoiseOfCalibratedImage(fits *fit, fits *dark, double k) {
+	double noise;
 	fits *dark_tmp;
 	fits *fit_tmp;
 
@@ -880,56 +875,39 @@ static double evaluateEntropyOfCalibratedImage(fits *fit, fits *dark, double k) 
 	soper(dark_tmp, k, OPER_MUL);
 	imoper(fit_tmp, dark_tmp, OPER_SUB);
 
-	/* TODO: evaluate on several channels ? */
-	e = entropy(fit_tmp, RLAYER, NULL, NULL);
-	//printf("e=%lf, k=%lf\n", e, k);
+	computeRawFitsStats(fit_tmp);
+	noise = fit_tmp->bgnoise;
+	//printf("noise=%lf, k=%lf\n", noise, k);
 
 	clearfits(dark_tmp);
 	clearfits(fit_tmp);
 
-	return e;
+	return noise;
 }
 
-static double findAGuess(fits *fit, fits *dark, double a, double b, double step) {
-	double k, e, e_min = DBL_MAX, k_min = 1.0;
+#define GR ((sqrt(5) - 1) / 2)
 
-	for (k = b; k >= a; k -= step) {
-		e = evaluateEntropyOfCalibratedImage(fit, dark, k);
-		if (e < e_min){
-			e_min = e;
-			k_min = k;
+static double goldenSectionSearch(fits *brut, fits *dark, double a, double b,
+		double tol) {
+	double c, d;
+	double fc, fd;
+
+	c = b - GR * (b - a);
+	d = a + GR * (b - a);
+	do {
+		fc = evaluateNoiseOfCalibratedImage(brut, dark, c);
+		fd = evaluateNoiseOfCalibratedImage(brut, dark, d);
+		if (fc < fd) {
+			b = d;
+			d = c;
+			c = b - GR * (b - a);
+		} else {
+			a = c;
+			c = d;
+			d = a + GR * (b - a);
 		}
-	}
-
-	return k_min;
-}
-
-#define PHI ((1 + sqrt(5)) / 2)
-#define RESPHI (2 - PHI)
-
-static double goldenSectionSearch(fits *brut, fits *dark, double a, double b, double c, double tau) {
-	double k;
-
-	if (c - b > b - a)
-		k = b + RESPHI * (c - b);
-	else
-		k = b - RESPHI * (b - a);
-	if (fabs(c - a) < tau * (fabs(b) + fabs(k)))
-		return (c + a) / 2;
-	//assert(evaluateEntropyOfCalibratedImage(brut, dark, k) != evaluateEntropyOfCalibratedImage(brut, dark, b));
-
-	if (evaluateEntropyOfCalibratedImage(brut, dark, k)
-			< evaluateEntropyOfCalibratedImage(brut, dark, b)) {
-		if (c - b > b - a)
-			return goldenSectionSearch(brut, dark, b, k, c, tau);
-		else
-			return goldenSectionSearch(brut, dark, a, k, b, tau);
-	} else {
-		if (c - b > b - a)
-			return goldenSectionSearch(brut, dark, a, b, k, tau);
-		else
-			return goldenSectionSearch(brut, dark, k, b, c, tau);
-	}
+	} while (fabs(c - d) > tol);
+	return ((b + a) / 2);
 }
 
 static int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float level) {
@@ -953,19 +931,15 @@ static int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float le
 
 static int darkOptimization(fits *brut, fits *dark, fits *offset) {
 	double k;
-	double lo = 0.1;
-	double up = 1.0;
-	double step = 0.1;
-	double k_guess;
+	double lo = 0.0;
+	double up = 1.5;
 
 	fits *dark_tmp = calloc(1, sizeof(fits));
 	new_fit_image(dark_tmp, dark->rx, dark->ry, 1);
 	copyfits(dark, dark_tmp, CP_ALLOC | CP_EXTRACT, 0);
 
-	/* Calculation of a guess for coefficient k */
-	k_guess = findAGuess(brut, dark_tmp, lo, up, step);
 	/* Minimization of entropy to find better k */
-	k = goldenSectionSearch(brut, dark_tmp, k_guess - step, k_guess, k_guess + step, 1E-3);
+	k = goldenSectionSearch(brut, dark_tmp, lo, up, 1E-3);
 
 	siril_log_message("Dark optimization: %.3lf\n", k);
 	/* Multiply coefficient to master-dark */

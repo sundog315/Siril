@@ -39,6 +39,22 @@ static char *BinY[] = { "YBINNING", "BINY", NULL };
 static char *Focal[] = { "FOCAL", "FOCALLEN", NULL };
 static char *Exposure[] = { "EXPTIME", "EXPOSURE", NULL };
 
+int computeRawFitsStats(fits *fit) {
+	int status = 0;
+	double noise1, noise3, mean, sigma;
+	WORD minvalue, maxvalue;
+	long ngoodpix;
+
+	fits_img_stats_ushort(fit->data, fit->rx, fit->ry, 0, 0, &ngoodpix,
+			&minvalue, &maxvalue, &mean, &sigma, &noise1, &noise3, &status);
+	/* TODO: put all values in fit structure */
+//	printf("Background noise: %.3lf\n", noise3);
+	/* noise1 gives "bizarre" resuts */
+	fit->bgnoise = noise3;
+
+	return status;
+}
+
 // return 0 on success, fills realname if not NULL with the opened file's name
 int readfits(const char *filename, fits *fit, char *realname) {
 	int status;
@@ -228,6 +244,8 @@ int readfits(const char *filename, fits *fit, char *realname) {
 
 	if (gtk_widget_get_visible(lookup_widget("data_dialog")))// update data if already shown
 		show_FITS_header(fit);
+
+	computeRawFitsStats(fit);
 
 	status = 0;
 	fits_close_file(fit->fptr, &status);

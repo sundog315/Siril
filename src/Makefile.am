@@ -25,6 +25,7 @@ siril_SOURCES = \
 	algos/Def_Math.h algos/Def_Wavelet.h algos/Def_Mem.h \
 	algos/PSF.c algos/PSF.h algos/star_finder.c algos/star_finder.h \
 	algos/cosmetic_correction.c algos/cosmetic_correction.h \
+	algos/quantize.c \
 	compositing/compositing.c compositing/compositing.h compositing/filters.c compositing/filters.h
 	
 siril_LDADD = $(GTK_LIBS) $(LIBRAW_LIBS) $(LIBTIFF_LIBS) $(LIBPNG_LIBS) $(FFTW_LIBS) $(CFITSIO_LIBS) $(GSL_LIBS) $(FFMS2_LIBS) $(LIBCONFIGXX_LIBS)

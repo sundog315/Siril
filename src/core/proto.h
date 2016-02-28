@@ -16,6 +16,7 @@
 #endif
 
 /****************** image_format_fits.h ******************/
+int computeRawFitsStats(fits *fit);
 int	readfits(const char *filename, fits *fit, char *realname);
 void	read_fits_header(fits *fit);
 char*	list_header(fits *fit);
@@ -131,6 +132,12 @@ char*	remove_ext_from_filename(const char *basename);
 char*	replace_spaces_from_filename(const char *filename);
 char*	str_append(char** data, const char* newdata);
 char*	format_basename(char *root);
+
+/****************** quantize.h ***************/
+int fits_img_stats_ushort(WORD *array, long nx, long ny, int nullcheck,
+		WORD nullvalue, long *ngoodpix, WORD *minvalue, WORD *maxvalue,
+		double *mean, double *sigma, double *noise1, double *noise3,
+		int *status);
 
 /****************** siril.h ******************/
 /* crop sequence data from GUI */
