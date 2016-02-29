@@ -39,6 +39,17 @@ static char *BinY[] = { "YBINNING", "BINY", NULL };
 static char *Focal[] = { "FOCAL", "FOCALLEN", NULL };
 static char *Exposure[] = { "EXPTIME", "EXPOSURE", NULL };
 
+#define __tryToFindKeywords(fit, type, keyword, value) \
+{ \
+	int __iter__ = 0; \
+	int __status__; \
+	do { \
+		__status__ = 0; \
+		fits_read_key(fit->fptr, type, keyword[__iter__], value, NULL, &__status__); \
+		__iter__++; \
+	} while ((keyword[__iter__]) && (__status__ > 0)); \
+}
+
 int computeRawFitsStats(fits *fit, int layer) {
 	int status = 0;
 	double noise1, noise3, mean, sigma;
@@ -255,58 +266,14 @@ int readfits(const char *filename, fits *fit, char *realname) {
 	return 0;
 }
 
-static void tryToFindKeywordsFloat(fits *fit, char **keyword, float *value) {
-	int i = 0;
-	int status;
-
-	do {
-		status = 0;
-		fits_read_key(fit->fptr, TFLOAT, keyword[i], value, NULL, &status);
-		i++;
-	} while (keyword[i] && status);
-}
-
-static void tryToFindKeywordsDouble(fits *fit, char **keyword, double *value) {
-	int i = 0;
-	int status;
-
-	do {
-		status = 0;
-		fits_read_key(fit->fptr, TDOUBLE, keyword[i], value, NULL, &status);
-		i++;
-	} while (keyword[i] && status);
-}
-
-static void tryToFindKeywordsUint(fits *fit, char **keyword, unsigned int *value) {
-	int i = 0;
-	int status;
-
-	do {
-		status = 0;
-		fits_read_key(fit->fptr, TUINT, keyword[i], value, NULL, &status);
-		i++;
-	} while (keyword[i] && status);
-}
-
-static void tryToFindKeywordsUshort(fits *fit, char **keyword, unsigned short *value) {
-	int i = 0;
-	int status;
-
-	do {
-		status = 0;
-		fits_read_key(fit->fptr, TUSHORT, keyword[i], value, NULL, &status);
-		i++;
-	} while (keyword[i] && status);
-}
-
 /* reading the FITS header to get useful information */
 void read_fits_header(fits *fit) {
 	/* about the status argument: http://heasarc.gsfc.nasa.gov/fitsio/c/c_user/node28.html */
 	int status = 0;
 	int zero;
 
-	tryToFindKeywordsUshort(fit, MIPSHI, &fit->hi);
-	tryToFindKeywordsUshort(fit, MIPSLO, &fit->lo);
+	__tryToFindKeywords(fit, TUSHORT, MIPSHI, &fit->hi);
+	__tryToFindKeywords(fit, TUSHORT, MIPSLO, &fit->lo);
 
 	status = 0;
 	fits_read_key(fit->fptr, TINT, "BSCALE", &zero, NULL, &status);
@@ -323,10 +290,10 @@ void read_fits_header(fits *fit) {
 	 * ************* CAMERA AND INSTRUMENT KEYWORDS ********************
 	 * ****************************************************************/
 
-	tryToFindKeywordsFloat(fit, PixSizeX, &fit->pixel_size_x);
-	tryToFindKeywordsFloat(fit, PixSizeY, &fit->pixel_size_y);
-	tryToFindKeywordsUint(fit, BinX, &fit->binning_x);
-	tryToFindKeywordsUint(fit, BinY, &fit->binning_y);
+	__tryToFindKeywords(fit, TFLOAT, PixSizeX, &fit->pixel_size_x);
+	__tryToFindKeywords(fit, TFLOAT, PixSizeY, &fit->pixel_size_y);
+	__tryToFindKeywords(fit, TUINT, BinX, &fit->binning_x);
+	__tryToFindKeywords(fit, TUINT, BinY, &fit->binning_y);
 
 	status = 0;
 	fits_read_key(fit->fptr, TSTRING, "INSTRUME", &(fit->instrume), NULL,
@@ -340,7 +307,7 @@ void read_fits_header(fits *fit) {
 	fits_read_key(fit->fptr, TSTRING, "DATE", &(fit->date), NULL,
 			&status);
 
-	tryToFindKeywordsDouble(fit, Focal, &fit->focal_length);
+	__tryToFindKeywords(fit, TDOUBLE, Focal, &fit->focal_length);
 	if (!sequence_is_loaded() || com.seq.current == 0)
 		fprintf(stdout,
 				"Read from FITS header: pix size %gx%g, binning %hix%hi, focal %g\n",
@@ -351,7 +318,7 @@ void read_fits_header(fits *fit) {
 	fits_read_key(fit->fptr, TDOUBLE, "CCD-TEMP", &(fit->ccd_temp), NULL,
 			&status);	// Non-standard keywords used in MaxIm DL
 
-	tryToFindKeywordsDouble(fit, Exposure, &fit->exposure);
+	__tryToFindKeywords(fit, TDOUBLE, Exposure, &fit->exposure);
 
 	status = 0;
 	fits_read_key(fit->fptr, TDOUBLE, "APERTURE", &(fit->aperture), NULL,
