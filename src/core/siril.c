@@ -935,7 +935,7 @@ static int darkOptimization(fits *brut, fits *dark, fits *offset) {
 	new_fit_image(dark_tmp, dark->rx, dark->ry, 1);
 	copyfits(dark, dark_tmp, CP_ALLOC | CP_EXTRACT, 0);
 
-	/* Minimization of entropy to find better k */
+	/* Minimization of background noise to find better k */
 	k = goldenSectionSearch(brut, dark_tmp, lo, up, 1E-3);
 
 	siril_log_message("Dark optimization: %.3lf\n", k);

@@ -52,16 +52,17 @@ static char *Exposure[] = { "EXPTIME", "EXPOSURE", NULL };
 
 int computeRawFitsStats(fits *fit, int layer) {
 	int status = 0;
-	double noise1, noise3, mean, sigma;
+	double noise1, noise2, noise3, noise5, mean, sigma;
 	WORD minvalue, maxvalue;
 	long ngoodpix;
 
 	fits_img_stats_ushort(fit->pdata[layer], fit->rx, fit->ry, 0, 0, &ngoodpix,
-			&minvalue, &maxvalue, &mean, &sigma, &noise1, &noise3, &status);
+			&minvalue, &maxvalue, &mean, &sigma, &noise1, &noise2, &noise3,
+			&noise5, &status);
 	/* TODO: put all values in fit structure */
-	//printf("Background noise: %.3lf\n", noise3);
-	/* noise1 gives "bizarre" resuts */
-	fit->bgnoise[layer] = noise3;
+	//printf("Background noise: %.3lf, %.3lf, %.3lf, %.3lf\n", noise1, noise2, noise3, noise5);
+	/* noise1 gives "bizarre" results */
+	fit->bgnoise[layer] = noise5;
 
 	return status;
 }
@@ -806,7 +807,7 @@ void save_fits_header(fits *fit) {
 		else if (fit->dft_type[0] == 'P')
 			strcpy(comment, "Phase of a Discrete Fourier Transform");
 		else
-			status = 1;			// should not happend
+			status = 1;			// should not happen
 		fits_update_key(fit->fptr, TSTRING, "DFT_TYPE", &(fit->dft_type),
 				comment, &status);
 	}
@@ -818,7 +819,7 @@ void save_fits_header(fits *fit) {
 		else if (fit->dft_ord[0] == 'R')
 			strcpy(comment, "High spatial freq. are located at image center");
 		else
-			status = 1;			// should not happend
+			status = 1;			// should not happen
 		fits_update_key(fit->fptr, TSTRING, "DFT_ORD", &(fit->dft_ord), comment,
 				&status);
 	}
@@ -846,10 +847,10 @@ void save_fits_header(fits *fit) {
 }
 
 /* Duplicates some of a fits data into another, with various options; the third
- * parameter, oper, indicates with bits what operations wille be done:
+ * parameter, oper, indicates with bits what operations will be done:
  *
  * - CP_ALLOC: allocates the to->data pointer to the size of from->data and
- *   sets to->pdatas; required if data is not already allocated with the
+ *   sets to->pdata; required if data is not already allocated with the
  *   correct size or at all. No data is copied
  * - CP_COPYA: copies the actual data, from->data to to->data on all layers,
  *   but no other information from the source
@@ -1047,7 +1048,7 @@ void fits_flip_top_to_bottom(fits *fit) {
 }
 
 /* This function copies an area from the fits 'from' on layer 'layer' into
- * another and initalizes all relevant data */
+ * another and initializes all relevant data */
 /* the crop function does the same but in place and for all channels without
  * reallocating */
 void extract_region_from_fits(fits *from, int layer, fits *to,

@@ -136,8 +136,8 @@ char*	format_basename(char *root);
 /****************** quantize.h ***************/
 int fits_img_stats_ushort(WORD *array, long nx, long ny, int nullcheck,
 		WORD nullvalue, long *ngoodpix, WORD *minvalue, WORD *maxvalue,
-		double *mean, double *sigma, double *noise1, double *noise3,
-		int *status);
+		double *mean, double *sigma, double *noise1, double *noise2, double *noise3,
+		double *noise5, int *status);
 
 /****************** siril.h ******************/
 /* crop sequence data from GUI */

@@ -23,51 +23,32 @@
  The code has been updated by Cyril Richard in order to work with ushort data used by Siril
  */
 
-# include <stdio.h>
-# include <stdlib.h>
-# include <math.h>
-# include <limits.h>
-# include <float.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+#include <limits.h>
 
 #include "core/proto.h"
 #include "core/siril.h"
 
-/* nearest integer function */
-# define NINT(x)  ((x >= 0.) ? (int) (x + 0.5) : (int) (x - 0.5))
-
-#define NULL_VALUE -2147483647 /* value used to represent undefined pixels */
-#define N_RESERVED_VALUES 10   /* number of reserved values, starting with */
-/* and including NULL_VALUE.  These values */
-/* may not be used to represent the quantized */
-/* and scaled floating point pixel values */
-/* If lossy Hcompression is used, and the */
-/* array contains null values, then it is also */
-/* possible for the compressed values to slightly */
-/* exceed the range of the actual (lossless) values */
-/* so we must reserve a little more space */
-
 /* more than this many standard deviations from the mean is an outlier */
-# define SIGMA_CLIP     5.
-# define NITER          3	/* number of sigma-clipping iterations */
+#define SIGMA_CLIP     5.
+#define NITER          3	/* number of sigma-clipping iterations */
 
 static int FnMeanSigma_ushort(WORD *array, long npix, int nullcheck,
 		WORD nullvalue, long *ngoodpix, double *mean, double *sigma,
 		int *status);
 
-static int FnMeanSigma_double(double *array, long npix, int nullcheck,
-		double nullvalue, long *ngoodpix, double *mean, double *sigma,
-		int *status);
-
-static int FnNoise3_ushort(WORD *array, long nx, long ny, int nullcheck,
-		WORD nullvalue, long *ngood, WORD *minval, WORD *maxval, double *noise,
-		int *status);
-
 static int FnNoise1_ushort(WORD *array, long nx, long ny, int nullcheck,
 		WORD nullvalue, double *noise, int *status);
 
+static int FnNoise5_ushort(WORD *array, long nx, long ny, int nullcheck,
+		WORD nullvalue, long *ngood, WORD *minval, WORD *maxval, double *n2,
+		double *n3, double *n5, int *status);
+
 static int FnCompare_double(const void *, const void *);
 
-static WORD quick_select_ushort(WORD arr[], int n);
+static int quick_select_int(int arr[], int n);
 
 /*--------------------------------------------------------------------------*/
 int fits_img_stats_ushort(WORD *array, /*  2 dimensional array of image pixels */
@@ -85,7 +66,9 @@ WORD *maxvalue, /* returned maximum non-null value in the array */
 double *mean, /* returned mean value of all non-null pixels */
 double *sigma, /* returned R.M.S. value of all non-null pixels */
 double *noise1, /* 1st order estimate of noise in image background level */
+double *noise2, /* 2nd order estimate of noise in image background level */
 double *noise3, /* 3rd order estimate of noise in image background level */
+double *noise5, /* 5th order estimate of noise in image background level */
 int *status) /* error status */
 
 /*
@@ -93,8 +76,9 @@ int *status) /* error status */
  */
 {
 	long ngood;
-	WORD minval, maxval;
-	double xmean = 0., xsigma = 0., xnoise = 0;
+	WORD minval = 0, maxval = 0;
+	double xmean = 0., xsigma = 0., xnoise = 0., xnoise2 = 0., xnoise3 = 0.,
+			xnoise5 = 0.;
 
 	/* need to calculate mean and/or sigma and/or limits? */
 	if (mean || sigma) {
@@ -116,8 +100,8 @@ int *status) /* error status */
 	}
 
 	if (minvalue || maxvalue || noise3) {
-		FnNoise3_ushort(array, nx, ny, nullcheck, nullvalue, &ngood, &minval,
-				&maxval, &xnoise, status);
+		FnNoise5_ushort(array, nx, ny, nullcheck, nullvalue, &ngood, &minval,
+				&maxval, &xnoise2, &xnoise3, &xnoise5, status);
 
 		if (ngoodpix)
 			*ngoodpix = ngood;
@@ -125,7 +109,12 @@ int *status) /* error status */
 			*minvalue = minval;
 		if (maxvalue)
 			*maxvalue = maxval;
-		*noise3 = xnoise;
+		if (noise2)
+			*noise2 = xnoise2;
+		if (noise3)
+			*noise3 = xnoise3;
+		if (noise5)
+			*noise5 = xnoise5;
 	}
 	return (*status);
 }
@@ -198,74 +187,8 @@ int *status) /* error status */
 }
 
 /*--------------------------------------------------------------------------*/
-static int FnMeanSigma_double(double *array, /*  2 dimensional array of image pixels */
-long npix, /* number of pixels in the image */
-int nullcheck, /* check for null values, if true */
-double nullvalue, /* value of null pixels, if nullcheck is true */
 
-/* returned parameters */
-
-long *ngoodpix, /* number of non-null pixels in the image */
-double *mean, /* returned mean value of all non-null pixels */
-double *sigma, /* returned R.M.S. value of all non-null pixels */
-int *status) /* error status */
-
-/*
- Compute mean and RMS sigma of the non-null pixels in the input array.
- */
-{
-	long ii, ngood = 0;
-	double *value;
-	double sum = 0., sum2 = 0., xtemp;
-
-	value = array;
-
-	if (nullcheck) {
-		for (ii = 0; ii < npix; ii++, value++) {
-			if (*value != nullvalue) {
-				ngood++;
-				xtemp = *value;
-				sum += xtemp;
-				sum2 += (xtemp * xtemp);
-			}
-		}
-	} else {
-		ngood = npix;
-		for (ii = 0; ii < npix; ii++, value++) {
-			xtemp = *value;
-			sum += xtemp;
-			sum2 += (xtemp * xtemp);
-		}
-	}
-
-	if (ngood > 1) {
-		if (ngoodpix)
-			*ngoodpix = ngood;
-		xtemp = sum / ngood;
-		if (mean)
-			*mean = xtemp;
-		if (sigma)
-			*sigma = sqrt((sum2 / ngood) - (xtemp * xtemp));
-	} else if (ngood == 1) {
-		if (ngoodpix)
-			*ngoodpix = 1;
-		if (mean)
-			*mean = sum;
-		if (sigma)
-			*sigma = 0.0;
-	} else {
-		if (ngoodpix)
-			*ngoodpix = 0;
-		if (mean)
-			*mean = 0.;
-		if (sigma)
-			*sigma = 0.;
-	}
-	return (*status);
-}
-
-/*--------------------------------------------------------------------------*/
-static int FnNoise3_ushort(WORD *array, /*  2 dimensional array of image pixels */
+static int FnNoise5_ushort(WORD *array, /*  2 dimensional array of image pixels */
 long nx, /* number of pixels in each row of the image */
 long ny, /* number of rows in the image */
 int nullcheck, /* check for null values, if true */
@@ -274,35 +197,41 @@ WORD nullvalue, /* value of null pixels, if nullcheck is true */
 long *ngood, /* number of good, non-null pixels? */
 WORD *minval, /* minimum non-null value */
 WORD *maxval, /* maximum non-null value */
-double *noise, /* returned R.M.S. value of all non-null pixels */
+double *noise2, /* returned 2nd order MAD of all non-null pixels */
+double *noise3, /* returned 3rd order MAD of all non-null pixels */
+double *noise5, /* returned 5th order MAD of all non-null pixels */
 int *status) /* error status */
 
 /*
- Estimate the median and background noise in the input image using 3rd order differences.
+ Estimate the median and background noise in the input image using 2nd, 3rd and 5th
+ order Median Absolute Differences.
 
- The noise in the background of the image is calculated using the 3rd order algorithm
+ The noise in the background of the image is calculated using the MAD algorithms
  developed for deriving the signal to noise ratio in spectra
  (see issue #42 of the ST-ECF newsletter, http://www.stecf.org/documents/newsletter/)
 
- noise = 1.482602 / sqrt(6) * median (abs(2*flux(i) - flux(i-2) - flux(i+2)))
+ 3rd order:  noise = 1.482602 / sqrt(6) * median (abs(2*flux(i) - flux(i-2) - flux(i+2)))
 
  The returned estimates are the median of the values that are computed for each
  row of the image.
  */
 {
-	long ii, jj, nrows = 0, nvals, ngoodpix = 0;
-	WORD *differences, *rowpix, v1, v2, v3, v4, v5;
-	WORD xminval = USHRT_MAX, xmaxval = 0, do_range = 0;
-	double *diffs, xnoise = 0, sigma;
+	long ii, jj, nrows = 0, nrows2 = 0, nvals, nvals2, ngoodpix = 0;
+	int *differences2, *differences3, *differences5;
+	WORD *rowpix, v1, v2, v3, v4, v5, v6, v7, v8, v9;
+	WORD xminval = USHRT_MAX, xmaxval = 0;
+	int do_range = 0;
+	double *diffs2, *diffs3, *diffs5;
+	double xnoise2 = 0, xnoise3 = 0, xnoise5 = 0;
 
-	if (nx < 5) {
+	if (nx < 9) {
 		/* treat entire array as an image with a single row */
 		nx = nx * ny;
 		ny = 1;
 	}
 
-	/* rows must have at least 5 pixels */
-	if (nx < 5) {
+	/* rows must have at least 9 pixels */
+	if (nx < 9) {
 
 		for (ii = 0; ii < nx; ii++) {
 			if (nullcheck && array[ii] == nullvalue)
@@ -321,8 +250,12 @@ int *status) /* error status */
 			*maxval = xmaxval;
 		if (ngood)
 			*ngood = ngoodpix;
-		if (noise)
-			*noise = 0.;
+		if (noise2)
+			*noise2 = 0.;
+		if (noise3)
+			*noise3 = 0.;
+		if (noise5)
+			*noise5 = 0.;
 		return (*status);
 	}
 
@@ -331,15 +264,51 @@ int *status) /* error status */
 		do_range = 1;
 
 	/* allocate arrays used to compute the median and noise estimates */
-	differences = calloc(nx, sizeof(WORD));
-	if (!differences) {
+	differences2 = calloc(nx, sizeof(int));
+	if (!differences2) {
+		*status = MEMORY_ALLOCATION;
+		return (*status);
+	}
+	differences3 = calloc(nx, sizeof(int));
+	if (!differences3) {
+		free(differences2);
+		*status = MEMORY_ALLOCATION;
+		return (*status);
+	}
+	differences5 = calloc(nx, sizeof(int));
+	if (!differences5) {
+		free(differences2);
+		free(differences3);
 		*status = MEMORY_ALLOCATION;
 		return (*status);
 	}
 
-	diffs = calloc(ny, sizeof(double));
-	if (!diffs) {
-		free(differences);
+	diffs2 = calloc(ny, sizeof(double));
+	if (!diffs2) {
+		free(differences2);
+		free(differences3);
+		free(differences5);
+		*status = MEMORY_ALLOCATION;
+		return (*status);
+	}
+
+	diffs3 = calloc(ny, sizeof(double));
+	if (!diffs3) {
+		free(differences2);
+		free(differences3);
+		free(differences5);
+		free(diffs2);
+		*status = MEMORY_ALLOCATION;
+		return (*status);
+	}
+
+	diffs5 = calloc(ny, sizeof(double));
+	if (!diffs5) {
+		free(differences2);
+		free(differences3);
+		free(differences5);
+		free(diffs2);
+		free(diffs3);
 		*status = MEMORY_ALLOCATION;
 		return (*status);
 	}
@@ -358,6 +327,7 @@ int *status) /* error status */
 		if (ii == nx)
 			continue; /* hit end of row */
 		v1 = rowpix[ii]; /* store the good pixel value */
+		ngoodpix++;
 
 		if (do_range) {
 			if (v1 < xminval)
@@ -375,6 +345,7 @@ int *status) /* error status */
 		if (ii == nx)
 			continue; /* hit end of row */
 		v2 = rowpix[ii]; /* store the good pixel value */
+		ngoodpix++;
 
 		if (do_range) {
 			if (v2 < xminval)
@@ -392,6 +363,7 @@ int *status) /* error status */
 		if (ii == nx)
 			continue; /* hit end of row */
 		v3 = rowpix[ii]; /* store the good pixel value */
+		ngoodpix++;
 
 		if (do_range) {
 			if (v3 < xminval)
@@ -409,6 +381,7 @@ int *status) /* error status */
 		if (ii == nx)
 			continue; /* hit end of row */
 		v4 = rowpix[ii]; /* store the good pixel value */
+		ngoodpix++;
 
 		if (do_range) {
 			if (v4 < xminval)
@@ -417,9 +390,81 @@ int *status) /* error status */
 				xmaxval = v4;
 		}
 
+		/* find the 5th valid pixel in row (to be skipped) */
+		ii++;
+		if (nullcheck)
+			while (ii < nx && rowpix[ii] == nullvalue)
+				ii++;
+
+		if (ii == nx)
+			continue; /* hit end of row */
+		v5 = rowpix[ii]; /* store the good pixel value */
+		ngoodpix++;
+
+		if (do_range) {
+			if (v5 < xminval)
+				xminval = v5;
+			if (v5 > xmaxval)
+				xmaxval = v5;
+		}
+
+		/* find the 6th valid pixel in row (to be skipped) */
+		ii++;
+		if (nullcheck)
+			while (ii < nx && rowpix[ii] == nullvalue)
+				ii++;
+
+		if (ii == nx)
+			continue; /* hit end of row */
+		v6 = rowpix[ii]; /* store the good pixel value */
+		ngoodpix++;
+
+		if (do_range) {
+			if (v6 < xminval)
+				xminval = v6;
+			if (v6 > xmaxval)
+				xmaxval = v6;
+		}
+
+		/* find the 7th valid pixel in row (to be skipped) */
+		ii++;
+		if (nullcheck)
+			while (ii < nx && rowpix[ii] == nullvalue)
+				ii++;
+
+		if (ii == nx)
+			continue; /* hit end of row */
+		v7 = rowpix[ii]; /* store the good pixel value */
+		ngoodpix++;
+
+		if (do_range) {
+			if (v7 < xminval)
+				xminval = v7;
+			if (v7 > xmaxval)
+				xmaxval = v7;
+		}
+
+		/* find the 8th valid pixel in row (to be skipped) */
+		ii++;
+		if (nullcheck)
+			while (ii < nx && rowpix[ii] == nullvalue)
+				ii++;
+
+		if (ii == nx)
+			continue; /* hit end of row */
+		v8 = rowpix[ii]; /* store the good pixel value */
+		ngoodpix++;
+
+		if (do_range) {
+			if (v8 < xminval)
+				xminval = v8;
+			if (v8 > xmaxval)
+				xmaxval = v8;
+		}
 		/* now populate the differences arrays */
 		/* for the remaining pixels in the row */
 		nvals = 0;
+		nvals2 = 0;
 		for (ii++; ii < nx; ii++) {
 
 			/* find the next valid pixel in row */
@@ -429,18 +474,27 @@ int *status) /* error status */
 
 			if (ii == nx)
 				break; /* hit end of row */
-			v5 = rowpix[ii]; /* store the good pixel value */
+			v9 = rowpix[ii]; /* store the good pixel value */
 
 			if (do_range) {
-				if (v5 < xminval)
-					xminval = v5;
-				if (v5 > xmaxval)
-					xmaxval = v5;
+				if (v9 < xminval)
+					xminval = v9;
+				if (v9 > xmaxval)
+					xmaxval = v9;
 			}
 
-			/* construct array of 3rd order absolute differences */
-			if (!(v1 == v2 && v2 == v3 && v3 == v4 && v4 == v5)) {
-				differences[nvals] = abs((2 * v3) - v1 - v5);
+			/* construct array of absolute differences */
+
+			if (!(v5 == v6 && v6 == v7)) {
+				differences2[nvals2] = abs((int) v5 - (int) v7);
+				nvals2++;
+			}
+
+			if (!(v3 == v4 && v4 == v5 && v5 == v6 && v6 == v7)) {
+				differences3[nvals] = abs((2 * (int) v5) - (int) v3 - (int) v7);
+				differences5[nvals] = abs(
+						(6 * (int) v5) - (4 * (int) v3) - (4 * (int) v7)
+								+ (int) v1 + (int) v9);
 				nvals++;
 			} else {
 				/* ignore constant background regions */
@@ -452,19 +506,35 @@ int *status) /* error status */
 			v2 = v3;
 			v3 = v4;
 			v4 = v5;
+			v5 = v6;
+			v6 = v7;
+			v7 = v8;
+			v8 = v9;
 		} /* end of loop over pixels in the row */
 
-		/* compute the 3rd order diffs */
-		/* Note that there are 4 more pixel values than there are diffs values. */
-		ngoodpix += (nvals + 4);
+		/* compute the median diffs */
+		/* Note that there are 8 more pixel values than there are diffs values. */
+		ngoodpix += nvals;
 
 		if (nvals == 0) {
 			continue; /* cannot compute medians on this row */
 		} else if (nvals == 1) {
-			diffs[nrows] = differences[0];
+			if (nvals2 == 1) {
+				diffs2[nrows2] = differences2[0];
+				nrows2++;
+			}
+
+			diffs3[nrows] = differences3[0];
+			diffs5[nrows] = differences5[0];
 		} else {
 			/* quick_select returns the median MUCH faster than using qsort */
-			diffs[nrows] = quick_select_ushort(differences, nvals);
+			if (nvals2 > 1) {
+				diffs2[nrows2] = quick_select_int(differences2, nvals);
+				nrows2++;
+			}
+
+			diffs3[nrows] = quick_select_int(differences3, nvals);
+			diffs5[nrows] = quick_select_int(differences5, nvals);
 		}
 
 		nrows++;
@@ -472,28 +542,25 @@ int *status) /* error status */
 
 	/* compute median of the values for each row */
 	if (nrows == 0) {
-		xnoise = 0;
+		xnoise3 = 0;
+		xnoise5 = 0;
 	} else if (nrows == 1) {
-		xnoise = diffs[0];
+		xnoise3 = diffs3[0];
+		xnoise5 = diffs5[0];
 	} else {
+		qsort(diffs3, nrows, sizeof(double), FnCompare_double);
+		qsort(diffs5, nrows, sizeof(double), FnCompare_double);
+		xnoise3 = (diffs3[(nrows - 1) / 2] + diffs3[nrows / 2]) / 2.;
+		xnoise5 = (diffs5[(nrows - 1) / 2] + diffs5[nrows / 2]) / 2.;
+	}
 
-		qsort(diffs, nrows, sizeof(double), FnCompare_double);
-		xnoise = (diffs[(nrows - 1) / 2] + diffs[nrows / 2]) / 2.;
-
-		FnMeanSigma_double(diffs, nrows, 0, 0.0, 0, &xnoise, &sigma, status);
-
-		/* do a 4.5 sigma rejection of outliers */
-		jj = 0;
-		sigma = 4.5 * sigma;
-		for (ii = 0; ii < nrows; ii++) {
-			if (fabs(diffs[ii] - xnoise) <= sigma) {
-				if (jj != ii)
-					diffs[jj] = diffs[ii];
-				jj++;
-			}
-		}
-		if (ii != jj)
-			FnMeanSigma_double(diffs, jj, 0, 0.0, 0, &xnoise, &sigma, status);
+	if (nrows2 == 0) {
+		xnoise2 = 0;
+	} else if (nrows2 == 1) {
+		xnoise2 = diffs2[0];
+	} else {
+		qsort(diffs2, nrows2, sizeof(double), FnCompare_double);
+		xnoise2 = (diffs2[(nrows2 - 1) / 2] + diffs2[nrows2 / 2]) / 2.;
 	}
 
 	if (ngood)
@@ -502,15 +569,22 @@ int *status) /* error status */
 		*minval = xminval;
 	if (maxval)
 		*maxval = xmaxval;
-	if (noise)
-		*noise = 0.6052697 * xnoise;
+	if (noise2)
+		*noise2 = 1.0483579 * xnoise2;
+	if (noise3)
+		*noise3 = 0.6052697 * xnoise3;
+	if (noise5)
+		*noise5 = 0.1772048 * xnoise5;
 
-	free(diffs);
-	free(differences);
+	free(diffs5);
+	free(diffs3);
+	free(diffs2);
+	free(differences5);
+	free(differences3);
+	free(differences2);
 
 	return (*status);
 }
-
 /*--------------------------------------------------------------------------*/
 static int FnNoise1_ushort(WORD *array, /*  2 dimensional array of image pixels */
 long nx, /* number of pixels in each row of the image */
@@ -639,6 +713,7 @@ int *status) /* error status */
 	return (*status);
 }
 /*--------------------------------------------------------------------------*/
+
 static int FnCompare_double(const void *v1, const void *v2) {
 	const double *i1 = v1;
 	const double *i2 = v2;
@@ -653,11 +728,9 @@ static int FnCompare_double(const void *v1, const void *v2) {
 
 /*--------------------------------------------------------------------------*/
 
-/*--------------------------------------------------------------------------*/
+#define ELEM_SWAP(a,b) { register int t=(a);(a)=(b);(b)=t; }
 
-#define ELEM_SWAP(a,b) { register short t=(a);(a)=(b);(b)=t; }
-
-static WORD quick_select_ushort(WORD arr[], int n) {
+static int quick_select_int(int arr[], int n) {
 	int low, high;
 	int median;
 	int middle, ll, hh;
