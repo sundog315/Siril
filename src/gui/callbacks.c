@@ -1822,10 +1822,9 @@ void on_close_settings_button_clicked(GtkButton *button, gpointer user_data) {
 void update_fwhm_units_ok() {
 	GtkWidget *label_ok = GTK_WIDGET(lookup_widget("label_ok"));
 
-	if (gfit.focal_length > 0.0 &&
-			gfit.pixel_size_x > 0.0f && gfit.pixel_size_y > 0.0f)
-		gtk_widget_set_visible(label_ok, FALSE);
-	else gtk_widget_set_visible(label_ok, TRUE);
+	gtk_widget_set_visible(label_ok,
+			gfit.focal_length > 0.0 && gfit.pixel_size_x > 0.0f
+					&& gfit.pixel_size_y > 0.0f);
 }
 
 void on_focal_entry_changed(GtkEditable *editable, gpointer user_data) {
