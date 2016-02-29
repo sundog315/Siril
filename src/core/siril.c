@@ -1,7 +1,7 @@
 /*
  * This file is part of Siril, an astronomy image processor.
  * Copyright (C) 2005-2011 Francois Meyer (dulle at free.fr)
- * Copyright (C) 2012-2015 team free-astro (see more in AUTHORS file)
+ * Copyright (C) 2012-2016 team free-astro (see more in AUTHORS file)
  * Reference site is http://free-astro.vinvin.tf/index.php/Siril
  *
  * Siril is free software: you can redistribute it and/or modify
@@ -875,8 +875,8 @@ static double evaluateNoiseOfCalibratedImage(fits *fit, fits *dark, double k) {
 	soper(dark_tmp, k, OPER_MUL);
 	imoper(fit_tmp, dark_tmp, OPER_SUB);
 
-	computeRawFitsStats(fit_tmp);
-	noise = fit_tmp->bgnoise;
+	computeRawFitsStats(fit_tmp, RLAYER);
+	noise = fit_tmp->bgnoise[RLAYER];
 	//printf("noise=%lf, k=%lf\n", noise, k);
 
 	clearfits(dark_tmp);
@@ -920,10 +920,7 @@ static int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float le
 		imoper(brut, dark, OPER_SUB);
 
 	if (com.preprostatus & USE_FLAT) {
-		if (fdiv(brut, flat, level) > 0)
-			siril_log_message(
-					"Overflow detected, change level value in settings: %0.2lf is too high.\n",
-					level);
+		fdiv(brut, flat, level);
 	}
 
 	return 0;
@@ -1128,7 +1125,9 @@ double background(fits* fit, int reqlayer, rectangle *selection) {
 
 /* Based on Jean-Luc Starck and Fionn Murtagh (1998), Automatic Noise
  * Estimation from the Multiresolution Support, Publications of the 
- * Royal Astronomical Society of the Pacific, vol. 110, pp. 193–199. */
+ * Royal Astronomical Society of the Pacific, vol. 110, pp. 193–199.
+ * slow algorithm. For now it is replaced by faster one. BUT, we need to keep it
+ * in case we need it -. */
 int backgroundnoise(fits* fit, double sigma[]) {
 	int layer, k;
 	fits *waveimage = calloc(1, sizeof(fits));
@@ -1647,6 +1646,7 @@ gboolean end_noise(gpointer p) {
 
 gpointer noise(gpointer p) {
 	struct noise_data *args = (struct noise_data *) p;
+	int  chan;
 
 	if (args->verbose) {
 		siril_log_color_message("Noise standard deviation: calculating...\n",
@@ -1654,9 +1654,14 @@ gpointer noise(gpointer p) {
 		gettimeofday(&args->t_start, NULL);
 	}
 
-	if (backgroundnoise(args->fit, args->bgnoise)) {
+/*	if (backgroundnoise(args->fit, args->bgnoise)) {
 		gdk_threads_add_idle(end_noise, args);
 		return GINT_TO_POINTER(1);
+	}
+	*/
+	for (chan = 0; chan < args->fit->naxes[2]; chan++) {
+		computeRawFitsStats(args->fit, chan);
+		args->bgnoise[chan] = args->fit->bgnoise[chan];
 	}
 
 	gdk_threads_add_idle(end_noise, args);

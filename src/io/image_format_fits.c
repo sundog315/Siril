@@ -1,7 +1,7 @@
 /*
  * This file is part of Siril, an astronomy image processor.
  * Copyright (C) 2005-2011 Francois Meyer (dulle at free.fr)
- * Copyright (C) 2012-2015 team free-astro (see more in AUTHORS file)
+ * Copyright (C) 2012-2016 team free-astro (see more in AUTHORS file)
  * Reference site is http://free-astro.vinvin.tf/index.php/Siril
  *
  * Siril is free software: you can redistribute it and/or modify
@@ -39,25 +39,25 @@ static char *BinY[] = { "YBINNING", "BINY", NULL };
 static char *Focal[] = { "FOCAL", "FOCALLEN", NULL };
 static char *Exposure[] = { "EXPTIME", "EXPOSURE", NULL };
 
-int computeRawFitsStats(fits *fit) {
+int computeRawFitsStats(fits *fit, int layer) {
 	int status = 0;
 	double noise1, noise3, mean, sigma;
 	WORD minvalue, maxvalue;
 	long ngoodpix;
 
-	fits_img_stats_ushort(fit->data, fit->rx, fit->ry, 0, 0, &ngoodpix,
+	fits_img_stats_ushort(fit->pdata[layer], fit->rx, fit->ry, 0, 0, &ngoodpix,
 			&minvalue, &maxvalue, &mean, &sigma, &noise1, &noise3, &status);
 	/* TODO: put all values in fit structure */
-//	printf("Background noise: %.3lf\n", noise3);
+	//printf("Background noise: %.3lf\n", noise3);
 	/* noise1 gives "bizarre" resuts */
-	fit->bgnoise = noise3;
+	fit->bgnoise[layer] = noise3;
 
 	return status;
 }
 
 // return 0 on success, fills realname if not NULL with the opened file's name
 int readfits(const char *filename, fits *fit, char *realname) {
-	int status;
+	int status, chan;
 	long orig[3] = { 1L, 1L, 1L };
 	// orig ^ gives the coordinate in each dimension of the first pixel to be read
 	int zero = 0;
@@ -245,7 +245,8 @@ int readfits(const char *filename, fits *fit, char *realname) {
 	if (gtk_widget_get_visible(lookup_widget("data_dialog")))// update data if already shown
 		show_FITS_header(fit);
 
-	computeRawFitsStats(fit);
+	for (chan = 0; chan < fit->naxes[2]; chan++)
+		computeRawFitsStats(fit, chan);
 
 	status = 0;
 	fits_close_file(fit->fptr, &status);

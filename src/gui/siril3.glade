@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.18.3 
 
-Copyright (C) The free-astro development team, 2015
+Copyright (C) The free-astro development team, 2016
 
 This file is part of Siril.
 
@@ -12448,7 +12448,7 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="label" translatable="yes">Copyright © 2004-2011 François Meyer 
-Copyright © 2012-2015 team free-astro
+Copyright © 2012-2016 team free-astro
 Project leader: Vincent Hourdin
 Project scientist: Cyril Richard
 and the Siril Development Team</property>
