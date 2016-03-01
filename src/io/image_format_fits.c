@@ -50,23 +50,6 @@ static char *Exposure[] = { "EXPTIME", "EXPOSURE", NULL };
 	} while ((keyword[__iter__]) && (__status__ > 0)); \
 }
 
-int computeRawFitsStats(fits *fit, int layer) {
-	int status = 0;
-	double noise1, noise2, noise3, noise5, mean, sigma;
-	WORD minvalue, maxvalue;
-	long ngoodpix;
-
-	fits_img_stats_ushort(fit->pdata[layer], fit->rx, fit->ry, 0, 0, &ngoodpix,
-			&minvalue, &maxvalue, &mean, &sigma, &noise1, &noise2, &noise3,
-			&noise5, &status);
-	/* TODO: put all values in fit structure */
-	//printf("Background noise: %.3lf, %.3lf, %.3lf, %.3lf\n", noise1, noise2, noise3, noise5);
-	/* noise1 gives "bizarre" results */
-	fit->bgnoise[layer] = noise5;
-
-	return status;
-}
-
 // return 0 on success, fills realname if not NULL with the opened file's name
 int readfits(const char *filename, fits *fit, char *realname) {
 	int status, chan;
@@ -256,9 +239,6 @@ int readfits(const char *filename, fits *fit, char *realname) {
 
 	if (gtk_widget_get_visible(lookup_widget("data_dialog")))// update data if already shown
 		show_FITS_header(fit);
-
-	for (chan = 0; chan < fit->naxes[2]; chan++)
-		computeRawFitsStats(fit, chan);
 
 	status = 0;
 	fits_close_file(fit->fptr, &status);

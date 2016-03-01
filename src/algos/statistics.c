@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
+#include <float.h>
 #include <gsl/gsl_statistics.h>
 #include "core/siril.h"
 #include "core/proto.h"
@@ -185,76 +186,83 @@ static int IKSS(double *data, int n, double *location, double *scale) {
 }
 
 /* computes statistics on the given layer of the given image. It creates the
- * histogram to easily extract the median. min and max value, mean, sigma
- * and average deviation are computed with gsl stats.
+ * histogram to easily extract the median. min and max value, mean, sigma and noise
+ * are computed with a cfitsio function rewritten here.
+ * Average deviation, MAD, Bidweight Midvariance and IKSS are computed with gsl stats.
  */
 imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
 	double mean = 0.0;
 	double median = 0.0;
 	double sigma = 0.0;
+	double noise1 = 0.0, noise2 = 0.0, noise3 = 0.0, noise5 = 0.0;
+	long ngoodpix = 0L;
 	double avgDev = 0.0;
 	double mad = 0.0;
 	double bwmv = 0.0;
 	double location = 0.0, scale = 0.0;
-	WORD min, max, *data;
+	int status = 0;
+	int nx, ny;
+	WORD min = 0, max = 0, *data;
 	gsl_histogram* histo;
-	size_t i, hist_size, count;
-	imstats* stat = malloc(sizeof(imstats));
-
-	count = fit->rx * fit->ry;
+	size_t i, hist_size;
+	imstats* stat = NULL;
 
 	if (selection && selection->h > 0 && selection->w > 0) {
-		count = selection->h * selection->w;
-		data = calloc(count, sizeof(WORD));
+		nx = selection->w;
+		ny = selection->h;
+		data = calloc(nx * ny, sizeof(WORD));
 		select_area(fit, data, layer, selection);
 		histo = computeHisto_Selection(fit, layer, selection);
 	} else {
-		data = calloc(count, sizeof(WORD));
+		nx = fit->rx;
+		ny = fit->ry;
+		data = calloc(nx * ny, sizeof(WORD));
 		histo = computeHisto(fit, layer);
-		memcpy(data, fit->pdata[layer], count * sizeof(WORD));
+		memcpy(data, fit->pdata[layer], nx * ny * sizeof(WORD));
 	}
 	hist_size = gsl_histogram_bins(histo);
 
 	/* Calculation of median with histogram */
-	median = siril_stats_ushort_median(histo, count);
+	median = siril_stats_ushort_median(histo, nx * ny);
 	gsl_histogram_free(histo);
 
-	/* Calculation of mean */
-	mean = gsl_stats_ushort_mean(data, 1, count);
-
-	/* Calculation of sigma */
-	if (option & STATS_SIGMA)
-		sigma = gsl_stats_ushort_sd_m(data, 1, count, mean);
+	/* Calculation of mean, min, max, sigma and noise */
+	if (option & STATS_BASIC)
+		fits_img_stats_ushort(data, nx, ny, 0, 0, &ngoodpix, &min, &max, &mean,
+			&sigma, &noise1, &noise2, &noise3, &noise5, &status);
+	if (status) {
+		free(data);
+		return NULL;
+	}
+	//printf("mean: %.3lf, minvalue: %d, maxvalue: %d, sigma: %.3lf, noise: %lf\n", mean, min, max, sigma, noise5);
 
 	/* Calculation of average absolute deviation from the median */
 	if (option & STATS_AVGDEV)
-		avgDev = gsl_stats_ushort_absdev_m(data, 1, count, median);
+		avgDev = gsl_stats_ushort_absdev_m(data, 1, nx * ny, median);
 
 	/* Calculation of median absolute deviation */
 	if (option & STATS_MAD)
-		mad = siril_stats_ushort_mad(data, 1, count, median);
-
-	/* Calculation of Minimum and Maximum */
-	if (option & STATS_MINMAX)
-		gsl_stats_ushort_minmax(&min, &max, data, 1, count);
+		mad = siril_stats_ushort_mad(data, 1, nx * ny, median);
 
 	/* Calculation of Bidweight Midvariance */
 	if ((option & STATS_BWMV) && (option & STATS_MAD))
-		bwmv = siril_stats_ushort_bwmv(data, count, mad, median);
+		bwmv = siril_stats_ushort_bwmv(data, nx * ny, mad, median);
 
 	/* Calculation of IKSS. Used for stacking */
 	if (option & (STATS_IKSS)) {
-		double *newdata = calloc(count, sizeof(double));
+		double *newdata = calloc(nx * ny, sizeof(double));
 
 		/* we convert in the [0, 1] range */
-		for (i = 0; i < count; i++) {
+		for (i = 0; i < (nx * ny); i++) {
 			newdata[i] = (double) data[i] / ((double) hist_size - 1);
 		}
-		IKSS(newdata, count, &location, &scale);
+		IKSS(newdata, nx * ny, &location, &scale);
 		location *= ((double) hist_size - 1);
 		scale *= ((double) hist_size - 1);
 		free(newdata);
 	}
+
+	stat = malloc(sizeof(imstats));
 
 	switch (layer) {
 	case 0:
@@ -271,12 +279,13 @@ imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
 		break;
 	}
 
-	stat->count = count;
+	stat->count = (nx * ny);
 	stat->mean = mean;
 	stat->avgDev = avgDev;
 	stat->mad = mad;
 	stat->median = median;
 	stat->sigma = sigma;
+	stat->bgnoise = noise5;
 	stat->min = (double) min;
 	stat->max = (double) max;
 	stat->sqrtbwmv = sqrt(bwmv);

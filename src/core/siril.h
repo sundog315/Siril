@@ -53,12 +53,10 @@ typedef unsigned short WORD;		// default type for internal image data
 #define QN_NORM 2.2191
 
 #define STATS_BASIC		(1 << 0)
-#define STATS_SIGMA		(1 << 1)
 #define STATS_AVGDEV	(1 << 2)
 #define STATS_MAD		(1 << 3)
-#define STATS_MINMAX	(1 << 4)
 #define STATS_BWMV		(1 << 5)
-#define STATS_MAIN		STATS_SIGMA | STATS_AVGDEV | STATS_MAD | STATS_MINMAX | STATS_BWMV
+#define STATS_MAIN		STATS_BASIC | STATS_AVGDEV | STATS_MAD | STATS_BWMV
 #define STATS_IKSS		(1 << 6) /* take time, needed only for stacking */
 #define STATS_EXTRA		STATS_MAIN | STATS_IKSS
 
@@ -401,8 +399,6 @@ struct ffit {
 	/* data obtained from FITS or RAW files */
 	double focal_length, iso_speed, exposure, aperture, ccd_temp;
 
-	double bgnoise[3];		// 3rd order estimate of noise in image background level
-
 	/* data used in the Fourrier space */
 	double dft_norm[3];			// Normalization value
 	char dft_type[FLEN_VALUE];		// spectrum, phase
@@ -556,8 +552,8 @@ struct cominf {
 
 /* this structure is used to characterize the statistics of the image */
 struct image_stats {
-	size_t count;
-	double mean, avgDev, median, sigma, min, max, normValue, mad, sqrtbwmv,
+	long count;
+	double mean, avgDev, median, sigma, bgnoise, min, max, normValue, mad, sqrtbwmv,
 			location, scale;
 	char layername[6];
 };

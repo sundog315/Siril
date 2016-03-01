@@ -98,7 +98,7 @@ point *find_deviant_pixels(fits *fit, double k, int *count) {
 	point *p;
 
 	/** statistics **/
-	stat = statistics(fit, RLAYER, NULL, STATS_SIGMA);
+	stat = statistics(fit, RLAYER, NULL, STATS_BASIC);
 	sigma = stat->sigma;
 	median = stat->median;
 	threshold = (k * sigma) + median;

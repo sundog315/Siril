@@ -42,7 +42,7 @@ static WORD Compute_threshold(fits *fit, double starfinder, int layer, WORD *nor
 
 	assert(layer <= 3);
 
-	stat = statistics(fit, layer, NULL, STATS_SIGMA);
+	stat = statistics(fit, layer, NULL, STATS_BASIC);
 	threshold = (WORD) stat->median + starfinder * (WORD) stat->sigma;
 	*norm = (WORD) stat->normValue;
 	printf("Threshold = %d\n", threshold);

@@ -862,6 +862,7 @@ static double evaluateNoiseOfCalibratedImage(fits *fit, fits *dark, double k) {
 	double noise;
 	fits *dark_tmp;
 	fits *fit_tmp;
+	imstats *stat = NULL;
 
 	dark_tmp = calloc(1, sizeof(fits));
 	fit_tmp = calloc(1, sizeof(fits));
@@ -875,10 +876,10 @@ static double evaluateNoiseOfCalibratedImage(fits *fit, fits *dark, double k) {
 	soper(dark_tmp, k, OPER_MUL);
 	imoper(fit_tmp, dark_tmp, OPER_SUB);
 
-	computeRawFitsStats(fit_tmp, RLAYER);
-	noise = fit_tmp->bgnoise[RLAYER];
+	stat = statistics(fit_tmp, RLAYER, NULL, STATS_BASIC);
+	noise = stat->bgnoise;
 	//printf("noise=%lf, k=%lf\n", noise, k);
-
+	free(stat);
 	clearfits(dark_tmp);
 	clearfits(fit_tmp);
 
@@ -1149,7 +1150,7 @@ int backgroundnoise(fits* fit, double sigma[]) {
 #endif
 
 	for (layer = 0; layer < fit->naxes[2]; layer++) {
-		imstats *stat = statistics(waveimage, layer, NULL, STATS_SIGMA);
+		imstats *stat = statistics(waveimage, layer, NULL, STATS_BASIC);
 		double sigma0 = stat->sigma;
 		double mean = stat->mean;
 		double epsilon = 0.0;
@@ -1660,8 +1661,9 @@ gpointer noise(gpointer p) {
 	}
 	*/
 	for (chan = 0; chan < args->fit->naxes[2]; chan++) {
-		computeRawFitsStats(args->fit, chan);
-		args->bgnoise[chan] = args->fit->bgnoise[chan];
+		imstats *stat = statistics(args->fit, chan, NULL, STATS_BASIC);
+		args->bgnoise[chan] = stat->bgnoise;
+		free(stat);
 	}
 
 	gdk_threads_add_idle(end_noise, args);
