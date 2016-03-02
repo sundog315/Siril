@@ -186,9 +186,9 @@ static int IKSS(double *data, int n, double *location, double *scale) {
 }
 
 /* computes statistics on the given layer of the given image. It creates the
- * histogram to easily extract the median. min and max value, mean, sigma and noise
+ * histogram to easily extract the median. mean, sigma and noise
  * are computed with a cfitsio function rewritten here.
- * Average deviation, MAD, Bidweight Midvariance and IKSS are computed with gsl stats.
+ * min and max value, average deviation, MAD, Bidweight Midvariance and IKSS are computed with gsl stats.
  */
 imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
 	double mean = 0.0;
@@ -227,14 +227,16 @@ imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
 		median = siril_stats_ushort_median(histo, nx * ny);
 	gsl_histogram_free(histo);
 
-	/* Calculation of mean, min, max, sigma and noise */
+	/* Calculation of mean, sigma and noise */
 	if (option & STATS_BASIC)
-		fits_img_stats_ushort(data, nx, ny, 0, 0, &ngoodpix, &min, &max, &mean,
+		fits_img_stats_ushort(data, nx, ny, 0, 0, &ngoodpix, NULL, NULL, &mean,
 			&sigma, &noise, NULL, NULL, NULL, &status);
 	if (status) {
 		free(data);
 		return NULL;
 	}
+	if (option & STATS_BASIC)
+		gsl_stats_ushort_minmax(&min, &max, data, 1, nx * ny);
 
 	/* Calculation of average absolute deviation from the median */
 	if (option & STATS_AVGDEV)

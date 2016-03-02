@@ -102,7 +102,7 @@ int *status) /* error status */
 		*noise1 = xnoise;
 	}
 
-	if (noise2 || noise3 || noise5) {
+	if (minvalue || maxvalue || noise3) {
 		FnNoise5_ushort(array, nx, ny, nullcheck, nullvalue, &ngood, &minval,
 				&maxval, &xnoise2, &xnoise3, &xnoise5, status);
 

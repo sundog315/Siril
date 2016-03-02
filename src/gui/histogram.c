@@ -689,7 +689,7 @@ double findMidtonesBalance(fits *fit, double *shadows, double *highlights) {
 	n = fit->naxes[2];
 
 	for (i = 0; i < n; ++i) {
-		stat[i] = statistics(fit, i, NULL, STATS_MAD);
+		stat[i] = statistics(fit, i, NULL, STATS_BASIC | STATS_MAD);
 
 		if (stat[i]->median / stat[i]->normValue > 0.5)
 			++invertedChannels;

@@ -930,7 +930,7 @@ static int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float le
 static int darkOptimization(fits *brut, fits *dark, fits *offset) {
 	double k;
 	double lo = 0.0;
-	double up = 1.5;
+	double up = 2.0;
 
 	fits *dark_tmp = calloc(1, sizeof(fits));
 	new_fit_image(dark_tmp, dark->rx, dark->ry, 1);
@@ -1566,7 +1566,7 @@ int BandingEngine(fits *fit, double sigma, double amount, gboolean protect_highl
 	new_fit_image(fiximage, fit->rx, fit->ry, fit->naxes[2]);
 
 	for (chan = 0; chan < fit->naxes[2]; chan++) {
-		imstats *stat = statistics(fit, chan, NULL, STATS_MAD);
+		imstats *stat = statistics(fit, chan, NULL, STATS_BASIC | STATS_MAD);
 		double background = stat->median;
 		double *rowvalue = calloc(fit->ry, sizeof(double));
 		if (rowvalue == NULL) {
