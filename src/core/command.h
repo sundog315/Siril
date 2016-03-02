@@ -49,7 +49,6 @@ int	process_rshift2(int nb);
 #endif
 int	process_entropy(int nb);
 int	process_gauss(int nb);
-int	process_gauss2(int nb);
 int	process_unsharp(int nb);
 #if 0
 int	process_unsharp2(int nb);

@@ -352,15 +352,6 @@ int process_gauss(int nb){
 	return 0;
 }
 
-int process_gauss2(int nb){
-	int i;
-	
-	for (i=0; i<com.seq.number; ++i) {
-		printf("test\n");
-	}
-	return 0;
-}
-
 int process_unsharp(int nb){
 	unsharp(&(gfit), atof(word[1]), atof(word[2]), TRUE);
 	adjust_cutoff_from_updated_gfit();
