@@ -52,7 +52,7 @@ typedef unsigned short WORD;		// default type for internal image data
 #define SN_NORM 1.1926
 #define QN_NORM 2.2191
 
-#define STATS_BASIC		(1 << 0)
+#define STATS_BASIC		(1 << 1)
 #define STATS_AVGDEV	(1 << 2)
 #define STATS_MAD		(1 << 3)
 #define STATS_BWMV		(1 << 5)

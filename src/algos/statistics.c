@@ -194,7 +194,7 @@ imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
 	double mean = 0.0;
 	double median = 0.0;
 	double sigma = 0.0;
-	double noise1 = 0.0, noise2 = 0.0, noise3 = 0.0, noise5 = 0.0;
+	double noise = 0.0;
 	long ngoodpix = 0L;
 	double avgDev = 0.0;
 	double mad = 0.0;
@@ -223,18 +223,18 @@ imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
 	hist_size = gsl_histogram_bins(histo);
 
 	/* Calculation of median with histogram */
-	median = siril_stats_ushort_median(histo, nx * ny);
+	if (option & STATS_BASIC)
+		median = siril_stats_ushort_median(histo, nx * ny);
 	gsl_histogram_free(histo);
 
 	/* Calculation of mean, min, max, sigma and noise */
 	if (option & STATS_BASIC)
 		fits_img_stats_ushort(data, nx, ny, 0, 0, &ngoodpix, &min, &max, &mean,
-			&sigma, &noise1, &noise2, &noise3, &noise5, &status);
+			&sigma, &noise, NULL, NULL, NULL, &status);
 	if (status) {
 		free(data);
 		return NULL;
 	}
-	//printf("mean: %.3lf, minvalue: %d, maxvalue: %d, sigma: %.3lf, noise: %lf\n", mean, min, max, sigma, noise5);
 
 	/* Calculation of average absolute deviation from the median */
 	if (option & STATS_AVGDEV)
@@ -257,6 +257,7 @@ imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
 			newdata[i] = (double) data[i] / ((double) hist_size - 1);
 		}
 		IKSS(newdata, nx * ny, &location, &scale);
+		/* go back to the original range */
 		location *= ((double) hist_size - 1);
 		scale *= ((double) hist_size - 1);
 		free(newdata);
@@ -285,7 +286,7 @@ imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
 	stat->mad = mad;
 	stat->median = median;
 	stat->sigma = sigma;
-	stat->bgnoise = noise5;
+	stat->bgnoise = noise;
 	stat->min = (double) min;
 	stat->max = (double) max;
 	stat->sqrtbwmv = sqrt(bwmv);

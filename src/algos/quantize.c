@@ -20,7 +20,7 @@
 /*
  The following code is based on algorithms written by Richard White at STScI and made
  available for use in CFITSIO in July 1999 and updated in January 2008.
- The code has been updated by Cyril Richard in order to work with ushort data used by Siril
+ The code has been updated by Cyril Richard (2016) in order to work with ushort data used by Siril
  */
 
 #include <stdio.h>
@@ -38,6 +38,9 @@
 static int FnMeanSigma_ushort(WORD *array, long npix, int nullcheck,
 		WORD nullvalue, long *ngoodpix, double *mean, double *sigma,
 		int *status);
+
+static int FnMeanSigma_int(int *array, long npix, int nullcheck, int nullvalue,
+		long *ngoodpix, double *mean, double *sigma, int *status);
 
 static int FnNoise1_ushort(WORD *array, long nx, long ny, int nullcheck,
 		WORD nullvalue, double *noise, int *status);
@@ -186,6 +189,72 @@ int *status) /* error status */
 	return (*status);
 }
 
+/*--------------------------------------------------------------------------*/
+static int FnMeanSigma_int(int *array, /*  2 dimensional array of image pixels */
+long npix, /* number of pixels in the image */
+int nullcheck, /* check for null values, if true */
+int nullvalue, /* value of null pixels, if nullcheck is true */
+
+/* returned parameters */
+
+long *ngoodpix, /* number of non-null pixels in the image */
+double *mean, /* returned mean value of all non-null pixels */
+double *sigma, /* returned R.M.S. value of all non-null pixels */
+int *status) /* error status */
+
+/*
+ Compute mean and RMS sigma of the non-null pixels in the input array.
+ */
+{
+	long ii, ngood = 0;
+	int *value;
+	double sum = 0., sum2 = 0., xtemp;
+
+	value = array;
+
+	if (nullcheck) {
+		for (ii = 0; ii < npix; ii++, value++) {
+			if (*value != nullvalue) {
+				ngood++;
+				xtemp = (double) *value;
+				sum += xtemp;
+				sum2 += (xtemp * xtemp);
+			}
+		}
+	} else {
+		ngood = npix;
+		for (ii = 0; ii < npix; ii++, value++) {
+			xtemp = (double) *value;
+			sum += xtemp;
+			sum2 += (xtemp * xtemp);
+		}
+	}
+
+	if (ngood > 1) {
+		if (ngoodpix)
+			*ngoodpix = ngood;
+		xtemp = sum / ngood;
+		if (mean)
+			*mean = xtemp;
+		if (sigma)
+			*sigma = sqrt((sum2 / ngood) - (xtemp * xtemp));
+	} else if (ngood == 1) {
+		if (ngoodpix)
+			*ngoodpix = 1;
+		if (mean)
+			*mean = sum;
+		if (sigma)
+			*sigma = 0.0;
+	} else {
+		if (ngoodpix)
+			*ngoodpix = 0;
+		if (mean)
+			*mean = 0.;
+		if (sigma)
+			*sigma = 0.;
+	}
+	return (*status);
+}
 /*--------------------------------------------------------------------------*/
 
 static int FnNoise5_ushort(WORD *array, /*  2 dimensional array of image pixels */
@@ -605,7 +674,8 @@ int *status) /* error status */
 {
 	int iter;
 	long ii, jj, kk, nrows = 0, nvals;
-	WORD *differences, *rowpix, v1;
+	int *differences;
+	WORD *rowpix, v1;
 	double *diffs, xnoise, mean, stdev;
 
 	/* rows must have at least 3 pixels to estimate noise */
@@ -615,7 +685,7 @@ int *status) /* error status */
 	}
 
 	/* allocate arrays used to compute the median and noise estimates */
-	differences = calloc(nx, sizeof(WORD));
+	differences = calloc(nx, sizeof(int));
 	if (!differences) {
 		*status = MEMORY_ALLOCATION;
 		return (*status);
@@ -668,8 +738,7 @@ int *status) /* error status */
 			continue;
 		else {
 
-			FnMeanSigma_ushort(differences, nvals, 0, 0, 0, &mean, &stdev,
-					status);
+			FnMeanSigma_int(differences, nvals, 0, 0, 0, &mean, &stdev, status);
 
 			if (stdev > 0.) {
 				for (iter = 0; iter < NITER; iter++) {
@@ -685,8 +754,8 @@ int *status) /* error status */
 						break;
 
 					nvals = kk;
-					FnMeanSigma_ushort(differences, nvals, 0, 0, 0, &mean,
-							&stdev, status);
+					FnMeanSigma_int(differences, nvals, 0, 0, 0, &mean, &stdev,
+							status);
 				}
 			}
 
