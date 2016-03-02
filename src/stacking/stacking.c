@@ -75,7 +75,7 @@ static int _compute_normalization_for_image(struct stacking_args *args, int i,
 		double *mul0, double *offset0) {
 	imstats *stat = NULL;
 
-	if (args->force_norm || !(stat = seq_get_imstats(args->seq, args->image_indices[i], NULL, STATS_EXTRA))) {
+	if (!(stat = seq_get_imstats(args->seq, args->image_indices[i], NULL, STATS_EXTRA))) {
 		fits fit;
 		memset(&fit, 0, sizeof(fits));
 		if (seq_read_frame(args->seq, args->image_indices[i], &fit)) {
@@ -134,6 +134,16 @@ int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normali
 	tmpmsg = siril_log_message("Computing normalization...\n");
 	tmpmsg[strlen(tmpmsg) - 1] = '\0';
 	set_progress_bar_data(tmpmsg, PROGRESS_NONE);
+
+	/* We empty the cache if needed (force to recompute) */
+	if (args->force_norm) {
+		for (i = 0; i < args->seq->number; i++) {
+			if (args->seq->imgparam && args->seq->imgparam[i].stats) {
+				free(args->seq->imgparam[i].stats);
+				args->seq->imgparam[i].stats = NULL;
+			}
+		}
+	}
 
 	// compute for the first image to have scale0 mul0 and offset0
 	if (_compute_normalization_for_image(args, 0, coeff->offset, coeff->mul, coeff->scale, mode,
