@@ -972,7 +972,9 @@ int do_fwhm_sequence_processing(sequence *seq, int layer, int print_psf) {
 			fitted_PSF *star = seq->regparam[layer][i].fwhm_data;
 			if (star) {
 				// see algos/PSF.h for more fields to print
-				fprintf(stdout, "%d\t%f\t%f\t%f\t%f\t%f\n", i, star->A, star->mag, star->fwhmx, star->xpos, star->ypos);
+				fprintf(stdout, "%d\t%f\t%f\t%f\t%f\t%f\n", i, star->A,
+						star->mag + com.magOffset, star->fwhmx, star->xpos,
+						star->ypos);
 			}
 		}
 	}

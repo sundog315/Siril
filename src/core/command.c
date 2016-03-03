@@ -139,6 +139,7 @@ command commande[] = {
 #ifdef _OPENMP
 	{"setcpu", 1, "setcpu number", process_set_cpu},
 #endif
+	{"setmag", 1, "setmag magnitude", process_set_mag},
 	{"split", 3, "split R G B", process_split},
 	{"stat", 0, "stat", process_stat},
 	{"stackall", 0, "stackall", process_stackall},
@@ -150,6 +151,7 @@ command commande[] = {
 	/* unsharp masking of current image or genname sequence */
 	{"unselect", 2, "unselect from to", process_unselect},
 	{"unsharp", 2, "unsharp sigma multi", process_unsharp},
+	{"unsetmag", 0, "unsetmag", process_unset_mag},
 //	{"unsharp2", 5, "unsharp2 sigma multi src dest number", process_unsharp2},
 
 	{"visu", 2, "visu low high", process_visu},
@@ -637,11 +639,44 @@ int process_rotatepi(int nb){
 	return 0;	
 }
 
+int process_set_mag(int nb) {
+	int layer = match_drawing_area_widget(com.vport[com.cvport], FALSE);
+	double mag;
+
+	mag = atof(word[1]);
+
+	if (layer != -1) {
+
+		if (com.selection.w > 300 || com.selection.h > 300){
+			siril_log_message("Current selection is too large. To determine the PSF, please make a selection around a single star.\n");
+			return 1;
+		}
+		if (com.selection.w <= 0 || com.selection.h <= 0){
+			siril_log_message("Select an area first\n");
+			return 1;
+		}
+		fitted_PSF *result = psf_get_minimisation(&gfit, layer, &com.selection);
+		if (result) {
+			com.magOffset = mag - result->mag;
+			siril_log_message("Relative magnitude: %.3lf, "
+					"True reduced magnitude: %.3lf, "
+					"Offset: %.3lf\n", result->mag, mag, com.magOffset);
+			free(result);
+		}
+	}
+	return 0;
+}
+
+int process_unset_mag(int nb) {
+	com.magOffset = 0.0;
+
+	return 0;
+}
+
 int process_psf(int nb){
 	int layer = match_drawing_area_widget(com.vport[com.cvport], FALSE);
 	if (layer != -1) {
-		if (!com.drawn || com.drawing)
-			return 1;
+
 		if (com.selection.w > 300 || com.selection.h > 300){
 			siril_log_message("Current selection is too large. To determine the PSF, please make a selection around a single star.\n");
 			return 1;

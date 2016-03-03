@@ -539,6 +539,7 @@ struct cominf {
 	fitted_PSF **stars;		// list of stars detected in the current image
 	gboolean star_is_seqdata;	// the only star in stars belongs to seq, don't free it
 	int selected_star;		// current selected star in the GtkListStore
+	double magOffset;		// offset to reduce the real magitude
 	
 	gradient *grad;
 	int grad_nb_boxes, grad_size_boxes;

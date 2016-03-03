@@ -5026,9 +5026,10 @@ void on_extract_channel_button_ok_clicked(GtkButton *button, gpointer user_data)
 /******************* POPUP GRAY MENU *******************************/
 
 void on_menu_gray_psf_activate(GtkMenuItem *menuitem, gpointer user_data) {
-	char msg[256];
+	char msg[512];
 	fitted_PSF *result = NULL;
 	int layer = match_drawing_area_widget(com.vport[com.cvport], FALSE);
+	char *str;
 
 	if (layer == -1)
 		return;
@@ -5044,17 +5045,22 @@ void on_menu_gray_psf_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	result = psf_get_minimisation(&gfit, layer, &com.selection);
 	if (!result)
 		return;
+
+	if (com.magOffset > 0.0)
+		str = "true reduced";
+	else
+		str = "relative";
 	g_snprintf(msg, sizeof(msg),
 			"Centroid Coordinates:\n\t\tx0=%.2fpx\n\t\ty0=%.2fpx\n\n"
 					"Full Width Half Maximum:\n\t\tFWHMx=%.2f%s\n\t\tFWHMy=%.2f%s\n\n"
 					"Angle:\n\t\t%0.2fdeg\n\n"
 					"Background Value:\n\t\tB=%.6f\n\n"
 					"Maximal Intensity:\n\t\tA=%.6f\n\n"
-					"Relative Magnitude:\n\t\tm=%.2f\n\n"
+					"Magnitude (%s):\n\t\tm=%.2f\n\n"
 					"RMSE:\n\t\tRMSE=%.3e", result->x0 + com.selection.x,
 			com.selection.y + com.selection.h - result->y0, result->fwhmx,
 			result->units, result->fwhmy, result->units, result->angle, result->B,
-			result->A, result->mag, result->rmse);
+			result->A, str, result->mag + com.magOffset, result->rmse);
 	show_data_dialog(msg, "PSF Results");
 	free(result);
 }
