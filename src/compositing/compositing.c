@@ -424,6 +424,14 @@ int no_color_available() {	// don't test luminance
 	return 1;
 }
 
+/* the 'enable luminance' checkbox callback */
+void on_composition_use_lum_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
+	luminance_mode = gtk_toggle_button_get_active(togglebutton);
+	select_reference_layer(luminance_mode ? 0 : -1);
+	if (has_fit(0) && number_of_images_loaded() >= 1)
+		update_result(1);
+}
+
 /* callback for the file chooser's file selection: try to load the pointed file, allocate the
  * destination image if this is the first image, and update the result. */
 void on_filechooser_file_set(GtkFileChooserButton *widget, gpointer user_data) {
@@ -483,7 +491,9 @@ void on_filechooser_file_set(GtkFileChooserButton *widget, gpointer user_data) {
 	/* special case of luminance selected */
 	if (layer == 0) {
 		GtkToggleButton *lum_button = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder, "composition_use_lum"));
+		g_signal_handlers_block_by_func(lum_button, on_composition_use_lum_toggled, NULL);
 		gtk_toggle_button_set_active(lum_button, !retval);
+		g_signal_handlers_unblock_by_func(lum_button, on_composition_use_lum_toggled, NULL);
 		luminance_mode = !retval;
 		if (!retval)
 			select_reference_layer(0);
@@ -530,14 +540,6 @@ void on_filechooser_file_set(GtkFileChooserButton *widget, gpointer user_data) {
 		adjust_cutoff_from_updated_gfit();
 		redraw(com.cvport, REMAP_ALL);
 	}
-}
-
-/* the 'enable luminance' checkbox callback */
-void on_composition_use_lum_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
-	luminance_mode = gtk_toggle_button_get_active(togglebutton);
-	select_reference_layer(luminance_mode ? 0 : -1);
-	if (has_fit(0) && number_of_images_loaded() >= 1)
-		update_result(1);
 }
 
 /* start alignming the layers: create an 'internal' sequence and run the seected method on it */
@@ -737,8 +739,9 @@ void luminance_and_colors_align_and_compose() {
 	for (y = 0; y < gfit.ry; y++) {
 		for (x = 0; x < gfit.rx; x++) {
 			int layer;
-			gdouble X, Y, Z;
-			gdouble a, b, i;
+			gdouble h, s, i;
+			//gdouble X, Y, Z;
+			//gdouble a, b, i;
 			/* get color information */
 			GdkRGBA pixel;
 			clear_pixel(&pixel);
@@ -751,16 +754,18 @@ void luminance_and_colors_align_and_compose() {
 			}
 			rgb_pixel_limiter(&pixel);
 
-			rgb_to_xyz(pixel.red, pixel.green, pixel.blue, &X, &Y, &Z);
-			xyz_to_LAB(X, Y, Z, &i, &a, &b);
+			rgb_to_hsv(pixel.red,pixel.green,pixel.blue, &h,&s,&i);
+			//rgb_to_xyz(pixel.red, pixel.green, pixel.blue, &X, &Y, &Z);
+			//xyz_to_LAB(X, Y, Z, &i, &a, &b);
 
 			/* add luminance by replacing it in the HSI */
 			i = (double)get_composition_pixel_value(0, 0, x, y) /
 				(double)(layers[0]->the_fit.maxi);
 
 			/* converting back to RGB */
-			LAB_to_xyz(i, a, b, &X, &Y, &Z);
-			xyz_to_rgb(X, Y, Z, &pixel.red, &pixel.green, &pixel.blue);
+			//LAB_to_xyz(i, a, b, &X, &Y, &Z);
+			//xyz_to_rgb(X, Y, Z, &pixel.red, &pixel.green, &pixel.blue);
+			hsv_to_rgb(h,s,i, &pixel.red,&pixel.green,&pixel.blue);
 			rgb_pixel_limiter(&pixel);
 
 			/* and store in gfit */

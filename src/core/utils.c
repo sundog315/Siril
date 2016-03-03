@@ -62,13 +62,13 @@ enum token_index {
 int round_to_int(double x) {
 	assert(x >= INT_MIN-0.5);
 	assert(x <= INT_MAX+0.5);
-	if (x >= 0)
+	if (x >= 0.0)
 		return (int) (x + 0.5);
 	return (int) (x - 0.5);
 }
 
 WORD round_to_WORD(double x) {
-	if (x <= 0)
+	if (x <= 0.0)
 		return (WORD) 0;
 	if (x > USHRT_MAX_DOUBLE)
 		return USHRT_MAX;
@@ -76,7 +76,7 @@ WORD round_to_WORD(double x) {
 }
 
 BYTE round_to_BYTE(double x) {
-	if (x <= 0)
+	if (x <= 0.0)
 		return (BYTE) 0;
 	if (x > UCHAR_MAX_DOUBLE)
 		return UCHAR_MAX;
@@ -84,7 +84,7 @@ BYTE round_to_BYTE(double x) {
 }
 
 BYTE conv_to_BYTE(double x) {
-	if (x == 0)
+	if (x == 0.0)
 		return (BYTE) 0;
 	if (x == USHRT_MAX_DOUBLE)
 		return UCHAR_MAX;

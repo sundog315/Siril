@@ -144,10 +144,7 @@ void rgb_to_hsl(double r, double g, double b, double *h, double *s, double *l) {
 	*h /= 6;
 }
 
-/* In these functions h =0...360, s=0...1, v=0....1 
- * So be careful: it is not the same behaviour than rgb_to_hsl
- * and its reversal. But I think that it is a better choice */
-
+/* all variables are between 0 and 1. h takes 0 for grey */
 void rgb_to_hsv(double r, double g, double b, double *h, double *s, double *v) {
 	double cmax, cmin, delta;
 
@@ -156,29 +153,34 @@ void rgb_to_hsv(double r, double g, double b, double *h, double *s, double *v) {
 	cmin = min(r, g);
 	cmin = min(cmin, b);
 	delta = cmax - cmin;
-	*s = (delta == 0.0 ? 0.0 : delta / cmax);
 	*v = cmax;
+	if (delta == 0.0) {
+		*s = 0.0;
+		*h = 0.0;
+		return;
+	}
+	*s = delta / cmax;
 
 	if (cmax == r)
-		*h = (((g - b) / delta)) * 60.0;
+		*h = (((g - b) / delta)) / 6.0;
 	else if (cmax == g)
-		*h = (((b - r) / delta) + 2.0) * 60.0;
+		*h = (((b - r) / delta) + 2.0) / 6.0;
 	else
-		*h = (((r - g) / delta) + 4.0) * 60.0;
+		*h = (((r - g) / delta) + 4.0) / 6.0;
 
 	if (*h < 0.0)
-		*h += 360.0;
+		*h += 1.0;
 }
 
 void hsv_to_rgb(double h, double s, double v, double *r, double *g, double *b) {
 	double p, q, t, f;
 	int i;
 
-	if (h >= 360.0)
-		h -= 360.0;
-	h /= 60.0;
-	i = (int) h;
-	f = h - i;
+	if (h >= 1.0)
+		h -= 1.0;
+	h *= 6.0;
+	i = (int)h;
+	f = h - (double)i;
 	p = v * (1.0 - s);
 	q = v * (1.0 - (s * f));
 	t = v * (1.0 - (s * (1.0 - f)));
