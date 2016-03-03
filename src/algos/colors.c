@@ -377,7 +377,7 @@ gpointer extract_channels(gpointer p) {
 			double g = (double) buf[GLAYER][i] / USHRT_MAX_DOUBLE;
 			double b = (double) buf[BLAYER][i] / USHRT_MAX_DOUBLE;
 			rgb_to_hsv(r, g, b, &h, &s, &v);
-			buf[RLAYER][i] = round_to_WORD(h);// h is set between 0 and 360 in this function
+			buf[RLAYER][i] = round_to_WORD(h * 360.0);
 			buf[GLAYER][i] = round_to_WORD(s * USHRT_MAX_DOUBLE);
 			buf[BLAYER][i] = round_to_WORD(v * USHRT_MAX_DOUBLE);
 		}

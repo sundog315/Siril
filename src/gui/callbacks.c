@@ -1177,9 +1177,10 @@ int make_index_for_rainbow(BYTE index[][3]) {
 	double h, s, v, r, g, b;
 
 	for (i = 0; i < UCHAR_MAX + 1; i++) {
-		r = g = b = (double) i / 255.0;
+		r = g = b = (double) i / UCHAR_MAX_DOUBLE;
 		rgb_to_hsv(r, g, b, &h, &s, &v);
-		h = (300. - (double) i * (300. / 255.)); /* Arbitrary: we want h from 300 to 0 deg */
+		double off = 300.0 / 360.0;  /* Arbitrary: we want h from 300 to 0 deg */
+		h = (off - (double) i * (off / UCHAR_MAX_DOUBLE));
 		s = 1.;
 		v = 1.; /* Saturation and Value are set to 100%  */
 		hsv_to_rgb(h, s, v, &r, &g, &b);
