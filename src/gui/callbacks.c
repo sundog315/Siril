@@ -1492,8 +1492,8 @@ void opendial(void) {
 	gint res;
 	GtkWindow *main_window = GTK_WINDOW(
 			gtk_builder_get_object(builder, "main_window"));
-	GtkWindow *controle_window = GTK_WINDOW(
-			gtk_builder_get_object(builder, "controle_window"));
+	GtkWindow *control_window = GTK_WINDOW(
+			gtk_builder_get_object(builder, "control_window"));
 
 	if (!com.wd)
 		return;
@@ -1505,7 +1505,7 @@ void opendial(void) {
 	case OD_FLAT:
 	case OD_DARK:
 	case OD_OFFSET:
-		widgetdialog = gtk_file_chooser_dialog_new("Open File", controle_window,
+		widgetdialog = gtk_file_chooser_dialog_new("Open File", control_window,
 				GTK_FILE_CHOOSER_ACTION_OPEN, ("_Cancel"), GTK_RESPONSE_CANCEL,
 				("_Open"), GTK_RESPONSE_ACCEPT,
 				NULL);
@@ -1515,7 +1515,7 @@ void opendial(void) {
 		set_filters_dialog(dialog);
 		break;
 	case OD_CWD:
-		widgetdialog = gtk_file_chooser_dialog_new("Open File", controle_window,
+		widgetdialog = gtk_file_chooser_dialog_new("Open File", control_window,
 				GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, ("_Cancel"),
 				GTK_RESPONSE_CANCEL, ("_Open"), GTK_RESPONSE_ACCEPT,
 				NULL);
@@ -1534,7 +1534,7 @@ void opendial(void) {
 		set_filters_dialog(dialog);
 		break;
 	case OD_CONVERT:
-		widgetdialog = gtk_file_chooser_dialog_new("Open File", controle_window,
+		widgetdialog = gtk_file_chooser_dialog_new("Open File", control_window,
 				GTK_FILE_CHOOSER_ACTION_OPEN, ("_Cancel"), GTK_RESPONSE_CANCEL,
 				("_Open"), GTK_RESPONSE_ACCEPT,
 				NULL);
