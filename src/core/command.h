@@ -93,6 +93,7 @@ int	process_visu(int nb);
 int	process_fill2(int nb);
 int	process_findstar(int nb);
 int	process_findhot(int nb);
+int process_cosme(int nb);
 int	process_fmedian(int nb);
 int	process_fill(int nb);
 int	process_offset(int nb);

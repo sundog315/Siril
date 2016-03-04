@@ -65,6 +65,7 @@ command commande[] = {
 	{"cd", 1, "cd directory (define the working directory)", process_cd},
 	{"clearstar", 0, "clearstar", process_clearstar},
 	{"contrast", 0, "contrast", process_contrast},
+	{"cosme", 2, "cosme [filename].lst is_cfa (0=no CFA <>0=CFA)", process_cosme},
 	{"crop", 0, "crop [x y width height]", process_crop}, 
 
 	{"ddp", 3, "ddp level coef sigma", process_ddp}, 
@@ -948,11 +949,76 @@ int process_findhot(int nb){
 	
 	point *p = find_deviant_pixels(&gfit, k, &count);
 	siril_log_message("Number of hot pixels: %d\n", count);
-	for (i = 0; i < count; i++)
-		fprintf(cosme_file, "P %d %d\n", (int)p[i].x, (int)p[i].y);
+	for (i = 0; i < count; i++) {
+		int y = gfit.ry - (int)p[i].y - 1;  /* FITS is stored bottom to top */
+		fprintf(cosme_file, "P %d %d\n", (int)p[i].x, y);
+	}
 
 	free(p);
 	fclose(cosme_file);
+
+	return 0;
+}
+
+int process_cosme(int nb) {
+	FILE* cosme_file = NULL;
+	point p;
+	double dirty;
+	int is_cfa, i = 0, retval = 0;
+	char line[64];
+
+	if (!ends_with(word[1], ".lst"))
+		strcat(word[1], ".lst");
+	cosme_file = fopen(word[1], "r");
+	if (cosme_file == NULL) {
+		siril_log_message("Cannot open file: %s\n", word[1]);
+		return 1;
+	}
+	is_cfa = atoi(word[2]);
+
+	while (fgets(line, 63, cosme_file)) {
+		++i;
+		switch (line[0]) {
+		case '#': // comments.
+			continue;
+			break;
+		case 'P':
+			if (sscanf(line + 2, "%lf %lf", &p.x, &p.y) != 2) {
+				fprintf(stderr, "cosmetic correction: "
+						"cosme file format error at line %d: %s", i, line);
+				retval = 1;
+				continue;
+			}
+			p.y = gfit.ry - p.y - 1;  /* FITS are stored bottom to top */
+			cosmeticCorrOnePoint(&gfit, p, is_cfa);
+			break;
+		case 'L':
+			if (sscanf(line + 2, "%lf %lf", &p.y, &dirty) != 2) {
+				fprintf(stderr, "cosmetic correction: "
+						"cosme file format error at line %d: %s\n", i, line);
+				retval = 1;
+				continue;
+			}
+			p.y = gfit.ry - p.y - 1; /* FITS are stored bottom to top */
+			cosmeticCorrOneLine(&gfit, p, is_cfa);
+			break;
+			/* TODO: add case C, for column */
+		case 'C':
+			fprintf(stderr, "cosmetic correction: "
+					"Column removal not handled yet, line %d: %s\n", i, line);
+			retval = 1;
+			continue;
+		default:
+			fprintf(stderr, "cosmetic correction: "
+					"cosme file format error at line %d: %s\n", i, line);
+			retval = 1;
+		}
+	}
+
+	fclose(cosme_file);
+	if (retval)
+		siril_log_message("There were some errors, please check your input file.\n");
+
 	adjust_cutoff_from_updated_gfit();
 	redraw(com.cvport, REMAP_ALL);
 	redraw_previews();
@@ -1351,324 +1417,3 @@ int processcommand(const char *line) {
 	free(myline);
 	return 0;
 }
-/**********************************************************************/
-/************** OLD FUNCTIONS: MUST BE REINTEGRATED OR NOT*************/
-/**********************************************************************/
-
-#if 0
-	/* displays genname sequence from start_im to end_im with delay in 0.1 s and stride stride */
-	{"animate", 3, "animate genname start_im end_im delay stride", process_animate},
-	{"convert", 1, "convert filename", process_convert}, 
-	/* register a sequence of images */
-	{"register", 2, "register genname number [size x y]", process_register},
-	/* stacking a sequence using genname.shift */
-	{"composit", 2, "composit genname number shifted", process_composit},	
-	{"medstack", 2, "medstack genname number outfile ", process_medstack}, 
-	/* shift current image by x,y */
-	{"shift", 2, "shift x y", process_shift}, 
-	{"shift2", 5, "shift2 in out n x y", process_shift2}, 
-	/* effectively shifts first n images sequence "in", output goes to sequence "out" */
-	{"rshift2", 4, "rshift2 in out n shiftfile", process_rshift2}, 
-	{"rrgb", 1, "file [file file]", process_rrgb}, /* 1 rgb file or 3 r,g,b files */
-	{"grgb", 1, "file [file file]", process_grgb}, /* 1 rgb file or 3 r,g,b files */
-	{"brgb", 1, "file [file file]", process_brgb}, /* 1 rgb file or 3 r,g,b files */
-	{"lrgb", 2, "file file [file file]", process_lrgb},/* 1 lum file + (1 rgb file or 3 r,g,b files */
-	/* i***2 commands oper the genname sequence and filename*/
-	{"iadd2", 4, "iadd2 genname outname filename number", process_imoper2},
-	{"isub2", 4, "isub2 genname outname filename number", process_imoper2},
-	{"imul2", 4, "imul2 genname outname filename number", process_imoper2}, 
-	{"idiv2", 4, "idiv2 genname outname filename number", process_imoper2},
-	/* s*** commands oper scalar and curent image */
-	{"sadd", 1, "sadd scalar", process_soper},
-	{"smul", 1, "smul scalar", process_soper}, 
-	{"sdiv", 1, "sdiv scalar", process_soper},
-	{"ssub", 1, "ssub scalar", process_soper},
-	/* s***2 commands oper the genname sequence and scalar */
-	{"sadd2", 4, "sadd2 genname outname scalar number", process_soper2},
-	{"smul2", 4, "smul2 genname outname scalar number", process_soper2}, 
-	{"sdiv2", 4, "sdiv2 genname outname scalar number", process_soper2},
-	{"ssub2", 4, "sdiv2 genname outname scalar number", process_soper2},
-	{"composervb", 1, "composervb filename", process_composervb}, /* compose et sauve un bmp a partir de (wfit[0]), (wfit[1]), (wfit[2] */
-	{"trichro", 3, "trichro rfile gfile bfile", process_trichro}, /* compose et affiche un rgb a partir de rfile, vfile, bfile */
-#endif
-
-#if 0
-int process_convert(int nb){
-	int type;
-	char suffix[16];
-
-	// use stat_file instead
-	if (findtype(word[1], suffix, &type)){
-		siril_log_message("Dont know how to convert %s.%s\n",word[1], suffix);
-		return 1;
-	};
-	// FIXME	convert(word[1], suffix,type);
-	return 0;
-}
-
-int process_trichro(int nb){
-	fprintf(stderr, "process_trichro is obsolete\n");
-	return 0;
-}
-
-int process_composervb(int nb){
-	fprintf(stderr,"composervb: is obsolete\n");
-	return 0;
-}
-
-// scalar add
-int process_soper(int nb){ 
-	float scalar;
-
-	scalar=atof(word[1]);
-	soper(&gfit,scalar,word[0][1]);
-	redraw(com.cvport,REMAP_ALL);
-	return 0;
-}
-
-int process_imoper2(int nb){
-	int i;
-	int number;
-
-	number=atoi(word[4]);
-	readfits(word[3], &(wfit[4]), NULL);
-	for (i=1;i<=number;++i){
-		readfits(buildfilename(word[1],i), &(gfit), NULL);
-		process_imoper(0);
-		savefits(buildfilename(word[2],i),&(gfit));
-	}
-	return 0;
-}
-
-int process_soper2(int nb){
-	int i;
-	int number;
-	char in[256];
-
-	number=atoi(word[4]);
-	strncpy(in,word[1],255);
-	strcpy(word[1],word[4]);
-	for (i=1;i<=number;++i){
-		readfits(buildfilename(in,i), &(gfit), NULL);
-		process_soper(0);
-		savefits(buildfilename(word[2],i),&(gfit));
-	}
-	return 0;
-}
-
-int process_composit(int nb){
-	isempty(word[1]);
-	if (nb==4){
-		composit(word[1], atoi(word[2]), (char)atoi(word[3])); 
-	}
-	else {
-		composit(word[1], atoi(word[2]), 1); 
-	}
-	//level_adjust(&com.g);
-	redraw(com.cvport, REMAP_ALL);
-	return 0;
-}
-
-int process_shift(int nb){
-	shift(atoi(word[1]), atoi(word[2])); 
-	redraw(com.cvport, REMAP_ALL);
-	//	level_adjust(&com.g);
-	return 0;
-}
-
-int process_shift2(int nb){
-	int i, /*n,*/ x, y;
-
-	isempty(word[1]);
-	isempty(word[2]);
-	//n=atoi(word[3]);
-	x=atoi(word[4]);
-	y=atoi(word[5]);
-
-	for(i=1;i<=atoi(word[3]);++i){
-		buildfilename(word[1],i);
-		readfits(com.formname, &gfit, com.formname);
-		shift(x,y); 
-		buildfilename(word[2],i);
-		savefits(com.formname,&gfit);
-	}
-	return 0;
-}
-
-int process_rshift2(int nb){
-	isempty(word[1]);
-	isempty(word[2]);
-	if (nb==5){
-		rshift2(word[1], word[2], atoi(word[3]), word[4]); 
-	}
-	level_adjust(&gfit);
-	return 0;
-}
-
-int process_unsharp2(int nb){
-	int i;
-
-	for (i=0;i<=atoi(word[5]);++i){
-		if(!readfits(buildfilename(word[3], i), &(gfit), NULL)){
-			process_unsharp(nb);
-			savefits(buildfilename(word[4], i), &(gfit));
-		}
-	}
-	return 0;
-}
-
-int process_medstack(int nb){
-	char filename[256];
-	stat_file(word[3], &(com.imagetype), filename);
-	medstack(word[1],atoi(word[2]),filename);
-	strcpy(word[1],filename);
-	process_load(1);
-	return 0;
-}
-
-int process_register(int nb){
-	struct registration_args reg_args;
-
-	if (com.drawn){
-		reg_args.sel1size = max(com.rectW, com.rectH);
-		reg_args.sel1X = com.rectX + com.rectW/2;
-		reg_args.sel1Y = com.rectY + com.rectH/2;
-	}
-	else{
-		if (nb<6){
-			siril_log_message("Select a rectangle or provide centerx centery size\n");
-			return 0;
-		}
-		reg_args.sel1X = atoi(word[3]);
-		reg_args.sel1Y = atoi(word[4]);
-		reg_args.sel1size = atoi(word[5]);
-	}
-	reg_args.all_images = TRUE;
-	//reg_args.number = atoi(word[2]);
-	isempty(word[1]);
-	readseqfile(com.seq.name);
-	register_shift(word[1], &reg_args, com.reglayer); 
-	writeseqfile(com.seq.name);
-	return 0;
-}
-
-int process_animate(int nb){
-	int i, start, end, stride, err;
-	double delay;
-
-	start=atoi(word[2]);
-	end=atoi(word[3]);
-	delay=atof(word[4]);
-	stride=max(1,atoi(word[5]));
-	if(delay <0.02)
-		delay=0.02;
-	if(delay >1)
-		delay=(double)1;
-	for (i=start;i<=end && !(com.busy & ST_CANCEL);i+=stride){
-		timing(0,"");
-		buildfilename(word[1],i);
-		err=readfits(com.formname, &(gfit), com.formname);
-		siril_log_message("Displaying image %s %f\n", com.formname,delay);
-		progress(0);
-		if (err){
-			siril_log_message("animate: error\n");
-		}
-		else{
-			redraw(com.cvport,REMAP_ALL);
-		}
-
-		while (timing(1,"")<delay){
-			progress(0);
-		}
-	}
-	return 0;
-}
-
-int xrgb(int nb, int layer){
-	siril_log_message("Entering xrgb command, nb %d reading %s:%s:%s\n", nb, word[1], word[2], word[3]);
-	switch(nb){
-		case 2: // only one RGB filename is given
-			// according to the value x of layer
-			// perform xrgb composite
-			readfits(word[1],wfit+4, NULL);
-			copyfits(wfit+4,&gfit,CP_ALLOC|CP_EXPAND|CP_FORMAT,0); 	/* lrgb result goes to gfit */
-			copyfits(wfit+4,wfit,CP_ALLOC|CP_EXTRACT,layer); 	/* l */
-			copyfits(wfit+4,wfit+1,CP_ALLOC|CP_EXTRACT,RLAYER);	/* r */
-			copyfits(wfit+4,wfit+2,CP_ALLOC|CP_EXTRACT,GLAYER);	/* g */
-			copyfits(wfit+4,wfit+3,CP_ALLOC|CP_EXTRACT,BLAYER);	/* b */
-			break;
-
-		case 4:
-			readfits(word[1],wfit+1,NULL);	/* r */
-			copyfits(wfit+1,&gfit,CP_ALLOC|CP_EXPAND|CP_FORMAT,0); 	/* lrgb result goes to gfit */
-			readfits(word[2],wfit+2,NULL);	/* g */
-			readfits(word[3],wfit+3,NULL);	/* b */
-			copyfits(wfit+layer+1,wfit,CP_COPYA|CP_ALLOC|CP_FORMAT,layer); 	/* l */
-			break;
-
-		default:
-			// error
-			break;
-	}
-	fprintf(stderr,"invoking lrgb command from xrgb\n");
-	lrgb(wfit, wfit+1, wfit+2, wfit+3, &gfit);
-	redraw(com.cvport, REMAP_ALL);
-	redraw_previews();
-	return 0;
-}
-
-int process_rrgb(int nb){
-	fprintf(stderr,"entering rrgb command\n");
-	xrgb(nb,RLAYER);
-	return 0;
-}
-
-int process_grgb(int nb){
-	fprintf(stderr,"entering grgb command\n");
-	xrgb(nb,GLAYER);
-	return 0;
-}
-
-int process_brgb(int nb){
-	fprintf(stderr,"entering brgb command\n");
-	xrgb(nb,BLAYER);
-	return 0;
-}
-
-int process_lrgb(int nb){
-	//
-	// lrgb combines an rgb fits and a luminance fits
-	// through a short irruption in HSI space.
-	// takes 2 or 3 arguments. 
-	//			lrgb with 2 filenames l,rgb as arg1 and arg2
-	//			lrgb with 4 filenames l,r,g,b as arg[1234]
-	// 	
-	fprintf(stderr,"entering lrgb command\n");
-	switch(nb){
-		case 2:
-			readfits(word[2],wfit,NULL);
-			readfits(word[3],wfit+4,NULL);
-			copyfits(wfit+4,wfit+1,CP_EXTRACT,RLAYER); 	/* r */
-			copyfits(wfit+4,wfit+2,CP_EXTRACT,GLAYER);	/* g */
-			copyfits(wfit+4,wfit+3,CP_EXTRACT,BLAYER);	/* b */
-			break;
-
-		case 3:
-			readfits(word[2],wfit,NULL);
-			readfits(word[3],wfit+4,NULL);
-			readfits(word[4],wfit+4,NULL);
-			readfits(word[5],wfit+4,NULL);
-			break;	
-
-		default:
-			// error
-			break;
-	}
-	fprintf(stderr,"invoking lrgb function\n");
-	copyfits(wfit,&gfit,CP_ALLOC|CP_EXPAND|CP_FORMAT,0); 	/* lrgb result goes to gfit */
-
-	lrgb(wfit, wfit+1, wfit+2, wfit+3, &gfit);	
-	redraw(com.cvport, REMAP_ALL);
-	return 0;
-}
-#endif
