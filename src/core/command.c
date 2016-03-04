@@ -1002,12 +1002,23 @@ int process_cosme(int nb) {
 			p.y = gfit.ry - p.y - 1; /* FITS are stored bottom to top */
 			cosmeticCorrOneLine(&gfit, p, is_cfa);
 			break;
-			/* TODO: add case C, for column */
 		case 'C':
-			fprintf(stderr, "cosmetic correction: "
-					"Column removal not handled yet, line %d: %s\n", i, line);
+#ifdef HAVE_OPENCV
+			if (sscanf(line + 2, "%lf %lf", &p.y, &dirty) != 2) {
+				fprintf(stderr, "cosmetic correction: "
+						"cosme file format error at line %d: %s\n", i, line);
+				retval = 1;
+				continue;
+			}
+			p.y = gfit.rx - p.y - 1; /* FITS are stored bottom to top */
+			cvRotateImage(&gfit, 90.0, -1, 0);
+			cosmeticCorrOneLine(&gfit, p, is_cfa);
+			cvRotateImage(&gfit, -90.0, -1, 0);
+#else
+			siril_log_message("Opencv need to be compiled to remove bad column.\n");
 			retval = 1;
-			continue;
+#endif
+			break;
 		default:
 			fprintf(stderr, "cosmetic correction: "
 					"cosme file format error at line %d: %s\n", i, line);

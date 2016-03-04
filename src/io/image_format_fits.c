@@ -52,7 +52,7 @@ static char *Exposure[] = { "EXPTIME", "EXPOSURE", NULL };
 
 // return 0 on success, fills realname if not NULL with the opened file's name
 int readfits(const char *filename, fits *fit, char *realname) {
-	int status, chan;
+	int status;
 	long orig[3] = { 1L, 1L, 1L };
 	// orig ^ gives the coordinate in each dimension of the first pixel to be read
 	int zero = 0;

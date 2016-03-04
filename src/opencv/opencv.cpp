@@ -1,5 +1,4 @@
 /*
- * This file is part of Siril, an astronomy image processor.
  * Copyright (C) 2005-2011 Francois Meyer (dulle at free.fr)
  * Copyright (C) 2012-2015 team free-astro (see more in AUTHORS file)
  * Reference site is http://free-astro.vinvin.tf/index.php/Siril
@@ -111,7 +110,7 @@ int cvRotateImage(fits *image, double angle, int interpolation, int cropped) {
 	Mat in(image->ry, image->rx, CV_16UC3, bgrbgr);
 	Mat out(image->ry, image->rx, CV_16UC3);
 
-	if ((angle == 90.0 || angle == 270.0) && interpolation == -1) {	// fast rotation
+	if ((fmod(angle, 90.0) == 0) && interpolation == -1) {	// fast rotation
 		transpose(in, out);
 		if (angle == 90.0)
 			flip(out, out, 0);

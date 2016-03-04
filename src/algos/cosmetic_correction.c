@@ -85,14 +85,15 @@ static WORD *getMedian5x5Line(WORD *buf, const int yy, const int w, const int h,
 		 * XXXXX
 		 */
 		for (y = yy - radius; y <= yy + radius; y += step) {
-			for (x = xx - radius; x <= xx + radius; x += step) {
-				if (y >= 0 && y < h) {
-					if (x >= 0 && x < w) {
-						value[n++] = buf[x + y * w];
+			if (y != yy) {	// we skip the line
+				for (x = xx - radius; x <= xx + radius; x += step) {
+					if (y >= 0 && y < h) {
+						if (x >= 0 && x < w) {
+							value[n++] = buf[x + y * w];
+						}
 					}
 				}
 			}
-			if (y == yy) y += step;	// we skip the line
 		}
 		start = 20 - n - 1;
 		quicksort_s(value, 20);
