@@ -993,11 +993,13 @@ gpointer seqpreprocess(gpointer p) {
 
 		if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK)) {
 			/* Cosmetic correction */
-			int n;
-			point *p = find_deviant_pixels(dark, args->sigma, &n);
-			siril_log_message("Removing %d hot pixels...\n", n);
-			cosmeticCorrection(com.uniq->fit, p, n, args->is_cfa);
-			if (p) free(p);
+			long icold, ihot;
+			point *p = find_deviant_pixels(dark, args->sigma, &icold, &ihot);
+			siril_log_message("%ld pixels corrected (%ld + %ld)\n",
+					icold + ihot, icold, ihot);
+			cosmeticCorrection(com.uniq->fit, p, icold + ihot, args->is_cfa);
+			if (p)
+				free(p);
 		}
 
 		snprintf(dest_filename, 255, "%s%s", com.uniq->ppprefix,
@@ -1010,7 +1012,8 @@ gpointer seqpreprocess(gpointer p) {
 	} else {	// sequence
 		struct ser_struct *new_ser_file;
 		char source_filename[256];
-		int i, n;
+		int i;
+		long icold, ihot;
 		point *p = NULL;
 
 		// creating a SER file if the input data is SER
@@ -1023,8 +1026,9 @@ gpointer seqpreprocess(gpointer p) {
 		}
 
 		if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK)) {
-			p = find_deviant_pixels(dark, args->sigma, &n);
-			siril_log_message("Removing %d hot pixels...\n", n);
+			p = find_deviant_pixels(dark, args->sigma, &icold, &ihot);
+			siril_log_message("%ld pixels corrected (%ld + %ld)\n",
+					icold + ihot, icold, ihot);
 		}
 
 		fits *fit = calloc(1, sizeof(fits));
@@ -1058,7 +1062,7 @@ gpointer seqpreprocess(gpointer p) {
 			preprocess(fit, offset, dark, flat, args->normalisation);
 
 			if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK))
-				cosmeticCorrection(fit, p, n, args->is_cfa);
+				cosmeticCorrection(fit, p, icold + ihot, args->is_cfa);
 
 			snprintf(dest_filename, 255, "%s%s", com.seq.ppprefix,
 					source_filename);

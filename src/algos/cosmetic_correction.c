@@ -23,6 +23,7 @@
 
 #include "core/siril.h"
 #include "core/proto.h"
+#include "io/single_image.h"
 #include "algos/cosmetic_correction.h"
 
 static WORD getMedian5x5(WORD *buf, const int xx, const int yy, const int w,
@@ -133,35 +134,54 @@ static WORD getAverage3x3(WORD *buf, const int xx, const int yy, const int w,
 
 /* Gives a list of point p containing deviant pixel coordinates
  * p MUST be freed after the call
+ * if cold == -1 or hot == -1, this is a flag to not compute cold or hot
  */
-point *find_deviant_pixels(fits *fit, double k, int *count) {
+point *find_deviant_pixels(fits *fit, double sig[2], long *icold, long *ihot) {
 	int x, y, i;
 	WORD *buf = fit->pdata[RLAYER];
 	imstats *stat;
-	double sigma, median, threshold;
+	double sigma, median, thresHot, thresCold;
 	point *p;
 
 	/** statistics **/
 	stat = statistics(fit, RLAYER, NULL, STATS_BASIC);
 	sigma = stat->sigma;
 	median = stat->median;
-	threshold = (k * sigma) + median;
+
+	if (sig[0] == -1.0) {	// flag for no cold detection
+		thresCold = -1.0;
+	}
+	else {
+		double val = median - (sig[0] * sigma);
+		thresCold = (val > 0) ? val : 0.0;
+	}
+	if (sig[1] == -1.0) {	// flag for no hot detection
+		thresHot = USHRT_MAX_DOUBLE + 1;
+	}
+	else {
+		double val = median + (sig[1] * sigma);
+		thresHot = (val > USHRT_MAX_DOUBLE) ? USHRT_MAX_DOUBLE : val;
+	}
+
 	free(stat);
 
-	/** First we count hot pixels **/
-	*count = 0;
-	for (i = 0; i < fit->rx * fit->ry; i++)
-		if (buf[i] > threshold) (*count)++;
+	/** First we count deviant pixels **/
+	*icold = 0;
+	*ihot = 0;
+	for (i = 0; i < fit->rx * fit->ry; i++) {
+		if (buf[i] >= thresHot) (*ihot)++;
+		else if (buf[i] <= thresCold) (*icold)++;
+	}
 
-	/** Second we store hot pixels in p*/
-	int n = *count;
+	/** Second we store deviant pixels in p*/
+	int n = (*icold) + (*ihot);
 	if (n <= 0) return NULL;
 	p = calloc(n, sizeof(point));
 	i = 0;
 	for (y = 0; y < fit->ry; y++) {
 		for (x = 0; x < fit->rx; x++) {
 			double pixel = (double) buf[x + y * fit->rx];
-			if (pixel > threshold) {
+			if (pixel >= thresHot || pixel <= thresCold) {
 				p[i].x = x;
 				p[i].y = y;
 				i++;

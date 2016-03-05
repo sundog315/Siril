@@ -79,7 +79,7 @@ command commande[] = {
 	{"ffti", 2, "ffti magnitude phase", process_fft},
 	{"fill", 1, "fill value", process_fill},
 	{"fill2", 1, "fill2 value [x y width height]", process_fill2},
-	{"find_hot", 2, "find_hot filename threshold", process_findhot},
+	{"find_hot", 3, "find_hot filename cold_sigma hot_sigma", process_findhot},
 	{"findstar", 0, "findstar", process_findstar},
 	{"fmedian", 2, "fmedian ksize modulation", process_fmedian},
 	{"fixbanding", 2, "fixbanding amount sigma", process_fixbanding},
@@ -937,19 +937,25 @@ int process_findstar(int nb){
 }
 
 int process_findhot(int nb){
-	double k = atof(word[2]);
-	int count, i;
+	long icold, ihot;
+	char filename[256];
+	int i;
 	if (gfit.naxes[2] != 1) {
 		siril_log_message("find_hot must be applied on an one-channel master-dark frame");
 		return 1;
 	}
+	double sig[2];
+	sig[0] = atof(word[2]);
+	sig[1] = atof(word[3]);
+
+	point *p = find_deviant_pixels(&gfit, sig, &icold, &ihot);
+	siril_log_message("%ld cold and %ld hot pixels\n", icold, ihot);
+
 	FILE* cosme_file = NULL;
-	strcat(word[1], ".lst");
-	cosme_file = fopen(word[1], "w");
-	
-	point *p = find_deviant_pixels(&gfit, k, &count);
-	siril_log_message("Number of hot pixels: %d\n", count);
-	for (i = 0; i < count; i++) {
+	sprintf(filename, "%s.lst", word[1]);
+	cosme_file = fopen(filename, "w");
+
+	for (i = 0; i < icold + ihot; i++) {
 		int y = gfit.ry - (int)p[i].y - 1;  /* FITS is stored bottom to top */
 		fprintf(cosme_file, "P %d %d\n", (int)p[i].x, y);
 	}

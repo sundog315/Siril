@@ -49,6 +49,7 @@
 #include "registration/registration.h"
 #include "stacking/stacking.h"
 #include "algos/fft.h"
+#include "algos/cosmetic_correction.h"
 #include "compositing/compositing.h"
 #ifdef HAVE_OPENCV
 #include "opencv/opencv.h"
@@ -1773,18 +1774,22 @@ void set_prepro_button_sensitiveness() {
 }
 
 void on_cosmEnabledCheck_toggled(GtkToggleButton *button, gpointer user_data) {
-	GtkWidget *CFA, *Sig, *label;
+	GtkWidget *CFA, *SigHot, *SigCold, *checkHot, *checkCold;
 	gboolean is_active;
 
 	CFA = lookup_widget("cosmCFACheck");
-	Sig = lookup_widget("spinSigCosme");
-	label = lookup_widget("label37");
+	SigHot = lookup_widget("spinSigCosmeHot");
+	SigCold = lookup_widget("spinSigCosmeCold");
+	checkHot = lookup_widget("checkSigHot");
+	checkCold = lookup_widget("checkSigCold");
 
 	is_active = gtk_toggle_button_get_active(button);
 
 	gtk_widget_set_sensitive(CFA, is_active);
-	gtk_widget_set_sensitive(Sig, is_active);
-	gtk_widget_set_sensitive(label, is_active);
+	gtk_widget_set_sensitive(SigHot, is_active);
+	gtk_widget_set_sensitive(SigCold, is_active);
+	gtk_widget_set_sensitive(checkHot, is_active);
+	gtk_widget_set_sensitive(checkCold, is_active);
 }
 
 void on_settings_activate(GtkMenuItem *menuitem, gpointer user_data) {
@@ -3249,12 +3254,22 @@ void on_prepro_button_clicked(GtkButton *button, gpointer user_data) {
 		args->normalisation = atof(gtk_entry_get_text(norm_entry));
 	}
 	GtkToggleButton *CFA;
-	GtkSpinButton *Sig;
+	GtkSpinButton *sigHot, *sigCold;
 
 	CFA = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"cosmCFACheck"));
-	Sig = GTK_SPIN_BUTTON(gtk_builder_get_object(builder,"spinSigCosme"));
+	sigHot = GTK_SPIN_BUTTON(gtk_builder_get_object(builder,"spinSigCosmeHot"));
+	sigCold = GTK_SPIN_BUTTON(gtk_builder_get_object(builder,"spinSigCosmeCold"));
 
-	args->sigma = gtk_spin_button_get_value(Sig);
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(lookup_widget("checkSigCold"))))
+		args->sigma[0] = gtk_spin_button_get_value(sigCold);
+	else
+		args->sigma[0] = -1.0;
+
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(lookup_widget("checkSigHot"))))
+		args->sigma[1] = gtk_spin_button_get_value(sigHot);
+	else
+		args->sigma[1] = -1.0;
+
 	args->is_cfa = gtk_toggle_button_get_active(CFA);
 
 	/****/

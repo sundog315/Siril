@@ -206,7 +206,7 @@ typedef int (*sequence_proc)(sequence *seq, int seq_layer, int frame_no, fits *f
 struct preprocessing_data {
 	struct timeval t_start;
 	gboolean autolevel;
-	double sigma;
+	double sigma[2];
 	gboolean is_cfa;
 	float normalisation;
 	int retval;

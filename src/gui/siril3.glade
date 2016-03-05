@@ -177,7 +177,13 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkAdjustment" id="adjSigCosme">
+  <object class="GtkAdjustment" id="adjSigCosmeCold">
+    <property name="upper">50</property>
+    <property name="value">3</property>
+    <property name="step_increment">0.10000000000000001</property>
+    <property name="page_increment">10</property>
+  </object>
+  <object class="GtkAdjustment" id="adjSigCosmeHot">
     <property name="upper">50</property>
     <property name="value">3</property>
     <property name="step_increment">0.10000000000000001</property>
@@ -10689,6 +10695,7 @@ The bias/offset master image will be removed from all images in the sequence, bu
                         <property name="tooltip_text" translatable="yes">Choose your own normalisation value.
 After preprocessing, check that no overflow have been detected in the console output.</property>
                         <property name="max_length">5</property>
+                        <property name="width_chars">5</property>
                         <property name="max_width_chars">5</property>
                         <property name="text" translatable="yes">5000</property>
                         <property name="primary_icon_tooltip_text" translatable="yes">Normalisation value for flat division</property>
@@ -10786,12 +10793,12 @@ Uncheck if images come from a monochrome sensor.</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
-                        <property name="left_attach">2</property>
+                        <property name="left_attach">4</property>
                         <property name="top_attach">1</property>
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkSpinButton" id="spinSigCosme">
+                      <object class="GtkSpinButton" id="spinSigCosmeHot">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">How many times the standard deviation, the pixel value must differ to be considered as defective.</property>
@@ -10799,25 +10806,13 @@ Uncheck if images come from a monochrome sensor.</property>
                         <property name="width_chars">6</property>
                         <property name="max_width_chars">6</property>
                         <property name="input_purpose">number</property>
-                        <property name="adjustment">adjSigCosme</property>
+                        <property name="adjustment">adjSigCosmeHot</property>
                         <property name="digits">3</property>
                         <property name="numeric">True</property>
                         <property name="value">3</property>
                       </object>
                       <packing>
-                        <property name="left_attach">1</property>
-                        <property name="top_attach">1</property>
-                      </packing>
-                    </child>
-                    <child>
-                      <object class="GtkLabel" id="label37">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="halign">end</property>
-                        <property name="label" translatable="yes">sigma:</property>
-                      </object>
-                      <packing>
-                        <property name="left_attach">0</property>
+                        <property name="left_attach">3</property>
                         <property name="top_attach">1</property>
                       </packing>
                     </child>
@@ -10837,7 +10832,59 @@ Hot pixels are located on the master-dark.</property>
                       <packing>
                         <property name="left_attach">0</property>
                         <property name="top_attach">0</property>
-                        <property name="width">3</property>
+                        <property name="width">5</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSpinButton" id="spinSigCosmeCold">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="tooltip_text" translatable="yes">How many times the standard deviation, the pixel value must differ to be considered as defective.</property>
+                        <property name="halign">start</property>
+                        <property name="width_chars">6</property>
+                        <property name="max_width_chars">5</property>
+                        <property name="text" translatable="yes">3,000</property>
+                        <property name="input_purpose">number</property>
+                        <property name="adjustment">adjSigCosmeCold</property>
+                        <property name="digits">3</property>
+                        <property name="numeric">True</property>
+                        <property name="value">3</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="checkSigCold">
+                        <property name="label" translatable="yes">sigma cold:</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="halign">end</property>
+                        <property name="xalign">0</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="checkSigHot">
+                        <property name="label" translatable="yes">sigma hot:</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="halign">end</property>
+                        <property name="xalign">0</property>
+                        <property name="active">True</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">2</property>
+                        <property name="top_attach">1</property>
                       </packing>
                     </child>
                   </object>
