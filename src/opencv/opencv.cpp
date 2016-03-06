@@ -114,7 +114,7 @@ int cvRotateImage(fits *image, double angle, int interpolation, int cropped) {
 		transpose(in, out);
 		if (angle == 90.0)
 			flip(out, out, 0);
-		else
+		else // 270, -90
 			flip(out, out, 1);
 	} else {
 		Point2f pt(in.cols / 2.0, in.rows / 2.0);// We take the center of the image. Should we pass this in function parameters ?

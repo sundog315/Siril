@@ -300,7 +300,7 @@ struct layer_info_struct {
 };
 
 typedef enum { SEQ_REGULAR, SEQ_SER,
-#ifdef HAVE_FFMS2
+#if defined(HAVE_FFMS2_1) || defined(HAVE_FFMS2_2)
 	SEQ_AVI,
 #endif
 	SEQ_INTERNAL
@@ -333,7 +333,7 @@ struct sequ {
 
 	sequence_type type;
 	struct ser_struct *ser_file;
-#ifdef HAVE_FFMS2
+#if defined(HAVE_FFMS2_1) || defined(HAVE_FFMS2_2)
 	struct film_struct *film_file;
 	char *ext;		// extension of video, NULL if not video
 #endif

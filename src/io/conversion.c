@@ -315,7 +315,7 @@ void initialize_converters() {
 	strcat(text, "FITS-CFA images");
 	has_entry = TRUE;
 
-#ifdef HAVE_FFMS2
+#if defined(HAVE_FFMS2_1) || defined(HAVE_FFMS2_2)
 	supported_filetypes |= TYPEAVI;
 	if (has_entry)	strcat(text, ", ");
 	strcat(text, "Films");
@@ -393,7 +393,7 @@ image_type get_type_for_extension(const char *extension) {
 		return TYPEPIC;
 	} else if (supported_filetypes & TYPERAW && !check_for_raw_extensions(extension)) {
 		return TYPERAW;
-#ifdef HAVE_FFMS2
+#if defined(HAVE_FFMS2_1) || defined(HAVE_FFMS2_2)
 		// check_for_film_extensions is undefined without FFMS2
 	} else if (supported_filetypes & TYPEAVI && !check_for_film_extensions(extension)) {
 		return TYPEAVI;
@@ -571,7 +571,7 @@ static gpointer convert_thread_worker(gpointer p) {
 		if (imagetype == TYPEAVI) {
 			// we need to do a semi-recursive thing here,
 			// thankfully it's only one level deep
-#ifdef HAVE_FFMS2
+#if defined(HAVE_FFMS2_1) || defined(HAVE_FFMS2_2)
 			int frame;
 			fits *fit = calloc(1, sizeof(fits));
 			struct film_struct film_file;

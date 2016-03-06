@@ -22,7 +22,7 @@
 #include <config.h>
 #endif
 
-#ifdef HAVE_FFMS2
+#if defined(HAVE_FFMS2_1) || defined(HAVE_FFMS2_2)
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -75,19 +75,38 @@ int film_open_file(const char *sourcefile, struct film_struct *film) {
 	 * present on disk.
 	 * Index is saved using this pattern for the file name "film_filename.idx" */
 	FFMS_Index *index;
+#ifdef HAVE_FFMS2_2
+	FFMS_Indexer *indexer;
+#endif
 	char *idxfilename;
 	idxfilename = malloc(strlen(sourcefile) + 5);
 	sprintf(idxfilename, "%s.idx", sourcefile);
 	index = FFMS_ReadIndex(idxfilename, &film->errinfo);
 	if (index == NULL) {
+#ifdef HAVE_FFMS2_2
+		/* we need to create the indexer */
+		indexer = FFMS_CreateIndexer(sourcefile, &film->errinfo);
+		if (indexer == NULL) {
+#else
+			/* we need to create the index */
+			index = FFMS_MakeIndex(sourcefile, 0, 0, NULL, NULL, FFMS_IEH_ABORT, NULL, NULL, &film->errinfo);
+			if (index == NULL) {
+#endif
+			/* handle error (print errinfo.Buffer somewhere) */
+			fprintf(stderr, "FILM error: %s\n", film->errmsg);
+			free(idxfilename);
+			return FILM_ERROR;
+		}
+#ifdef HAVE_FFMS2_2
 		/* we need to create the index */
-		index = FFMS_MakeIndex(sourcefile, 0, 0, NULL, NULL, FFMS_IEH_ABORT, NULL, NULL, &film->errinfo);
+		index = FFMS_DoIndexing2(indexer, FFMS_IEH_ABORT, &film->errinfo);
 		if (index == NULL) {
 			/* handle error (print errinfo.Buffer somewhere) */
 			fprintf(stderr, "FILM error: %s\n", film->errmsg);
 			free(idxfilename);
 			return FILM_ERROR;
 		}
+#endif
 
 		/* write the index for future openings */
 		if (FFMS_WriteIndex(idxfilename, index, &film->errinfo)) {

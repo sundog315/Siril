@@ -955,6 +955,11 @@ int process_findhot(int nb){
 	FILE* cosme_file = NULL;
 	sprintf(filename, "%s.lst", word[1]);
 	cosme_file = fopen(filename, "w");
+	if (cosme_file == NULL) {
+		siril_log_message("Cannot open file: %s\n", filename);
+		free(dev);
+		return 1;
+	}
 
 	for (i = 0; i < icold + ihot; i++) {
 		int y = gfit.ry - (int) dev[i].p.y - 1;  /* FITS is stored bottom to top */
