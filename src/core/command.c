@@ -940,6 +940,7 @@ int process_findhot(int nb){
 	long icold, ihot;
 	char filename[256];
 	int i;
+	char type;
 	if (gfit.naxes[2] != 1) {
 		siril_log_message("find_hot must be applied on an one-channel master-dark frame");
 		return 1;
@@ -948,7 +949,7 @@ int process_findhot(int nb){
 	sig[0] = atof(word[2]);
 	sig[1] = atof(word[3]);
 
-	point *p = find_deviant_pixels(&gfit, sig, &icold, &ihot);
+	deviant_pixel *dev = find_deviant_pixels(&gfit, sig, &icold, &ihot);
 	siril_log_message("%ld cold and %ld hot pixels\n", icold, ihot);
 
 	FILE* cosme_file = NULL;
@@ -956,11 +957,15 @@ int process_findhot(int nb){
 	cosme_file = fopen(filename, "w");
 
 	for (i = 0; i < icold + ihot; i++) {
-		int y = gfit.ry - (int)p[i].y - 1;  /* FITS is stored bottom to top */
-		fprintf(cosme_file, "P %d %d\n", (int)p[i].x, y);
+		int y = gfit.ry - (int) dev[i].p.y - 1;  /* FITS is stored bottom to top */
+		if (dev[i].type == HOT_PIXEL)
+			type = 'H';
+		else
+			type = 'C';
+		fprintf(cosme_file, "P %d %d %c\n", (int) dev[i].p.x, y, type);
 	}
 
-	free(p);
+	free(dev);
 	fclose(cosme_file);
 
 	return 0;
@@ -968,10 +973,12 @@ int process_findhot(int nb){
 
 int process_cosme(int nb) {
 	FILE* cosme_file = NULL;
-	point p;
+	deviant_pixel dev;
 	double dirty;
 	int is_cfa, i = 0, retval = 0;
+	int nb_tokens;
 	char line[64];
+	char type;
 
 	if (!ends_with(word[1], ".lst"))
 		strcat(word[1], ".lst");
@@ -989,36 +996,48 @@ int process_cosme(int nb) {
 			continue;
 			break;
 		case 'P':
-			if (sscanf(line + 2, "%lf %lf", &p.x, &p.y) != 2) {
+			nb_tokens = sscanf(line + 2, "%lf %lf %c", &dev.p.x, &dev.p.y, &type);
+			if (nb_tokens != 2 && nb_tokens != 3) {
 				fprintf(stderr, "cosmetic correction: "
 						"cosme file format error at line %d: %s", i, line);
 				retval = 1;
 				continue;
 			}
-			p.y = gfit.ry - p.y - 1;  /* FITS are stored bottom to top */
-			cosmeticCorrOnePoint(&gfit, p, is_cfa);
+			if (nb_tokens == 2)	{
+				type = 'H';
+			}
+			if (type == 'H')
+				dev.type = HOT_PIXEL;
+			else
+				dev.type = COLD_PIXEL;
+			dev.p.y = gfit.ry - dev.p.y - 1;  /* FITS are stored bottom to top */
+			cosmeticCorrOnePoint(&gfit, dev, is_cfa);
 			break;
 		case 'L':
-			if (sscanf(line + 2, "%lf %lf", &p.y, &dirty) != 2) {
+			nb_tokens = sscanf(line + 2, "%lf %lf %c", &dev.p.y, &dirty, &type);
+			if (nb_tokens != 2 && nb_tokens != 3) {
 				fprintf(stderr, "cosmetic correction: "
 						"cosme file format error at line %d: %s\n", i, line);
 				retval = 1;
 				continue;
 			}
-			p.y = gfit.ry - p.y - 1; /* FITS are stored bottom to top */
-			cosmeticCorrOneLine(&gfit, p, is_cfa);
+			dev.type = HOT_PIXEL; // we force it
+			dev.p.y = gfit.ry - dev.p.y - 1; /* FITS are stored bottom to top */
+			cosmeticCorrOneLine(&gfit, dev, is_cfa);
 			break;
 		case 'C':
 #ifdef HAVE_OPENCV
-			if (sscanf(line + 2, "%lf %lf", &p.y, &dirty) != 2) {
+			nb_tokens = sscanf(line + 2, "%lf %lf %c", &dev.p.y, &dirty, &type);
+			if (nb_tokens != 2 && nb_tokens != 3) {
 				fprintf(stderr, "cosmetic correction: "
 						"cosme file format error at line %d: %s\n", i, line);
 				retval = 1;
 				continue;
 			}
-			p.y = gfit.rx - p.y - 1; /* FITS are stored bottom to top */
+			dev.type = HOT_PIXEL; // we force it
+			dev.p.y = gfit.rx - dev.p.y - 1; /* FITS are stored bottom to top */
 			cvRotateImage(&gfit, 90.0, -1, 0);
-			cosmeticCorrOneLine(&gfit, p, is_cfa);
+			cosmeticCorrOneLine(&gfit, dev, is_cfa);
 			cvRotateImage(&gfit, -90.0, -1, 0);
 #else
 			siril_log_message("Opencv need to be compiled to remove bad column.\n");

@@ -994,12 +994,12 @@ gpointer seqpreprocess(gpointer p) {
 		if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK)) {
 			/* Cosmetic correction */
 			long icold, ihot;
-			point *p = find_deviant_pixels(dark, args->sigma, &icold, &ihot);
+			deviant_pixel *dev = find_deviant_pixels(dark, args->sigma, &icold, &ihot);
 			siril_log_message("%ld pixels corrected (%ld + %ld)\n",
 					icold + ihot, icold, ihot);
-			cosmeticCorrection(com.uniq->fit, p, icold + ihot, args->is_cfa);
-			if (p)
-				free(p);
+			cosmeticCorrection(com.uniq->fit, dev, icold + ihot, args->is_cfa);
+			if (dev)
+				free(dev);
 		}
 
 		snprintf(dest_filename, 255, "%s%s", com.uniq->ppprefix,
@@ -1014,7 +1014,7 @@ gpointer seqpreprocess(gpointer p) {
 		char source_filename[256];
 		int i;
 		long icold, ihot;
-		point *p = NULL;
+		deviant_pixel *dev = NULL;
 
 		// creating a SER file if the input data is SER
 		if (com.seq.type == SEQ_SER) {
@@ -1026,7 +1026,7 @@ gpointer seqpreprocess(gpointer p) {
 		}
 
 		if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK)) {
-			p = find_deviant_pixels(dark, args->sigma, &icold, &ihot);
+			dev = find_deviant_pixels(dark, args->sigma, &icold, &ihot);
 			siril_log_message("%ld pixels corrected (%ld + %ld)\n",
 					icold + ihot, icold, ihot);
 		}
@@ -1062,7 +1062,7 @@ gpointer seqpreprocess(gpointer p) {
 			preprocess(fit, offset, dark, flat, args->normalisation);
 
 			if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK))
-				cosmeticCorrection(fit, p, icold + ihot, args->is_cfa);
+				cosmeticCorrection(fit, dev, icold + ihot, args->is_cfa);
 
 			snprintf(dest_filename, 255, "%s%s", com.seq.ppprefix,
 					source_filename);
@@ -1097,7 +1097,7 @@ gpointer seqpreprocess(gpointer p) {
 			free(new_ser_file);
 		}
 		set_progress_bar_data(PROGRESS_TEXT_RESET, PROGRESS_RESET);
-		if (p) free(p);
+		if (dev) free(dev);
 	}
 	args->retval = 0;
 	gdk_threads_add_idle(end_sequence_prepro, args);

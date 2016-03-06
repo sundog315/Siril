@@ -26,6 +26,7 @@
 #include "io/single_image.h"
 #include "algos/cosmetic_correction.h"
 
+
 static WORD getMedian5x5(WORD *buf, const int xx, const int yy, const int w,
 		const int h, gboolean is_cfa) {
 	int step, radius, x, y;
@@ -61,50 +62,39 @@ static WORD getMedian5x5(WORD *buf, const int xx, const int yy, const int w,
 	return median;
 }
 
-static WORD *getMedian5x5Line(WORD *buf, const int yy, const int w, const int h,
+
+static WORD *getAverage3x3Line(WORD *buf, const int yy, const int w, const int h,
 		gboolean is_cfa) {
 	int step, radius, x, xx, y;
 	WORD *cpyline;
 
-	if (is_cfa) {
-		step = 2;
-		radius = 4;
-	} else {
-		step = 1;
-		radius = 2;
-	}
+	if (is_cfa)
+		step = radius = 2;
+	else
+		step = radius = 1;
+
 	cpyline = calloc(w, sizeof(WORD));
 	for (xx = 0; xx < w; ++xx) {
 		int n = 0;
-		int start;
-		WORD *value = calloc(20, sizeof(WORD));
-		/* 20 neighbours
-		 * XXXXX
-		 * XXXXX
-		 *   o
-		 * XXXXX
-		 * XXXXX
-		 */
+		double value = 0;
 		for (y = yy - radius; y <= yy + radius; y += step) {
 			if (y != yy) {	// we skip the line
 				for (x = xx - radius; x <= xx + radius; x += step) {
 					if (y >= 0 && y < h) {
 						if (x >= 0 && x < w) {
-							value[n++] = buf[x + y * w];
+							value += (double) buf[x + y * w];
+							n++;
 						}
 					}
 				}
 			}
 		}
-		start = 20 - n - 1;
-		quicksort_s(value, 20);
-		cpyline[xx] = round_to_WORD(get_median_value_from_sorted_word_data(value + start, n));
-		free(value);
+		cpyline[xx] = round_to_WORD(value / n);
 	}
 	return cpyline;
 }
 
-/*
+
 static WORD getAverage3x3(WORD *buf, const int xx, const int yy, const int w,
 		const int h, gboolean is_cfa) {
 	int step, radius, x, y;
@@ -130,18 +120,18 @@ static WORD getAverage3x3(WORD *buf, const int xx, const int yy, const int w,
 	}
 	return round_to_WORD(value / n);
 }
-*/
+
 
 /* Gives a list of point p containing deviant pixel coordinates
  * p MUST be freed after the call
  * if cold == -1 or hot == -1, this is a flag to not compute cold or hot
  */
-point *find_deviant_pixels(fits *fit, double sig[2], long *icold, long *ihot) {
+deviant_pixel *find_deviant_pixels(fits *fit, double sig[2], long *icold, long *ihot) {
 	int x, y, i;
 	WORD *buf = fit->pdata[RLAYER];
 	imstats *stat;
 	double sigma, median, thresHot, thresCold;
-	point *p;
+	deviant_pixel *dev;
 
 	/** statistics **/
 	stat = statistics(fit, RLAYER, NULL, STATS_BASIC);
@@ -176,43 +166,50 @@ point *find_deviant_pixels(fits *fit, double sig[2], long *icold, long *ihot) {
 	/** Second we store deviant pixels in p*/
 	int n = (*icold) + (*ihot);
 	if (n <= 0) return NULL;
-	p = calloc(n, sizeof(point));
+	dev = calloc(n, sizeof(deviant_pixel));
 	i = 0;
 	for (y = 0; y < fit->ry; y++) {
 		for (x = 0; x < fit->rx; x++) {
 			double pixel = (double) buf[x + y * fit->rx];
-			if (pixel >= thresHot || pixel <= thresCold) {
-				p[i].x = x;
-				p[i].y = y;
+			if (pixel >= thresHot) {
+				dev[i].p.x = x;
+				dev[i].p.y = y;
+				dev[i].type = HOT_PIXEL;
+				i++;
+			}
+			else if (pixel <= thresCold) {
+				dev[i].p.x = x;
+				dev[i].p.y = y;
+				dev[i].type = COLD_PIXEL;
 				i++;
 			}
 		}
 	}
-	return p;
+	return dev;
 }
 
-int cosmeticCorrOnePoint(fits *fit, point p, gboolean is_cfa) {
+int cosmeticCorrOnePoint(fits *fit, deviant_pixel dev, gboolean is_cfa) {
 	WORD *buf = fit->pdata[RLAYER];		// Cosmetic correction, as developed here, is only used on 1-channel images
 	int width = fit->rx;
 	int height = fit->ry;
-	int x = (int) p.x;
-	int y = (int) p.y;
+	int x = (int) dev.p.x;
+	int y = (int) dev.p.y;
 
-	WORD mean = getMedian5x5(buf, x, y, width, height, is_cfa);
+	WORD mean = getAverage3x3(buf, x, y, width, height, is_cfa);
 
 	buf[x + y * fit->rx] = mean;
 	return 0;
 }
 
-int cosmeticCorrOneLine(fits *fit, point p, gboolean is_cfa) {
+int cosmeticCorrOneLine(fits *fit, deviant_pixel dev, gboolean is_cfa) {
 	WORD *buf = fit->pdata[RLAYER];
 	WORD *line, *newline;
 	int width = fit->rx;
 	int height = fit->ry;
-	int row = (int) p.y;
+	int row = (int) dev.p.y;
 
 	line = buf + row * width;
-	newline = getMedian5x5Line(buf, row, width, height, is_cfa);
+	newline = getAverage3x3Line(buf, row, width, height, is_cfa);
 	memcpy(line, newline, width * sizeof(WORD));
 
 	free(newline);
@@ -220,19 +217,23 @@ int cosmeticCorrOneLine(fits *fit, point p, gboolean is_cfa) {
 	return 0;
 }
 
-int cosmeticCorrection(fits *fit, point *p, int size, gboolean is_cfa) {
+int cosmeticCorrection(fits *fit, deviant_pixel *dev, int size, gboolean is_cfa) {
 	int i;
 	WORD *buf = fit->pdata[RLAYER];		// Cosmetic correction, as developed here, is only used on 1-channel images
 	int width = fit->rx;
 	int height = fit->ry;
 
 	for (i = 0; i < size; i++) {
-		int xx = (int) p[i].x;
-		int yy = (int) p[i].y;
+		WORD newPixel;
+		int xx = (int) dev[i].p.x;
+		int yy = (int) dev[i].p.y;
 
-		WORD median = getMedian5x5(buf, xx, yy, width, height, is_cfa);
+		if (dev[i].type == HOT_PIXEL)
+			newPixel = getAverage3x3(buf, xx, yy, width, height, is_cfa);
+		else
+			newPixel = getMedian5x5(buf, xx, yy, width, height, is_cfa);
 
-		buf[xx + yy * width] = median;
+		buf[xx + yy * width] = newPixel;
 	}
 	return 0;
 }
