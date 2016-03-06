@@ -199,6 +199,7 @@ int main(int argc, char *argv[]) {
 	gtk_text_buffer_create_tag (tbuf, "salmon", "foreground", "#ff9898", NULL);
 	gtk_text_buffer_create_tag (tbuf, "green", "foreground", "#01b301", NULL);
 	gtk_text_buffer_create_tag (tbuf, "blue", "foreground", "#7a7af8", NULL);
+	gtk_text_buffer_create_tag (tbuf, "plum", "foreground", "#8e4585", NULL);
 	
 	siril_log_color_message("Welcome to %s v%s\n", "bold", PACKAGE, VERSION);
 

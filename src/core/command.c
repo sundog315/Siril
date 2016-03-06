@@ -500,10 +500,31 @@ int process_log(int nb){
 	return 0;
 }
 
+static int compareSize(const void * const A, const void * const B) {
+	return strcmp((*(struct dirent **) A)->d_name,
+			(*(struct dirent **) B)->d_name);
+}
+
+/* list must be freed */
+static void sortedFilesByNames(DIR *dir, struct dirent **list) {
+	int count;
+	struct dirent *entry;
+
+	rewinddir(dir); /* reset position */
+
+	count = 0;
+	while ((entry = readdir(dir)) != NULL)
+		list[count++] = entry;
+
+	qsort(list, count, sizeof(*list), compareSize);
+
+}
+
 int process_ls(int nb){
 	DIR* ptdir;
-	struct dirent* entry;
+	struct dirent **list, *entry;
 	char filename[256];
+	int i, n;
 	
 	filename[0]='\0';
 	/* If a path is given in argument */
@@ -541,43 +562,62 @@ int process_ls(int nb){
 		siril_log_message("Siril cannot open the directory.\n");
 		return 1;
 	}
+
+	/* First determine the number of entries */
+	n = 0;
+	while ((entry = readdir(ptdir)) != NULL)
+		++n;
+
+	/* Allocate enough space */
+	list = malloc(n * sizeof(*list));
+	if (list == NULL) {
+		closedir(ptdir);
+		fprintf(stderr, "memory exhausted.\n");
+		return 1;
+	}
+
+	sortedFilesByNames(ptdir, list);
+
 	/* List the entries */
-	while ((entry = readdir(ptdir)) != NULL) {
+	for (i = 0 ; i < n ; ++i) {
 		struct stat entrystat;
 		char file_path[256];
 		const char *ext;
-		if (entry->d_name[0] == '.')
+		if (list[i]->d_name[0] == '.')
 			continue;	/* no hidden files */
 		if (filename[0] != '\0')
-			sprintf(file_path, "%s/%s", filename, entry->d_name);
+			sprintf(file_path, "%s/%s", filename, list[i]->d_name);
 		else
-			sprintf(file_path, "%s", entry->d_name);
+			sprintf(file_path, "%s", list[i]->d_name);
 		if (lstat(file_path, &entrystat)) {
 			perror("stat");
 			break;		
 		}
 		if (S_ISLNK(entrystat.st_mode)) {
-			siril_log_color_message("Link: %s\n", "bold", entry->d_name);
+			siril_log_color_message("Link: %s\n", "bold", list[i]->d_name);
 			continue;
 		}
 		if (S_ISDIR(entrystat.st_mode)) {
-			siril_log_color_message("Directory: %s\n", "green", entry->d_name);
+			siril_log_color_message("Directory: %s\n", "green", list[i]->d_name);
 			continue;
 		}
-		ext = get_filename_ext(entry->d_name);
+		ext = get_filename_ext(list[i]->d_name);
 		if (!ext) continue;
 		image_type type = get_type_for_extension(ext);
 		if (type != TYPEUNDEF) {
 			if (type == TYPEAVI || type == TYPESER)
-				siril_log_color_message("Sequence: %s\n", "salmon", entry->d_name);
-			else 	siril_log_color_message("Image: %s\n", "red", entry->d_name);
+				siril_log_color_message("Sequence: %s\n", "salmon", list[i]->d_name);
+			else if (type == TYPEFITS)
+				siril_log_color_message("Image: %s\n", "plum", list[i]->d_name);
+			else 	siril_log_color_message("Image: %s\n", "red", list[i]->d_name);
 		}
-		// RAW files are not listed with the above filter
-		else if (!strncmp(ext, ".seq", 4))
-			siril_log_color_message("Sequence: %s\n", "blue", entry->d_name);
+		else if (!strncmp(ext, "seq", 4))
+			siril_log_color_message("Sequence: %s\n", "blue", list[i]->d_name);
 	}
 	siril_log_message("********* END OF THE LIST *********\n");
 	closedir(ptdir);
+	free(list);
+
 	return 0;
 }
 
