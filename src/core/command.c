@@ -45,6 +45,7 @@
 #include "io/single_image.h"
 #include "algos/gradient.h"
 #include "algos/fft.h"
+#include "algos/quality.h"
 #include "algos/cosmetic_correction.h"
 #include "stacking/stacking.h"
 #include "registration/registration.h"
@@ -63,6 +64,7 @@ command commande[] = {
 	{"bgnoise", 0, "bgnoise", process_bgnoise},
 	
 	{"cd", 1, "cd directory (define the working directory)", process_cd},
+	{"cdg", 0, "cdg", process_cdg},
 	{"clearstar", 0, "clearstar", process_clearstar},
 	{"contrast", 0, "contrast", process_contrast},
 	{"cosme", 2, "cosme [filename].lst is_cfa (0=no CFA <>0=CFA)", process_cosme},
@@ -1132,6 +1134,19 @@ int process_fmedian(int nb){
 	set_cursor_waiting(TRUE);
 	start_in_new_thread(median_filter, args);
 	
+	return 0;
+}
+
+/* The name of this command should be COG in english but this choice
+ * was done to be consistent with IRIS
+ */
+int process_cdg(int nb) {
+	double x_avg, y_avg;
+
+	FindCentre(&gfit, &x_avg, &y_avg);
+	y_avg = gfit.ry - y_avg;	// FITS are stored bottom to top
+	siril_log_message("Center of gravity coordinates are (%.3lf, %.3lf)\n", x_avg, y_avg);
+
 	return 0;
 }
 

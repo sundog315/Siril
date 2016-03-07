@@ -88,9 +88,10 @@ int film_open_file(const char *sourcefile, struct film_struct *film) {
 		indexer = FFMS_CreateIndexer(sourcefile, &film->errinfo);
 		if (indexer == NULL) {
 #else
-			/* we need to create the index */
-			index = FFMS_MakeIndex(sourcefile, 0, 0, NULL, NULL, FFMS_IEH_ABORT, NULL, NULL, &film->errinfo);
-			if (index == NULL) {
+		/* we need to create the index */
+		index = FFMS_MakeIndex(sourcefile, 0, 0, NULL, NULL,
+				FFMS_IEH_ABORT, NULL, NULL, &film->errinfo);
+		if (index == NULL) {
 #endif
 			/* handle error (print errinfo.Buffer somewhere) */
 			fprintf(stderr, "FILM error: %s\n", film->errmsg);
