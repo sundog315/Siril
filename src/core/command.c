@@ -67,7 +67,8 @@ command commande[] = {
 	{"cdg", 0, "cdg", process_cdg},
 	{"clearstar", 0, "clearstar", process_clearstar},
 	{"contrast", 0, "contrast", process_contrast},
-	{"cosme", 2, "cosme [filename].lst is_cfa (0=no CFA <>0=CFA)", process_cosme},
+	{"cosme", 1, "cosme [filename].lst", process_cosme},
+	{"cosme_cfa", 1, "cosme [filename].lst", process_cosme},
 	{"crop", 0, "crop [x y width height]", process_crop}, 
 
 	{"ddp", 3, "ddp level coef sigma", process_ddp}, 
@@ -1034,7 +1035,10 @@ int process_cosme(int nb) {
 		siril_log_message("Cannot open file: %s\n", word[1]);
 		return 1;
 	}
-	is_cfa = atoi(word[2]);
+	if (word[0][5] == '_')
+		is_cfa = 1;
+	else
+		is_cfa = 0;
 
 	while (fgets(line, 63, cosme_file)) {
 		++i;
