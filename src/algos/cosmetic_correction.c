@@ -23,6 +23,8 @@
 
 #include "core/siril.h"
 #include "core/proto.h"
+#include "core/processing.h"
+#include "gui/callbacks.h"
 #include "io/single_image.h"
 #include "algos/cosmetic_correction.h"
 
@@ -234,6 +236,133 @@ int cosmeticCorrection(fits *fit, deviant_pixel *dev, int size, gboolean is_cfa)
 			newPixel = getMedian5x5(buf, xx, yy, width, height, is_cfa);
 
 		buf[xx + yy * width] = newPixel;
+	}
+	return 0;
+}
+
+/**** Autodetect *****/
+
+int cosmetic_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) {
+	char dest[256];
+	struct cosmetic_data *c_args = (struct cosmetic_data *) args->user;
+	int retval, chan;
+
+	for (chan = 0; chan < fit->naxes[2]; chan++) {
+		retval = autoDetect(fit, chan, c_args->sigma, &c_args->icold,
+				&c_args->ihot, c_args->is_cfa);
+		if (retval)
+			return retval;
+	}
+	siril_log_message("%ld pixels corrected (%ld + %ld)\n",
+			c_args->icold + c_args->ihot, c_args->icold, c_args->ihot);
+
+	snprintf(dest, 255, "%s%s%05d%s", c_args->seqEntry, args->seq->seqname, i,
+			com.ext);
+	return savefits(dest, fit);
+}
+
+void apply_cosmetic_to_sequence(struct cosmetic_data *cosme_args) {
+	struct generic_seq_args *args = malloc(sizeof(struct generic_seq_args));
+	args->seq = &com.seq;
+	args->filtering_criterion = seq_filter_included;
+	args->nb_filtered_images = com.seq.selnum;
+	args->prepare_hook = NULL;
+	args->image_hook = cosmetic_image_hook;
+	args->finalize_hook = NULL;
+	args->idle_function = NULL;
+	args->user = cosme_args;
+
+	cosme_args->fit = NULL;	// not used here
+
+	siril_log_color_message("Cosmetic Correction: processing...\n", "red");
+	gettimeofday(&args->t_start, NULL);
+	start_in_new_thread(generic_sequence_worker, args);
+}
+
+// idle function executed at the end of the BandingEngine processing
+gboolean end_autoDetect(gpointer p) {
+	struct cosmetic_data *args = (struct cosmetic_data *) p;
+
+	stop_processing_thread();// can it be done here in case there is no thread?
+	siril_log_message("%ld pixels corrected (%ld + %ld)\n",
+			args->icold + args->ihot, args->icold, args->ihot);
+	set_cursor_waiting(FALSE);
+	adjust_cutoff_from_updated_gfit();
+	redraw(com.cvport, REMAP_ALL);
+	redraw_previews();
+	set_cursor_waiting(FALSE);
+	update_used_memory();
+	free(args);
+	return FALSE;
+}
+
+gpointer autoDetectThreaded(gpointer p) {
+	struct cosmetic_data *args = (struct cosmetic_data *) p;
+	struct timeval t_start, t_end;
+	int retval, chan;
+
+	siril_log_color_message("Cosmetic Correction: processing...\n", "red");
+	gettimeofday(&t_start, NULL);
+
+	for (chan = 0; chan < args->fit->naxes[2]; chan++) {
+		retval = autoDetect(args->fit, chan, args->sigma, &args->icold,
+				&args->ihot, args->is_cfa);
+		if (retval) break;
+	}
+	gettimeofday(&t_end, NULL);
+	show_time(t_start, t_end);
+	gdk_threads_add_idle(end_autoDetect, args);
+
+	return GINT_TO_POINTER(retval);
+}
+
+/* this is an autodetect algorithm. Cold and hot pixels
+ *  are corrected in the same time */
+int autoDetect(fits *fit, int layer, double sig[2], long *icold, long *ihot,
+		gboolean is_cfa) {
+	int x, y;
+	int width = fit->rx;
+	int height = fit->ry;
+	double bkg, avgDev;
+	imstats *stat;
+
+	/* XXX: if cfa, stats are irrelevant. We should compute them taking
+	 * into account the Bayer pattern */
+	stat = statistics(fit, layer, NULL, STATS_BASIC | STATS_AVGDEV);
+	bkg = stat->median;
+	avgDev = stat->avgDev;
+	free(stat);
+
+	WORD *buf = fit->pdata[layer];
+
+	*icold = *ihot = 0L;
+
+	for (y = 0; y < height; y++) {
+		for (x = 0; x < width; x++) {
+			WORD pixel = buf[x + y * width];
+			WORD a = getAverage3x3(buf, x, y, width, height, is_cfa);
+			WORD m = getMedian5x5(buf, x, y, width, height, is_cfa);
+
+			/* Hot autodetect */
+			if (sig[1] != -1.0) {
+				double k1 = avgDev;
+				double k2 = k1 / 2;
+				double k3 = sig[1] * k1;
+				if ((a < bkg + k2) && (pixel > bkg + k1) && (pixel > m + k3)) {
+					(*ihot)++;
+					buf[x + y * width] = a;
+				}
+			}
+
+			/* Cold autodetect */
+			if (sig[0] != -1.0) {
+				double k = avgDev * sig[0];
+				if (((pixel + k) < bkg) && ((pixel + k) < m)) {
+					(*icold)++;
+					buf[x + y * width] = m;
+				}
+			}
+		}
 	}
 	return 0;
 }

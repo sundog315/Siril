@@ -83,9 +83,12 @@ command commande[] = {
 	{"fill", 1, "fill value", process_fill},
 	{"fill2", 1, "fill2 value [x y width height]", process_fill2},
 	{"find_hot", 3, "find_hot filename cold_sigma hot_sigma", process_findhot},
+	{"find_cosme", 2, "find_cosme cold_sigma hot_sigma", process_findcosme},
+	{"find_cosme_cfa", 2, "find_cosme_cfa cold_sigma hot_sigma", process_findcosme},
 	{"findstar", 0, "findstar", process_findstar},
 	{"fmedian", 2, "fmedian ksize modulation", process_fmedian},
 	{"fixbanding", 2, "fixbanding amount sigma", process_fixbanding},
+
 	
 	{"gauss", 1, "gauss sigma ", process_gauss},	
 	//~ {"gauss2", 1, "gauss sigma", process_gauss2},
@@ -139,6 +142,8 @@ command commande[] = {
 #endif
 	{"select", 2, "select from to", process_select},
 	{"seqcrop", 0, "seqcrop", process_seq_crop},
+	{"seqfind_cosme", 2, "seqfind_cosme cold_sigma hot_sigma", process_findcosme},
+	{"seqfind_cosme_cfa", 2, "seqfind_cosme_cfa cold_sigma hot_sigma", process_findcosme},
 	{"seqpsf", 0, "seqpsf", process_seq_psf},
 #ifdef _OPENMP
 	{"setcpu", 1, "setcpu number", process_set_cpu},
@@ -1270,6 +1275,32 @@ int process_fixbanding(int nb) {
 	set_cursor_waiting(TRUE);
 	start_in_new_thread(BandingEngineThreaded, args);
 	
+	return 0;
+}
+
+int process_findcosme(int nb) {
+
+	if (!sequence_is_loaded() && !single_image_is_loaded())
+		return 1;
+	struct cosmetic_data *args = malloc(sizeof(struct cosmetic_data));
+
+	args->sigma[0] = atof(word[1]);
+	args->sigma[1] = atof(word[2]);
+	if (word[0][10] == '_' || word[0][13] == '_') {	// find_cosme_cfa or seqfind_cosme_cfa
+		args->is_cfa = TRUE;
+	}
+	else {
+		args->is_cfa = FALSE;
+	}
+	args->fit = &gfit;
+	set_cursor_waiting(TRUE);
+	if (word[0][0] == 's' && sequence_is_loaded()) {
+		args->seqEntry = "cc_";
+		apply_cosmetic_to_sequence(args);
+	} else {
+		start_in_new_thread(autoDetectThreaded, args);
+	}
+
 	return 0;
 }
 

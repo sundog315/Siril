@@ -1514,6 +1514,7 @@ void apply_banding_to_sequence(struct banding_data *banding_args) {
 
 	banding_args->fit = NULL;	// not used here
 
+	gettimeofday(&args->t_start, NULL);
 	start_in_new_thread(generic_sequence_worker, args);
 }
 

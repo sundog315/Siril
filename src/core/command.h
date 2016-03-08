@@ -101,6 +101,7 @@ int	process_offset(int nb);
 int	process_scnr(int nb);
 int	process_fft(int nb);
 int	process_fixbanding(int nb);
+int process_findcosme(int nb);
 int	process_split(int nb);
 int	process_select(int nb);
 int process_set_mag(int nb);

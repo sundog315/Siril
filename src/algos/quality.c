@@ -435,7 +435,7 @@ static int _FindCentre(fits *fit, int x1, int y1, int x2, int y2, double *x_avg,
 // find the centre of brightness of the whole image
 int FindCentre(fits *fit, double *x_avg, double *y_avg) {
 	int x1 = 2;
-	int x2 = fit->rx - 1;
+	int x2 = fit->rx - 3;
 	int y1 = 0;
 	int y2 = fit->ry - 1;
 

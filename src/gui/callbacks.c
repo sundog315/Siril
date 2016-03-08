@@ -5624,7 +5624,7 @@ void on_button_apply_fixbanding_clicked(GtkButton *button, gpointer user_data) {
 	set_cursor_waiting(TRUE);
 
 	if (gtk_toggle_button_get_active(seq) && sequence_is_loaded()) {
-		if (args->seqEntry[0] == '\0')
+		if (args->seqEntry && args->seqEntry[0] == '\0')
 			args->seqEntry = "unband_";
 		apply_banding_to_sequence(args);
 	} else {

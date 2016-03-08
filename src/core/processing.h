@@ -32,6 +32,9 @@ struct generic_seq_args {
 	// user data: pointer to operation-specific data
 	void *user;
 
+	// show time at the end of process
+	struct timeval t_start;
+
 	// activate parallel execution
 	//gboolean parallel;
 };

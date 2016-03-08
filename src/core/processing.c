@@ -11,6 +11,7 @@
 // set_cursor_waiting(FALSE); is not included, but the TRUE is
 gpointer generic_sequence_worker(gpointer p) {
 	struct generic_seq_args *args = (struct generic_seq_args *)p;
+	struct timeval t_end;
 	char filename[256], msg[256];
 	float nb_framesf, progress = 0.f; // 0 to nb_framesf, for progress
 	int frame;	// the current frame, sequence index
@@ -75,6 +76,8 @@ the_end:
 	else {
 		set_progress_bar_data("Sequence processing succeeded.", PROGRESS_RESET);
 		siril_log_message("Sequence processing succeeded.\n");
+		gettimeofday(&t_end, NULL);
+			show_time(args->t_start, t_end);
 	}
 
 	if (args->finalize_hook && args->finalize_hook(args)) {
