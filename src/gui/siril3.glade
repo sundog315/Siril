@@ -617,6 +617,267 @@ enter a visible wavelength in nm</property>
       </object>
     </child>
   </object>
+  <object class="GtkDialog" id="cosmetic_dialog">
+    <property name="width_request">300</property>
+    <property name="can_focus">False</property>
+    <property name="title" translatable="yes">Cosmetic Correction</property>
+    <property name="resizable">False</property>
+    <property name="window_position">center</property>
+    <property name="type_hint">normal</property>
+    <property name="transient_for">main_window</property>
+    <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
+    <child internal-child="vbox">
+      <object class="GtkBox" id="dialog-vbox36">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">10</property>
+        <child internal-child="action_area">
+          <object class="GtkButtonBox" id="dialog-action_area37">
+            <property name="can_focus">False</property>
+            <property name="layout_style">end</property>
+            <child>
+              <object class="GtkButton" id="button_cosmetic_close">
+                <property name="label">gtk-close</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Close current window</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_button_cosmetic_close_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="button_cosmetic_ok">
+                <property name="label">gtk-apply</property>
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Apply Cosmetic Correction</property>
+                <property name="use_stock">True</property>
+                <signal name="clicked" handler="on_button_cosmetic_ok_clicked" swapped="no"/>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="pack_type">end</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="box14">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+            <child>
+              <object class="GtkGrid" id="grid42">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="row_spacing">10</property>
+                <property name="column_spacing">6</property>
+                <child>
+                  <object class="GtkCheckButton" id="cosmCFACheckBox">
+                    <property name="label" translatable="yes">CFA</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Check if the target frames are CFA images.
+Uncheck if images come from a monochrome sensor.</property>
+                    <property name="xalign">0</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkCheckButton" id="checkCosmeticSeq">
+                    <property name="label" translatable="yes">Apply to sequence</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">If a sequence is loaded and this is activated, perform the processing on all images of the sequence instead of only the loaded image.</property>
+                    <property name="xalign">0</property>
+                    <property name="draw_indicator">True</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkEntry" id="entryCosmeticSeq">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="tooltip_text" translatable="yes">Prefix of the image names resulting from the cosmetic correction process.</property>
+                    <property name="max_length">10</property>
+                    <property name="width_chars">10</property>
+                    <property name="max_width_chars">10</property>
+                    <property name="text" translatable="yes">cc_</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">2</property>
+                    <property name="top_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label37">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label" translatable="yes">Output prefix:</property>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkFrame" id="frame20">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label_xalign">0</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment" id="alignment24">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="left_padding">12</property>
+                        <child>
+                          <object class="GtkGrid" id="grid43">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="column_homogeneous">True</property>
+                            <child>
+                              <object class="GtkCheckButton" id="checkSigColdBox">
+                                <property name="label" translatable="yes">Cold Sigma:</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">How many times (in averrage deviation units) a pixel value must differ from the value of surrounding neighbors to be considered as a cold pixel.</property>
+                                <property name="halign">start</property>
+                                <property name="xalign">0</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <signal name="toggled" handler="on_checkSigCosme_toggled" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="spinSigCosmeColdBox">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">How many times (in averrage deviation units) a pixel value must differ from the value of surrounding neighbors to be considered as a cold pixel.</property>
+                                <property name="halign">end</property>
+                                <property name="hexpand">True</property>
+                                <property name="invisible_char">●</property>
+                                <property name="text" translatable="yes">50,00</property>
+                                <property name="adjustment">adjSigCosmeCold</property>
+                                <property name="climb_rate">0.01</property>
+                                <property name="digits">2</property>
+                                <property name="numeric">True</property>
+                                <property name="value">3</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkCheckButton" id="checkSigHotBox">
+                                <property name="label" translatable="yes">Hot Sigma:</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">How many times (in averrage deviation units) a pixel value must differ from the value of surrounding neighbors to be considered as a hot pixel.</property>
+                                <property name="halign">start</property>
+                                <property name="xalign">0</property>
+                                <property name="active">True</property>
+                                <property name="draw_indicator">True</property>
+                                <signal name="toggled" handler="on_checkSigCosme_toggled" swapped="no"/>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkSpinButton" id="spinSigCosmeHotBox">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="tooltip_text" translatable="yes">How many times (in averrage deviation units) a pixel value must differ from the value of surrounding neighbors to be considered as a hot pixel.</property>
+                                <property name="halign">end</property>
+                                <property name="hexpand">True</property>
+                                <property name="text" translatable="yes">50,00</property>
+                                <property name="adjustment">adjSigCosmeHot</property>
+                                <property name="climb_rate">0.01</property>
+                                <property name="digits">2</property>
+                                <property name="numeric">True</property>
+                                <property name="value">3</property>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">1</property>
+                              </packing>
+                            </child>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel" id="label162">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Auto detection</property>
+                        <attributes>
+                          <attribute name="weight" value="bold"/>
+                        </attributes>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
+                    <property name="width">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+                <child>
+                  <placeholder/>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </object>
   <object class="GtkFileFilter" id="filefilter1">
     <patterns>
       <pattern>*.fit</pattern>
@@ -3809,6 +4070,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="tooltip_text" translatable="yes">Prefix of the image names resulting from the cropping process.</property>
                 <property name="max_length">10</property>
                 <property name="width_chars">10</property>
+                <property name="max_width_chars">10</property>
                 <property name="text" translatable="yes">cropped_</property>
               </object>
               <packing>
@@ -9184,24 +9446,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                       </object>
                     </child>
                     <child>
-                      <object class="GtkMenuItem" id="menuitem_medianfilter">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Median Filter...</property>
-                        <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_menuitem_medianfilter_activate" swapped="no"/>
-                      </object>
-                    </child>
-                    <child>
-                      <object class="GtkMenuItem" id="menuitem_fft">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Fourier Transform...</property>
-                        <property name="use_underline">True</property>
-                        <signal name="activate" handler="on_menuitem_fft_activate" swapped="no"/>
-                      </object>
-                    </child>
-                    <child>
                       <object class="GtkMenuItem" id="menuitem_wavelets">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
@@ -9217,6 +9461,33 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="label" translatable="yes">Banding Reduction...</property>
                         <property name="use_underline">True</property>
                         <signal name="activate" handler="on_menuitem_fixbanding_activate" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="menuitem_cosmetic">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Cosmetic Correction...</property>
+                        <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_menuitem_cosmetic_activate" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="menuitem_fft">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Fourier Transform...</property>
+                        <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_menuitem_fft_activate" swapped="no"/>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkMenuItem" id="menuitem_medianfilter">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="label" translatable="yes">Median Filter...</property>
+                        <property name="use_underline">True</property>
+                        <signal name="activate" handler="on_menuitem_medianfilter_activate" swapped="no"/>
                       </object>
                     </child>
                     <child>
@@ -10857,10 +11128,11 @@ Hot pixels are located on the master-dark.</property>
                     </child>
                     <child>
                       <object class="GtkCheckButton" id="checkSigCold">
-                        <property name="label" translatable="yes">sigma cold:</property>
+                        <property name="label" translatable="yes">Cold Sigma:</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">How many times the standard deviation, the pixel value must differ to be considered as defective.</property>
                         <property name="halign">end</property>
                         <property name="xalign">0</property>
                         <property name="active">True</property>
@@ -10873,10 +11145,11 @@ Hot pixels are located on the master-dark.</property>
                     </child>
                     <child>
                       <object class="GtkCheckButton" id="checkSigHot">
-                        <property name="label" translatable="yes">sigma hot:</property>
+                        <property name="label" translatable="yes">Hot Sigma:</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">How many times the standard deviation, the pixel value must differ to be considered as defective.</property>
                         <property name="halign">end</property>
                         <property name="xalign">0</property>
                         <property name="active">True</property>

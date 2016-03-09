@@ -4298,9 +4298,14 @@ void on_processing_activate(GtkMenuItem *menuitem, gpointer user_data) {
 		gtk_widget_set_sensitive(lookup_widget("menuitem_histo"), FALSE);
 	}
 
-	if ((sequence_is_loaded() && com.seq.type == SEQ_REGULAR) || single_image_is_loaded())
+	if ((sequence_is_loaded() && com.seq.type == SEQ_REGULAR) || single_image_is_loaded()) {
 		gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"), TRUE);
-	else gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"), FALSE);
+		gtk_widget_set_sensitive(lookup_widget("menuitem_cosmetic"), TRUE);
+	}
+	else {
+		gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"), FALSE);
+		gtk_widget_set_sensitive(lookup_widget("menuitem_cosmetic"), FALSE);
+	}
 
 	if (single_image_is_loaded()
 			&& (!sequence_is_loaded()
@@ -5559,7 +5564,77 @@ void on_Median_Apply_clicked(GtkButton *button, gpointer user_data) {
 
 }
 
-/**********************************************************************/
+/****************** GUI for Cosmetic Correction *********************/
+
+void on_menuitem_cosmetic_activate(GtkMenuItem *menuitem, gpointer user_data) {
+	if (sequence_is_loaded()) {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lookup_widget("checkCosmeticSeq")), TRUE);
+	}
+	else if (single_image_is_loaded()) {
+		// not a processing result
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lookup_widget("checkCosmeticSeq")), FALSE);
+	}
+	gtk_widget_show(lookup_widget("cosmetic_dialog"));
+}
+
+void on_button_cosmetic_close_clicked(GtkButton *button, gpointer user_data) {
+	gtk_widget_hide(lookup_widget("cosmetic_dialog"));
+}
+
+void on_checkSigCosme_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
+	static GtkWidget *cosmeticApply = NULL;
+	static GtkToggleButton *checkCosmeSigCold = NULL;
+	static GtkToggleButton *checkCosmeSigHot = NULL;
+	gboolean checkCold, checkHot;
+
+	if (cosmeticApply == NULL) {
+		cosmeticApply = lookup_widget("button_cosmetic_ok");
+		checkCosmeSigCold = GTK_TOGGLE_BUTTON(lookup_widget("checkSigColdBox"));
+		checkCosmeSigHot = GTK_TOGGLE_BUTTON(lookup_widget("checkSigHotBox"));
+	}
+	checkCold = gtk_toggle_button_get_active(checkCosmeSigCold);
+	checkHot = gtk_toggle_button_get_active(checkCosmeSigHot);
+	gtk_widget_set_sensitive(cosmeticApply, checkCold || checkHot);
+}
+
+void on_button_cosmetic_ok_clicked(GtkButton *button, gpointer user_data) {
+	GtkEntry *cosmeticSeqEntry;
+	GtkToggleButton *CFA, *seq;
+	GtkSpinButton *sigma[2];
+
+	CFA = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder,"cosmCFACheckBox"));
+	sigma[0] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder,"spinSigCosmeColdBox"));
+	sigma[1] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder,"spinSigCosmeHotBox"));
+	seq = GTK_TOGGLE_BUTTON(lookup_widget("checkCosmeticSeq"));
+	cosmeticSeqEntry = GTK_ENTRY(lookup_widget("entryCosmeticSeq"));
+
+	struct cosmetic_data *args = malloc(sizeof(struct cosmetic_data));
+
+	if (gtk_toggle_button_get_active(
+			GTK_TOGGLE_BUTTON(lookup_widget("checkSigColdBox"))))
+		args->sigma[0] = gtk_spin_button_get_value(sigma[0]);
+	else
+		args->sigma[0] = -1.0;
+
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(lookup_widget("checkSigHotBox"))))
+		args->sigma[1] = gtk_spin_button_get_value(sigma[1]);
+	else
+		args->sigma[1] = -1.0;
+
+	args->is_cfa = gtk_toggle_button_get_active(CFA);
+
+	args->fit = &gfit;
+	args->seqEntry = gtk_entry_get_text(cosmeticSeqEntry);
+	set_cursor_waiting(TRUE);
+
+	if (gtk_toggle_button_get_active(seq) && sequence_is_loaded()) {
+		if (args->seqEntry && args->seqEntry[0] == '\0')
+			args->seqEntry = "cc_";
+		apply_cosmetic_to_sequence(args);
+	} else {
+		start_in_new_thread(autoDetectThreaded, args);
+	}
+}
 
 /***************** GUI for Canon Banding Reduction ********************/
 
