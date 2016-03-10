@@ -192,14 +192,18 @@ deviant_pixel *find_deviant_pixels(fits *fit, double sig[2], long *icold, long *
 
 int cosmeticCorrOnePoint(fits *fit, deviant_pixel dev, gboolean is_cfa) {
 	WORD *buf = fit->pdata[RLAYER];		// Cosmetic correction, as developed here, is only used on 1-channel images
+	WORD newpixel;
 	int width = fit->rx;
 	int height = fit->ry;
 	int x = (int) dev.p.x;
 	int y = (int) dev.p.y;
 
-	WORD mean = getAverage3x3(buf, x, y, width, height, is_cfa);
+	if (dev.type == COLD_PIXEL)
+		newpixel = getMedian5x5(buf, x, y, width, height, is_cfa);
+	else
+		newpixel = getAverage3x3(buf, x, y, width, height, is_cfa);
 
-	buf[x + y * fit->rx] = mean;
+	buf[x + y * fit->rx] = newpixel;
 	return 0;
 }
 
@@ -230,10 +234,10 @@ int cosmeticCorrection(fits *fit, deviant_pixel *dev, int size, gboolean is_cfa)
 		int xx = (int) dev[i].p.x;
 		int yy = (int) dev[i].p.y;
 
-		if (dev[i].type == HOT_PIXEL)
-			newPixel = getAverage3x3(buf, xx, yy, width, height, is_cfa);
-		else
+		if (dev[i].type == COLD_PIXEL)
 			newPixel = getMedian5x5(buf, xx, yy, width, height, is_cfa);
+		else
+			newPixel = getAverage3x3(buf, xx, yy, width, height, is_cfa);
 
 		buf[xx + yy * width] = newPixel;
 	}
@@ -249,7 +253,7 @@ int cosmetic_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) 
 
 	for (chan = 0; chan < fit->naxes[2]; chan++) {
 		retval = autoDetect(fit, chan, c_args->sigma, &c_args->icold,
-				&c_args->ihot, c_args->is_cfa);
+				&c_args->ihot, c_args->amount, c_args->is_cfa);
 		if (retval)
 			return retval;
 	}
@@ -306,7 +310,7 @@ gpointer autoDetectThreaded(gpointer p) {
 
 	for (chan = 0; chan < args->fit->naxes[2]; chan++) {
 		retval = autoDetect(args->fit, chan, args->sigma, &args->icold,
-				&args->ihot, args->is_cfa);
+				&args->ihot, args->amount, args->is_cfa);
 		if (retval) break;
 	}
 	gettimeofday(&t_end, NULL);
@@ -318,12 +322,14 @@ gpointer autoDetectThreaded(gpointer p) {
 
 /* this is an autodetect algorithm. Cold and hot pixels
  *  are corrected in the same time */
-int autoDetect(fits *fit, int layer, double sig[2], long *icold, long *ihot,
+int autoDetect(fits *fit, int layer, double sig[2], long *icold, long *ihot, double amount,
 		gboolean is_cfa) {
 	int x, y;
 	int width = fit->rx;
 	int height = fit->ry;
 	double bkg, avgDev;
+	double f0 = amount;
+	double f1 = 1 - f0;
 	imstats *stat;
 
 	/* XXX: if cfa, stats are irrelevant. We should compute them taking
@@ -350,7 +356,7 @@ int autoDetect(fits *fit, int layer, double sig[2], long *icold, long *ihot,
 				double k3 = sig[1] * k1;
 				if ((a < bkg + k2) && (pixel > bkg + k1) && (pixel > m + k3)) {
 					(*ihot)++;
-					buf[x + y * width] = a;
+					buf[x + y * width] = a * f0 + pixel * f1;
 				}
 			}
 
@@ -359,7 +365,7 @@ int autoDetect(fits *fit, int layer, double sig[2], long *icold, long *ihot,
 				double k = avgDev * sig[0];
 				if (((pixel + k) < bkg) && ((pixel + k) < m)) {
 					(*icold)++;
-					buf[x + y * width] = m;
+					buf[x + y * width] = m * f0 + pixel * f1;
 				}
 			}
 		}

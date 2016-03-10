@@ -11,6 +11,7 @@ struct cosmetic_data {
 	double sigma[2];
 	long icold;
 	long ihot;
+	double amount;
 	gboolean is_cfa;
 	const gchar *seqEntry;
 };
@@ -26,7 +27,7 @@ struct deviant_struct {
 
 deviant_pixel *find_deviant_pixels(fits *fit, double sig[2], long *icold, long *ihot);
 int autoDetect(fits *fit, int layer, double sig[2], long *icold, long *ihot,
-		gboolean is_cfa);
+		double amount, gboolean is_cfa);
 void apply_cosmetic_to_sequence(struct cosmetic_data *cosme_args);
 gpointer autoDetectThreaded(gpointer p);
 int cosmeticCorrection(fits *fit, deviant_pixel *dev, int size, gboolean is_CFA);
