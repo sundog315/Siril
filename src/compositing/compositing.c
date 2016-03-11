@@ -34,6 +34,7 @@
 #include "gui/callbacks.h"
 #include "registration/registration.h"
 #include "compositing/filters.h"
+#include "stacking/stacking.h"
 #ifdef HAVE_OPENCV
 #include "opencv/opencv.h"
 #endif
@@ -71,7 +72,8 @@ static int luminance_mode = 0;		// 0 if luminance is not used
 
 static struct registration_method *reg_methods[4];
 
-static sequence *seq = NULL;		// the sequence of layers, for alignments
+static sequence *seq = NULL;		// the sequence of layers, for alignments and normalization
+static norm_coeff *coeff = NULL;	// the normalization coefficients
 
 /* special case of the color associated to luminance */
 void set_luminance(GdkRGBA *rgba) { rgba->red = -42.0; }
@@ -542,20 +544,15 @@ void on_filechooser_file_set(GtkFileChooserButton *widget, gpointer user_data) {
 	}
 }
 
-/* start alignming the layers: create an 'internal' sequence and run the seected method on it */
-void on_button_align_clicked(GtkButton *button, gpointer user_data) {
+void create_the_internal_sequence() {
 	int i, j, nb_layers;
-	struct registration_args regargs;
-	struct registration_method *method;
-	char *msg;
-	GtkComboBox *regcombo;
-
-	/* create the sequence */
 	if (seq) free_sequence(seq, TRUE);
+
 	nb_layers = number_of_images_loaded();
 	if (nb_layers == 0 || nb_layers == 1) {
 		char *msg = siril_log_message("You must at least load two layers before!\n");
 		show_dialog(msg, "Warning", "gtk-dialog-warning");
+		seq = NULL;
 		return;
 	}
 	if (luminance_mode) {
@@ -578,12 +575,23 @@ void on_button_align_clicked(GtkButton *button, gpointer user_data) {
 		}
 	}
 
+	seq->rx = gfit.rx;
+	seq->ry = gfit.ry;
+}
+
+/* start alignming the layers: create an 'internal' sequence and run the seected method on it */
+void on_button_align_clicked(GtkButton *button, gpointer user_data) {
+	int i, j;
+	struct registration_args regargs;
+	struct registration_method *method;
+	char *msg;
+	GtkComboBox *regcombo;
+
+	create_the_internal_sequence();
+
 	/* align it */
 	regcombo = GTK_COMBO_BOX(gtk_builder_get_object(builder, "compositing_align_method_combo"));
 	method = reg_methods[gtk_combo_box_get_active(regcombo)];
-
-	seq->rx = gfit.rx;
-	seq->ry = gfit.ry;
 
 	regargs.seq = seq;
 	regargs.process_all_frames = TRUE;
@@ -635,6 +643,13 @@ WORD get_composition_pixel_value(int fits_index, int reg_layer, int x, int y) {
 		if (realX < 0 || realX >= gfit.rx) return (WORD)0;
 		realY = y - seq->regparam[0][reg_layer].shifty;
 		if (realY < 0 || realY >= gfit.ry) return (WORD)0;
+	}
+	if (coeff) {
+		// normalization
+		double tmp = (double)layers[fits_index]->the_fit.pdata[0][realX + realY * gfit.rx];
+		tmp *= coeff->scale[fits_index];
+		tmp -= coeff->offset[fits_index];
+		return round_to_WORD(tmp);
 	}
 	return layers[fits_index]->the_fit.pdata[0][realX + realY * gfit.rx];
 }
@@ -820,24 +835,24 @@ void update_result(int and_refresh) {
 
 // update the saturated color from the new real colour
 void color_has_been_updated(int layer) {
-	double h, s, l;
+	double h, s, v;
 	GdkRGBA *real = &layers[layer]->color;
 	GdkRGBA *satu = &layers[layer]->saturated_color;
-	rgb_to_hsl(real->red, real->green, real->blue, &h,&s,&l);
-	printf("%d: saturation: %g, light: %g\n", layer, s, l);
+	rgb_to_hsv(real->red, real->green, real->blue, &h,&s,&v);
+	printf("%d: saturation: %g, light: %g\n", layer, s, v);
 	/* in HSL, the actual saturated pure colour happens at l=0.5 and s=1 */
-	s = 1.0; l = 0.5;
-	hsl_to_rgb(h,s,l, &satu->red, &satu->green, &satu->blue);
+	s = 1.0; v = 1.0;
+	hsv_to_rgb(h,s,v, &satu->red, &satu->green, &satu->blue);
 	printf("%d: r: %g, g: %g, b: %g\n", layer, satu->red, satu->green, satu->blue);
 }
 
 // update a real colour from the saturated colour with a new lightness
 void update_color_from_saturation(int layer, double newl) {
-	double h, s, l;
+	double h, s, v;
 	GdkRGBA *real = &layers[layer]->color;
 	GdkRGBA *satu = &layers[layer]->saturated_color;
-	rgb_to_hsl(satu->red, satu->green, satu->blue, &h,&s,&l);
-	hsl_to_rgb(h,s,newl, &real->red, &real->green, &real->blue);
+	rgb_to_hsv(satu->red, satu->green, satu->blue, &h,&s,&v);
+	hsv_to_rgb(h,s,newl, &real->red, &real->green, &real->blue);
 }
 
 void on_colordialog_response(GtkColorChooserDialog *chooser, gint response_id, gpointer user_data) {
@@ -929,16 +944,16 @@ gboolean on_color_button_release_event(GtkDrawingArea *widget, GdkEventButton *e
 
 gboolean on_color_button_motion_event(GtkWidget *widget, GdkEventMotion *event, gpointer user_data) {
 	if (color_quick_edit) {	// right click
-		double h, s, l;
+		double h, s, v;
 		//fprintf(stdout, "%g\n", event->x);
-		rgb_to_hsl(qe_ref_color.red, qe_ref_color.green,
-				qe_ref_color.blue, &h,&s,&l);
+		rgb_to_hsv(qe_ref_color.red, qe_ref_color.green,
+				qe_ref_color.blue, &h,&s,&v);
 		h += event->x / 600.0;
-		l -= event->y / 600.0;
+		v -= event->y / 600.0;
 		while (h < 0.0) h += 1.0;
 		while (h > 1.0) h -= 1.0;
-		if (l < 0.0) l = 0.0; if (l > 1.0) l = 1.0;
-		hsl_to_rgb(h,s,l, &layers[current_layer_color_choosing]->color.red,
+		if (v < 0.0) v = 0.0; if (v > 1.0) v = 1.0;
+		hsv_to_rgb(h,s,v, &layers[current_layer_color_choosing]->color.red,
 				&layers[current_layer_color_choosing]->color.green,
 				&layers[current_layer_color_choosing]->color.blue);
 		color_has_been_updated(current_layer_color_choosing);
@@ -1100,7 +1115,7 @@ void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 					layer, 1.0-to_redistribute);
 			/* to_redistribute here is the maximum reduction we
 			 * need to give to the layer */
-			update_color_from_saturation(layer, 0.5 * (1.0 - to_redistribute));
+			update_color_from_saturation(layer, 1.0 - to_redistribute);
 		}
 	}
 
@@ -1111,3 +1126,49 @@ void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 	update_result(1);
 }
 
+/* Normalization functions */
+
+void coeff_alloc(int nb_images) {
+	if (!coeff)
+		coeff = calloc(1, sizeof(norm_coeff));
+	coeff->offset = realloc(coeff->offset, nb_images * sizeof(double));
+	// mul is not used in ADDITIVE_SCALING but needed to avoid crash in compute_normalization
+	coeff->mul = realloc(coeff->mul, nb_images * sizeof(double));
+	coeff->scale = realloc(coeff->scale, nb_images * sizeof(double));
+}
+
+gboolean end_normalization(gpointer args) {
+	GtkWidget *norm_button = lookup_widget("composition_layers_normalize");
+	siril_log_message("Normalization information collected, redrawing...\n");
+	update_result(1);
+	gtk_widget_set_sensitive(norm_button, TRUE);
+	free(args);
+	return end_generic(NULL);
+}
+
+gpointer normalization_thread(gpointer args) {
+	struct stacking_args *stackargs = (struct stacking_args *)args;
+	compute_normalization(stackargs, coeff, ADDITIVE_SCALING);
+	free(stackargs->image_indices);
+	gdk_threads_add_idle(end_normalization, args);
+	return NULL;
+}
+
+void on_composition_layers_normalize_clicked(GtkButton *button, gpointer user_data){
+	struct stacking_args *stackargs = malloc(sizeof(struct stacking_args));
+
+	create_the_internal_sequence();
+	if (!seq) return;
+	gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
+	coeff_alloc(seq->number);
+
+	stackargs->force_norm = TRUE;
+	stackargs->seq = seq;
+	stackargs->filtering_criterion = stack_filter_all;
+	stackargs->nb_images_to_stack = seq->number;
+
+	stackargs->image_indices = malloc(stackargs->nb_images_to_stack * sizeof(int));
+	fill_list_of_unfiltered_images(stackargs);
+
+	start_in_new_thread(normalization_thread, stackargs);
+}

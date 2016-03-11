@@ -70,6 +70,7 @@ void initialize_stacking_methods() {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(rejectioncombo), com.stack.rej_method);
 }
 
+/* scale0, mul0 and offset0 are output arguments when i = 0, input arguments otherwise */
 static int _compute_normalization_for_image(struct stacking_args *args, int i,
 		double *offset, double *mul, double *scale, normalization mode, double *scale0,
 		double *mul0, double *offset0) {
@@ -82,7 +83,8 @@ static int _compute_normalization_for_image(struct stacking_args *args, int i,
 			return 1;
 		}
 		stat = seq_get_imstats(args->seq, args->image_indices[i], &fit, STATS_EXTRA);
-		clearfits(&fit);
+		if (args->seq->type != SEQ_INTERNAL)
+			clearfits(&fit);
 	}
 
 	switch (mode) {
