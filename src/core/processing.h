@@ -36,7 +36,7 @@ struct generic_seq_args {
 	struct timeval t_start;
 
 	// activate parallel execution
-	//gboolean parallel;
+	gboolean parallel;
 };
 
 gpointer generic_sequence_worker(gpointer p);

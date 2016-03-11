@@ -16,12 +16,10 @@ gpointer generic_sequence_worker(gpointer p) {
 	float nb_framesf, progress = 0.f; // 0 to nb_framesf, for progress
 	int frame;	// the current frame, sequence index
 	int current;	// number of processed frames so far
-	fits fit;
 
 	assert(args);
 	assert(args->seq);
 	assert(args->image_hook);
-	memset(&fit, 0, sizeof(fits));
 	set_progress_bar_data(NULL, PROGRESS_RESET);
 	if (args->nb_filtered_images > 0)
 		nb_framesf = (float)args->nb_filtered_images;
@@ -34,39 +32,52 @@ gpointer generic_sequence_worker(gpointer p) {
 		goto the_end;
 	}
 
-// to enable soon after having removed the breaks
-//#pragma omp parallel for private(frame) schedule(static) if(args->parallel)
-	for (frame = 0, current = 0; frame < args->seq->number; frame++) {
-		if (!get_thread_run())
-			break;
-		if (args->filtering_criterion &&
-				!args->filtering_criterion(args->seq,
-					frame, args->filtering_parameter))
-			continue;
-		if (!seq_get_image_filename(args->seq, frame, filename)) {
-			args->retval = 1;
-			break;
+	current = 0;
+	// to enable soon after having removed the breaks
+//#pragma omp parallel for num_threads(com.max_thread) private(frame) schedule(static) if(args->parallel && fits_is_reentrant())
+	for (frame = 0; frame < args->seq->number; frame++) {
+		if (!args->retval) {
+			fits fit;
+			memset(&fit, 0, sizeof(fits));
+
+			if (!get_thread_run()) {
+				args->retval = 1;
+				clearfits(&fit);
+				continue;
+			}
+			if (args->filtering_criterion
+					&& !args->filtering_criterion(args->seq, frame,
+							args->filtering_parameter))
+				continue;
+			if (!seq_get_image_filename(args->seq, frame, filename)) {
+				args->retval = 1;
+				clearfits(&fit);
+				continue;
+			}
+
+			snprintf(msg, 256, "Processing image %d (%s)", frame, filename);
+			progress =
+					(float) (args->nb_filtered_images <= 0 ? frame : current);
+			set_progress_bar_data(msg, progress / nb_framesf);
+
+			if (seq_read_frame(args->seq, frame, &fit)) {
+				args->retval = 1;
+				clearfits(&fit);
+				continue;
+			}
+
+			if (args->image_hook(args, frame, current, &fit)) {
+				args->retval = 1;
+				clearfits(&fit);
+				continue;
+			}
+
+#pragma omp atomic
+			current++;
+			clearfits(&fit);
 		}
-
-		snprintf(msg, 256, "Processing image %d (%s)", frame, filename);
-		progress = (float)(args->nb_filtered_images <= 0 ? frame : current);
-		set_progress_bar_data(msg, progress / nb_framesf);
-
-		if (seq_read_frame(args->seq, frame, &fit)) {
-			args->retval = 1;
-			break;
-		}
-
-		if (args->image_hook(args, frame, current, &fit)) {
-			args->retval = 1;
-			break;
-		}
-
-		current++;
-		clearfits(&fit);
 	}
 
-	clearfits(&fit);	// in case of goto or break
 
 the_end:
 	if (args->retval) {
