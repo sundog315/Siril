@@ -27,7 +27,8 @@ struct generic_seq_args {
 	// retval, useful for the idle_function, set by the worker
 	int retval;
 
-	// string description for progress and logs?
+	// string description for progress and logs
+	const char *description;
 
 	// user data: pointer to operation-specific data
 	void *user;

@@ -15,6 +15,8 @@ gpointer generic_sequence_worker(gpointer p) {
 	float nb_framesf, progress = 0.f; // 0 to nb_framesf, for progress
 	int frame;	// the current frame, sequence index
 	int current;	// number of processed frames so far
+	GString *desc;	// temporary string description for logs
+	gchar *msg; // final string description for logs
 
 	assert(args);
 	assert(args->seq);
@@ -29,6 +31,15 @@ gpointer generic_sequence_worker(gpointer p) {
 		siril_log_message("Preparing sequence processing failed.\n");
 		args->retval = 1;
 		goto the_end;
+	}
+
+	/* Output print of algorithm description */
+	desc = g_string_new(args->description);
+	if (desc) {
+		desc = g_string_append(desc, ": processing...\n");
+		msg = g_string_free(desc, FALSE);
+		siril_log_color_message(msg, "red");
+		g_free(msg);
 	}
 
 	current = 0;

@@ -1511,6 +1511,7 @@ void apply_banding_to_sequence(struct banding_data *banding_args) {
 	args->finalize_hook = NULL;
 	args->idle_function = NULL;
 	args->user = banding_args;
+	args->description = "Banding Reduction";
 	args->parallel = TRUE;
 
 	banding_args->fit = NULL;	// not used here

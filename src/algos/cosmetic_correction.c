@@ -275,11 +275,11 @@ void apply_cosmetic_to_sequence(struct cosmetic_data *cosme_args) {
 	args->finalize_hook = NULL;
 	args->idle_function = NULL;
 	args->user = cosme_args;
+	args->description = "Cosmetic Correction";
 	args->parallel = FALSE;
 
 	cosme_args->fit = NULL;	// not used here
 
-	siril_log_color_message("Cosmetic Correction: processing...\n", "red");
 	gettimeofday(&args->t_start, NULL);
 	start_in_new_thread(generic_sequence_worker, args);
 }
