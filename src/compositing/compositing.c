@@ -1155,12 +1155,12 @@ gpointer normalization_thread(gpointer args) {
 }
 
 void on_composition_layers_normalize_clicked(GtkButton *button, gpointer user_data){
-	struct stacking_args *stackargs = malloc(sizeof(struct stacking_args));
-
 	create_the_internal_sequence();
 	if (!seq) return;
 	gtk_widget_set_sensitive(GTK_WIDGET(button), FALSE);
 	coeff_alloc(seq->number);
+
+	struct stacking_args *stackargs = malloc(sizeof(struct stacking_args));
 
 	stackargs->force_norm = TRUE;
 	stackargs->seq = seq;

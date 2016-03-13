@@ -275,7 +275,7 @@ void apply_cosmetic_to_sequence(struct cosmetic_data *cosme_args) {
 	args->finalize_hook = NULL;
 	args->idle_function = NULL;
 	args->user = cosme_args;
-	args->parallel = TRUE;
+	args->parallel = FALSE;
 
 	cosme_args->fit = NULL;	// not used here
 
