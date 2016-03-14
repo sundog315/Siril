@@ -117,6 +117,7 @@ void rgb_pixel_limiter(GdkRGBA *pixel);
 void clear_pixel(GdkRGBA *pixel);
 void update_result(int and_refresh);
 void populate_filter_lists();
+void coeff_clear();
 
 /* callbacks for programatic GTK */
 void on_layer_remove(GtkButton *button, gpointer user_data);
@@ -214,6 +215,8 @@ void on_layer_add(GtkButton *button, gpointer user_data) {
 	grid_add_row(layers_count-1, layers_count, 1);
 
 	color_has_been_updated(layers_count-1);
+
+	coeff_clear();
 }
 
 /* adds the '+' button at the bottom of the list. Creates the trailing grid row too */
@@ -263,6 +266,8 @@ void on_layer_remove(GtkButton *button, gpointer user_data) {
 	--layers_count;
 
 	add_the_layer_add_button();
+
+	coeff_clear();
 
 	if (refresh)
 		update_result(1);
@@ -377,20 +382,6 @@ void open_compositing_window() {
 		gtk_widget_show(lookup_widget("composition_dialog"));
 }
 
-/* Selects a reference layer in the list, and greys out the corresponding spinner.
- * layer is 0 for luminance, 1 for red and so on. -1 is unselect all. */
-void select_reference_layer(int layer) {
-	//GtkComboBox *combo;
-	//int i;
-	//combo = GTK_COMBO_BOX(gtk_builder_get_object(cbuilder, "compositing_align_layer_combo"));
-	//gtk_combo_box_set_active(combo, layer);
-	/* that's a bit useless for now, since there is no callback on the spinbttons *
-	for (i=0; layers[i]; i++) {
-		gtk_widget_set_sensitive(GTK_WIDGET(layers[i]->spinbutton_x), i != layer);
-		gtk_widget_set_sensitive(GTK_WIDGET(layers[i]->spinbutton_y), i != layer);
-	}*/
-}
-
 /* returns true if the layer number layer has a loaded FITS image */
 int has_fit(int layer) {
 	return (layers[layer] && layers[layer]->the_fit.rx != 0);
@@ -429,7 +420,6 @@ int no_color_available() {	// don't test luminance
 /* the 'enable luminance' checkbox callback */
 void on_composition_use_lum_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
 	luminance_mode = gtk_toggle_button_get_active(togglebutton);
-	select_reference_layer(luminance_mode ? 0 : -1);
 	if (has_fit(0) && number_of_images_loaded() >= 1)
 		update_result(1);
 }
@@ -497,8 +487,6 @@ void on_filechooser_file_set(GtkFileChooserButton *widget, gpointer user_data) {
 		gtk_toggle_button_set_active(lum_button, !retval);
 		g_signal_handlers_unblock_by_func(lum_button, on_composition_use_lum_toggled, NULL);
 		luminance_mode = !retval;
-		if (!retval)
-			select_reference_layer(0);
 	}
 	if (retval) {
 		clearfits(&layers[layer]->the_fit);
@@ -632,6 +620,13 @@ void on_button_align_clicked(GtkButton *button, gpointer user_data) {
 	update_result(1);
 }
 
+WORD get_normalized_pixel_value(int fits_index, WORD layer_pixel_value) {
+	double tmp = (double)layer_pixel_value;
+	tmp *= coeff->scale[fits_index];
+	tmp -= coeff->offset[fits_index];
+	return round_to_WORD(tmp);
+}
+
 /* get the pixel value at coordinates x,y for image in layers[fits_index]->the_fit.
  * x and y are given in buffer coordinates, not image coordinates.
  * Handles (not yet - binning and) registration offset */
@@ -644,14 +639,12 @@ WORD get_composition_pixel_value(int fits_index, int reg_layer, int x, int y) {
 		realY = y - seq->regparam[0][reg_layer].shifty;
 		if (realY < 0 || realY >= gfit.ry) return (WORD)0;
 	}
+	WORD pixel_value = layers[fits_index]->the_fit.pdata[0][realX + realY * gfit.rx];
 	if (coeff) {
 		// normalization
-		double tmp = (double)layers[fits_index]->the_fit.pdata[0][realX + realY * gfit.rx];
-		tmp *= coeff->scale[fits_index];
-		tmp -= coeff->offset[fits_index];
-		return round_to_WORD(tmp);
+		pixel_value = get_normalized_pixel_value(fits_index, pixel_value);
 	}
-	return layers[fits_index]->the_fit.pdata[0][realX + realY * gfit.rx];
+	return pixel_value;
 }
 
 /* increments the color values in rgbpixel from the pixel value for a particular
@@ -1070,8 +1063,11 @@ void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 	/* should we assume that fits mini and maxi are correct? */
 	for (layer = 1; layers[layer]; layer++) {
 		if (has_fit(layer)) {
-			increment_pixel_components_from_layer_saturated_value(layer,
-					&max_pixel, layers[layer]->the_fit.maxi);
+			WORD max_value = layers[layer]->the_fit.maxi;
+			if (coeff)
+				max_value = get_normalized_pixel_value(layer, max_value);
+			increment_pixel_components_from_layer_saturated_value(
+					layer, &max_pixel, max_value);
 
 			if (layers[layer]->color.red > 0.0) nb_images_red++;
 			if (layers[layer]->color.green > 0.0) nb_images_green++;
@@ -1137,12 +1133,25 @@ void coeff_alloc(int nb_images) {
 	coeff->scale = realloc(coeff->scale, nb_images * sizeof(double));
 }
 
+void coeff_clear() {
+	if (coeff) {
+		free(coeff->offset);
+		free(coeff->scale);
+		free(coeff->mul);
+		free(coeff);
+		coeff = NULL;
+	}
+}
+
 gboolean end_normalization(gpointer args) {
 	GtkWidget *norm_button = lookup_widget("composition_layers_normalize");
 	siril_log_message("Normalization information collected, redrawing...\n");
-	update_result(1);
+	on_compositing_autoadjust_clicked(NULL, NULL);	// update colours and result
 	gtk_widget_set_sensitive(norm_button, TRUE);
 	free(args);
+	int i;
+	for (i = 0; i < seq->number; i++)
+		siril_log_message("  layer %d - offset: %g, scale: %g\n", i, coeff->offset[i], coeff->scale[i]);
 	return end_generic(NULL);
 }
 
