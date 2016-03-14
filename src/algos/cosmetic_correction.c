@@ -26,6 +26,7 @@
 #include "core/processing.h"
 #include "gui/callbacks.h"
 #include "io/single_image.h"
+#include "io/ser.h"
 #include "algos/cosmetic_correction.h"
 
 
@@ -245,6 +246,16 @@ int cosmeticCorrection(fits *fit, deviant_pixel *dev, int size, gboolean is_cfa)
 }
 
 /**** Autodetect *****/
+int cosmetic_prepare_hook(struct generic_seq_args *args) {
+	char dest[256];
+	int retval;
+
+	struct cosmetic_data *c_args = (struct cosmetic_data *) args->user;
+	args->new_ser = malloc(sizeof(struct ser_struct));
+	snprintf(dest, 255, "%s%s.ser", c_args->seqEntry, args->seq->seqname);
+
+	return ser_create_file(dest, args->new_ser, TRUE, args->seq->ser_file);
+}
 
 int cosmetic_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) {
 	char dest[256];
@@ -263,9 +274,20 @@ int cosmetic_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) 
 	siril_log_color_message("Image %d: %ld pixels corrected (%ld + %ld)\n",
 			"bold", i, icold + ihot, icold, ihot);
 
-	snprintf(dest, 255, "%s%s%05d%s", c_args->seqEntry, args->seq->seqname, i,
-			com.ext);
-	return savefits(dest, fit);
+	if (args->seq->type == SEQ_SER) {
+		snprintf(dest, 255, "%s%s.ser", c_args->seqEntry, args->seq->seqname);
+		return ser_write_frame_from_fit(args->new_ser, fit);
+	} else {
+		snprintf(dest, 255, "%s%s%05d%s", c_args->seqEntry, args->seq->seqname,
+				i, com.ext);
+		return savefits(dest, fit);
+	}
+}
+
+int cosmetic_finalize_hook(struct generic_seq_args *args) {
+	ser_write_and_close(args->new_ser);
+	free(args->new_ser);
+	return 0;
 }
 
 void apply_cosmetic_to_sequence(struct cosmetic_data *cosme_args) {
@@ -273,13 +295,19 @@ void apply_cosmetic_to_sequence(struct cosmetic_data *cosme_args) {
 	args->seq = &com.seq;
 	args->filtering_criterion = seq_filter_included;
 	args->nb_filtered_images = com.seq.selnum;
-	args->prepare_hook = NULL;
+	if (args->seq->type == SEQ_SER) {
+		args->prepare_hook = cosmetic_prepare_hook;
+		args->finalize_hook = cosmetic_finalize_hook;
+		args->parallel = FALSE;		// if TRUE, all frames are sorted in a random order
+	} else {
+		args->prepare_hook = NULL;
+		args->finalize_hook = NULL;
+		args->parallel = TRUE;
+	}
 	args->image_hook = cosmetic_image_hook;
-	args->finalize_hook = NULL;
 	args->idle_function = NULL;
 	args->user = cosme_args;
 	args->description = "Cosmetic Correction";
-	args->parallel = TRUE;
 
 	cosme_args->fit = NULL;	// not used here
 

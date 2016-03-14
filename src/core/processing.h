@@ -6,6 +6,8 @@ typedef int (*seq_image_filter)(sequence *seq, int nb_img, double param);
 
 struct generic_seq_args {
 	sequence *seq;
+	// new output SER if seqtype == SER_SEQ
+	struct ser_struct *new_ser;
 	// filtering the images from the sequence, maybe we don't want them all
 	seq_image_filter filtering_criterion;
 	double filtering_parameter;
