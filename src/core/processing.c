@@ -44,7 +44,8 @@ gpointer generic_sequence_worker(gpointer p) {
 
 	current = 0;
 
-#pragma omp parallel for num_threads(com.max_thread) private(frame) schedule(static) if(args->parallel && ((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER))
+#pragma omp parallel for num_threads(com.max_thread) private(frame) schedule(static) \
+	if(args->parallel && ((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER))
 	for (frame = 0; frame < args->seq->number; frame++) {
 		if (!args->retval) {
 			fits fit;
@@ -64,7 +65,7 @@ gpointer generic_sequence_worker(gpointer p) {
 				continue;
 			}
 
-			snprintf(msg, 256, "Processing image %d (%s)", frame, filename);
+			snprintf(msg, 256, "%s. Processing image %d (%s)",	args->description, frame, filename);
 			progress = (float) (args->nb_filtered_images <= 0 ? frame : current);
 			set_progress_bar_data(msg, progress / nb_framesf);
 

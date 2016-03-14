@@ -250,16 +250,18 @@ int cosmetic_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) 
 	char dest[256];
 	struct cosmetic_data *c_args = (struct cosmetic_data *) args->user;
 	int retval, chan;
+	/* Count variables, icold and ihot, need to be local in order to be parallelized */
+	long icold, ihot;
 
-	c_args->icold = c_args->ihot = 0L;
+	icold = ihot = 0L;
 	for (chan = 0; chan < fit->naxes[2]; chan++) {
-		retval = autoDetect(fit, chan, c_args->sigma, &c_args->icold,
-				&c_args->ihot, c_args->amount, c_args->is_cfa);
+		retval = autoDetect(fit, chan, c_args->sigma, &icold, &ihot,
+				c_args->amount, c_args->is_cfa);
 		if (retval)
 			return retval;
 	}
-	siril_log_message("Image %d: %ld pixels corrected (%ld + %ld)\n", i,
-			c_args->icold + c_args->ihot, c_args->icold, c_args->ihot);
+	siril_log_color_message("Image %d: %ld pixels corrected (%ld + %ld)\n",
+			"bold", i, icold + ihot, icold, ihot);
 
 	snprintf(dest, 255, "%s%s%05d%s", c_args->seqEntry, args->seq->seqname, i,
 			com.ext);
@@ -277,7 +279,7 @@ void apply_cosmetic_to_sequence(struct cosmetic_data *cosme_args) {
 	args->idle_function = NULL;
 	args->user = cosme_args;
 	args->description = "Cosmetic Correction";
-	args->parallel = FALSE;
+	args->parallel = TRUE;
 
 	cosme_args->fit = NULL;	// not used here
 
@@ -306,16 +308,20 @@ gpointer autoDetectThreaded(gpointer p) {
 	struct cosmetic_data *args = (struct cosmetic_data *) p;
 	struct timeval t_start, t_end;
 	int retval, chan;
+	long icold, ihot;
 
 	siril_log_color_message("Cosmetic Correction: processing...\n", "red");
 	gettimeofday(&t_start, NULL);
 
-	args->icold = args->ihot = 0L;
+	icold = ihot = 0L;
 	for (chan = 0; chan < args->fit->naxes[2]; chan++) {
-		retval = autoDetect(args->fit, chan, args->sigma, &args->icold,
-				&args->ihot, args->amount, args->is_cfa);
-		if (retval) break;
+		retval = autoDetect(args->fit, chan, args->sigma, &icold, &ihot,
+				args->amount, args->is_cfa);
+		if (retval)
+			break;
 	}
+	args->icold = icold;
+	args->ihot = ihot;
 	gettimeofday(&t_end, NULL);
 	show_time(t_start, t_end);
 	gdk_threads_add_idle(end_autoDetect, args);
