@@ -4298,7 +4298,7 @@ void on_processing_activate(GtkMenuItem *menuitem, gpointer user_data) {
 		gtk_widget_set_sensitive(lookup_widget("menuitem_histo"), FALSE);
 	}
 
-	if ((sequence_is_loaded() && com.seq.type == SEQ_REGULAR) || single_image_is_loaded()) {
+	if ((sequence_is_loaded()) || single_image_is_loaded()) {
 		gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"), TRUE);
 		gtk_widget_set_sensitive(lookup_widget("menuitem_cosmetic"), TRUE);
 	}

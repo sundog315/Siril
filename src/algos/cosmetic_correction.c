@@ -248,11 +248,15 @@ int cosmeticCorrection(fits *fit, deviant_pixel *dev, int size, gboolean is_cfa)
 /**** Autodetect *****/
 int cosmetic_prepare_hook(struct generic_seq_args *args) {
 	char dest[256];
-	int retval;
+	const char *ptr;
 
 	struct cosmetic_data *c_args = (struct cosmetic_data *) args->user;
 	args->new_ser = malloc(sizeof(struct ser_struct));
-	snprintf(dest, 255, "%s%s.ser", c_args->seqEntry, args->seq->seqname);
+	ptr = strrchr(args->seq->seqname, '/');
+	if (ptr)
+		snprintf(dest, 255, "%s%s.ser", c_args->seqEntry, ptr + 1);
+	else
+		snprintf(dest, 255, "%s%s.ser", c_args->seqEntry, args->seq->seqname);
 
 	return ser_create_file(dest, args->new_ser, TRUE, args->seq->ser_file);
 }
