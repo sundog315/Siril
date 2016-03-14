@@ -251,13 +251,14 @@ int cosmetic_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) 
 	struct cosmetic_data *c_args = (struct cosmetic_data *) args->user;
 	int retval, chan;
 
+	c_args->icold = c_args->ihot = 0L;
 	for (chan = 0; chan < fit->naxes[2]; chan++) {
 		retval = autoDetect(fit, chan, c_args->sigma, &c_args->icold,
 				&c_args->ihot, c_args->amount, c_args->is_cfa);
 		if (retval)
 			return retval;
 	}
-	siril_log_message("%ld pixels corrected (%ld + %ld)\n",
+	siril_log_message("Image %d: %ld pixels corrected (%ld + %ld)\n", i,
 			c_args->icold + c_args->ihot, c_args->icold, c_args->ihot);
 
 	snprintf(dest, 255, "%s%s%05d%s", c_args->seqEntry, args->seq->seqname, i,
@@ -309,6 +310,7 @@ gpointer autoDetectThreaded(gpointer p) {
 	siril_log_color_message("Cosmetic Correction: processing...\n", "red");
 	gettimeofday(&t_start, NULL);
 
+	args->icold = args->ihot = 0L;
 	for (chan = 0; chan < args->fit->naxes[2]; chan++) {
 		retval = autoDetect(args->fit, chan, args->sigma, &args->icold,
 				&args->ihot, args->amount, args->is_cfa);
@@ -341,8 +343,6 @@ int autoDetect(fits *fit, int layer, double sig[2], long *icold, long *ihot, dou
 	free(stat);
 
 	WORD *buf = fit->pdata[layer];
-
-	*icold = *ihot = 0L;
 
 	for (y = 0; y < height; y++) {
 		for (x = 0; x < width; x++) {

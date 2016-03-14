@@ -1058,6 +1058,7 @@ void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 	int layer, nb_images_red = 0, nb_images_green = 0, nb_images_blue = 0;
 	GdkRGBA max_pixel;
 
+	set_cursor_waiting(TRUE);
 	clear_pixel(&max_pixel);
 	/* sum the max per channel */
 	/* should we assume that fits mini and maxi are correct? */
@@ -1077,6 +1078,7 @@ void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 
 	if (max_pixel.red <= 1.0 && max_pixel.green <= 1.0 && max_pixel.blue <= 1.0) {
 	       siril_log_message("nothing to adjust, no overflow\n");
+	       set_cursor_waiting(FALSE);
        	       return;
 	}
 
@@ -1120,6 +1122,7 @@ void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 		gtk_widget_queue_draw(GTK_WIDGET(layers[layer]->color_w));
 	}
 	update_result(1);
+	set_cursor_waiting(FALSE);
 }
 
 /* Normalization functions */
@@ -1152,6 +1155,7 @@ gboolean end_normalization(gpointer args) {
 	int i;
 	for (i = 0; i < seq->number; i++)
 		siril_log_message("  layer %d - offset: %g, scale: %g\n", i, coeff->offset[i], coeff->scale[i]);
+	set_cursor_waiting(FALSE);
 	return end_generic(NULL);
 }
 
@@ -1178,6 +1182,7 @@ void on_composition_layers_normalize_clicked(GtkButton *button, gpointer user_da
 
 	stackargs->image_indices = malloc(stackargs->nb_images_to_stack * sizeof(int));
 	fill_list_of_unfiltered_images(stackargs);
+	set_cursor_waiting(TRUE);
 
 	start_in_new_thread(normalization_thread, stackargs);
 }
