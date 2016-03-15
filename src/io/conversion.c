@@ -598,7 +598,7 @@ static gpointer convert_thread_worker(gpointer p) {
 				if (convflags & CONVDSTSER) {
 					if (convflags & CONV1X1)
 						keep_first_channel_from_fits(fit);
-					if (ser_write_frame_from_fit(ser_file, fit)) {
+					if (ser_write_frame_from_fit(ser_file, fit, frame)) {
 						siril_log_message("Error while converting to SER (no space left?)\n");
 						goto clean_exit;
 					}
@@ -626,7 +626,7 @@ static gpointer convert_thread_worker(gpointer p) {
 			if (convflags & CONVDSTSER) {
 				if (convflags & CONV1X1)
 					keep_first_channel_from_fits(fit);
-				if (ser_write_frame_from_fit(ser_file, fit)) {
+				if (ser_write_frame_from_fit(ser_file, fit, args->nb_converted)) {
 					siril_log_message("Error while converting to SER (no space left?)\n");
 					break;
 				}

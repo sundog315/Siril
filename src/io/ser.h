@@ -79,7 +79,7 @@ int ser_close_file(struct ser_struct *ser_file);
 int ser_read_frame(struct ser_struct *ser_file, int frame_no, fits *fit);
 int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 		int frame_no, WORD *buffer, const rectangle *area);
-int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit);
+int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit, int frame);
 void set_combo_box_bayer_pattern(ser_color pattern);
 void ser_manage_endianess_and_depth(struct ser_struct *ser_file, WORD *data, int frame_size);
 void ser_manage_rgb_v3(struct ser_struct *ser_file, WORD *data, int frame_size);

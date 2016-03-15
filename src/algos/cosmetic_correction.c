@@ -280,7 +280,7 @@ int cosmetic_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) 
 
 	if (args->seq->type == SEQ_SER) {
 		snprintf(dest, 255, "%s%s.ser", c_args->seqEntry, args->seq->seqname);
-		return ser_write_frame_from_fit(args->new_ser, fit);
+		return ser_write_frame_from_fit(args->new_ser, fit, i);
 	} else {
 		snprintf(dest, 255, "%s%s%05d%s", c_args->seqEntry, args->seq->seqname,
 				i, com.ext);
@@ -302,12 +302,11 @@ void apply_cosmetic_to_sequence(struct cosmetic_data *cosme_args) {
 	if (args->seq->type == SEQ_SER) {
 		args->prepare_hook = cosmetic_prepare_hook;
 		args->finalize_hook = cosmetic_finalize_hook;
-		args->parallel = FALSE;		// if TRUE, all frames are sorted in a random order
 	} else {
 		args->prepare_hook = NULL;
 		args->finalize_hook = NULL;
-		args->parallel = TRUE;
 	}
+	args->parallel = TRUE;
 	args->image_hook = cosmetic_image_hook;
 	args->idle_function = NULL;
 	args->user = cosme_args;

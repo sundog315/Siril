@@ -40,6 +40,7 @@
 #include "algos/PSF.h"
 #include "gui/PSF_list.h"
 #include "algos/quality.h"
+#include "io/ser.h"
 #ifdef HAVE_OPENCV
 #include "opencv/opencv.h"
 #include "opencv/ecc/ecc.h"
@@ -466,6 +467,7 @@ int register_star_alignment(struct registration_args *args) {
 	regdata *current_regdata;
 	starFinder sf;
 	fits fit;
+	struct ser_struct *new_ser;
 
 	memset(&fit, 0, sizeof(fits));
 	memset(&sf, 0, sizeof(starFinder));
@@ -539,6 +541,21 @@ int register_star_alignment(struct registration_args *args) {
 	if (args->process_all_frames)
 		args->seq->new_total = args->seq->number;
 	else args->seq->new_total = args->seq->selnum;
+
+	if (args->seq->type == SEQ_SER) {
+		char dest[256];
+
+		new_ser = malloc(sizeof(struct ser_struct));
+
+		const char *ptr = strrchr(args->seq->seqname, '/');
+		if (ptr)
+			snprintf(dest, 255, "%s%s.ser", args->text, ptr + 1);
+		else
+			snprintf(dest, 255, "%s%s.ser", args->text, args->seq->seqname);
+
+		ser_create_file(dest, new_ser, TRUE, args->seq->ser_file);
+	}
+
 	for (frame = 0, cur_nb = 0.f; frame < args->seq->number; frame++) {
 		if (args->run_in_thread && !get_thread_run())
 			break;
@@ -603,12 +620,18 @@ int register_star_alignment(struct registration_args *args) {
 			}
 			fit_sequence_get_image_filename(args->seq, frame, filename, TRUE);
 
-			snprintf(dest, 255, "%s%s", args->text, filename);
-			savefits(dest, &fit);
+			if (args->seq->type == SEQ_SER)
+				ser_write_frame_from_fit(new_ser, &fit, frame);
+			else
+				savefits(dest, &fit);
 
 			cur_nb += 1.f;
 			set_progress_bar_data(NULL, cur_nb / nb_frames);
 		}
+	}
+	if (args->seq->type == SEQ_SER) {
+		ser_write_and_close(new_ser);
+		free(new_ser);
 	}
 	args->seq->regparam[args->layer] = current_regdata;
 	update_used_memory();

@@ -97,6 +97,10 @@ int nozero(fits *fit, int level) {
 	return 0;
 }
 
+/*****************************************************************************
+ *       S I R I L      A R I T H M E T I C      O P E R A T I O N S         *
+ ****************************************************************************/
+
 /* equivalent to (map simple_operation a), with simple_operation being
  * (lambda (pixel) (oper pixel scalar))
  * oper is a for addition, s for substraction (i for difference) and so on. */
@@ -300,6 +304,10 @@ int ndiv(fits *a, fits *b) {
 	free(div);
 	return 0;
 }
+
+/**********************************************************
+ *
+ */
 
 #ifdef HAVE_OPENCV
 int unsharp(fits *fit, double sigma, double amount, gboolean verbose) {
@@ -859,10 +867,10 @@ int lrgb(fits *l, fits *r, fits *g, fits *b, fits *lrgb) {
 }
 
 static double evaluateNoiseOfCalibratedImage(fits *fit, fits *dark, double k) {
-	double noise;
+	double noise = 0;
 	fits *dark_tmp;
 	fits *fit_tmp;
-	imstats *stat = NULL;
+	int chan;
 
 	dark_tmp = calloc(1, sizeof(fits));
 	fit_tmp = calloc(1, sizeof(fits));
@@ -876,10 +884,13 @@ static double evaluateNoiseOfCalibratedImage(fits *fit, fits *dark, double k) {
 	soper(dark_tmp, k, OPER_MUL);
 	imoper(fit_tmp, dark_tmp, OPER_SUB);
 
-	stat = statistics(fit_tmp, RLAYER, NULL, STATS_BASIC);
-	noise = stat->bgnoise;
-	//printf("noise=%lf, k=%lf\n", noise, k);
-	free(stat);
+	for (chan = 0; chan < fit->naxes[2]; chan++) {
+		imstats *stat = NULL;
+		stat = statistics(fit_tmp, chan, NULL, STATS_BASIC);
+		noise += stat->bgnoise;
+		//printf("noise=%lf, k=%lf\n", noise, k);
+		free(stat);
+	}
 	clearfits(dark_tmp);
 	clearfits(fit_tmp);
 
@@ -992,6 +1003,7 @@ gpointer seqpreprocess(gpointer p) {
 		preprocess(com.uniq->fit, offset, dark, flat, args->normalisation);
 
 		if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK)) {
+			if (dark->naxes[2] == 1) {
 			/* Cosmetic correction */
 			long icold, ihot;
 			deviant_pixel *dev = find_deviant_pixels(dark, args->sigma, &icold, &ihot);
@@ -1000,6 +1012,10 @@ gpointer seqpreprocess(gpointer p) {
 			cosmeticCorrection(com.uniq->fit, dev, icold + ihot, args->is_cfa);
 			if (dev)
 				free(dev);
+			}
+			else
+				siril_log_message("Darkmap cosmetic correction"
+						"is only supported with single channel images\n");
 		}
 
 		snprintf(dest_filename, 255, "%s%s", com.uniq->ppprefix,
@@ -1020,15 +1036,18 @@ gpointer seqpreprocess(gpointer p) {
 		if (com.seq.type == SEQ_SER) {
 			char new_ser_filename[256];
 			new_ser_file = calloc(1, sizeof(struct ser_struct));
-			snprintf(new_ser_filename, 255, "%s%s", com.seq.ppprefix,
-					new_ser_file->filename);
+			snprintf(new_ser_filename, 255, "%s%s", com.seq.ppprefix, com.seq.ser_file->filename);
 			ser_create_file(new_ser_filename, new_ser_file, TRUE, com.seq.ser_file);
 		}
 
 		if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK)) {
-			dev = find_deviant_pixels(dark, args->sigma, &icold, &ihot);
-			siril_log_message("%ld pixels corrected (%ld + %ld)\n",
-					icold + ihot, icold, ihot);
+			if (dark->naxes[2] == 1) {
+				dev = find_deviant_pixels(dark, args->sigma, &icold, &ihot);
+				siril_log_message("%ld pixels corrected (%ld + %ld)\n",
+						icold + ihot, icold, ihot);
+			} else
+				siril_log_message("Darkmap cosmetic correction"
+						"is only supported with single channel images\n");
 		}
 
 		fits *fit = calloc(1, sizeof(fits));
@@ -1061,7 +1080,7 @@ gpointer seqpreprocess(gpointer p) {
 
 			preprocess(fit, offset, dark, flat, args->normalisation);
 
-			if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK))
+			if ((com.preprostatus & USE_COSME) && (com.preprostatus & USE_DARK) && (dark->naxes[2] == 1))
 				cosmeticCorrection(fit, dev, icold + ihot, args->is_cfa);
 
 			snprintf(dest_filename, 255, "%s%s", com.seq.ppprefix,
@@ -1070,20 +1089,7 @@ gpointer seqpreprocess(gpointer p) {
 			snprintf(msg, 255, "Saving image %d/%d (%s)", i + 1, com.seq.number,
 					dest_filename);
 			if (com.seq.type == SEQ_SER) {
-				if ((new_ser_file->color_id != SER_MONO)
-						&& (!com.debayer.open_debayer)) {
-					char *msg = siril_log_message("You must preprocess "
-							"your SER files without applying demosaicing.\n");
-					show_dialog(msg, "Warning", "gtk-dialog-warning");
-					ser_close_file(new_ser_file);
-					free(new_ser_file);
-					if (p) free(p);
-					set_progress_bar_data(PROGRESS_TEXT_RESET, PROGRESS_RESET);
-					args->retval = 1;
-					gdk_threads_add_idle(end_sequence_prepro, args);
-					return GINT_TO_POINTER(1);
-				}
-				ser_write_frame_from_fit(new_ser_file, fit);
+				ser_write_frame_from_fit(new_ser_file, fit, i);
 			} else {
 				savefits(dest_filename, fit);
 			}
@@ -1125,98 +1131,6 @@ double background(fits* fit, int reqlayer, rectangle *selection) {
 	free(stat);
 	stat = NULL;
 	return bg;
-}
-
-/* Based on Jean-Luc Starck and Fionn Murtagh (1998), Automatic Noise
- * Estimation from the Multiresolution Support, Publications of the 
- * Royal Astronomical Society of the Pacific, vol. 110, pp. 193–199.
- * slow algorithm. For now it is replaced by faster one. BUT, we need to keep it
- * in case we need it -. */
-int backgroundnoise(fits* fit, double sigma[]) {
-	int layer, k;
-	fits *waveimage = calloc(1, sizeof(fits));
-
-	if (waveimage == NULL) {
-		fprintf(stderr, "backgroundnoise: error allocating data\n");
-		return 1;
-	}
-
-	copyfits(fit, waveimage, CP_ALLOC | CP_FORMAT | CP_COPYA, 0);
-#ifdef HAVE_OPENCV	// a bit faster
-	cvComputeFinestScale(waveimage);
-#else
-	if (get_wavelet_layers(waveimage, 4, 0, TO_PAVE_BSPLINE, -1)) {
-		siril_log_message("Siril cannot evaluate the noise in the image\n");
-		clearfits(waveimage);
-		return 1;
-	}
-#endif
-
-	for (layer = 0; layer < fit->naxes[2]; layer++) {
-		imstats *stat = statistics(waveimage, layer, NULL, STATS_BASIC);
-		double sigma0 = stat->sigma;
-		double mean = stat->mean;
-		double epsilon = 0.0;
-		WORD lo, hi;
-		WORD *buf = waveimage->pdata[layer];
-		unsigned int i;
-		unsigned int ndata = fit->rx * fit->ry;
-		assert(ndata > 0);
-		WORD *array1 = calloc(ndata, sizeof(WORD));
-		WORD *array2 = calloc(ndata, sizeof(WORD));
-		if (array1 == NULL || array2 == NULL) {
-			siril_log_message("backgroundnoise: Error allocating data\n");
-			if (array1)
-				free(array1);
-			if (array2)
-				free(array2);
-			free(stat);
-			return 1;
-		}
-		WORD *set = array1, *subset = array2;
-		memcpy(set, buf, ndata * sizeof(WORD));
-
-		lo = round_to_WORD(LOW_BOUND * stat->normValue);
-		hi = round_to_WORD(HIGH_BOUND * stat->normValue);
-
-		sigma[layer] = sigma0;
-
-		int n = 0;
-		do {
-			sigma0 = sigma[layer];
-			for (i = 0, k = 0; i < ndata; i++) {
-				if (set[i] >= lo && set[i] <= hi) {
-					if (fabs(set[i] - mean) < 3.0 * sigma0) {
-						subset[k++] = set[i];
-					}
-				}
-			}
-			ndata = k;
-			sigma[layer] = gsl_stats_ushort_sd(subset, 1, ndata);
-			set = subset;
-			(set == array1) ? (subset = array2) : (subset = array1);
-			if (ndata == 0) {
-				free(array1);
-				free(array2);
-				free(stat);
-				siril_log_message("backgroundnoise: Error, no data computed\n");
-				sigma[layer] = 0.0;
-				return 1;
-			}
-			n++;
-			epsilon = fabs(sigma[layer] - sigma0) / sigma[layer];
-		} while (epsilon > EPSILON && n < MAX_ITER);
-		sigma[layer] *= SIGMA_PER_FWHM; // normalization
-		sigma[layer] /= 0.974; // correct for 2% systematic bias
-		if (n == MAX_ITER)
-			siril_log_message("backgroundnoise: does not converge\n");
-		free(array1);
-		free(array2);
-		free(stat);
-	}
-	clearfits(waveimage);
-
-	return 0;
 }
 
 void show_FITS_header(fits *fit) {
@@ -1367,7 +1281,10 @@ int get_wavelet_layers(fits *fit, int Nbr_Plan, int Plan, int Type, int reqlayer
 	return 0;
 }
 
-// idle function executed at the end of the median_filter processing
+/*****************************************************************************
+ *                      M E D I A N     F I L T E R                          *
+ ****************************************************************************/
+
 gboolean end_median_filter(gpointer p) {
 	struct median_filter_data *args = (struct median_filter_data *) p;
 	stop_processing_thread();// can it be done here in case there is no thread?
@@ -1490,6 +1407,10 @@ static int fmul(fits *a, int layer, float coeff) {
 	return 0;
 }
 
+/*****************************************************************************
+ *      B A N D I N G      R E D U C T I O N      M A N A G E M E N T        *
+ ****************************************************************************/
+
 int banding_prepare_hook(struct generic_seq_args *args) {
 	char dest[256];
 	const char *ptr;
@@ -1514,7 +1435,7 @@ int banding_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) {
 
 	if (args->seq->type == SEQ_SER) {
 		snprintf(dest, 255, "%s%s.ser", banding_args->seqEntry, args->seq->seqname);
-		return ser_write_frame_from_fit(args->new_ser, fit);
+		return ser_write_frame_from_fit(args->new_ser, fit, i);
 	} else {
 		snprintf(dest, 255, "%s%s%05d%s", banding_args->seqEntry, args->seq->seqname, i, com.ext);
 		return savefits(dest, fit);
@@ -1535,12 +1456,11 @@ void apply_banding_to_sequence(struct banding_data *banding_args) {
 	if (args->seq->type == SEQ_SER) {
 		args->prepare_hook = banding_prepare_hook;
 		args->finalize_hook = banding_finalize_hook;
-		args->parallel = FALSE;		// if TRUE, all frames are sorted in a random order
 	} else {
 		args->prepare_hook = NULL;
 		args->finalize_hook = NULL;
-		args->parallel = TRUE;
 	}
+	args->parallel = TRUE;
 	args->image_hook = banding_image_hook;
 	args->idle_function = NULL;
 	args->user = banding_args;
@@ -1657,6 +1577,102 @@ int BandingEngine(fits *fit, double sigma, double amount, gboolean protect_highl
 	clearfits(fiximage);
 	if (applyRotation)
 		cvRotateImage(fit, -90.0, -1, 0);
+	return 0;
+}
+
+/*****************************************************************************
+ *       N O I S E     C O M P U T A T I O N      M A N A G E M E N T        *
+ ****************************************************************************/
+
+/* Based on Jean-Luc Starck and Fionn Murtagh (1998), Automatic Noise
+ * Estimation from the Multiresolution Support, Publications of the
+ * Royal Astronomical Society of the Pacific, vol. 110, pp. 193–199.
+ * slow algorithm. For now it is replaced by faster one. BUT, we need to keep it
+ * in case we need it -. */
+int backgroundnoise(fits* fit, double sigma[]) {
+	int layer, k;
+	fits *waveimage = calloc(1, sizeof(fits));
+
+	if (waveimage == NULL) {
+		fprintf(stderr, "backgroundnoise: error allocating data\n");
+		return 1;
+	}
+
+	copyfits(fit, waveimage, CP_ALLOC | CP_FORMAT | CP_COPYA, 0);
+#ifdef HAVE_OPENCV	// a bit faster
+	cvComputeFinestScale(waveimage);
+#else
+	if (get_wavelet_layers(waveimage, 4, 0, TO_PAVE_BSPLINE, -1)) {
+		siril_log_message("Siril cannot evaluate the noise in the image\n");
+		clearfits(waveimage);
+		return 1;
+	}
+#endif
+
+	for (layer = 0; layer < fit->naxes[2]; layer++) {
+		imstats *stat = statistics(waveimage, layer, NULL, STATS_BASIC);
+		double sigma0 = stat->sigma;
+		double mean = stat->mean;
+		double epsilon = 0.0;
+		WORD lo, hi;
+		WORD *buf = waveimage->pdata[layer];
+		unsigned int i;
+		unsigned int ndata = fit->rx * fit->ry;
+		assert(ndata > 0);
+		WORD *array1 = calloc(ndata, sizeof(WORD));
+		WORD *array2 = calloc(ndata, sizeof(WORD));
+		if (array1 == NULL || array2 == NULL) {
+			siril_log_message("backgroundnoise: Error allocating data\n");
+			if (array1)
+				free(array1);
+			if (array2)
+				free(array2);
+			free(stat);
+			return 1;
+		}
+		WORD *set = array1, *subset = array2;
+		memcpy(set, buf, ndata * sizeof(WORD));
+
+		lo = round_to_WORD(LOW_BOUND * stat->normValue);
+		hi = round_to_WORD(HIGH_BOUND * stat->normValue);
+
+		sigma[layer] = sigma0;
+
+		int n = 0;
+		do {
+			sigma0 = sigma[layer];
+			for (i = 0, k = 0; i < ndata; i++) {
+				if (set[i] >= lo && set[i] <= hi) {
+					if (fabs(set[i] - mean) < 3.0 * sigma0) {
+						subset[k++] = set[i];
+					}
+				}
+			}
+			ndata = k;
+			sigma[layer] = gsl_stats_ushort_sd(subset, 1, ndata);
+			set = subset;
+			(set == array1) ? (subset = array2) : (subset = array1);
+			if (ndata == 0) {
+				free(array1);
+				free(array2);
+				free(stat);
+				siril_log_message("backgroundnoise: Error, no data computed\n");
+				sigma[layer] = 0.0;
+				return 1;
+			}
+			n++;
+			epsilon = fabs(sigma[layer] - sigma0) / sigma[layer];
+		} while (epsilon > EPSILON && n < MAX_ITER);
+		sigma[layer] *= SIGMA_PER_FWHM; // normalization
+		sigma[layer] /= 0.974; // correct for 2% systematic bias
+		if (n == MAX_ITER)
+			siril_log_message("backgroundnoise: does not converge\n");
+		free(array1);
+		free(array2);
+		free(stat);
+	}
+	clearfits(waveimage);
+
 	return 0;
 }
 

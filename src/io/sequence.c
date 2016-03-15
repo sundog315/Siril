@@ -1095,7 +1095,7 @@ gpointer crop_sequence(gpointer p) {
 				savefits(dest, &wfit[0]);
 				break;
 			case SEQ_SER:
-				if (ser_write_frame_from_fit(ser_file, &wfit[0])) {
+				if (ser_write_frame_from_fit(ser_file, &wfit[0], frame)) {
 					siril_log_message(
 							"Error while converting to SER (no space left?)\n");
 				}
@@ -1318,7 +1318,7 @@ gpointer export_sequence(gpointer ptr) {
 				}
 				break;
 			case TYPESER:
-				if (ser_write_frame_from_fit(ser_file, &destfit))
+				if (ser_write_frame_from_fit(ser_file, &destfit, i))
 					siril_log_message("Error while converting to SER (no space left?)\n");
 				break;
 			case TYPEGIF:
