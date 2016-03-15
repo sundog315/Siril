@@ -51,7 +51,7 @@ static double siril_stats_ushort_median(gsl_histogram *histo, const size_t n) {
 	double median = 0.0;
 
 	/* Get the median value */
-	for (i = 0; i < hist_size + 1; i++) {
+	for (i = 0; i < hist_size; i++) {
 		sum += gsl_histogram_get(histo, i);
 		if (sum > ((double) n * 0.5)) {
 			median = (double) i;
