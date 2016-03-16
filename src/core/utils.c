@@ -711,7 +711,7 @@ void expand_home_in_filename(char *filename, int size) {
 }
 
 WORD get_normalized_value(fits *fit) {
-	image_find_minmax(fit, 0);// recomputing is needed for dark, flat & offset fits
+	image_find_minmax(fit, 1);// recomputing is needed for dark, flat & offset fits
 	if (fit->maxi <= UCHAR_MAX)
 		return UCHAR_MAX;
 	return USHRT_MAX;
