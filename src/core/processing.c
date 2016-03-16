@@ -10,12 +10,13 @@
 // called in start_in_new_thread only
 // works in parallel if the arg->parallel is TRUE for FITS or SER sequences
 gpointer generic_sequence_worker(gpointer p) {
-	struct generic_seq_args *args = (struct generic_seq_args *)p;
+	struct generic_seq_args *args = (struct generic_seq_args *) p;
 	struct timeval t_end;
 	float nb_framesf, progress = 0.f; // 0 to nb_framesf, for progress
 	int frame;	// the current frame, sequence index
-	int current;	// number of processed frames so far
-	GString *desc;	// temporary string description for logs
+	int current; // number of processed frames so far
+	int abort = 0; // variable for breaking out of loop
+	GString *desc; // temporary string description for logs
 	gchar *msg; // final string description for logs
 
 	assert(args);
@@ -47,12 +48,12 @@ gpointer generic_sequence_worker(gpointer p) {
 #pragma omp parallel for num_threads(com.max_thread) private(frame) schedule(static) \
 	if(args->parallel && ((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER))
 	for (frame = 0; frame < args->seq->number; frame++) {
-		if (!args->retval) {
+		if (!abort) {
 			fits fit;
 			char filename[256], msg[256];
 
 			if (!get_thread_run()) {
-				args->retval = 1;
+				abort = 1;
 				continue;
 			}
 			if (args->filtering_criterion
@@ -61,7 +62,7 @@ gpointer generic_sequence_worker(gpointer p) {
 				continue;
 
 			if (!seq_get_image_filename(args->seq, frame, filename)) {
-				args->retval = 1;
+				abort = 1;
 				continue;
 			}
 
@@ -71,13 +72,13 @@ gpointer generic_sequence_worker(gpointer p) {
 
 			memset(&fit, 0, sizeof(fits));
 			if (seq_read_frame(args->seq, frame, &fit)) {
-				args->retval = 1;
+				abort = 1;
 				clearfits(&fit);
 				continue;
 			}
 
 			if (args->image_hook(args, frame, current, &fit)) {
-				args->retval = 1;
+				abort = 1;
 				clearfits(&fit);
 				continue;
 			}
@@ -89,9 +90,10 @@ gpointer generic_sequence_worker(gpointer p) {
 	}
 
 the_end:
-	if (args->retval) {
+	if (abort) {
 		set_progress_bar_data("Sequence processing failed. Check the log.", PROGRESS_RESET);
 		siril_log_message("Sequence processing failed.\n");
+		args->retval = abort;
 	}
 	else {
 		set_progress_bar_data("Sequence processing succeeded.", PROGRESS_RESET);
