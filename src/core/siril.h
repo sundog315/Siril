@@ -52,12 +52,12 @@ typedef unsigned short WORD;		// default type for internal image data
 #define SN_NORM 1.1926
 #define QN_NORM 2.2191
 
-#define STATS_BASIC		(1 << 1)
-#define STATS_AVGDEV	(1 << 2)
-#define STATS_MAD		(1 << 3)
-#define STATS_BWMV		(1 << 5)
+#define STATS_BASIC		(1 << 1)	// median, mean, sigma, noise
+#define STATS_AVGDEV	(1 << 2)	// average absolute deviation
+#define STATS_MAD		(1 << 3)	// median absolute deviation
+#define STATS_BWMV		(1 << 5)	// bidweight midvariance
 #define STATS_MAIN		STATS_BASIC | STATS_AVGDEV | STATS_MAD | STATS_BWMV
-#define STATS_IKSS		(1 << 6) /* take time, needed only for stacking */
+#define STATS_IKSS		(1 << 6)	// Iterative K-sigma Estimator of Location and Scale. Take time, needed only for stacking
 #define STATS_EXTRA		STATS_MAIN | STATS_IKSS
 
 /* when requesting an image redraw, it can be asked to remap its data before redrawing it.

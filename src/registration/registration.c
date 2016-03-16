@@ -771,7 +771,6 @@ void on_comboboxregmethod_changed(GtkComboBox *box, gpointer user_data) {
 
 int get_registration_layer() {
 	int reglayer;
-	gboolean has_changed = FALSE;
 	GtkComboBox *registbox = GTK_COMBO_BOX(lookup_widget("comboboxreglayer"));
 
 	if (!sequence_is_loaded())
