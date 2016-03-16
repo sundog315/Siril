@@ -239,15 +239,15 @@ imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
 		gsl_stats_ushort_minmax(&min, &max, data, 1, nx * ny);
 
 	/* Calculation of average absolute deviation from the median */
-	if (option & STATS_AVGDEV)
+	if ((option & STATS_AVGDEV) && (option & STATS_BASIC))
 		avgDev = gsl_stats_ushort_absdev_m(data, 1, nx * ny, median);
 
 	/* Calculation of median absolute deviation */
-	if (option & STATS_MAD)
+	if ((option & STATS_MAD) && (option & STATS_BASIC))
 		mad = siril_stats_ushort_mad(data, 1, nx * ny, median);
 
 	/* Calculation of Bidweight Midvariance */
-	if ((option & STATS_BWMV) && (option & STATS_MAD))
+	if ((option & STATS_BWMV) && (option & STATS_MAD) && (option & STATS_BASIC))
 		bwmv = siril_stats_ushort_bwmv(data, nx * ny, mad, median);
 
 	/* Calculation of IKSS. Used for stacking */
