@@ -97,7 +97,7 @@ the_end:
 		set_progress_bar_data("Sequence processing succeeded.", PROGRESS_RESET);
 		siril_log_message("Sequence processing succeeded.\n");
 		gettimeofday(&t_end, NULL);
-			show_time(args->t_start, t_end);
+		show_time(args->t_start, t_end);
 	}
 
 	if (args->finalize_hook && args->finalize_hook(args)) {

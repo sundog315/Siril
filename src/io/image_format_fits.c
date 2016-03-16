@@ -39,13 +39,13 @@ static char *BinY[] = { "YBINNING", "BINY", NULL };
 static char *Focal[] = { "FOCAL", "FOCALLEN", NULL };
 static char *Exposure[] = { "EXPTIME", "EXPOSURE", NULL };
 
-#define __tryToFindKeywords(fit, type, keyword, value) \
+#define __tryToFindKeywords(fptr, type, keyword, value) \
 { \
 	int __iter__ = 0; \
 	int __status__; \
 	do { \
 		__status__ = 0; \
-		fits_read_key(fit->fptr, type, keyword[__iter__], value, NULL, &__status__); \
+		fits_read_key(fptr, type, keyword[__iter__], value, NULL, &__status__); \
 		__iter__++; \
 	} while ((keyword[__iter__]) && (__status__ > 0)); \
 }
@@ -253,8 +253,8 @@ void read_fits_header(fits *fit) {
 	int status = 0;
 	int zero;
 
-	__tryToFindKeywords(fit, TUSHORT, MIPSHI, &fit->hi);
-	__tryToFindKeywords(fit, TUSHORT, MIPSLO, &fit->lo);
+	__tryToFindKeywords(fit->fptr, TUSHORT, MIPSHI, &fit->hi);
+	__tryToFindKeywords(fit->fptr, TUSHORT, MIPSLO, &fit->lo);
 
 	status = 0;
 	fits_read_key(fit->fptr, TINT, "BSCALE", &zero, NULL, &status);
@@ -271,10 +271,10 @@ void read_fits_header(fits *fit) {
 	 * ************* CAMERA AND INSTRUMENT KEYWORDS ********************
 	 * ****************************************************************/
 
-	__tryToFindKeywords(fit, TFLOAT, PixSizeX, &fit->pixel_size_x);
-	__tryToFindKeywords(fit, TFLOAT, PixSizeY, &fit->pixel_size_y);
-	__tryToFindKeywords(fit, TUINT, BinX, &fit->binning_x);
-	__tryToFindKeywords(fit, TUINT, BinY, &fit->binning_y);
+	__tryToFindKeywords(fit->fptr, TFLOAT, PixSizeX, &fit->pixel_size_x);
+	__tryToFindKeywords(fit->fptr, TFLOAT, PixSizeY, &fit->pixel_size_y);
+	__tryToFindKeywords(fit->fptr, TUINT, BinX, &fit->binning_x);
+	__tryToFindKeywords(fit->fptr, TUINT, BinY, &fit->binning_y);
 
 	status = 0;
 	fits_read_key(fit->fptr, TSTRING, "INSTRUME", &(fit->instrume), NULL,
@@ -288,7 +288,7 @@ void read_fits_header(fits *fit) {
 	fits_read_key(fit->fptr, TSTRING, "DATE", &(fit->date), NULL,
 			&status);
 
-	__tryToFindKeywords(fit, TDOUBLE, Focal, &fit->focal_length);
+	__tryToFindKeywords(fit->fptr, TDOUBLE, Focal, &fit->focal_length);
 	if (!sequence_is_loaded() || com.seq.current == 0)
 		fprintf(stdout,
 				"Read from FITS header: pix size %gx%g, binning %hix%hi, focal %g\n",
@@ -299,7 +299,7 @@ void read_fits_header(fits *fit) {
 	fits_read_key(fit->fptr, TDOUBLE, "CCD-TEMP", &(fit->ccd_temp), NULL,
 			&status);	// Non-standard keywords used in MaxIm DL
 
-	__tryToFindKeywords(fit, TDOUBLE, Exposure, &fit->exposure);
+	__tryToFindKeywords(fit->fptr, TDOUBLE, Exposure, &fit->exposure);
 
 	status = 0;
 	fits_read_key(fit->fptr, TDOUBLE, "APERTURE", &(fit->aperture), NULL,
