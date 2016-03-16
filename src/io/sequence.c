@@ -670,7 +670,7 @@ void set_fwhm_star_as_star_list_with_layer(sequence *seq, int layer) {
 
 // cannot be called in the worker thread
 void set_fwhm_star_as_star_list(sequence *seq) {
-	int layer = get_registration_layer(seq);
+	int layer = get_registration_layer();
 	set_fwhm_star_as_star_list_with_layer(seq, layer);
 }
 
@@ -1183,7 +1183,7 @@ gpointer export_sequence(gpointer ptr) {
 #endif
 	norm_coeff coeff;
 
-	reglayer = get_registration_layer(args->seq);
+	reglayer = get_registration_layer();
 	siril_log_message("Using registration information from layer %d to export sequence\n", reglayer);
 
 	if (args->convflags == TYPESER) {

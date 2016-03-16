@@ -196,7 +196,7 @@ int stack_summing(struct stacking_args *args) {
 
 	/* should be pre-computed to display it in the stacking tab */
 	nb_frames = args->nb_images_to_stack;
-	reglayer = get_registration_layer(args->seq);
+	reglayer = get_registration_layer();
 
 	if (nb_frames <= 1) {
 		siril_log_message("No frame selected for stacking (select at least 2). Aborting.\n");
@@ -820,7 +820,7 @@ int stack_addmax(struct stacking_args *args) {
 
 	/* should be pre-computed to display it in the stacking tab */
 	nb_frames = args->nb_images_to_stack;
-	reglayer = get_registration_layer(args->seq);
+	reglayer = get_registration_layer();
 
 	if (nb_frames <= 1) {
 		siril_log_message("No frame selected for stacking (select at least 2). Aborting.\n");
@@ -981,7 +981,7 @@ int stack_addmin(struct stacking_args *args) {
 
 	/* should be pre-computed to display it in the stacking tab */
 	nb_frames = args->nb_images_to_stack;
-	reglayer = get_registration_layer(args->seq);
+	reglayer = get_registration_layer();
 
 	if (nb_frames <= 1) {
 		siril_log_message("No frame selected for stacking (select at least 2). Aborting.\n");
@@ -1201,7 +1201,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 	norm_coeff coeff;
 
 	nb_frames = args->nb_images_to_stack;
-	reglayer = get_registration_layer(args->seq);
+	reglayer = get_registration_layer();
 
 	if (args->seq->type != SEQ_REGULAR && args->seq->type != SEQ_SER) {
 		char *msg = siril_log_message("Rejection stacking is only supported for FITS images and SER sequences.\nUse \"Sum Stacking\" instead.\n");
@@ -2135,7 +2135,7 @@ int stack_filter_included(sequence *seq, int nb_img, double any) {
 int stack_filter_fwhm(sequence *seq, int nb_img, double max_fwhm) {
 	int layer;
 	if (!seq->regparam) return 0;
-	layer = get_registration_layer(seq);
+	layer = get_registration_layer();
 	if (layer == -1) return 0;
 	if (!seq->regparam[layer]) return 0;
 	if (seq->imgparam[nb_img].incl && seq->regparam[layer][nb_img].fwhm > 0.0f)
@@ -2147,7 +2147,7 @@ int stack_filter_fwhm(sequence *seq, int nb_img, double max_fwhm) {
 int stack_filter_quality(sequence *seq, int nb_img, double max_quality) {
 	int layer;
 	if (!seq->regparam) return 0;
-	layer = get_registration_layer(seq);
+	layer = get_registration_layer();
 	if (layer == -1) return 0;
 	if (!seq->regparam[layer]) return 0;
 	if (seq->imgparam[nb_img].incl && seq->regparam[layer][nb_img].quality > 0.0)
@@ -2192,7 +2192,7 @@ double compute_highest_accepted_fwhm(double percent) {
 	int i, layer;
 	double *val = malloc(com.seq.number * sizeof(double));
 	double highest_accepted;
-	layer = get_registration_layer(&com.seq);
+	layer = get_registration_layer();
 	if (layer == -1 || !com.seq.regparam || !com.seq.regparam[layer]) {
 		free(val);
 		return 0.0;
@@ -2227,7 +2227,7 @@ double compute_highest_accepted_quality(double percent) {
 	int i, layer;
 	double *val = malloc(com.seq.number * sizeof(double));
 	double highest_accepted;
-	layer = get_registration_layer(&com.seq);
+	layer = get_registration_layer();
 	if (layer == -1 || !com.seq.regparam || !com.seq.regparam[layer]) {
 		free(val);
 		return 0.0;

@@ -769,7 +769,7 @@ void on_comboboxregmethod_changed(GtkComboBox *box, gpointer user_data) {
 	writeinitfile();
 }
 
-int get_registration_layer(sequence *seq) {
+int get_registration_layer() {
 	int reglayer;
 	gboolean has_changed = FALSE;
 	GtkComboBox *registbox = GTK_COMBO_BOX(lookup_widget("comboboxreglayer"));
@@ -778,25 +778,6 @@ int get_registration_layer(sequence *seq) {
 		return -1;
 	reglayer = gtk_combo_box_get_active(registbox);
 
-	if (seq->nb_layers == 3) {
-		if (!seq->regparam[reglayer]) {
-			if (seq->regparam[GLAYER]) {
-				reglayer = GLAYER;
-				has_changed = TRUE;
-			}
-			else if (seq->regparam[RLAYER]) {
-				reglayer = RLAYER;
-				has_changed = TRUE;
-			}
-			else if (seq->regparam[BLAYER]) {
-				reglayer = BLAYER;
-				has_changed = TRUE;
-			}
-		}
-		if (has_changed) {
-			gtk_combo_box_set_active(registbox, reglayer);
-		}
-	}
 	return reglayer;
 }
 
