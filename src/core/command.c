@@ -550,7 +550,7 @@ int process_ls(int nb){
 		return 1;
 	}
 
-	n = scandir(com.wd, &list, 0, alphasort);
+	n = scandir(path, &list, 0, alphasort);
 	if (n < 0)
 		perror("scandir");
 
