@@ -244,7 +244,7 @@ imstats* statistics(fits *fit, int layer, rectangle *selection, int option) {
 		avgDev = gsl_stats_ushort_absdev_m(data, 1, nx * ny, median);
 
 	/* Calculation of median absolute deviation */
-	if ((option & STATS_MAD) ||(option & STATS_BWMV))
+	if ((option & STATS_MAD) || (option & STATS_BWMV))
 		mad = siril_stats_ushort_mad(data, 1, nx * ny, median);
 
 	/* Calculation of Bidweight Midvariance */

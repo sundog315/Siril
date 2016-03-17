@@ -589,7 +589,7 @@ int savefits(const char *name, fits *f) {
 	unlink(filename); /* Delete old file if it already exists */
 
 	status = 0;
-	if (fits_create_file(&(f->fptr), filename, &status)) {/* create new FITS file */
+	if (fits_create_file(&(f->fptr), filename, &status)) { /* create new FITS file */
 		report_fits_error(status);
 		return 1;
 	}
@@ -603,14 +603,14 @@ int savefits(const char *name, fits *f) {
 	switch (f->bitpix) {
 	case BYTE_IMG:
 		data8 = calloc(pixel_count, sizeof(BYTE));
+		WORD norm = get_normalized_value(f);
 		for (i = 0; i < pixel_count; i++) {
-			if (get_normalized_value(f) == USHRT_MAX)
+			if (norm == USHRT_MAX)
 				data8[i] = conv_to_BYTE(f->data[i]);
 			else
-				data8[i] = (BYTE)(f->data[i]);
+				data8[i] = (BYTE) (f->data[i]);
 		}
-		if (fits_write_pix(f->fptr, TBYTE, orig,
-				pixel_count, data8, &status)) {
+		if (fits_write_pix(f->fptr, TBYTE, orig, pixel_count, data8, &status)) {
 			report_fits_error(status);
 			if (data8)
 				free(data8);
@@ -619,15 +619,13 @@ int savefits(const char *name, fits *f) {
 		free(data8);
 		break;
 	case SHORT_IMG:
-		if ( fits_write_pix(f->fptr, TSHORT, orig,
-				pixel_count, f->data, &status)) {
+		if (fits_write_pix(f->fptr, TSHORT, orig, pixel_count, f->data, &status)) {
 			report_fits_error(status);
 			return 1;
 		}
 		break;
 	case USHORT_IMG:
-		if ( fits_write_pix(f->fptr, TUSHORT, orig,
-				pixel_count, f->data, &status)) {
+		if (fits_write_pix(f->fptr, TUSHORT, orig, pixel_count, f->data, &status)) {
 			report_fits_error(status);
 			return 1;
 		}

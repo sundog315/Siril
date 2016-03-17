@@ -1978,6 +1978,7 @@ static void _show_bgnoise(gpointer p) {
 	set_cursor_waiting(TRUE);
 
 	args->fit = com.uniq->fit;
+	args->fit->mini = args->fit->maxi = -1;	// force to recompute min/max
 	args->verbose = FALSE;
 	memset(args->bgnoise, 0.0, sizeof(double[3]));
 	start_in_new_thread(noise, args);
