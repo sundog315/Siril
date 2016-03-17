@@ -66,7 +66,7 @@ gpointer generic_sequence_worker(gpointer p) {
 				continue;
 			}
 
-			snprintf(msg, 256, "%s. Processing image %d (%s)",	args->description, frame, filename);
+			snprintf(msg, 256, "%s. Processing image %d (%s)", args->description, frame, filename);
 			progress = (float) (args->nb_filtered_images <= 0 ? frame : current);
 			set_progress_bar_data(msg, progress / nb_framesf);
 
@@ -89,7 +89,6 @@ gpointer generic_sequence_worker(gpointer p) {
 		}
 	}
 
-the_end:
 	if (abort) {
 		set_progress_bar_data("Sequence processing failed. Check the log.", PROGRESS_RESET);
 		siril_log_message("Sequence processing failed.\n");
@@ -102,6 +101,7 @@ the_end:
 		show_time(args->t_start, t_end);
 	}
 
+the_end:
 	if (args->finalize_hook && args->finalize_hook(args)) {
 		siril_log_message("Preparing sequence processing failed.\n");
 		args->retval = 1;

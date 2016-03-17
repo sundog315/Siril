@@ -622,6 +622,8 @@ void on_button_align_clicked(GtkButton *button, gpointer user_data) {
 
 WORD get_normalized_pixel_value(int fits_index, WORD layer_pixel_value) {
 	double tmp = (double)layer_pixel_value;
+	if (!has_fit(0))
+		fits_index--;
 	tmp *= coeff->scale[fits_index];
 	tmp -= coeff->offset[fits_index];
 	return round_to_WORD(tmp);
@@ -1054,7 +1056,7 @@ void on_compositing_reset_clicked(GtkButton *button, gpointer user_data){
  * This algorithm doesn't give the optimal answer, which could be found
  * iteratively, but it should never give an overflow.
  */
-void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
+void autoadjust(int force_redraw) {
 	int layer, nb_images_red = 0, nb_images_green = 0, nb_images_blue = 0;
 	GdkRGBA max_pixel;
 
@@ -1077,9 +1079,14 @@ void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 	}
 
 	if (max_pixel.red <= 1.0 && max_pixel.green <= 1.0 && max_pixel.blue <= 1.0) {
-	       siril_log_message("nothing to adjust, no overflow\n");
-	       set_cursor_waiting(FALSE);
-       	       return;
+		if (force_redraw) {
+			siril_log_message("no overflow with the current colours, redrawing only\n");
+			update_result(1);
+		} else {
+			siril_log_message("nothing to adjust, no overflow\n");
+			set_cursor_waiting(FALSE);
+		}
+		return;
 	}
 
 	/* update the real colours of layers from their saturated colour, based
@@ -1125,6 +1132,10 @@ void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 	set_cursor_waiting(FALSE);
 }
 
+void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
+	autoadjust(0);
+}
+
 /* Normalization functions */
 
 void coeff_alloc(int nb_images) {
@@ -1147,21 +1158,27 @@ void coeff_clear() {
 }
 
 gboolean end_normalization(gpointer args) {
+	struct stacking_args *stackargs = (struct stacking_args *)args;
 	GtkWidget *norm_button = lookup_widget("composition_layers_normalize");
-	siril_log_message("Normalization information collected, redrawing...\n");
-	on_compositing_autoadjust_clicked(NULL, NULL);	// update colours and result
-	gtk_widget_set_sensitive(norm_button, TRUE);
+	siril_log_message("Normalization information collected, readjusting and redrawing...\n");
+	if (!stackargs->retval) {
+		autoadjust(1);	// update colours and result
+		gtk_widget_set_sensitive(norm_button, TRUE);
+		int i;
+		for (i = 0; i < seq->number; i++)
+			siril_log_message("  layer %d - offset: %g, scale: %g\n", i, coeff->offset[i], coeff->scale[i]);
+		siril_log_message("Normalization finished successfully.\n");
+	} else {
+		siril_log_message("Normalization encountered errors and was aborted.\n");
+	}
 	free(args);
-	int i;
-	for (i = 0; i < seq->number; i++)
-		siril_log_message("  layer %d - offset: %g, scale: %g\n", i, coeff->offset[i], coeff->scale[i]);
-	set_cursor_waiting(FALSE);
 	return end_generic(NULL);
 }
 
 gpointer normalization_thread(gpointer args) {
 	struct stacking_args *stackargs = (struct stacking_args *)args;
-	compute_normalization(stackargs, coeff, ADDITIVE_SCALING);
+	if (compute_normalization(stackargs, coeff, ADDITIVE_SCALING))
+		stackargs->retval = 1;
 	free(stackargs->image_indices);
 	gdk_threads_add_idle(end_normalization, args);
 	return NULL;
@@ -1179,6 +1196,7 @@ void on_composition_layers_normalize_clicked(GtkButton *button, gpointer user_da
 	stackargs->seq = seq;
 	stackargs->filtering_criterion = stack_filter_all;
 	stackargs->nb_images_to_stack = seq->number;
+	stackargs->retval = 0;
 
 	stackargs->image_indices = malloc(stackargs->nb_images_to_stack * sizeof(int));
 	fill_list_of_unfiltered_images(stackargs);

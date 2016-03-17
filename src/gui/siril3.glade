@@ -3618,6 +3618,8 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="label" translatable="yes">Normalize loaded images</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
+		<property name="tooltip_text" translatable="yes">Normalize layer images. This will make the input images of all loaded layers have the same brightness. Their background value and scaling will be modified in the rendering so that they look like the first image in the list. Image files are not modified.
+Must be done again when a new image is added to the composition.</property>
                 <property name="receives_default">True</property>
                 <signal name="clicked" handler="on_composition_layers_normalize_clicked" swapped="no"/>
               </object>
@@ -5022,6 +5024,7 @@ Uncheck if images come from a monochrome sensor.</property>
               <object class="GtkToolButton" id="histoZoom100">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+		<property name="tooltip_text" translatable="yes">Reset zooms to 1.</property>
                 <property name="halign">center</property>
                 <property name="valign">center</property>
                 <property name="use_underline">True</property>

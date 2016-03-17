@@ -118,7 +118,7 @@ static int _compute_normalization_for_image(struct stacking_args *args, int i,
 }
 
 int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normalization mode) {
-	int i, retval = 0, cur_nb = 0;
+	int i, retval = 0, cur_nb = 1;
 	double scale0, mul0, offset0;
 	char *tmpmsg;
 
@@ -135,7 +135,7 @@ int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normali
 
 	tmpmsg = siril_log_message("Computing normalization...\n");
 	tmpmsg[strlen(tmpmsg) - 1] = '\0';
-	set_progress_bar_data(tmpmsg, PROGRESS_NONE);
+	set_progress_bar_data(tmpmsg, PROGRESS_RESET);
 
 	/* We empty the cache if needed (force to recompute) */
 	if (args->force_norm) {
@@ -154,6 +154,8 @@ int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normali
 		return 1;
 	}
 
+	set_progress_bar_data(NULL, 1.0 / (double)args->nb_images_to_stack);
+
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static) if (args->seq->type == SEQ_SER || fits_is_reentrant())
 	for (i = 1; i < args->nb_images_to_stack; ++i) {
 		if (!retval) {
@@ -169,7 +171,7 @@ int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normali
 #pragma omp atomic
 			cur_nb++;	// only used for progress bar
 			set_progress_bar_data(NULL,
-					(double) cur_nb / ((double) args->nb_images_to_stack + 1.));
+					(double)cur_nb / ((double)args->nb_images_to_stack));
 		}
 	}
 	set_progress_bar_data(NULL, PROGRESS_DONE);
