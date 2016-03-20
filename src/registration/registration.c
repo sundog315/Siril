@@ -699,7 +699,7 @@ int register_ecc(struct registration_args *args) {
 	else args->seq->new_total = args->seq->selnum;
 
 	cur_nb = 0.f;
-#pragma omp parallel for num_threads(com.max_thread) private(frame, q_max, q_index) schedule(static) \
+#pragma omp parallel for num_threads(com.max_thread) private(frame) schedule(static) \
 	if((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER)
 	for (frame = 0; frame < args->seq->number; frame++) {
 		if (!abort) {
@@ -736,9 +736,12 @@ int register_ecc(struct registration_args *args) {
 					current_regdata[frame].quality = QualityEstimate(&im,
 							args->layer, QUALTYPE_NORMAL);
 
-					if (current_regdata[frame].quality > q_max) {
-						q_max = current_regdata[frame].quality;
-						q_index = frame;
+#pragma omp critical
+					{
+						if (current_regdata[frame].quality > q_max) {
+							q_max = current_regdata[frame].quality;
+							q_index = frame;
+						}
 					}
 
 					current_regdata[frame].shiftx = -round_to_int(reg_param.dx);
