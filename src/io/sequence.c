@@ -874,8 +874,8 @@ gboolean sequence_is_loaded() {
 /* Start a processing on all images of the sequence seq, on layer layer if it applies.
  * The see coment in siril.h for help on process format.
  */
-int sequence_processing(sequence *seq, sequence_proc process, int layer) {
-	int i, run = 1;
+int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolean run_in_thread) {
+	int i, abort = 0;
 	float cur_nb = 0.f, nb_frames;
 	fits fit;
 	rectangle area;
@@ -894,30 +894,30 @@ int sequence_processing(sequence *seq, sequence_proc process, int layer) {
 	 * detection, which makes it a bit hard to keep track of the star movement... */
 //#pragma omp parallel for private(i) schedule(dynamic)
 	for (i=0; i<seq->number; ++i) {
-		if (run) {
-			// Don't check for thread running here, this is always false
-			// for compositing registration.
-			//if (!get_thread_run()) break;
+		if (!abort) {
+			if (run_in_thread && !get_thread_run()) {
+				abort = 1;
+				continue;
+			}
 			check_area_is_in_image(&area, seq);
 
 			/* opening the image */
 			if (seq_read_frame_part(seq, layer, i, &fit, &area)) {
-				run = 0;
+				abort = 1;
 				continue;
 			}
 
 			/* processing the image
 			 * warning: area may be modified */
 			if (process(seq, layer, i, &fit, &area) < 0) {
-				run = 0;
+				abort = 1;
 				continue;
 			}
 		}
 		cur_nb += 1.f;
 		set_progress_bar_data(NULL, cur_nb/nb_frames);
 	}
-	if (!run) return 1;
-	return 0;
+	return abort;
 }
 
 /* Computes FWHM for a sequence image and store data in the sequence imgdata.
@@ -951,11 +951,11 @@ int seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit, recta
 
 /* Computes PSF for all images in a sequence.
  * Prints PSF data if print_psf is true, only position if false. */
-int do_fwhm_sequence_processing(sequence *seq, int layer, int print_psf) {
+int do_fwhm_sequence_processing(sequence *seq, int layer, int print_psf, gboolean run_in_thread) {
 	int i, retval;
 	siril_log_message("Starting sequence processing of PSF\n");
 	set_progress_bar_data("Computing PSF on selected star", PROGRESS_NONE);
-	retval = sequence_processing(seq, &seqprocess_fwhm, layer);	// allocates regparam
+	retval = sequence_processing(seq, &seqprocess_fwhm, layer, run_in_thread);	// allocates regparam
 	siril_log_message("Finished sequence processing of PSF\n");
 	if (retval) {
 		set_progress_bar_data("Failed to compute PSF for the sequence. Ready.", PROGRESS_NONE);
@@ -968,7 +968,7 @@ int do_fwhm_sequence_processing(sequence *seq, int layer, int print_psf) {
 
 	if (print_psf) {
 		fprintf(stdout, "# image_no amplitude magnitude fwhm x y\n");
-		for (i=0; i<seq->number; i++) {
+		for (i = 0; i < seq->number; i++) {
 			fitted_PSF *star = seq->regparam[layer][i].fwhm_data;
 			if (star) {
 				// see algos/PSF.h for more fields to print

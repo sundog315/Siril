@@ -719,7 +719,7 @@ int process_psf(int nb){
 
 void *_psf_thread(void *arg) {
 	int layer = (intptr_t) arg;
-	do_fwhm_sequence_processing(&com.seq, layer, 1);
+	do_fwhm_sequence_processing(&com.seq, layer, 1, 1);
 	gdk_threads_add_idle(end_generic, NULL);
 	return NULL;
 }

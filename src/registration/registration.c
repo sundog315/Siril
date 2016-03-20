@@ -360,7 +360,8 @@ int register_shift_fwhm(struct registration_args *args) {
 	 * images to register, which provides FWHM but also star coordinates */
 	// TODO: detect that it was already computed, and don't do it again
 	// -> should be done at a higher level and passed in the args
-	if (do_fwhm_sequence_processing(args->seq, args->layer, 0))	// stores in regparam
+	if (do_fwhm_sequence_processing(args->seq, args->layer, 0,
+			args->run_in_thread))	// stores in regparam
 		return 1;
 
 	current_regdata = args->seq->regparam[args->layer];
