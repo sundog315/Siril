@@ -646,11 +646,11 @@ int register_ecc(struct registration_args *args) {
 	int frame, ref_image, ret, failed = 0;
 	float nb_frames, cur_nb;
 	regdata *current_regdata;
-	fits ref, im;
+	fits ref;
 	double q_max = 0;
 	int q_index = -1;
+	int abort = 0;
 
-	memset(&im, 0, sizeof(fits));
 	memset(&ref, 0, sizeof(fits));
 
 	if (!args->seq->regparam) {
@@ -697,46 +697,58 @@ int register_ecc(struct registration_args *args) {
 	if (args->process_all_frames)
 		args->seq->new_total = args->seq->number;
 	else args->seq->new_total = args->seq->selnum;
-	for (frame = 0, cur_nb = 0.f; frame < args->seq->number; frame++) {
-		if (args->run_in_thread && !get_thread_run())
-			break;
-		if (!args->process_all_frames && !args->seq->imgparam[frame].incl)
-			continue;
-		current_regdata[frame].shiftx = 0;
-		current_regdata[frame].shifty = 0;
 
-		if (args->run_in_thread && !get_thread_run())
-			break;
-		if (!args->process_all_frames && !args->seq->imgparam[frame].incl)
-			continue;
+	cur_nb = 0.f;
+#pragma omp parallel for num_threads(com.max_thread) private(frame, q_max, q_index) schedule(static) \
+	if((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER)
+	for (frame = 0; frame < args->seq->number; frame++) {
+		if (!abort) {
+			if (args->run_in_thread && !get_thread_run()) {
+				abort = 1;
+				continue;
+			}
+			if (!args->process_all_frames && !args->seq->imgparam[frame].incl)
+				continue;
+			current_regdata[frame].shiftx = 0;
+			current_regdata[frame].shifty = 0;
 
-		if (frame != ref_image) {
-			ret = seq_read_frame(args->seq, frame, &im);
-			if (!ret) {
-				reg_ecc reg_param;
-				memset(&reg_param, 0, sizeof(reg_ecc));
+			if (frame != ref_image) {
+				fits im;
 
-				if (findTransform(&ref, &im, args->layer, &reg_param)) {
-					siril_log_message("Cannot perform ECC alignment for frame %d\n", frame);
-					/* We exclude this frame */
-					com.seq.imgparam[frame].incl = FALSE;
-					++failed;
-					continue;
+				memset(&im, 0, sizeof(fits));
+				ret = seq_read_frame(args->seq, frame, &im);
+				if (!ret) {
+					reg_ecc reg_param;
+					memset(&reg_param, 0, sizeof(reg_ecc));
+
+					if (findTransform(&ref, &im, args->layer, &reg_param)) {
+						siril_log_message(
+								"Cannot perform ECC alignment for frame %d\n",
+								frame);
+						/* We exclude this frame */
+						com.seq.imgparam[frame].incl = FALSE;
+#pragma omp atomic
+						++failed;
+						clearfits(&im);
+						continue;
+					}
+					// We don't need fit anymore, we can destroy it.
+					current_regdata[frame].quality = QualityEstimate(&im,
+							args->layer, QUALTYPE_NORMAL);
+
+					if (current_regdata[frame].quality > q_max) {
+						q_max = current_regdata[frame].quality;
+						q_index = frame;
+					}
+
+					current_regdata[frame].shiftx = -round_to_int(reg_param.dx);
+					current_regdata[frame].shifty = -round_to_int(reg_param.dy);
+
+#pragma omp atomic
+					cur_nb += 1.f;
+					set_progress_bar_data(NULL, cur_nb / nb_frames);
+					clearfits(&im);
 				}
-				// We don't need fit anymore, we can destroy it.
-				current_regdata[frame].quality = QualityEstimate(&im, args->layer,
-						QUALTYPE_NORMAL);
-
-				if (current_regdata[frame].quality > q_max) {
-					q_max = current_regdata[frame].quality;
-					q_index = frame;
-				}
-
-				current_regdata[frame].shiftx = -round_to_int(reg_param.dx);
-				current_regdata[frame].shifty = -round_to_int(reg_param.dy);
-
-				cur_nb += 1.f;
-				set_progress_bar_data(NULL, cur_nb / nb_frames);
 			}
 		}
 	}
