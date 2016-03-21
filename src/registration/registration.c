@@ -159,23 +159,19 @@ struct registration_method *get_selected_registration_method() {
  * layer is the layer on which the registration will be done, green by default (set in siril_init())
  */
 int register_shift_dft(struct registration_args *args) {
-	int i, x, size, sqsize;
-	fftw_complex *ref, *img, *in, *out, *convol;
+	fits fit_ref;
+	int frame, size, sqsize;
+	fftw_complex *ref, *in, *out, *convol;
 	fftw_plan p, q;
-	int shiftx, shifty, shift;
-	int ret;
+	int ret, j;
 	int plan;
-	fftw_complex *cbuf, *ibuf, *obuf;
+	int abort = 0;
 	float nb_frames, cur_nb;
 	int ref_image;
 	regdata *current_regdata;
-	char tmpmsg[1024], tmpfilename[256];
 	rectangle full_area;	// the area to use after getting image_part
-	int j;
 	double q_max = 0;
 	int q_index = -1;
-	fits fit;
-	memset(&fit, 0, sizeof(fits));
 
 	/* the selection needs to be squared for the DFT */
 	assert(args->selection.w == args->selection.h);
@@ -214,7 +210,8 @@ int register_shift_dft(struct registration_args *args) {
 	set_progress_bar_data(
 			"Register DFT: loading and processing reference frame",
 			PROGRESS_NONE);
-	ret = seq_read_frame_part(args->seq, args->layer, ref_image, &fit,
+	memset(&fit_ref, 0, sizeof(fits));
+	ret = seq_read_frame_part(args->seq, args->layer, ref_image, &fit_ref,
 			&args->selection);
 
 	q_max = current_regdata[ref_image].quality;
@@ -224,11 +221,11 @@ int register_shift_dft(struct registration_args *args) {
 		siril_log_message(
 				"Register: could not load first image to register, aborting.\n");
 		free(current_regdata);
+		clearfits(&fit_ref);
 		return ret;
 	}
 
 	ref = fftw_malloc(sizeof(fftw_complex) * sqsize);
-	img = fftw_malloc(sizeof(fftw_complex) * sqsize);
 	in = fftw_malloc(sizeof(fftw_complex) * sqsize);
 	out = fftw_malloc(sizeof(fftw_complex) * sqsize);
 	convol = fftw_malloc(sizeof(fftw_complex) * sqsize);
@@ -243,90 +240,120 @@ int register_shift_dft(struct registration_args *args) {
 
 	// copying image selection into the fftw data
 	for (j = 0; j < sqsize; j++)
-		ref[j] = (double) fit.data[j];
+		ref[j] = (double) fit_ref.data[j];
 
 	// We don't need fit anymore, we can destroy it.
-	current_regdata[ref_image].quality = QualityEstimate(&fit, args->layer, QUALTYPE_NORMAL);
-	clearfits(&fit);
+	current_regdata[ref_image].quality = QualityEstimate(&fit_ref, args->layer, QUALTYPE_NORMAL);
+	clearfits(&fit_ref);
 	fftw_execute_dft(p, ref, in); /* repeat as needed */
 	current_regdata[ref_image].shiftx = 0;
 	current_regdata[ref_image].shifty = 0;
 
-	for (i = 0, cur_nb = 0.f; i < args->seq->number; ++i) {
-		if (args->run_in_thread && !get_thread_run())
-			break;
-		if (i == ref_image)
-			continue;
-		if (!args->process_all_frames && !args->seq->imgparam[i].incl)
-			continue;
-
-		seq_get_image_filename(args->seq, i, tmpfilename);
-		g_snprintf(tmpmsg, 1024, "Register: processing image %s\n", tmpfilename);
-		set_progress_bar_data(tmpmsg, PROGRESS_NONE);
-		if (!(ret = seq_read_frame_part(args->seq, args->layer, i, &fit,
-				&args->selection))) {
-
-			// copying image selection into the fftw data
-			for (j = 0; j < sqsize; j++)
-				img[j] = (double) fit.data[j];
-
-			// We don't need fit anymore, we can destroy it.
-			current_regdata[i].quality = QualityEstimate(&fit, args->layer, QUALTYPE_NORMAL);
-
-			if (current_regdata[i].quality > q_max) {
-				q_max = current_regdata[i].quality;
-				q_index = i;
+	cur_nb = 0.f;
+#pragma omp parallel for num_threads(com.max_thread) private(frame) schedule(static) \
+	if((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER)
+	for (frame = 0; frame < args->seq->number; ++frame) {
+		if (!abort) {
+			if (args->run_in_thread && !get_thread_run()) {
+				abort = 1;
+				continue;
 			}
+			if (frame == ref_image)
+				continue;
+			if (!args->process_all_frames && !args->seq->imgparam[frame].incl)
+				continue;
 
-			clearfits(&fit);
-			fftw_execute_dft(p, img, out); /* repeat as needed */
-			/* originally, quality is computed with the quality
-			 * function working on the fft space. Now we use quality
-			 * instead.
-			 */
-			cbuf = convol;
-			ibuf = in;
-			obuf = out;
-			for (x = 0; x < sqsize; x++) {
-				*cbuf++ = *ibuf++ * conj(*obuf++);
-			}
+			char tmpmsg[1024], tmpfilename[256];
+			fits fit;
+			memset(&fit, 0, sizeof(fits));
 
-			fftw_execute_dft(q, convol, ref); /* repeat as needed */
-			shift = 0;
-			for (x = 1; x < sqsize; ++x) {
-				if (creal(ref[x]) > creal(ref[shift])) {
-					shift = x;
-					// break or get last value?
+			seq_get_image_filename(args->seq, frame, tmpfilename);
+			g_snprintf(tmpmsg, 1024, "Register: processing image %s\n",
+					tmpfilename);
+			set_progress_bar_data(tmpmsg, PROGRESS_NONE);
+			if (!(seq_read_frame_part(args->seq, args->layer, frame, &fit,
+					&args->selection))) {
+
+				int x;
+				fftw_complex *img = fftw_malloc(sizeof(fftw_complex) * sqsize);
+				fftw_complex *out2 = fftw_malloc(sizeof(fftw_complex) * sqsize);
+
+				// copying image selection into the fftw data
+				for (x = 0; x < sqsize; x++)
+					img[x] = (double) fit.data[x];
+
+				// We don't need fit anymore, we can destroy it.
+				current_regdata[frame].quality = QualityEstimate(&fit, args->layer,
+						QUALTYPE_NORMAL);
+
+				clearfits(&fit);
+
+#pragma omp critical
+				{
+					if (current_regdata[frame].quality > q_max) {
+						q_max = current_regdata[frame].quality;
+						q_index = frame;
+					}
 				}
-			}
-			shifty = shift / size;
-			shiftx = shift % size;
-			if (shifty > size / 2) {
-				shifty -= size;
-			}
-			if (shiftx > size / 2) {
-				shiftx -= size;
-			}
 
-			current_regdata[i].shiftx = shiftx;
-			current_regdata[i].shifty = shifty;
+				fftw_execute_dft(p, img, out2); /* repeat as needed */
+				/* originally, quality is computed with the quality
+				 * function working on the fft space. Now we use quality
+				 * instead.
+				 */
+				fftw_complex *convol2 = fftw_malloc(sizeof(fftw_complex) * sqsize);
 
-			/* shiftx and shifty are the x and y values for translation that
-			 * would make this image aligned with the reference image.
-			 * WARNING: the y value is counted backwards, since the FITS is
-			 * stored down from up.
-			 */
-			fprintf(stderr, "reg: file %d, shiftx=%d shifty=%d quality=%g\n",
-					args->seq->imgparam[i].filenum, current_regdata[i].shiftx,
-					current_regdata[i].shifty, current_regdata[i].quality);
-			cur_nb += 1.f;
-			set_progress_bar_data(NULL, cur_nb / nb_frames);
-		} else {
-			//report_fits_error(ret, error_buffer);
-			if (current_regdata == args->seq->regparam[args->layer])
-				args->seq->regparam[args->layer] = NULL;
-			free(current_regdata);
-			return ret;
+				for (x = 0; x < sqsize; x++) {
+					convol2[x] = in[x] * conj(out2[x]);
+				}
+
+				fftw_execute_dft(q, convol2, out2); /* repeat as needed */
+				fftw_free(convol2);
+
+				int shift = 0;
+				for (x = 1; x < sqsize; ++x) {
+					if (creal(out2[x]) > creal(out2[shift])) {
+						shift = x;
+						// break or get last value?
+					}
+				}
+				int shifty = shift / size;
+				int shiftx = shift % size;
+				if (shifty > size / 2) {
+					shifty -= size;
+				}
+				if (shiftx > size / 2) {
+					shiftx -= size;
+				}
+
+				current_regdata[frame].shiftx = shiftx;
+				current_regdata[frame].shifty = shifty;
+
+				/* shiftx and shifty are the x and y values for translation that
+				 * would make this image aligned with the reference image.
+				 * WARNING: the y value is counted backwards, since the FITS is
+				 * stored down from up.
+				 */
+#ifdef DEBUG
+				fprintf(stderr,
+						"reg: frame %d, shiftx=%d shifty=%d quality=%g\n",
+						args->seq->imgparam[frame].filenum,
+						current_regdata[frame].shiftx, current_regdata[frame].shifty,
+						current_regdata[frame].quality);
+#endif
+#pragma omp atomic
+				cur_nb += 1.f;
+				set_progress_bar_data(NULL, cur_nb / nb_frames);
+				fftw_free(img);
+				fftw_free(out2);
+			} else {
+				//report_fits_error(ret, error_buffer);
+				if (current_regdata == args->seq->regparam[args->layer])
+					args->seq->regparam[args->layer] = NULL;
+				free(current_regdata);
+				abort = ret = 1;
+				continue;
+			}
 		}
 	}
 
@@ -335,14 +362,15 @@ int register_shift_dft(struct registration_args *args) {
 	fftw_free(in);
 	fftw_free(out);
 	fftw_free(ref);
-	fftw_free(img);
 	fftw_free(convol);
-	args->seq->regparam[args->layer] = current_regdata;
-	update_used_memory();
-	siril_log_message("Registration finished.\n");
-	siril_log_color_message("Best frame: #%d with quality=%g.\n", "bold",
-			q_index, q_max);
-	return 0;
+	if (!ret) {
+		args->seq->regparam[args->layer] = current_regdata;
+		update_used_memory();
+		siril_log_message("Registration finished.\n");
+		siril_log_color_message("Best frame: #%d with quality=%g.\n", "bold",
+				q_index, q_max);
+	}
+	return ret;
 }
 
 /* register images: calculate shift in images to be aligned with the reference image;
