@@ -1978,7 +1978,6 @@ static void _show_bgnoise(gpointer p) {
 	set_cursor_waiting(TRUE);
 
 	args->fit = com.uniq->fit;
-	args->fit->mini = args->fit->maxi = -1;	// force to recompute min/max
 	args->verbose = FALSE;
 	memset(args->bgnoise, 0.0, sizeof(double[3]));
 	start_in_new_thread(noise, args);
@@ -2000,6 +1999,7 @@ static gboolean end_stacking(gpointer p) {
 		com.uniq->nb_layers = gfit.naxes[2];
 		com.uniq->layers = calloc(com.uniq->nb_layers, sizeof(layer_info));
 		com.uniq->fit = &gfit;
+		com.uniq->fit->maxi = 0;	// force to recompute min/max
 		/* Giving summary if average rejection stacking */
 		_show_summary(args);
 		/* Giving noise estimation */
