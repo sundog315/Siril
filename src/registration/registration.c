@@ -297,10 +297,7 @@ int register_shift_dft(struct registration_args *args) {
 				}
 
 				fftw_execute_dft(p, img, out2); /* repeat as needed */
-				/* originally, quality is computed with the quality
-				 * function working on the fft space. Now we use quality
-				 * instead.
-				 */
+
 				fftw_complex *convol2 = fftw_malloc(sizeof(fftw_complex) * sqsize);
 
 				for (x = 0; x < sqsize; x++) {
@@ -680,8 +677,6 @@ int register_ecc(struct registration_args *args) {
 	int q_index = -1;
 	int abort = 0;
 
-	memset(&ref, 0, sizeof(fits));
-
 	if (!args->seq->regparam) {
 		fprintf(stderr, "regparam should have been created before\n");
 		return -1;
@@ -708,6 +703,8 @@ int register_ecc(struct registration_args *args) {
 		ref_image = 0;
 	else
 		ref_image = args->seq->reference_image;
+
+	memset(&ref, 0, sizeof(fits));
 
 	/* first we're looking for stars in reference image */
 	ret = seq_read_frame(args->seq, ref_image, &ref);
@@ -741,6 +738,13 @@ int register_ecc(struct registration_args *args) {
 			current_regdata[frame].shiftx = 0;
 			current_regdata[frame].shifty = 0;
 
+			char tmpmsg[1024], tmpfilename[256];
+
+			seq_get_image_filename(args->seq, frame, tmpfilename);
+			g_snprintf(tmpmsg, 1024, "Register: processing image %s\n",
+					tmpfilename);
+			set_progress_bar_data(tmpmsg, PROGRESS_NONE);
+
 			if (frame != ref_image) {
 				fits im;
 
@@ -761,7 +765,7 @@ int register_ecc(struct registration_args *args) {
 						clearfits(&im);
 						continue;
 					}
-					// We don't need fit anymore, we can destroy it.
+					// We don't need fit (im) anymore, we can destroy it.
 					current_regdata[frame].quality = QualityEstimate(&im,
 							args->layer, QUALTYPE_NORMAL);
 
