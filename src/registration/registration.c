@@ -154,6 +154,21 @@ struct registration_method *get_selected_registration_method() {
 	return reg_methods[index];
 }
 
+static void normalizeQualityData(struct registration_args *args, double q_min, double q_max) {
+	int frame;
+
+	for (frame = 0; frame < args->seq->number; ++frame) {
+		if (args->run_in_thread && !get_thread_run()) {
+			break;
+		}
+		if (!args->process_all_frames && !args->seq->imgparam[frame].incl)
+			continue;
+
+		args->seq->regparam[args->layer][frame].quality -= q_min;
+		args->seq->regparam[args->layer][frame].quality /= (q_max - q_min);
+	}
+}
+
 /* register images: calculate shift in images to be aligned with the reference image;
  * images are not modified, only shift parameters are saved in regparam in the sequence.
  * layer is the layer on which the registration will be done, green by default (set in siril_init())
@@ -170,7 +185,7 @@ int register_shift_dft(struct registration_args *args) {
 	int ref_image;
 	regdata *current_regdata;
 	rectangle full_area;	// the area to use after getting image_part
-	double q_max = 0;
+	double q_max = 0, q_min = DBL_MAX;
 	int q_index = -1;
 
 	/* the selection needs to be squared for the DFT */
@@ -214,9 +229,6 @@ int register_shift_dft(struct registration_args *args) {
 	ret = seq_read_frame_part(args->seq, args->layer, ref_image, &fit_ref,
 			&args->selection);
 
-	q_max = current_regdata[ref_image].quality;
-	q_index = ref_image;
-
 	if (ret) {
 		siril_log_message(
 				"Register: could not load first image to register, aborting.\n");
@@ -248,6 +260,9 @@ int register_shift_dft(struct registration_args *args) {
 	fftw_execute_dft(p, ref, in); /* repeat as needed */
 	current_regdata[ref_image].shiftx = 0;
 	current_regdata[ref_image].shifty = 0;
+
+	q_min = q_max = current_regdata[ref_image].quality;
+	q_index = ref_image;
 
 	cur_nb = 0.f;
 #pragma omp parallel for num_threads(com.max_thread) private(frame) schedule(static) \
@@ -290,10 +305,12 @@ int register_shift_dft(struct registration_args *args) {
 
 #pragma omp critical
 				{
-					if (current_regdata[frame].quality > q_max) {
-						q_max = current_regdata[frame].quality;
+					double qual = current_regdata[frame].quality;
+					if (qual > q_max) {
+						q_max = qual;
 						q_index = frame;
 					}
+					q_min = min(q_min, qual);
 				}
 
 				fftw_execute_dft(p, img, out2); /* repeat as needed */
@@ -362,10 +379,10 @@ int register_shift_dft(struct registration_args *args) {
 	fftw_free(convol);
 	if (!ret) {
 		args->seq->regparam[args->layer] = current_regdata;
+		normalizeQualityData(args, q_min, q_max);
 		update_used_memory();
 		siril_log_message("Registration finished.\n");
-		siril_log_color_message("Best frame: #%d with quality=%g.\n", "bold",
-				q_index, q_max);
+		siril_log_color_message("Best frame: #%d.\n", "bold", q_index);
 	}
 	return ret;
 }
@@ -673,7 +690,7 @@ int register_ecc(struct registration_args *args) {
 	float nb_frames, cur_nb;
 	regdata *current_regdata;
 	fits ref;
-	double q_max = 0;
+	double q_max = 0, q_min = DBL_MAX;
 	int q_index = -1;
 	int abort = 0;
 
@@ -716,7 +733,11 @@ int register_ecc(struct registration_args *args) {
 		return 1;
 	}
 	current_regdata[ref_image].quality = QualityEstimate(&ref, args->layer, QUALTYPE_NORMAL);
-	q_max = current_regdata[ref_image].quality;
+	/* we make sure to free data in the destroyed fit */
+	clearfits(&ref);
+	/* Ugly code: as QualityEstimate destroys fit we need to reload it */
+	seq_read_frame(args->seq, ref_image, &ref);
+	q_min = q_max = current_regdata[ref_image].quality;
 	q_index = ref_image;
 
 	/* then we compare to other frames */
@@ -771,10 +792,12 @@ int register_ecc(struct registration_args *args) {
 
 #pragma omp critical
 					{
-						if (current_regdata[frame].quality > q_max) {
-							q_max = current_regdata[frame].quality;
+						double qual = current_regdata[frame].quality;
+						if (qual > q_max) {
+							q_max = qual;
 							q_index = frame;
 						}
+						q_min = min(q_min, qual);
 					}
 
 					current_regdata[frame].shiftx = -round_to_int(reg_param.dx);
@@ -789,12 +812,13 @@ int register_ecc(struct registration_args *args) {
 		}
 	}
 	args->seq->regparam[args->layer] = current_regdata;
+	normalizeQualityData(args, q_min, q_max);
+	clearfits(&ref);
 	update_used_memory();
 	siril_log_message("Registration finished.\n");
 	if (failed)
 		siril_log_color_message("%d frames were excluded.\n", "red", failed);
-	siril_log_color_message("Best frame: #%d with quality=%g.\n", "bold",
-			q_index, q_max);
+	siril_log_color_message("Best frame: #%d.\n", "bold", q_index);
 
 	return 0;
 }

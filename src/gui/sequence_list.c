@@ -67,7 +67,7 @@ void add_image_to_sequence_list(sequence *seq, int index, int layer) {
 		if (seq->regparam[layer][index].fwhm > 0.0f) {
 			// Is it certain that FWHMX is > than FWHMY? The minimization seems to imply this.
 			sprintf(fwhm_str, "%.3f", seq->regparam[layer][index].fwhm);
-		} else if (seq->regparam[layer][index].quality) {
+		} else if (seq->regparam[layer][index].quality >= 0.0) {
 			sprintf(fwhm_str, "%.3f", seq->regparam[layer][index].quality);
 		} else sprintf(fwhm_str, "N/A");
 	} else sprintf(fwhm_str, "N/A");
