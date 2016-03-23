@@ -3408,8 +3408,9 @@ void on_checkseqbutton_clicked(GtkButton *button, gpointer user_data) {
 	set_cursor_waiting(TRUE);
 	progress_bar_set_text(
 			"Searching for sequences in the current working directory...");
-	check_seq(force);
-	update_sequences_list(NULL);
+	if (!check_seq(force))
+		update_sequences_list(NULL);
+
 	/* it's better to uncheck the force button each time it is used */
 	if (force)
 		gtk_toggle_button_set_active(forceButton, FALSE);

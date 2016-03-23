@@ -41,6 +41,14 @@
 
 static int compositing_loaded = 0;
 
+typedef enum {
+	HSL,
+	HSV,
+	CIELAB
+} coloring_type_enum;
+
+static coloring_type_enum coloring_type = HSL;
+
 /* The result is stored in gfit.
  * gfit.rx and gfit.ry are the reference 1x1 binning output image size. */
 
@@ -126,12 +134,6 @@ gboolean on_color_button_release_event(GtkDrawingArea *widget, GdkEventButton *e
 gboolean on_color_button_motion_event(GtkWidget *widget, GdkEventMotion *event, gpointer user_data);
 gboolean draw_layer_color(GtkDrawingArea *widget, cairo_t *cr, gpointer data);
 void on_filechooser_file_set(GtkFileChooserButton *widget, gpointer user_data);
-
-/*********************** TODO ****************************
- *
- * the seq, in particular seq->regparam, needs to be invalidated when a new
- * image is loaded or mode is changed
- */
 
 /********************************************************/
 
@@ -698,6 +700,12 @@ void on_compositing_align_layer_combo_changed(GtkComboBox *widget, gpointer user
 	update_compositing_interface();
 }
 
+
+void on_composition_combo_coloringtype_changed(GtkComboBox *widget, gpointer user_data) {
+	coloring_type = gtk_combo_box_get_active(widget);
+	update_result(1);
+}
+
 /* Image composition without luminance. Used for RGB composition for example.
  * Result is in gfit. */
 void colors_align_and_compose() {
@@ -733,7 +741,7 @@ void colors_align_and_compose() {
 void luminance_and_colors_align_and_compose() {
 	/* Each pixel is transformed from RGB to HSI, I is replaced by the
 	 * luminance layer's value and transformed back to RGB. */
-	guint x, y, j = 0;	// j is browsing the 1D buffer, j = y * rx + x
+	guint x, y;
 	assert(has_fit(0));
 
 	if (no_color_available()) {
@@ -746,12 +754,16 @@ void luminance_and_colors_align_and_compose() {
 		return;
 	}
 	fprintf(stdout, "luminance-enabled composition\n");
+
+	double norm = (double)(layers[0]->the_fit.maxi);
+
+#pragma omp parallel for num_threads(com.max_thread) private(y,x) schedule(static)
 	for (y = 0; y < gfit.ry; y++) {
 		for (x = 0; x < gfit.rx; x++) {
 			int layer;
 			gdouble h, s, i;
-			//gdouble X, Y, Z;
-			//gdouble a, b, i;
+			gdouble X, Y, Z;
+			gdouble a, b;
 			/* get color information */
 			GdkRGBA pixel;
 			clear_pixel(&pixel);
@@ -764,25 +776,37 @@ void luminance_and_colors_align_and_compose() {
 			}
 			rgb_pixel_limiter(&pixel);
 
-			rgb_to_hsv(pixel.red,pixel.green,pixel.blue, &h,&s,&i);
-			//rgb_to_xyz(pixel.red, pixel.green, pixel.blue, &X, &Y, &Z);
-			//xyz_to_LAB(X, Y, Z, &i, &a, &b);
+			switch (coloring_type) {
+				case HSL:
+					rgb_to_hsl(pixel.red,pixel.green,pixel.blue, &h,&s,&i);
+					/* add luminance by replacing it in the HSI */
+					i = (double)get_composition_pixel_value(0, 0, x, y) / norm;
+					/* converting back to RGB */
+					hsl_to_rgb(h,s,i, &pixel.red,&pixel.green,&pixel.blue);
+					break;
+				case HSV:
+					rgb_to_hsv(pixel.red,pixel.green,pixel.blue, &h,&s,&i);
+					/* add luminance by replacing it in the HSI */
+					i = (double)get_composition_pixel_value(0, 0, x, y) / norm;
+					/* converting back to RGB */
+					hsv_to_rgb(h,s,i, &pixel.red,&pixel.green,&pixel.blue);
+					break;
+				case CIELAB:
+					rgb_to_xyz(pixel.red, pixel.green, pixel.blue, &X, &Y, &Z);
+					xyz_to_LAB(X, Y, Z, &i, &a, &b);
+					i = (double)get_composition_pixel_value(0, 0, x, y) / norm;
+					LAB_to_xyz(i, a, b, &X, &Y, &Z);
+					xyz_to_rgb(X, Y, Z, &pixel.red, &pixel.green, &pixel.blue);
+					break;
+			}
 
-			/* add luminance by replacing it in the HSI */
-			i = (double)get_composition_pixel_value(0, 0, x, y) /
-				(double)(layers[0]->the_fit.maxi);
-
-			/* converting back to RGB */
-			//LAB_to_xyz(i, a, b, &X, &Y, &Z);
-			//xyz_to_rgb(X, Y, Z, &pixel.red, &pixel.green, &pixel.blue);
-			hsv_to_rgb(h,s,i, &pixel.red,&pixel.green,&pixel.blue);
 			rgb_pixel_limiter(&pixel);
 
 			/* and store in gfit */
-			gfit.pdata[RLAYER][j] = round_to_WORD(pixel.red * USHRT_MAX_DOUBLE);
-			gfit.pdata[GLAYER][j] = round_to_WORD(pixel.green * USHRT_MAX_DOUBLE);
-			gfit.pdata[BLAYER][j] = round_to_WORD(pixel.blue * USHRT_MAX_DOUBLE);
-			j++;
+			int dst_index = y * gfit.rx + x;
+			gfit.pdata[RLAYER][dst_index] = round_to_WORD(pixel.red * USHRT_MAX_DOUBLE);
+			gfit.pdata[GLAYER][dst_index] = round_to_WORD(pixel.green * USHRT_MAX_DOUBLE);
+			gfit.pdata[BLAYER][dst_index] = round_to_WORD(pixel.blue * USHRT_MAX_DOUBLE);
 		}
 	}
 }
@@ -1018,7 +1042,7 @@ void on_compositing_reset_clicked(GtkButton *button, gpointer user_data){
 	gtk_file_chooser_unselect_all (GTK_FILE_CHOOSER (lum));
 
 	if (seq) {
-		free_sequence(seq, 1);
+		free_sequence(seq, TRUE);
 		seq = NULL;
 	}
 
@@ -1136,16 +1160,7 @@ void on_compositing_autoadjust_clicked(GtkButton *button, gpointer user_data){
 	autoadjust(0);
 }
 
-/* Normalization functions */
-
-void coeff_alloc(int nb_images) {
-	if (!coeff)
-		coeff = calloc(1, sizeof(norm_coeff));
-	coeff->offset = realloc(coeff->offset, nb_images * sizeof(double));
-	// mul is not used in ADDITIVE_SCALING but needed to avoid crash in compute_normalization
-	coeff->mul = realloc(coeff->mul, nb_images * sizeof(double));
-	coeff->scale = realloc(coeff->scale, nb_images * sizeof(double));
-}
+/* Normalization functions, not used anymore */
 
 void coeff_clear() {
 	if (coeff) {
@@ -1155,6 +1170,16 @@ void coeff_clear() {
 		free(coeff);
 		coeff = NULL;
 	}
+}
+#if 0
+
+void coeff_alloc(int nb_images) {
+	if (!coeff)
+		coeff = calloc(1, sizeof(norm_coeff));
+	coeff->offset = realloc(coeff->offset, nb_images * sizeof(double));
+	// mul is not used in ADDITIVE_SCALING but needed to avoid crash in compute_normalization
+	coeff->mul = realloc(coeff->mul, nb_images * sizeof(double));
+	coeff->scale = realloc(coeff->scale, nb_images * sizeof(double));
 }
 
 gboolean end_normalization(gpointer args) {
@@ -1204,3 +1229,10 @@ void on_composition_layers_normalize_clicked(GtkButton *button, gpointer user_da
 
 	start_in_new_thread(normalization_thread, stackargs);
 }
+#endif
+
+void on_composition_rgbcolor_clicked(GtkButton *button, gpointer user_data){
+	initialize_calibration_interface();
+	gtk_widget_show(lookup_widget("color_calibration"));
+}
+
