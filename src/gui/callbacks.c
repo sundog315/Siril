@@ -884,8 +884,8 @@ int make_index_for_rainbow(BYTE index[][3]);
 void remap(int vport) {
 	// This function maps fit data with a linear LUT between lo and hi levels
 	// to the buffer to be displayed; display only is modified
-	guint x, y, i, j;
-	BYTE *dst, dst_pixel_value, *index, rainbow_index[UCHAR_MAX + 1][3];
+	guint x, y;
+	BYTE *dst, *index, rainbow_index[UCHAR_MAX + 1][3];
 	WORD *src, hi, lo, tmp_pixel_value;
 	display_mode mode;
 	color_map color;
@@ -981,6 +981,7 @@ void remap(int vport) {
 		double hist_sum;
 		double nb_pixels;
 		size_t hist_nb_bins;
+		size_t i;
 		gsl_histogram *histo = NULL;
 
 		compute_histo_for_gfit(1);
@@ -1014,11 +1015,9 @@ void remap(int vport) {
 			set_viewer_mode_widgets_sensitive(TRUE);
 	}
 
-	src = gfit.pdata[vport];	// index is i
-	i = 0;
+	src = gfit.pdata[vport];
 	/* Siril's FITS are stored bottom to top, so mapping needs to revert data order */
-	dst = com.graybuf[vport];	// index is j
-	j = (gfit.ry - 1) * com.surface_stride[vport];
+	dst = com.graybuf[vport];
 
 	color = gtk_toggle_button_get_active(
 			GTK_TOGGLE_BUTTON(lookup_widget("colormap_button")));
@@ -1026,43 +1025,40 @@ void remap(int vport) {
 	if (color == RAINBOW_COLOR)
 		make_index_for_rainbow(rainbow_index);
 	index = remap_index[vport];
-	/* cannot be parallelized because of i and j */
+
+#pragma omp parallel for num_threads(com.max_thread) private(y,x) schedule(static)
 	for (y = 0; y < gfit.ry; y++) {
-		for (x = 0; x < gfit.rx; x++, i++) {
+		for (x = 0; x < gfit.rx; x++) {
+			guint src_index = y * gfit.rx + x;
+			BYTE dst_pixel_value;
 			if (mode == HISTEQ_DISPLAY || mode == STF_DISPLAY)	// special case, no lo & hi
-				dst_pixel_value = index[src[i]];
-			else if (do_cut_over && src[i] > hi)	// cut
+				dst_pixel_value = index[src[src_index]];
+			else if (do_cut_over && src[src_index] > hi)	// cut
 				dst_pixel_value = 0;
 			else {
-				if (src[i] - lo < 0)
+				if (src[src_index] - lo < 0)
 					tmp_pixel_value = 0;
 				else
-					tmp_pixel_value = src[i] - lo;
+					tmp_pixel_value = src[src_index] - lo;
 				dst_pixel_value = index[tmp_pixel_value];
 			}
 			if (inverted)
 				dst_pixel_value = UCHAR_MAX - dst_pixel_value;
 
-			double r, g, b;
-
+			guint dst_index = ((gfit.ry - 1 - y) * gfit.rx + x) * 4;
 			switch (color) {
-			default:
-			case NORMAL_COLOR:
-				dst[j++] = round_to_BYTE(dst_pixel_value);
-				dst[j++] = round_to_BYTE(dst_pixel_value);
-				dst[j++] = round_to_BYTE(dst_pixel_value);
-				break;
-			case RAINBOW_COLOR:
-				r = (double) rainbow_index[(int) dst_pixel_value][0];
-				g = (double) rainbow_index[(int) dst_pixel_value][1];
-				b = (double) rainbow_index[(int) dst_pixel_value][2];
-				dst[j++] = round_to_BYTE(b);
-				dst[j++] = round_to_BYTE(g);
-				dst[j++] = round_to_BYTE(r);
+				default:
+				case NORMAL_COLOR:
+					dst[dst_index++] = dst_pixel_value;
+					dst[dst_index++] = dst_pixel_value;
+					dst[dst_index++] = dst_pixel_value;
+					break;
+				case RAINBOW_COLOR:
+					dst[dst_index++] = rainbow_index[dst_pixel_value][0];
+					dst[dst_index++] = rainbow_index[dst_pixel_value][1];
+					dst[dst_index++] = rainbow_index[dst_pixel_value][2];
 			}
-			j++; /* 8-bit padding for the 32-bit cairo RGB24 format */
 		}
-		j -= 2 * com.surface_stride[vport];
 	}
 
 	// flush to ensure all writing to the image was done and redraw the surface
