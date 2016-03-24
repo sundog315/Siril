@@ -798,7 +798,7 @@ enter a visible wavelength in nm</property>
                   <object class="GtkTreeView" id="treeview1">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
-                    <property name="tooltip_text" translatable="yes">List of images in the sequence, with their state and quality information. Quality is FWHM when PSF registration is used, so lower is better, and entropy for DFT registration, higher is better. X and Y columns are the translation relative to the reference image.</property>
+                    <property name="tooltip_text" translatable="yes">List of images in the sequence, with their state and quality information. Quality is FWHM when PSF registration is used, so lower is better, and gradient estimator for DFT registration, higher is better. X and Y columns are the translation relative to the reference image.</property>
                     <property name="hscroll_policy">natural</property>
                     <property name="vscroll_policy">natural</property>
                     <property name="model">liststore1</property>

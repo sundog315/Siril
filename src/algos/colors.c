@@ -451,7 +451,7 @@ gpointer enhance_saturation(gpointer p) {
 		free(stat);
 	}
 
-#pragma omp parallel for num_threads(com.max_thread) private(i) schedule(dynamic, 1)
+#pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
 	for (i = 0; i < args->fit->rx * args->fit->ry; i++) {
 		double h, s, l;
 		double r = (double) buf[RLAYER][i] / USHRT_MAX_DOUBLE;
@@ -514,7 +514,7 @@ gpointer scnr(gpointer p) {
 	gettimeofday(&t_start, NULL);
 
 	WORD norm = get_normalized_value(args->fit);
-#pragma omp parallel for num_threads(com.max_thread) private(i) schedule(dynamic,1)
+#pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
 	for (i = 0; i < nbdata; i++) {
 		double red = (double) buf[RLAYER][i] / norm;
 		double green = (double) buf[GLAYER][i] / norm;
@@ -833,7 +833,7 @@ static void white_balance(fits *fit, gboolean is_manual, rectangle white_selecti
 		high = gtk_range_get_value(scaleLimit[1]);
 		get_coeff_for_wb(fit, white_selection, black_selection, kw, bg, &norm, low, high);
 	}
-#pragma omp parallel for num_threads(com.max_thread) private(chan) schedule(dynamic, 1)
+#pragma omp parallel for num_threads(com.max_thread) private(chan) schedule(static)
 	for (chan = 0; chan < 3; chan++) {
 		if (kw[chan] == 1.0) continue;
 		calibrate(fit, chan, kw[chan], bg[chan], norm);
