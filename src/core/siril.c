@@ -1518,8 +1518,15 @@ int BandingEngine(fits *fit, double sigma, double amount, gboolean protect_highl
 		return 1;
 	}
 
-	if (applyRotation)
+	if (applyRotation) {
+#ifdef HAVE_OPENCV
 		cvRotateImage(fit, 90.0, -1, 0);
+#else
+		siril_log_message("Rotation is only possible when Siril has been compiled with OpenCV support.\n");
+		free(fiximage);
+		return 1;
+#endif
+	}
 
 	new_fit_image(fiximage, fit->rx, fit->ry, fit->naxes[2]);
 
@@ -1575,8 +1582,10 @@ int BandingEngine(fits *fit, double sigma, double amount, gboolean protect_highl
 	imoper(fit, fiximage, OPER_ADD);
 
 	clearfits(fiximage);
+#ifdef HAVE_OPENCV
 	if (applyRotation)
 		cvRotateImage(fit, -90.0, -1, 0);
+#endif
 	return 0;
 }
 
