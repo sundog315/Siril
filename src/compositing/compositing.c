@@ -795,6 +795,7 @@ void luminance_and_colors_align_and_compose() {
 					rgb_to_xyz(pixel.red, pixel.green, pixel.blue, &X, &Y, &Z);
 					xyz_to_LAB(X, Y, Z, &i, &a, &b);
 					i = (double)get_composition_pixel_value(0, 0, x, y) / norm;
+					i *= 100.0;		// 0 < L < 100
 					LAB_to_xyz(i, a, b, &X, &Y, &Z);
 					xyz_to_rgb(X, Y, Z, &pixel.red, &pixel.green, &pixel.blue);
 					break;
