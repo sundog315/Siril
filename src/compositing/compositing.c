@@ -39,6 +39,8 @@
 #include "opencv/opencv.h"
 #endif
 
+#undef DEBUG
+
 static int compositing_loaded = 0;
 
 typedef enum {
@@ -777,28 +779,28 @@ void luminance_and_colors_align_and_compose() {
 			rgb_pixel_limiter(&pixel);
 
 			switch (coloring_type) {
-				case HSL:
-					rgb_to_hsl(pixel.red,pixel.green,pixel.blue, &h,&s,&i);
-					/* add luminance by replacing it in the HSI */
-					i = (double)get_composition_pixel_value(0, 0, x, y) / norm;
-					/* converting back to RGB */
-					hsl_to_rgb(h,s,i, &pixel.red,&pixel.green,&pixel.blue);
-					break;
-				case HSV:
-					rgb_to_hsv(pixel.red,pixel.green,pixel.blue, &h,&s,&i);
-					/* add luminance by replacing it in the HSI */
-					i = (double)get_composition_pixel_value(0, 0, x, y) / norm;
-					/* converting back to RGB */
-					hsv_to_rgb(h,s,i, &pixel.red,&pixel.green,&pixel.blue);
-					break;
-				case CIELAB:
-					rgb_to_xyz(pixel.red, pixel.green, pixel.blue, &X, &Y, &Z);
-					xyz_to_LAB(X, Y, Z, &i, &a, &b);
-					i = (double)get_composition_pixel_value(0, 0, x, y) / norm;
-					i *= 100.0;		// 0 < L < 100
-					LAB_to_xyz(i, a, b, &X, &Y, &Z);
-					xyz_to_rgb(X, Y, Z, &pixel.red, &pixel.green, &pixel.blue);
-					break;
+			case HSL:
+				rgb_to_hsl(pixel.red, pixel.green, pixel.blue, &h, &s, &i);
+				/* add luminance by replacing it in the HSI */
+				i = (double) get_composition_pixel_value(0, 0, x, y) / norm;
+				/* converting back to RGB */
+				hsl_to_rgb(h, s, i, &pixel.red, &pixel.green, &pixel.blue);
+				break;
+			case HSV:
+				rgb_to_hsv(pixel.red, pixel.green, pixel.blue, &h, &s, &i);
+				/* add luminance by replacing it in the HSI */
+				i = (double) get_composition_pixel_value(0, 0, x, y) / norm;
+				/* converting back to RGB */
+				hsv_to_rgb(h, s, i, &pixel.red, &pixel.green, &pixel.blue);
+				break;
+			case CIELAB:
+				rgb_to_xyz(pixel.red, pixel.green, pixel.blue, &X, &Y, &Z);
+				xyz_to_LAB(X, Y, Z, &i, &a, &b);
+				i = (double) get_composition_pixel_value(0, 0, x, y) / norm;
+				i *= 100.0;		// 0 < L < 100
+				LAB_to_xyz(i, a, b, &X, &Y, &Z);
+				xyz_to_rgb(X, Y, Z, &pixel.red, &pixel.green, &pixel.blue);
+				break;
 			}
 
 			rgb_pixel_limiter(&pixel);
@@ -819,9 +821,11 @@ void on_compositing_cancel_clicked(GtkButton *button, gpointer user_data){
 /* When summing all layers to get the RGB values for one pixel, it may overflow.
  * This procedure defines what happens in that case. */
 void rgb_pixel_limiter(GdkRGBA *pixel) {
+#ifdef DEBUG
 	if (pixel->red > 1.2 || pixel->green > 1.2 || pixel->blue > 1.2)
 		fprintf(stdout, "large overflow %g,%g,%g\n", pixel->red,
 				pixel->green, pixel->blue);
+#endif
 	if (pixel->red >= 1.0)
 		pixel->red = 1.0;
 	if (pixel->green >= 1.0)
