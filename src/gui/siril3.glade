@@ -3665,7 +3665,7 @@ Modifying parameters in this windows afterward will void the colour balance, and
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
                 <property name="ypad">5</property>
-                <property name="label" translatable="yes">WARNING: You cannot perform a LRGB combination with linear images. Process images before.</property>
+                <property name="label" translatable="yes">WARNING: You should not perform a LRGB combination with linear images. Process images before.</property>
               </object>
               <packing>
                 <property name="expand">False</property>
