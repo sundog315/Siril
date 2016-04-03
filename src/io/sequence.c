@@ -967,12 +967,12 @@ int do_fwhm_sequence_processing(sequence *seq, int layer, int print_psf, gboolea
 		fill_sequence_list(seq, layer);
 
 	if (print_psf) {
-		fprintf(stdout, "# image_no amplitude magnitude fwhm x y\n");
+		siril_log_message("# image_no amplitude magnitude fwhm x y\n");
 		for (i = 0; i < seq->number; i++) {
 			fitted_PSF *star = seq->regparam[layer][i].fwhm_data;
 			if (star) {
 				// see algos/PSF.h for more fields to print
-				fprintf(stdout, "%d\t%f\t%f\t%f\t%f\t%f\n", i, star->A,
+				siril_log_message("%d\t%f\t%f\t%f\t%f\t%f\n", i, star->A,
 						star->mag + com.magOffset, star->fwhmx, star->xpos,
 						star->ypos);
 			}
