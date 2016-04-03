@@ -6,6 +6,7 @@
 #include "processing.h"
 #include "proto.h"
 #include "gui/callbacks.h"
+#include "io/ser.h"
 
 // called in start_in_new_thread only
 // works in parallel if the arg->parallel is TRUE for FITS or SER sequences
@@ -82,6 +83,17 @@ gpointer generic_sequence_worker(gpointer p) {
 				clearfits(&fit);
 				continue;
 			}
+
+			int retval;
+			if (args->save_hook)
+				retval = args->save_hook(args, frame, current, &fit);
+			else retval = generic_save(args, frame, current, &fit);
+			if (retval) {
+				abort = 1;
+				clearfits(&fit);
+				continue;
+			}
+
 			clearfits(&fit);
 
 #pragma omp atomic
@@ -103,14 +115,67 @@ gpointer generic_sequence_worker(gpointer p) {
 
 the_end:
 	if (args->finalize_hook && args->finalize_hook(args)) {
-		siril_log_message("Preparing sequence processing failed.\n");
+		siril_log_message("Finalizing sequence processing failed.\n");
 		args->retval = 1;
 	}
 
 	if (args->idle_function)
 		gdk_threads_add_idle(args->idle_function, args);
-	else gdk_threads_add_idle(end_generic, args);
+	else gdk_threads_add_idle(end_generic_sequence, args);
 	return NULL;
+}
+
+// defaut idle function (in GTK main thread) to run at the end of the generic sequence processing
+gboolean end_generic_sequence(gpointer p) {
+	struct generic_seq_args *args = (struct generic_seq_args *) p;
+
+	if (args->load_new_sequence && args->new_seq_prefix && !args->retval) {
+		char *seqname = malloc(strlen(args->new_seq_prefix) + strlen(args->seq->seqname) + 5);
+		sprintf(seqname, "%s%s.seq", args->new_seq_prefix, args->seq->seqname);
+		check_seq(0);
+		update_sequences_list(seqname);
+		free(seqname);
+	}
+	
+	return end_generic(p);
+}
+
+int ser_prepare_hook(struct generic_seq_args *args) {
+	char dest[256];
+	const char *ptr;
+
+	if (args->force_ser_output || args->seq->type == SEQ_SER) {
+		ptr = strrchr(args->seq->seqname, '/');
+		if (ptr)
+			snprintf(dest, 255, "%s%s.ser", args->new_seq_prefix, ptr + 1);
+		else snprintf(dest, 255, "%s%s.ser", args->new_seq_prefix, args->seq->seqname);
+
+		args->new_ser = malloc(sizeof(struct ser_struct));
+		return ser_create_file(dest, args->new_ser, TRUE, args->seq->ser_file);
+	}
+
+	return 0;
+}
+
+int ser_finalize_hook(struct generic_seq_args *args) {
+	int retval = 0;
+	if (args->force_ser_output || args->seq->type == SEQ_SER) {
+		retval = ser_write_and_close(args->new_ser);
+		free(args->new_ser);
+	}
+	return retval;
+}
+
+int generic_save(struct generic_seq_args *args, int input_index, int processed_index, fits *fit) {
+	char dest[256];
+	if (args->force_ser_output || args->seq->type == SEQ_SER) {
+		snprintf(dest, 256, "%s%s.ser", args->new_seq_prefix, args->seq->seqname);
+		return ser_write_frame_from_fit(args->new_ser, fit, input_index);
+	} else {
+		snprintf(dest, 256, "%s%s%05d%s", args->new_seq_prefix,
+				args->seq->seqname, processed_index, com.ext);
+		return savefits(dest, fit);
+	}
 }
 
 /*****************************************************************************

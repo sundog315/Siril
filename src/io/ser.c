@@ -210,9 +210,9 @@ int ser_write_header(struct ser_struct *ser_file) {
 	return 0;
 }
 
-void ser_write_and_close(struct ser_struct *ser_file) {
+int ser_write_and_close(struct ser_struct *ser_file) {
 	ser_write_header(ser_file);	// writes the header
-	ser_close_file(ser_file);	// closes, frees and zeroes
+	return ser_close_file(ser_file);// closes, frees and zeroes
 }
 
 /* ser_file must be allocated */
@@ -330,6 +330,11 @@ int ser_close_file(struct ser_struct *ser_file) {
 	if (ser_file->fd > 0) {
 		retval = close(ser_file->fd);
 		ser_file->fd = -1;
+		// removing the created file if frames have not been added
+		if (ser_file->frame_count < 2 && ser_file->filename) {
+			unlink(ser_file->filename);
+			retval = 1;
+		}
 	}
 	if (ser_file->file_id)
 		free(ser_file->file_id);
@@ -662,18 +667,6 @@ int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit, int frame_n
 	offset = SER_HEADER_LEN	+ (off_t) frame_size *
 			(off_t) ser_file->byte_pixel_depth * (off_t) frame_no;
 
-#ifdef _OPENMP
-	omp_set_lock(&ser_file->fd_lock);
-#endif
-	if ((off_t) -1 == lseek(ser_file->fd, offset, SEEK_SET)) {
-#ifdef _OPENMP
-		omp_unset_lock(&ser_file->fd_lock);
-#endif
-		perror("seek");
-		retval = -1;
-		goto free_and_quit;
-	}
-
 	if (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8)
 		data8 = malloc(frame_size * ser_file->byte_pixel_depth);
 	else
@@ -689,10 +682,23 @@ int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit, int frame_n
 			dest += ser_file->number_of_planes;
 		}
 	}
+
+#ifdef _OPENMP
+	omp_set_lock(&ser_file->fd_lock);
+#endif
+	if ((off_t)-1 == lseek(ser_file->fd, offset, SEEK_SET)) {
+#ifdef _OPENMP
+		omp_unset_lock(&ser_file->fd_lock);
+#endif
+		perror("seek");
+		retval = -1;
+		goto free_and_quit;
+	}
+
 	if (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8) {
 		ret = write(ser_file->fd, data8, frame_size * ser_file->byte_pixel_depth);
 #ifdef _OPENMP
-	omp_unset_lock(&ser_file->fd_lock);
+		omp_unset_lock(&ser_file->fd_lock);
 #endif
 		if (ret != frame_size * ser_file->byte_pixel_depth) {
 			perror("write image in SER");
@@ -702,18 +708,22 @@ int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit, int frame_n
 	} else {
 		ret = write(ser_file->fd, data16, frame_size * ser_file->byte_pixel_depth);
 #ifdef _OPENMP
-	omp_unset_lock(&ser_file->fd_lock);
+		omp_unset_lock(&ser_file->fd_lock);
 #endif
-	if (ret != frame_size * ser_file->byte_pixel_depth) {
+		if (ret != frame_size * ser_file->byte_pixel_depth) {
 			perror("write image in SER");
 			retval = 1;
 			goto free_and_quit;
 		}
 	}
+
+#ifdef _OPENMP
+#pragma omp atomic
+#endif
 	ser_file->frame_count++;
 	retval = 0;
 
-	free_and_quit:
+free_and_quit:
 	if (data8) free(data8);
 	if (data16) free(data16);
 	return retval;

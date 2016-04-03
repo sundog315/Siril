@@ -786,7 +786,7 @@ int register_ecc(struct registration_args *args) {
 						clearfits(&im);
 						continue;
 					}
-					// We don't need fit (im) anymore, we can destroy it.
+
 					current_regdata[frame].quality = QualityEstimate(&im,
 							args->layer, QUALTYPE_NORMAL);
 

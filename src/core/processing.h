@@ -6,8 +6,6 @@ typedef int (*seq_image_filter)(sequence *seq, int nb_img, double param);
 
 struct generic_seq_args {
 	sequence *seq;
-	// new output SER if seqtype == SER_SEQ
-	struct ser_struct *new_ser;
 	// filtering the images from the sequence, maybe we don't want them all
 	seq_image_filter filtering_criterion;
 	double filtering_parameter;
@@ -18,8 +16,10 @@ struct generic_seq_args {
 	// function called before iterating through the sequence
 	int (*prepare_hook)(struct generic_seq_args *);
 	// function called for each image with image index in sequence, number
-	// of image currently processed and the image.
+	// of image currently processed and the image
 	int (*image_hook)(struct generic_seq_args *, int, int, fits *);
+	// saving the processed image, can be NULL to get default behaviour
+	int (*save_hook)(struct generic_seq_args *, int, int, fits *);
 	// function called after iterating through the sequence
 	int (*finalize_hook)(struct generic_seq_args *);
 
@@ -32,6 +32,13 @@ struct generic_seq_args {
 	// string description for progress and logs
 	const char *description;
 
+	// output files: prefix for the new sequence and automatic loading
+	const char *new_seq_prefix;
+	gboolean load_new_sequence;
+	gboolean force_ser_output;
+	// new output SER if seq->type == SEQ_SER or force_ser_output
+	struct ser_struct *new_ser;
+
 	// user data: pointer to operation-specific data
 	void *user;
 
@@ -43,6 +50,11 @@ struct generic_seq_args {
 };
 
 gpointer generic_sequence_worker(gpointer p);
+gboolean end_generic_sequence(gpointer p);
+
+int ser_prepare_hook(struct generic_seq_args *args);
+int ser_finalize_hook(struct generic_seq_args *args);
+int generic_save(struct generic_seq_args *, int, int, fits *);
 
 int seq_filter_all(sequence *seq, int nb_img, double any);
 int seq_filter_included(sequence *seq, int nb_img, double any);

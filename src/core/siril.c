@@ -1411,41 +1411,10 @@ static int fmul(fits *a, int layer, float coeff) {
  *      B A N D I N G      R E D U C T I O N      M A N A G E M E N T        *
  ****************************************************************************/
 
-int banding_prepare_hook(struct generic_seq_args *args) {
-	char dest[256];
-	const char *ptr;
-
-	struct banding_data *c_args = (struct banding_data *) args->user;
-	args->new_ser = malloc(sizeof(struct ser_struct));
-	ptr = strrchr(args->seq->seqname, '/');
-	if (ptr)
-		snprintf(dest, 255, "%s%s.ser", c_args->seqEntry, ptr + 1);
-	else
-		snprintf(dest, 255, "%s%s.ser", c_args->seqEntry, args->seq->seqname);
-
-	return ser_create_file(dest, args->new_ser, TRUE, args->seq->ser_file);
-}
-
 int banding_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) {
-	char dest[256];
 	struct banding_data *banding_args = (struct banding_data *)args->user;
-	int retval = BandingEngine(fit, banding_args->sigma, banding_args->amount,
+	return BandingEngine(fit, banding_args->sigma, banding_args->amount,
 			banding_args->protect_highlights, banding_args->applyRotation);
-	if (retval) return retval;
-
-	if (args->seq->type == SEQ_SER) {
-		snprintf(dest, 255, "%s%s.ser", banding_args->seqEntry, args->seq->seqname);
-		return ser_write_frame_from_fit(args->new_ser, fit, i);
-	} else {
-		snprintf(dest, 255, "%s%s%05d%s", banding_args->seqEntry, args->seq->seqname, i, com.ext);
-		return savefits(dest, fit);
-	}
-}
-
-int banding_finalize_hook(struct generic_seq_args *args) {
-	ser_write_and_close(args->new_ser);
-	free(args->new_ser);
-	return 0;
 }
 
 void apply_banding_to_sequence(struct banding_data *banding_args) {
@@ -1453,18 +1422,18 @@ void apply_banding_to_sequence(struct banding_data *banding_args) {
 	args->seq = &com.seq;
 	args->filtering_criterion = seq_filter_included;
 	args->nb_filtered_images = com.seq.selnum;
-	if (args->seq->type == SEQ_SER) {
-		args->prepare_hook = banding_prepare_hook;
-		args->finalize_hook = banding_finalize_hook;
-	} else {
-		args->prepare_hook = NULL;
-		args->finalize_hook = NULL;
-	}
+	args->force_ser_output = FALSE;
+	args->prepare_hook = ser_prepare_hook;
+	args->finalize_hook = ser_finalize_hook;
+	args->save_hook = NULL;
 	args->parallel = TRUE;
 	args->image_hook = banding_image_hook;
 	args->idle_function = NULL;
 	args->user = banding_args;
 	args->description = "Banding Reduction";
+	args->new_seq_prefix = banding_args->seqEntry;
+	args->load_new_sequence = TRUE;
+	args->force_ser_output = FALSE;
 
 	banding_args->fit = NULL;	// not used here
 

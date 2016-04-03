@@ -1293,12 +1293,15 @@ int select_unselect(gboolean select) {
 	gboolean current_updated = FALSE;
 	for (i=from; i<=to; i++) {
 		if (i >= com.seq.number) break;
-		if (i == com.seq.current) current_updated = TRUE;
-		com.seq.imgparam[i].incl = select;
-		sequence_list_change_selection_index(i);
-		if (select)
-			com.seq.selnum++;
-		else	com.seq.selnum--;
+		if (com.seq.imgparam[i].incl != select) {
+			com.seq.imgparam[i].incl = select;
+			sequence_list_change_selection_index(i);
+			if (select)
+				com.seq.selnum++;
+			else	com.seq.selnum--;
+			if (i == com.seq.current)
+				current_updated = TRUE;
+		}
 	}
 
 	if (current_updated) {

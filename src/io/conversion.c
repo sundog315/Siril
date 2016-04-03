@@ -659,13 +659,12 @@ clean_exit:
 	return NULL;
 }
 
-// This idle function was not really required, but allows to properly join the thread.
 static gboolean end_convert_idle(gpointer p) {
 	struct _convert_data *args = (struct _convert_data *) p;
 	struct timeval t_end;
 	
 	if (get_thread_run() && args->nb_converted > 1) {
-		// load the sequence of debayered images
+		// load the sequence
 		char *ppseqname = malloc(strlen(destroot) + 5);
 		sprintf(ppseqname, "%s.seq", destroot);
 		check_seq(0);

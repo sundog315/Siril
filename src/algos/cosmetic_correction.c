@@ -246,23 +246,7 @@ int cosmeticCorrection(fits *fit, deviant_pixel *dev, int size, gboolean is_cfa)
 }
 
 /**** Autodetect *****/
-int cosmetic_prepare_hook(struct generic_seq_args *args) {
-	char dest[256];
-	const char *ptr;
-
-	struct cosmetic_data *c_args = (struct cosmetic_data *) args->user;
-	args->new_ser = malloc(sizeof(struct ser_struct));
-	ptr = strrchr(args->seq->seqname, '/');
-	if (ptr)
-		snprintf(dest, 255, "%s%s.ser", c_args->seqEntry, ptr + 1);
-	else
-		snprintf(dest, 255, "%s%s.ser", c_args->seqEntry, args->seq->seqname);
-
-	return ser_create_file(dest, args->new_ser, TRUE, args->seq->ser_file);
-}
-
 int cosmetic_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) {
-	char dest[256];
 	struct cosmetic_data *c_args = (struct cosmetic_data *) args->user;
 	int retval, chan;
 	/* Count variables, icold and ihot, need to be local in order to be parallelized */
@@ -277,20 +261,6 @@ int cosmetic_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) 
 	}
 	siril_log_color_message("Image %d: %ld pixels corrected (%ld + %ld)\n",
 			"bold", i, icold + ihot, icold, ihot);
-
-	if (args->seq->type == SEQ_SER) {
-		snprintf(dest, 255, "%s%s.ser", c_args->seqEntry, args->seq->seqname);
-		return ser_write_frame_from_fit(args->new_ser, fit, i);
-	} else {
-		snprintf(dest, 255, "%s%s%05d%s", c_args->seqEntry, args->seq->seqname,
-				i, com.ext);
-		return savefits(dest, fit);
-	}
-}
-
-int cosmetic_finalize_hook(struct generic_seq_args *args) {
-	ser_write_and_close(args->new_ser);
-	free(args->new_ser);
 	return 0;
 }
 
@@ -299,18 +269,17 @@ void apply_cosmetic_to_sequence(struct cosmetic_data *cosme_args) {
 	args->seq = &com.seq;
 	args->filtering_criterion = seq_filter_included;
 	args->nb_filtered_images = com.seq.selnum;
-	if (args->seq->type == SEQ_SER) {
-		args->prepare_hook = cosmetic_prepare_hook;
-		args->finalize_hook = cosmetic_finalize_hook;
-	} else {
-		args->prepare_hook = NULL;
-		args->finalize_hook = NULL;
-	}
+	args->prepare_hook = ser_prepare_hook;
+	args->finalize_hook = ser_finalize_hook;
+	args->save_hook = NULL;
 	args->parallel = TRUE;
 	args->image_hook = cosmetic_image_hook;
 	args->idle_function = NULL;
 	args->user = cosme_args;
 	args->description = "Cosmetic Correction";
+	args->new_seq_prefix = cosme_args->seqEntry;
+	args->load_new_sequence = TRUE;
+	args->force_ser_output = FALSE;
 
 	cosme_args->fit = NULL;	// not used here
 
