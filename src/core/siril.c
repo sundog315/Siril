@@ -1433,7 +1433,6 @@ void apply_banding_to_sequence(struct banding_data *banding_args) {
 	args->description = "Banding Reduction";
 	args->new_seq_prefix = banding_args->seqEntry;
 	args->load_new_sequence = TRUE;
-	args->force_ser_output = FALSE;
 
 	banding_args->fit = NULL;	// not used here
 

@@ -217,13 +217,13 @@ int image_find_minmax(fits *fit, int force_minmax){
 	if (fit->maxi != 0 && !force_minmax) return 1;
 
 	/* search for min and max values in all layers */
-#pragma omp parallel for num_threads(com.max_thread) private(layer) schedule(dynamic,1)
-	for (layer=0; layer<fit->naxes[2]; ++layer){
+#pragma omp parallel for num_threads(com.max_thread) private(layer, i) schedule(dynamic,1)
+	for (layer = 0; layer < fit->naxes[2]; ++layer) {
 		WORD *buf = fit->pdata[layer];
 		fit->max[layer] = 0;
 		fit->min[layer] = USHRT_MAX;
 
-		for (i=0; i<fit->rx * fit->ry; ++i){
+		for (i = 0; i < fit->rx * fit->ry; ++i) {
 			fit->max[layer] = max(fit->max[layer], buf[i]);
 			fit->min[layer] = min(fit->min[layer], buf[i]);
 		}
@@ -234,7 +234,7 @@ int image_find_minmax(fits *fit, int force_minmax){
 	/* set the overall min and max values from layer values */
 	fit->maxi = 0;
 	fit->mini = USHRT_MAX;
-	for (layer=0; layer<fit->naxes[2]; ++layer){
+	for (layer = 0; layer < fit->naxes[2]; ++layer) {
 		fit->maxi = max(fit->max[layer], fit->maxi);
 		fit->mini = min(fit->min[layer], fit->mini);
 	}
