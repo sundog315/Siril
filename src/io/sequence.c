@@ -939,8 +939,8 @@ int seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit, recta
 		//fprintf(stdout, "%d\t%f\t%f\t%f\t%f\t%f\n", frame_no, result->A, result->mag, result->fwhmx, result->xpos, result->ypos);
 
 		/* let's move source_area to center it on the star */
-//		source_area->x = round_to_int(result->xpos) - source_area->w/2;
-//		source_area->y = round_to_int(result->ypos) - source_area->h/2;
+		//source_area->x = round_to_int(result->xpos) - source_area->w/2;
+		//source_area->y = round_to_int(result->ypos) - source_area->h/2;
 		return 0;
 	} else {
 		seq->regparam[seq_layer][frame_no].fwhm_data = NULL;
