@@ -924,12 +924,14 @@ static double goldenSectionSearch(fits *brut, fits *dark, double a, double b,
 
 static int preprocess(fits *brut, fits *offset, fits *dark, fits *flat, float level) {
 
-	if (com.preprostatus & USE_OFFSET)
+	if (com.preprostatus & USE_OFFSET) {
 		imoper(brut, offset, OPER_SUB);
+	}
 
 	/* if dark optimization, the master-dark has already been subtracted */
-	if ((com.preprostatus & USE_DARK) && !(com.preprostatus & USE_DARK))
+	if ((com.preprostatus & USE_DARK) && !(com.preprostatus & USE_OPTD)) {
 		imoper(brut, dark, OPER_SUB);
+	}
 
 	if (com.preprostatus & USE_FLAT) {
 		fdiv(brut, flat, level);
