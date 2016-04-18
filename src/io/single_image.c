@@ -217,7 +217,7 @@ int image_find_minmax(fits *fit, int force_minmax){
 	if (fit->maxi != 0 && !force_minmax) return 1;
 
 	/* search for min and max values in all layers */
-#pragma omp parallel for num_threads(com.max_thread) private(layer, i) schedule(dynamic,1)
+#pragma omp parallel for num_threads(com.max_thread) private(layer, i) schedule(dynamic,1) if(fit->naxes[2] > 1)
 	for (layer = 0; layer < fit->naxes[2]; ++layer) {
 		WORD *buf = fit->pdata[layer];
 		fit->max[layer] = 0;

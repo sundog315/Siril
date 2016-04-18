@@ -96,7 +96,7 @@ command commande[] = {
 	{"help", 0, "help", process_help},	
 	{"histo", 1, "histo layer (layer=0, 1, 2 with 0: red, 1: green, 2: blue)", process_histo},
 	
-	/* i*** commands oper filename and curent image */
+	/* commands oper filename and curent image */
 	{"iadd", 1, "add filename", process_imoper}, 
 	{"idiv", 1, "idiv filename", process_imoper},
 	{"imul", 1, "imul filename", process_imoper}, 
@@ -719,7 +719,7 @@ int process_psf(int nb){
 
 void *_psf_thread(void *arg) {
 	int layer = (intptr_t) arg;
-	do_fwhm_sequence_processing(&com.seq, layer, 1, 1);
+	do_fwhm_sequence_processing(&com.seq, layer, TRUE, TRUE, TRUE);
 	gdk_threads_add_idle(end_generic, NULL);
 	return NULL;
 }

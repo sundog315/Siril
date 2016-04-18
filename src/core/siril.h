@@ -206,7 +206,7 @@ struct imdata {
  * Returns < 0 for an error that should stop the processing on the sequence.
  * Other return values are not used.
  * Processed data should be written in the sequence data directly. */
-typedef int (*sequence_proc)(sequence *seq, int seq_layer, int frame_no, fits *fit, rectangle *source_area);
+typedef int (*sequence_proc)(sequence *seq, int seq_layer, int frame_no, fits *fit, rectangle *source_area, void *arg);
 
 /* preprocessing data from GUI */
 struct preprocessing_data {

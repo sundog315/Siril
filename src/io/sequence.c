@@ -871,10 +871,12 @@ gboolean sequence_is_loaded() {
  *                             SEQUENCE PROCESSING                           *
  * **************************************************************************/
 
-/* Start a processing on all images of the sequence seq, on layer layer if it applies.
+/* Start a processing on an area of all images of the sequence seq, on layer
+ * layer if it applies. Another generic processing method is available in
+ * core/processing.c, called generic_sequence.
  * The see coment in siril.h for help on process format.
  */
-int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolean run_in_thread) {
+int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolean run_in_thread, gboolean run_in_parallel, void *arg) {
 	int i, abort = 0;
 	float cur_nb = 0.f, nb_frames;
 	fits fit;
@@ -892,7 +894,7 @@ int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolea
 
 	/* this loops could be run in parallel, but now the area depends on the previous star
 	 * detection, which makes it a bit hard to keep track of the star movement... */
-//#pragma omp parallel for private(i) schedule(dynamic)
+#pragma omp parallel for private(i) schedule(static) if(run_in_parallel && ((seq->type == SEQ_REGULAR && fits_is_reentrant()) || seq->type == SEQ_SER))
 	for (i=0; i<seq->number; ++i) {
 		if (!abort) {
 			if (run_in_thread && !get_thread_run()) {
@@ -909,13 +911,14 @@ int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolea
 
 			/* processing the image
 			 * warning: area may be modified */
-			if (process(seq, layer, i, &fit, &area) < 0) {
+			if (process(seq, layer, i, &fit, &area, arg) < 0) {
 				abort = 1;
 				continue;
 			}
+#pragma omp atomic
+			cur_nb += 1.f;
+			set_progress_bar_data(NULL, cur_nb/nb_frames);
 		}
-		cur_nb += 1.f;
-		set_progress_bar_data(NULL, cur_nb/nb_frames);
 	}
 	return abort;
 }
@@ -925,7 +928,7 @@ int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolea
  * source_area is the area from which fit was extracted from the full frame. It can be used
  * for reference, but can also be modified to help subsequent minimisations.
  */
-int seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit, rectangle *source_area) {
+int seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit, rectangle *source_area, void *arg) {
 	rectangle area;
 	area.x = area.y = 0;
 	area.w = fit->rx; area.h = fit->ry;
@@ -936,11 +939,12 @@ int seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit, recta
 		result->ypos = source_area->y + source_area->h - result->y0;
 		seq->regparam[seq_layer][frame_no].fwhm_data = result;
 		seq->regparam[seq_layer][frame_no].fwhm = result->fwhmx;
-		//fprintf(stdout, "%d\t%f\t%f\t%f\t%f\t%f\n", frame_no, result->A, result->mag, result->fwhmx, result->xpos, result->ypos);
 
 		/* let's move source_area to center it on the star */
-		//source_area->x = round_to_int(result->xpos) - source_area->w/2;
-		//source_area->y = round_to_int(result->ypos) - source_area->h/2;
+		if (arg) {
+			source_area->x = round_to_int(result->xpos) - source_area->w/2;
+			source_area->y = round_to_int(result->ypos) - source_area->h/2;
+		}
 		return 0;
 	} else {
 		seq->regparam[seq_layer][frame_no].fwhm_data = NULL;
@@ -951,11 +955,11 @@ int seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit, recta
 
 /* Computes PSF for all images in a sequence.
  * Prints PSF data if print_psf is true, only position if false. */
-int do_fwhm_sequence_processing(sequence *seq, int layer, int print_psf, gboolean run_in_thread) {
+int do_fwhm_sequence_processing(sequence *seq, int layer, gboolean print_psf, gboolean follow_star, gboolean run_in_thread) {
 	int i, retval;
 	siril_log_message("Starting sequence processing of PSF\n");
 	set_progress_bar_data("Computing PSF on selected star", PROGRESS_NONE);
-	retval = sequence_processing(seq, &seqprocess_fwhm, layer, run_in_thread);	// allocates regparam
+	retval = sequence_processing(seq, &seqprocess_fwhm, layer, run_in_thread, !follow_star, GINT_TO_POINTER(follow_star));	// allocates regparam
 	if (retval) {
 		set_progress_bar_data("Failed to compute PSF for the sequence. Ready.", PROGRESS_NONE);
 		set_cursor_waiting(FALSE);
@@ -1298,12 +1302,14 @@ gpointer export_sequence(gpointer ptr) {
 					nx = x + shiftx;
 					ny = y + shifty;
 					if (nx >= 0 && nx < fit.rx && ny >= 0 && ny < fit.ry) {
-						double tmp = fit.pdata[layer][x + y * fit.rx];
 						if (args->normalize) {
+							double tmp = fit.pdata[layer][x + y * fit.rx];
 							tmp *= coeff.scale[i];
 							tmp -= coeff.offset[i];
+							destfit.pdata[layer][nx + ny * fit.rx] = round_to_WORD(tmp);
+						} else {
+							destfit.pdata[layer][nx + ny * fit.rx] = fit.pdata[layer][x + y * fit.rx];
 						}
-						destfit.pdata[layer][nx + ny * fit.rx] = round_to_WORD(tmp);
 					}
 				}
 			}

@@ -17,8 +17,8 @@ struct registration_args {
 	struct timeval t_start;		// start time of func
 	int retval;			// retval of func
 	gboolean run_in_thread;		// true if the registration was run in a thread
-	GtkEntry *entry;
-	const gchar *text;
+	const gchar *prefix;		// prefix of the created sequence if any
+	gboolean follow_star;		// follow star position between frames
 };
 
 typedef enum {

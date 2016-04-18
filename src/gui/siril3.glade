@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 
+<!-- Generated with glade 3.20.0 
 
 Copyright (C) The free-astro development team, 2016
 
@@ -6607,7 +6607,8 @@ Uncheck if images come from a monochrome sensor.</property>
                           <object class="GtkLabel" id="label48">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="ypad">10</property>
+                            <property name="margin_top">10</property>
+                            <property name="margin_bottom">10</property>
                             <property name="label" translatable="yes">&lt;b&gt;Image Color Adjustement&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -6651,7 +6652,8 @@ Uncheck if images come from a monochrome sensor.</property>
                           <object class="GtkLabel" id="label7">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="ypad">10</property>
+                            <property name="margin_top">10</property>
+                            <property name="margin_bottom">10</property>
                             <property name="label" translatable="yes">Image Matrix Interpolation</property>
                             <attributes>
                               <attribute name="weight" value="bold"/>
@@ -6752,7 +6754,8 @@ Uncheck if images come from a monochrome sensor.</property>
                           <object class="GtkLabel" id="label70">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="ypad">10</property>
+                            <property name="margin_top">10</property>
+                            <property name="margin_bottom">10</property>
                             <property name="label" translatable="yes">&lt;b&gt;Image Gamma Correction&lt;/b&gt;</property>
                             <property name="use_markup">True</property>
                           </object>
@@ -6824,7 +6827,8 @@ by averaging the entire image</property>
                           <object class="GtkLabel" id="label5">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="ypad">10</property>
+                            <property name="margin_top">10</property>
+                            <property name="margin_bottom">10</property>
                             <property name="label" translatable="yes">Image White Balance</property>
                             <attributes>
                               <attribute name="weight" value="bold"/>
@@ -6903,8 +6907,10 @@ by averaging the entire image</property>
                       <object class="GtkLabel" id="label3">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="ypad">10</property>
+                        <property name="margin_top">10</property>
+                        <property name="margin_bottom">10</property>
                         <property name="label" translatable="yes">SER sequences</property>
+                        <property name="single_line_mode">True</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
                         </attributes>
@@ -7005,8 +7011,10 @@ by averaging the entire image</property>
                       <object class="GtkLabel" id="label15">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="ypad">10</property>
+                        <property name="margin_top">10</property>
+                        <property name="margin_bottom">10</property>
                         <property name="label" translatable="yes">Debayer</property>
+                        <property name="single_line_mode">True</property>
                         <attributes>
                           <attribute name="weight" value="bold"/>
                         </attributes>
@@ -7212,9 +7220,11 @@ by averaging the entire image</property>
                       <object class="GtkLabel" id="label96">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="ypad">10</property>
+                        <property name="margin_top">10</property>
+                        <property name="margin_bottom">10</property>
                         <property name="label" translatable="yes">&lt;b&gt;Camera and Lens Settings&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="single_line_mode">True</property>
                       </object>
                     </child>
                   </object>
@@ -7294,6 +7304,7 @@ by averaging the entire image</property>
                               <packing>
                                 <property name="left_attach">0</property>
                                 <property name="top_attach">2</property>
+                                <property name="width">2</property>
                               </packing>
                             </child>
                             <child>
@@ -7303,7 +7314,9 @@ by averaging the entire image</property>
                                 <property name="halign">start</property>
                                 <property name="label" translatable="yes">/tmp</property>
                                 <property name="ellipsize">middle</property>
+                                <property name="single_line_mode">True</property>
                                 <property name="max_width_chars">50</property>
+                                <property name="track_visited_links">False</property>
                                 <property name="lines">1</property>
                               </object>
                               <packing>
@@ -7340,9 +7353,6 @@ by averaging the entire image</property>
                                 <property name="width">2</property>
                               </packing>
                             </child>
-                            <child>
-                              <placeholder/>
-                            </child>
                           </object>
                         </child>
                       </object>
@@ -7351,9 +7361,11 @@ by averaging the entire image</property>
                       <object class="GtkLabel" id="label86">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="ypad">10</property>
+                        <property name="margin_top">10</property>
+                        <property name="margin_bottom">10</property>
                         <property name="label" translatable="yes">&lt;b&gt;Swap Storage Directory&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="single_line_mode">True</property>
                       </object>
                     </child>
                   </object>
@@ -7418,9 +7430,11 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                       <object class="GtkLabel" id="label54">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="ypad">10</property>
+                        <property name="margin_top">10</property>
+                        <property name="margin_bottom">10</property>
                         <property name="label" translatable="yes">&lt;b&gt;Memory Managment&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="single_line_mode">True</property>
                       </object>
                     </child>
                   </object>
@@ -7485,9 +7499,11 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                       <object class="GtkLabel" id="label94">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="ypad">10</property>
+                        <property name="margin_top">10</property>
+                        <property name="margin_bottom">10</property>
                         <property name="label" translatable="yes">&lt;b&gt;FITS Format&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="single_line_mode">True</property>
                       </object>
                     </child>
                   </object>
@@ -7525,9 +7541,11 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                       <object class="GtkLabel" id="label99">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="ypad">10</property>
+                        <property name="margin_top">10</property>
+                        <property name="margin_bottom">10</property>
                         <property name="label" translatable="yes">&lt;b&gt;Confirmation dialog&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
+                        <property name="single_line_mode">True</property>
                       </object>
                     </child>
                   </object>
@@ -7537,7 +7555,43 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                   </packing>
                 </child>
                 <child>
-                  <placeholder/>
+                  <object class="GtkFrame">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="label_xalign">0</property>
+                    <property name="shadow_type">none</property>
+                    <child>
+                      <object class="GtkAlignment">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="left_padding">12</property>
+                        <child>
+                          <object class="GtkCheckButton" id="darkThemeCheck">
+                            <property name="label" translatable="yes">Using dark GTK theme</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="draw_indicator">True</property>
+                            <signal name="toggled" handler="on_darkThemeCheck_toggled" swapped="no"/>
+                          </object>
+                        </child>
+                      </object>
+                    </child>
+                    <child type="label">
+                      <object class="GtkLabel">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="margin_top">10</property>
+                        <property name="margin_bottom">10</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Look and feel&lt;/b&gt;</property>
+                        <property name="use_markup">True</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="top_attach">2</property>
+                  </packing>
                 </child>
                 <child>
                   <placeholder/>
@@ -11163,7 +11217,6 @@ WARNING: Do not apply dark optimization on master-dark if master-bias has not be
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Check if the target frames are CFA images.
 Uncheck if images come from a monochrome sensor.</property>
-                        <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
@@ -11198,7 +11251,6 @@ Uncheck if images come from a monochrome sensor.</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Check if you want to apply a hot pixel removal.
 Hot pixels are located on the master-dark.</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_cosmEnabledCheck_toggled" swapped="no"/>
@@ -11237,7 +11289,6 @@ Hot pixels are located on the master-dark.</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">How many times the standard deviation, the pixel value must differ to be considered as defective.</property>
                         <property name="halign">end</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -11254,7 +11305,6 @@ Hot pixels are located on the master-dark.</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">How many times the standard deviation, the pixel value must differ to be considered as defective.</property>
                         <property name="halign">end</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -11444,7 +11494,6 @@ The next action for DSLR images would be to debayer the preprocessed images, go 
                         <property name="receives_default">False</property>
                         <property name="border_width">2</property>
                         <property name="use_underline">True</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_register_all_toggle" swapped="no"/>
@@ -11464,7 +11513,6 @@ The next action for DSLR images would be to debayer the preprocessed images, go 
                         <property name="receives_default">False</property>
                         <property name="border_width">2</property>
                         <property name="use_underline">True</property>
-                        <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">regallbutton</property>
                       </object>
@@ -11573,7 +11621,7 @@ When processing images, registration data is taken from the default layer if ava
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="padding">16</property>
-                        <property name="position">1</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                     <child>
@@ -11584,12 +11632,13 @@ When processing images, registration data is taken from the default layer if ava
                         <property name="max_length">10</property>
                         <property name="width_chars">10</property>
                         <property name="text">r_</property>
+                        <property name="caps_lock_warning">False</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="padding">16</property>
-                        <property name="position">2</property>
+                        <property name="position">1</property>
                       </packing>
                     </child>
                   </object>
@@ -11635,6 +11684,23 @@ When processing images, registration data is taken from the default layer if ava
                         <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="followStarCheckButton">
+                        <property name="label" translatable="yes">Follow star movement</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Use this option to use the position of the star found in the previous image as new centre for the current image registration. This allows the selection area to be smaller, registration faster, and accounts for drift or images with a large number of stars.
+Warning: enabling this option requries the registration to not be parallelized, it will run on one CPU core only.</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="padding">16</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">2</property>
                       </packing>
                     </child>
                   </object>
@@ -11689,7 +11755,6 @@ When processing images, registration data is taken from the default layer if ava
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Display the reference image over the current image using a 50% transparency.
 To be enabled, the reference image must have been explicitly set and already displayed once on the selected registration layer.</property>
-                        <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_checkbutton_displayref_toggled" swapped="no"/>
                       </object>
@@ -11944,7 +12009,6 @@ To be enabled, the reference image must have been explicitly set and already dis
                         <property name="can_focus">False</property>
                         <property name="halign">end</property>
                         <property name="label" translatable="yes">Stacking Methods: </property>
-                        <property name="xalign">0</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -11958,7 +12022,6 @@ To be enabled, the reference image must have been explicitly set and already dis
                         <property name="halign">end</property>
                         <property name="margin_top">7</property>
                         <property name="label" translatable="yes">Stack this set of images: </property>
-                        <property name="xalign">0</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>

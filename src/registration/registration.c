@@ -402,7 +402,7 @@ int register_shift_fwhm(struct registration_args *args) {
 	 * images to register, which provides FWHM but also star coordinates */
 	// TODO: detect that it was already computed, and don't do it again
 	// -> should be done at a higher level and passed in the args
-	if (do_fwhm_sequence_processing(args->seq, args->layer, 0,
+	if (do_fwhm_sequence_processing(args->seq, args->layer, TRUE, args->follow_star,
 			args->run_in_thread))	// stores in regparam
 		return 1;
 
@@ -592,9 +592,9 @@ int register_star_alignment(struct registration_args *args) {
 
 		const char *ptr = strrchr(args->seq->seqname, '/');
 		if (ptr)
-			snprintf(dest, 255, "%s%s.ser", args->text, ptr + 1);
+			snprintf(dest, 255, "%s%s.ser", args->prefix, ptr + 1);
 		else
-			snprintf(dest, 255, "%s%s.ser", args->text, args->seq->seqname);
+			snprintf(dest, 255, "%s%s.ser", args->prefix, args->seq->seqname);
 
 		ser_create_file(dest, new_ser, TRUE, args->seq->ser_file);
 	}
@@ -666,7 +666,7 @@ int register_star_alignment(struct registration_args *args) {
 			if (args->seq->type == SEQ_SER)
 				ser_write_frame_from_fit(new_ser, &fit, frame);
 			else {
-				snprintf(dest, 256, "%s%s", args->text, filename);
+				snprintf(dest, 256, "%s%s", args->prefix, filename);
 				savefits(dest, &fit);
 			}
 
@@ -859,7 +859,7 @@ int get_registration_layer() {
  * Verifies that enough images are selected and an area is selected.
  */
 void update_reg_interface(gboolean dont_change_reg_radio) {
-	static GtkWidget *go_register = NULL, *newSequence = NULL;
+	static GtkWidget *go_register = NULL, *newSequence = NULL, *follow = NULL;
 	static GtkLabel *labelreginfo = NULL;
 	static GtkToggleButton *reg_all = NULL, *reg_sel = NULL;
 	int nb_images_reg; /* the number of images to register */
@@ -867,13 +867,14 @@ void update_reg_interface(gboolean dont_change_reg_radio) {
 
 	if (!go_register) {
 		go_register = lookup_widget("goregister_button");
+		newSequence = lookup_widget("box29");
+		follow = lookup_widget("followStarCheckButton");
 		reg_all = GTK_TOGGLE_BUTTON(
 				gtk_builder_get_object(builder, "regallbutton"));
 		reg_sel = GTK_TOGGLE_BUTTON(
 				gtk_builder_get_object(builder, "regselbutton"));
 		labelreginfo = GTK_LABEL(
 				gtk_builder_get_object(builder, "labelregisterinfo"));
-		newSequence = lookup_widget("box29");
 	}
 
 	if (!dont_change_reg_radio) {
@@ -897,6 +898,7 @@ void update_reg_interface(gboolean dont_change_reg_radio) {
 #ifdef HAVE_OPENCV
 		gtk_widget_set_visible(newSequence, method->method_ptr == &register_star_alignment);
 #endif
+		gtk_widget_set_visible(follow, method->method_ptr == &register_shift_fwhm);
 	} else {
 		gtk_widget_set_sensitive(go_register, FALSE);
 		gtk_widget_set_visible(newSequence, FALSE);
@@ -999,7 +1001,7 @@ void on_seqregister_button_clicked(GtkButton *button, gpointer user_data) {
 	struct registration_args *reg_args;
 	struct registration_method *method;
 	char *msg;
-	GtkToggleButton *regall;
+	GtkToggleButton *regall, *follow;
 	GtkComboBox *cbbt_layers;
 
 	if (get_thread_run()) {
@@ -1027,7 +1029,9 @@ void on_seqregister_button_clicked(GtkButton *button, gpointer user_data) {
 	/* filling the arguments for registration */
 	reg_args->seq = &com.seq;
 	regall = GTK_TOGGLE_BUTTON(lookup_widget("regallbutton"));
+	follow = GTK_TOGGLE_BUTTON(lookup_widget("followStarCheckButton"));
 	reg_args->process_all_frames = gtk_toggle_button_get_active(regall);
+	reg_args->follow_star = gtk_toggle_button_get_active(follow);
 	/* getting the selected registration layer from the combo box. The value is the index
 	 * of the selected line, and they are in the same order than layers so there should be
 	 * an exact matching between the two */
@@ -1037,9 +1041,8 @@ void on_seqregister_button_clicked(GtkButton *button, gpointer user_data) {
 	get_the_registration_area(reg_args, method);
 	reg_args->func = method->method_ptr;
 	reg_args->run_in_thread = TRUE;
-	reg_args->entry = GTK_ENTRY(
-			gtk_builder_get_object(builder, "regseqname_entry"));
-	reg_args->text = gtk_entry_get_text(reg_args->entry);
+	reg_args->prefix = gtk_entry_get_text(
+			GTK_ENTRY(gtk_builder_get_object(builder, "regseqname_entry")));
 
 	msg = siril_log_color_message("Registration: processing using method: %s\n",
 			"red", method->name);
@@ -1075,10 +1078,9 @@ static gboolean end_register_idle(gpointer p) {
 			int frame, new_frame;
 			regdata *new_data;
 			imgdata *new_image;
-			char *rseqname = malloc(gtk_entry_get_text_length(args->entry)
-							+ strlen(com.seq.seqname) + 5);
+			char *rseqname = malloc(strlen(args->prefix) + strlen(com.seq.seqname) + 5);
 
-			sprintf(rseqname, "%s%s.seq", args->text, com.seq.seqname);
+			sprintf(rseqname, "%s%s.seq", args->prefix, com.seq.seqname);
 			unlink(rseqname);
 			check_seq(0);
 			if (args->seq->seqname)

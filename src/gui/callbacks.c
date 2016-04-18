@@ -3725,6 +3725,8 @@ void set_progress_bar_data(const char *text, double percent) {
 	data = malloc(sizeof(struct progress_bar_idle_data));
 	data->progress_bar_text = text ? strdup(text) : NULL;
 	data->progress_bar_percent = percent;
+	assert(percent == PROGRESS_PULSATE || percent == PROGRESS_NONE ||
+			(percent >= 0.0 && percent <= 1.0));
 	gdk_threads_add_idle(progress_bar_idle_callback, data);
 	g_mutex_unlock(&com.mutex);
 }
