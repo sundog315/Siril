@@ -87,6 +87,7 @@ command commande[] = {
 	{"find_cosme_cfa", 2, "find_cosme_cfa cold_sigma hot_sigma", process_findcosme},
 	{"findstar", 0, "findstar", process_findstar},
 	{"fmedian", 2, "fmedian ksize modulation", process_fmedian},
+	{"fmul", 1, "fmul scalar", process_fmul},
 	{"fixbanding", 2, "fixbanding amount sigma", process_fixbanding},
 
 	
@@ -334,6 +335,22 @@ int process_fdiv(int nb){
 	clearfits(&(wfit[4]));
 	readfits(word[1], &(wfit[4]), NULL);
 	fdiv(&gfit,&wfit[4], norm);
+	adjust_cutoff_from_updated_gfit();
+	redraw(com.cvport, REMAP_ALL);
+	redraw_previews();
+	return 0;
+}
+
+int process_fmul(int nb){
+	// combines an image division and a scalar multiplication.
+	float coeff;
+
+	coeff = atof(word[1]);
+	if (coeff <= 0.0) {
+		siril_log_message("Multiplying by a coefficient lower or equal to 0 is not possible.\n");
+		return 1;
+	}
+	fmul(&gfit, coeff);
 	adjust_cutoff_from_updated_gfit();
 	redraw(com.cvport, REMAP_ALL);
 	redraw_previews();

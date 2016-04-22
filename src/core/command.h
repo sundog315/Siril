@@ -41,6 +41,7 @@ int	process_imoper2(int nb);
 int	process_soper2(int nb);
 #endif
 int	process_fdiv(int nb);
+int	process_fmul(int nb);
 #if 0
 int	process_composit(int nb);
 int	process_shift(int nb);
