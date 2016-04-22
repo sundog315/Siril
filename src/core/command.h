@@ -33,7 +33,6 @@ int	process_savetif(int nb);
 int	process_savepnm(int nb);
 
 int	process_imoper(int nb);
-int process_mult(int nb);
 int 	process_addmax(int nb);
 #if 0
 int	process_soper(int nb);

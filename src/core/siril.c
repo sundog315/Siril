@@ -304,23 +304,6 @@ int ndiv(fits *a, fits *b) {
 	return 0;
 }
 
-int fmul(fits *a, float coef) {
-	int i, layer;
-	int retvalue = 0;
-	double temp;
-
-	for (layer = 0; layer < a->naxes[2]; ++layer) {
-		WORD *gbuf = a->pdata[layer];
-		for (i = 0; i < a->rx * a->ry; ++i) {
-			temp = ((double) coef * (double) gbuf[i]);
-			if (temp > USHRT_MAX_DOUBLE)
-				retvalue = 1;
-			gbuf[i] = round_to_WORD(temp);
-		}
-	}
-	return retvalue;
-}
-
 /**********************************************************
  *
  */
