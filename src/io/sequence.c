@@ -595,7 +595,7 @@ int seq_open_image(sequence *seq, int index) {
 				return 1;
 
 			fit_sequence_get_image_filename(seq, index, filename, TRUE);
-			fits_open_file(&seq->fptr[index], filename, READONLY, &status);
+			fits_open_diskfile(&seq->fptr[index], filename, READONLY, &status);
 			if (status) {
 				fits_report_error(stderr, status);
 				return status;

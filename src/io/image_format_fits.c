@@ -84,7 +84,7 @@ int readfits(const char *filename, fits *fit, char *realname) {
 	if (realname)
 		strcpy(realname, name);
 	status = 0;
-	fits_open_file(&(fit->fptr), name, READONLY, &status);
+	fits_open_diskfile(&(fit->fptr), name, READONLY, &status);
 	if (status) {
 		report_fits_error(status);
 		return status;
@@ -420,7 +420,7 @@ int readfits_partial(const char *filename, int layer, fits *fit,
 	int zero = 0;
 
 	status = 0;
-	if (fits_open_file(&(fit->fptr), filename, READONLY, &status))
+	if (fits_open_diskfile(&(fit->fptr), filename, READONLY, &status))
 		report_fits_error(status);
 	if (status)
 		return status;
