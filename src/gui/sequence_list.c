@@ -27,6 +27,10 @@
 
 static gboolean fill_sequence_list_idle(gpointer p);
 
+static const char *bg_colour[] = { "WhiteSmoke", "#1B1B1B" };
+static const char *ref_bg_colour[] = { "Beige", "#4A4A39" };
+
+
 static GtkListStore *list_store = NULL;
 
 enum {
@@ -82,7 +86,8 @@ void add_image_to_sequence_list(sequence *seq, int index, int layer) {
 			COLUMN_CURRENT, index == seq->current ? 800 : 400,
 			// weight value is 400 by default "normal":
 			// http://developer.gnome.org/gtk3/stable/GtkCellRendererText.html#GtkCellRendererText--weight
-			COLUMN_REFERENCE, index == seq->reference_image ? "Beige" : "WhiteSmoke",
+			COLUMN_REFERENCE, index == seq->reference_image ?
+			ref_bg_colour[com.have_dark_theme] : bg_colour[com.have_dark_theme],
 			COLUMN_INDEX, index,
 			-1);
 	/* see example at http://developer.gnome.org/gtk3/3.5/GtkListStore.html */
@@ -226,7 +231,8 @@ void sequence_list_change_reference() {
 	while (valid) {
 		gtk_list_store_set(list_store, &iter,
 				COLUMN_REFERENCE,
-				(row_count == com.seq.reference_image) ? "Beige" : "WhiteSmoke",
+				(row_count == com.seq.reference_image) ?
+				ref_bg_colour[com.have_dark_theme] : bg_colour[com.have_dark_theme],
 				-1);
 		row_count++;
 		valid = gtk_tree_model_iter_next(GTK_TREE_MODEL(list_store), &iter);

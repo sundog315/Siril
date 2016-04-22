@@ -26,6 +26,8 @@
 
 static GtkListStore *list_store = NULL;
 
+static const char *first_colour[] = { "WhiteSmoke", "#1B1B1B" };
+static const char *second_colour[] = { "Powder Blue", "#39394A" };
 
 enum {
 	COLUMN_NAME,		// string
@@ -93,7 +95,7 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_RVALUE, rvalue,
 			COLUMN_GVALUE, gvalue,
 			COLUMN_BVALUE, bvalue,
-			COLUMN_COLOR, "White Smoke",
+			COLUMN_COLOR, first_colour[com.have_dark_theme],
 			-1);
 
 	/** Mean */
@@ -111,7 +113,7 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_RVALUE, rvalue,
 			COLUMN_GVALUE, gvalue,
 			COLUMN_BVALUE, bvalue,
-			COLUMN_COLOR, "Powder Blue",
+			COLUMN_COLOR, second_colour[com.have_dark_theme],
 			-1);
 
 	/* median */
@@ -129,7 +131,7 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_RVALUE, rvalue,
 			COLUMN_GVALUE, gvalue,
 			COLUMN_BVALUE, bvalue,
-			COLUMN_COLOR, "White Smoke",
+			COLUMN_COLOR, first_colour[com.have_dark_theme],
 			-1);
 
 	/* sigma */
@@ -147,7 +149,7 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_RVALUE, rvalue,
 			COLUMN_GVALUE, gvalue,
 			COLUMN_BVALUE, bvalue,
-			COLUMN_COLOR, "Powder Blue",
+			COLUMN_COLOR, second_colour[com.have_dark_theme],
 			-1);
 
 	/* avgDev */
@@ -165,7 +167,7 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_RVALUE, rvalue,
 			COLUMN_GVALUE, gvalue,
 			COLUMN_BVALUE, bvalue,
-			COLUMN_COLOR, "White Smoke",
+			COLUMN_COLOR, first_colour[com.have_dark_theme],
 			-1);
 
 	/* MAD */
@@ -183,7 +185,7 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_RVALUE, rvalue,
 			COLUMN_GVALUE, gvalue,
 			COLUMN_BVALUE, bvalue,
-			COLUMN_COLOR, "Powder Blue",
+			COLUMN_COLOR, second_colour[com.have_dark_theme],
 			-1);
 
 	/* sqrt(BWMV) */
@@ -201,7 +203,7 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_RVALUE, rvalue,
 			COLUMN_GVALUE, gvalue,
 			COLUMN_BVALUE, bvalue,
-			COLUMN_COLOR, "White Smoke",
+			COLUMN_COLOR, first_colour[com.have_dark_theme],
 			-1);
 
 	/* min */
@@ -219,7 +221,7 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_RVALUE, rvalue,
 			COLUMN_GVALUE, gvalue,
 			COLUMN_BVALUE, bvalue,
-			COLUMN_COLOR, "Powder Blue",
+			COLUMN_COLOR, second_colour[com.have_dark_theme],
 			-1);
 
 	/* max */
@@ -237,7 +239,7 @@ void add_stats_to_list(imstats *stat[], int nblayer, gboolean normalized) {
 			COLUMN_RVALUE, rvalue,
 			COLUMN_GVALUE, gvalue,
 			COLUMN_BVALUE, bvalue,
-			COLUMN_COLOR, "White Smoke",
+			COLUMN_COLOR, first_colour[com.have_dark_theme],
 			-1);
 
 }

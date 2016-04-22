@@ -514,6 +514,8 @@ struct cominf {
 	
 	gboolean dontShowConfirm;
 
+	gboolean have_dark_theme;	// we have a dark theme, use bright colours
+
 	stackconf stack;
 	
 	int filter;

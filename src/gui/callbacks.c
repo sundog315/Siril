@@ -5890,3 +5890,8 @@ void on_redo_item1_activate(GtkMenuItem *menuitem, gpointer user_data) {
 		set_cursor_waiting(FALSE);
 	}
 }
+
+void on_darkThemeCheck_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
+	com.have_dark_theme = gtk_toggle_button_get_active(togglebutton);
+}
+
