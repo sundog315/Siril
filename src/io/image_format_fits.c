@@ -589,7 +589,7 @@ int savefits(const char *name, fits *f) {
 	unlink(filename); /* Delete old file if it already exists */
 
 	status = 0;
-	if (fits_create_file(&(f->fptr), filename, &status)) { /* create new FITS file */
+	if (fits_create_diskfile(&(f->fptr), filename, &status)) { /* create new FITS file */
 		report_fits_error(status);
 		return 1;
 	}
