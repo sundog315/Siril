@@ -768,9 +768,12 @@ void set_GUI_CWD() {
 }
 
 void set_GUI_misc() {
-	GtkToggleButton *ToggleButton = GTK_TOGGLE_BUTTON(lookup_widget("miscAskQuit"));
+	GtkToggleButton *ToggleButton;
 
+	ToggleButton = GTK_TOGGLE_BUTTON(lookup_widget("miscAskQuit"));
 	gtk_toggle_button_set_active(ToggleButton, com.dontShowConfirm);
+	ToggleButton = GTK_TOGGLE_BUTTON(lookup_widget("darkThemeCheck"));
+	gtk_toggle_button_set_active(ToggleButton, com.have_dark_theme);
 }
 
 /* size is in kiB */

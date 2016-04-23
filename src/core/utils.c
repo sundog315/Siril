@@ -282,6 +282,7 @@ int readinitfile() {
 	config_setting_t *misc_setting = config_lookup(&config, keywords[MISC]);
 	if (misc_setting) {
 		config_setting_lookup_bool(misc_setting, "confirm", &com.dontShowConfirm);
+		config_setting_lookup_bool(misc_setting, "darktheme", &com.have_dark_theme);
 		config_setting_lookup_string(misc_setting, "swap_directory", &swap_dir);
 		config_setting_lookup_string(misc_setting, "extension", &extension);
 		set_GUI_misc();
@@ -404,6 +405,9 @@ static void _save_misc(config_t *config, config_setting_t *root) {
 
 	misc_setting = config_setting_add(misc_group, "confirm", CONFIG_TYPE_BOOL);
 	config_setting_set_bool(misc_setting, com.dontShowConfirm);
+
+	misc_setting = config_setting_add(misc_group, "darktheme", CONFIG_TYPE_BOOL);
+	config_setting_set_bool(misc_setting, com.have_dark_theme);
 }
 
 int writeinitfile() {
