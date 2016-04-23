@@ -502,6 +502,7 @@ static void _print_result(TRANS *trans, float FWHMx, float FWHMy) {
 
 int register_star_alignment(struct registration_args *args) {
 	int frame, ref_image, ret, i;
+	int abort = 0;
 	int fitted_stars, failed = 0, skipped;
 	float nb_frames, cur_nb;
 	float FWHMx, FWHMy;
@@ -573,8 +574,7 @@ int register_star_alignment(struct registration_args *args) {
 		}
 		fclose(pfile);
 #endif
-	fitted_stars =
-			(sf.nb_stars > MAX_STARS_FITTED) ? MAX_STARS_FITTED : sf.nb_stars;
+	fitted_stars = (sf.nb_stars > MAX_STARS_FITTED) ? MAX_STARS_FITTED : sf.nb_stars;
 	FWHM_average(com.stars, &FWHMx, &FWHMy, fitted_stars);
 	siril_log_message("FWHMx:\t%*.2f px\n", 8, FWHMx);
 	siril_log_message("FWHMy:\t%*.2f px\n", 8, FWHMy);
@@ -601,80 +601,86 @@ int register_star_alignment(struct registration_args *args) {
 
 	skipped = 0;
 	for (frame = 0, cur_nb = 0.f; frame < args->seq->number; frame++) {
-		if (args->run_in_thread && !get_thread_run())
-			break;
-		if (!args->process_all_frames && !args->seq->imgparam[frame].incl) {
-			skipped ++;
-			continue;
-		}
+		if (!abort) {
+			if (args->run_in_thread && !get_thread_run()) {
+				abort = 1;
+				continue;
+			}
+			if (!args->process_all_frames && !args->seq->imgparam[frame].incl) {
+				skipped++;
+				continue;
+			}
 
-		ret = seq_read_frame(args->seq, frame, &fit);
-		if (!ret) {
-			char dest[256], filename[256];
-			int nbpoints;
+			ret = seq_read_frame(args->seq, frame, &fit);
+			if (!ret) {
+				char dest[256], filename[256];
+				int nbpoints;
 
-			if (frame != ref_image) {
-				stars = peaker(&fit, args->layer, &sf);
-				if (sf.nb_stars < AT_MATCH_MINPAIRS) {
-					siril_log_message("Not enough stars. Image %d skipped\n",
-							frame);
-					args->seq->new_total--;
-					failed++;
-					continue;
-				}
+				if (frame != ref_image) {
+					stars = peaker(&fit, args->layer, &sf);
+					if (sf.nb_stars < AT_MATCH_MINPAIRS) {
+						siril_log_message(
+								"Not enough stars. Image %d skipped\n", frame);
+						args->seq->new_total--;
+						failed++;
+						continue;
+					}
 
 #ifdef DEBUG
-				FILE *pfile2;
+					FILE *pfile2;
 
-				pfile2 = fopen("im.txt", "w+");
-				fprintf(pfile2, "IMAGE %d\n", frame);
-				for (i = 0; i < MAX_STARS_FITTED; i++) {
-					fprintf(pfile2, "%.3lf\t%.3lf\t%.3lf\n", stars[i]->xpos,
-							stars[i]->ypos, stars[i]->mag);
-				}
-				fprintf(pfile2, "\n\n", frame);
-				fclose(pfile2);
+					pfile2 = fopen("im.txt", "w+");
+					fprintf(pfile2, "IMAGE %d\n", frame);
+					for (i = 0; i < MAX_STARS_FITTED; i++) {
+						fprintf(pfile2, "%.3lf\t%.3lf\t%.3lf\n", stars[i]->xpos,
+								stars[i]->ypos, stars[i]->mag);
+					}
+					fprintf(pfile2, "\n\n", frame);
+					fclose(pfile2);
 
 #endif
 
-				nbpoints = (sf.nb_stars < fitted_stars) ?
-								sf.nb_stars : fitted_stars;
+					nbpoints = (sf.nb_stars < fitted_stars) ?
+									sf.nb_stars : fitted_stars;
 
-				if (star_match(stars, com.stars, nbpoints, &trans)) {
-					siril_log_color_message(
-							"Cannot perform star matching. Image %d skipped\n",
-							"red", frame);
-					args->seq->new_total--;
-					failed++;
+					if (star_match(stars, com.stars, nbpoints, &trans)) {
+						siril_log_color_message("Cannot perform"
+								"star matching. Image %d skipped\n",
+								"red", frame);
+						args->seq->new_total--;
+						failed++;
+						i = 0;
+						while (i < MAX_STARS && stars[i])
+							free(stars[i++]);
+						free(stars);
+						continue;
+					}
+
+					FWHM_average(stars, &FWHMx, &FWHMy, nbpoints);
+					_print_result(&trans, FWHMx, FWHMy);
+					current_regdata[frame].fwhm = FWHMx;
+
+					cvTransformImage(&fit, trans, 0);
+
 					i = 0;
 					while (i < MAX_STARS && stars[i])
 						free(stars[i++]);
 					free(stars);
-					continue;
+				}
+				fit_sequence_get_image_filename(args->seq, frame, filename,
+						TRUE);
+
+				if (args->seq->type == SEQ_SER)
+					ser_write_frame_from_fit(new_ser, &fit,
+							frame - failed - skipped);
+				else {
+					snprintf(dest, 256, "%s%s", args->prefix, filename);
+					savefits(dest, &fit);
 				}
 
-				FWHM_average(stars, &FWHMx, &FWHMy, nbpoints);
-				_print_result(&trans, FWHMx, FWHMy);
-				current_regdata[frame].fwhm = FWHMx;
-
-				cvTransformImage(&fit, trans, 0);
-
-				i = 0;
-				while (i < MAX_STARS && stars[i])
-					free(stars[i++]);
-				free(stars);
+				cur_nb += 1.f;
+				set_progress_bar_data(NULL, cur_nb / nb_frames);
 			}
-			fit_sequence_get_image_filename(args->seq, frame, filename, TRUE);
-
-			if (args->seq->type == SEQ_SER)
-				ser_write_frame_from_fit(new_ser, &fit, frame - failed - skipped);
-			else {
-				snprintf(dest, 256, "%s%s", args->prefix, filename);
-				savefits(dest, &fit);
-			}
-
-			cur_nb += 1.f;
-			set_progress_bar_data(NULL, cur_nb / nb_frames);
 		}
 	}
 	if (args->seq->type == SEQ_SER) {
@@ -683,9 +689,18 @@ int register_star_alignment(struct registration_args *args) {
 	}
 	args->seq->regparam[args->layer] = current_regdata;
 	update_used_memory();
-	siril_log_message("Registration finished.\n");
-	siril_log_color_message("%d images processed.\n", "green", args->seq->new_total + failed);
-	siril_log_color_message("Total: %d failed, %d registred.\n", "green", failed, args->seq->new_total);
+	if (!abort) {
+		siril_log_message("Registration finished.\n");
+		siril_log_color_message("%d images processed.\n", "green",
+				args->seq->new_total + failed);
+		siril_log_color_message("Total: %d failed, %d registred.\n", "green",
+				failed, args->seq->new_total);
+		args->load_new_sequance = TRUE;
+	}
+	else {
+		siril_log_message("Registration aborted.\n");
+		args->load_new_sequance = FALSE;
+	}
 
 	return args->seq->new_total == 0;
 }
@@ -1078,46 +1093,51 @@ static gboolean end_register_idle(gpointer p) {
 		/* Load new sequence. Only star alignment method uses new sequence. */
 #ifdef HAVE_OPENCV
 		if (args->func == &register_star_alignment) {
-			int frame, new_frame;
-			regdata *new_data;
-			imgdata *new_image;
-			char *rseqname = malloc(strlen(args->prefix) + strlen(com.seq.seqname) + 5);
+			if (args->load_new_sequance) {
+				int frame, new_frame;
+				regdata *new_data;
+				imgdata *new_image;
+				char *rseqname = malloc(
+						strlen(args->prefix) + strlen(com.seq.seqname) + 5);
 
-			sprintf(rseqname, "%s%s.seq", args->prefix, com.seq.seqname);
-			unlink(rseqname);
-			check_seq(0);
-			if (args->seq->seqname)
-				free(args->seq->seqname);
-			char *newname = remove_ext_from_filename(rseqname);
-			args->seq->seqname = strdup(newname);
+				sprintf(rseqname, "%s%s.seq", args->prefix, com.seq.seqname);
+				unlink(rseqname);
+				check_seq(0);
+				if (args->seq->seqname)
+					free(args->seq->seqname);
+				char *newname = remove_ext_from_filename(rseqname);
+				args->seq->seqname = strdup(newname);
 
-			/* If images have not been registred we have to reorganize data and images */
-			new_data = calloc(args->seq->new_total, sizeof(regdata));
-			new_image = calloc(args->seq->new_total, sizeof(imgdata));
-			for (frame = 0, new_frame = 0; frame < args->seq->number; frame++) {
-				if (!args->process_all_frames
-						&& !args->seq->imgparam[frame].incl)
-					continue;
-				if (args->seq->regparam[args->layer][frame].fwhm > 0) {
-					new_data[new_frame] = args->seq->regparam[args->layer][frame];
-					new_image[new_frame] = args->seq->imgparam[frame];
-					new_frame++;
+				/* If images have not been registered we have to reorganize data and images */
+				new_data = calloc(args->seq->new_total, sizeof(regdata));
+				new_image = calloc(args->seq->new_total, sizeof(imgdata));
+				for (frame = 0, new_frame = 0; frame < args->seq->number;
+						frame++) {
+					if (!args->process_all_frames
+							&& !args->seq->imgparam[frame].incl)
+						continue;
+					if (args->seq->regparam[args->layer][frame].fwhm > 0) {
+						new_data[new_frame] =
+								args->seq->regparam[args->layer][frame];
+						new_image[new_frame] = args->seq->imgparam[frame];
+						new_frame++;
+					}
 				}
-			}
-			if (args->seq->regparam[args->layer])
-				free(args->seq->regparam[args->layer]);
-			if (args->seq->imgparam)
-				free(args->seq->imgparam);
-			args->seq->regparam[args->layer] = new_data;
-			args->seq->imgparam = new_image;
-			args->seq->number = args->seq->new_total;
-			args->seq->selnum = args->seq->new_total;
+				if (args->seq->regparam[args->layer])
+					free(args->seq->regparam[args->layer]);
+				if (args->seq->imgparam)
+					free(args->seq->imgparam);
+				args->seq->regparam[args->layer] = new_data;
+				args->seq->imgparam = new_image;
+				args->seq->number = args->seq->new_total;
+				args->seq->selnum = args->seq->new_total;
 
-			/* We write the new sequence */
-			writeseqfile(args->seq);
-			update_sequences_list(rseqname);
-			free(newname);
-			free(rseqname);
+				/* We write the new sequence */
+				writeseqfile(args->seq);
+				update_sequences_list(rseqname);
+				free(newname);
+				free(rseqname);
+			}
 			clear_stars_list();
 		}
 #endif

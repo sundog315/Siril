@@ -19,6 +19,7 @@ struct registration_args {
 	gboolean run_in_thread;		// true if the registration was run in a thread
 	const gchar *prefix;		// prefix of the created sequence if any
 	gboolean follow_star;		// follow star position between frames
+	gboolean load_new_sequance;
 };
 
 typedef enum {
