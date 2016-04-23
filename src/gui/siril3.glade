@@ -7410,7 +7410,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                                 <property name="halign">center</property>
                                 <property name="valign">center</property>
                                 <property name="adjustment">adj_mem</property>
-                                <property name="climb_rate">0.10000000000000001</property>
+                                <property name="climb_rate">0.050000000223517416</property>
                                 <property name="digits">1</property>
                                 <property name="numeric">True</property>
                                 <property name="value">0.90000000000000002</property>
@@ -7530,7 +7530,6 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="valign">start</property>
-                            <property name="xalign">0</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="on_confirmDontShowButton_toggled" swapped="no"/>
                           </object>
@@ -7555,22 +7554,24 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                   </packing>
                 </child>
                 <child>
-                  <object class="GtkFrame">
+                  <object class="GtkFrame" id="frame66">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="label_xalign">0</property>
                     <property name="shadow_type">none</property>
                     <child>
-                      <object class="GtkAlignment">
+                      <object class="GtkAlignment" id="alignment66">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="left_padding">12</property>
                         <child>
                           <object class="GtkCheckButton" id="darkThemeCheck">
-                            <property name="label" translatable="yes">Using dark GTK theme</property>
+                            <property name="label" translatable="yes">Using dark GTK theme
+(may require restarting)</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
+                            <property name="tooltip_text" translatable="yes">Some dialogs of Siril have non-standard bright colours. With a dark theme, where the text is bright too, that's unreadable. Checking here will change these non-standard colours to dark.</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="on_darkThemeCheck_toggled" swapped="no"/>
                           </object>
@@ -7578,7 +7579,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                       </object>
                     </child>
                     <child type="label">
-                      <object class="GtkLabel">
+                      <object class="GtkLabel" id="label666">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="margin_top">10</property>
