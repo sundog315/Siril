@@ -98,7 +98,7 @@ static void get_structure(starFinder *sf) {
 fitted_PSF **peaker(fits *fit, int layer, starFinder *sf) {
 	int nx = fit->rx;
 	int ny = fit->ry;
-	int y, i, nbstars = 0;
+	int y, k, nbstars = 0;
 	double bg;
 	WORD threshold, norm;
 	WORD **wave_image, **real_image;
@@ -140,8 +140,8 @@ fitted_PSF **peaker(fits *fit, int layer, starFinder *sf) {
 		printf("Memory allocation failed: peaker\n");
 		return NULL;
 	}
-	for (i = 0; i < ny; i++)
-		wave_image[ny - i - 1] = wave_fit->pdata[layer] + i * nx;
+	for (k = 0; k < ny; k++)
+		wave_image[ny - k - 1] = wave_fit->pdata[layer] + k * nx;
 
 	/* FILL real image upside-down */
 	real_image = malloc(ny * sizeof(WORD *));
@@ -152,10 +152,10 @@ fitted_PSF **peaker(fits *fit, int layer, starFinder *sf) {
 		printf("Memory allocation failed: peaker\n");
 		return NULL;
 	}
-	for (i = 0; i < ny; i++)
-		real_image[ny - i - 1] = fit->pdata[layer] + i * nx;
+	for (k = 0; k < ny; k++)
+		real_image[ny - k - 1] = fit->pdata[layer] + k * nx;
 
-//#pragma omp parallel for num_threads(com.max_thread) private(y,i) schedule(static)
+#pragma omp parallel for num_threads(com.max_thread) private(y) schedule(static)
 	for (y = sf->radius; y < ny - sf->radius; y++) {
 		int x;
 		for (x = sf->radius; x < nx - sf->radius; x++) {
@@ -181,7 +181,7 @@ fitted_PSF **peaker(fits *fit, int layer, starFinder *sf) {
 					}
 				}
 				if (bingo && nbstars < MAX_STARS) {
-					int ii, jj, j;
+					int ii, jj, i, j;
 					//~ fprintf(stdout, "Found a probable star at position (%d, %d) with a value of %hu\n", x, y, pixel);
 					gsl_matrix *z = gsl_matrix_alloc(sf->radius * 2, sf->radius * 2);
 					/* FILL z */
