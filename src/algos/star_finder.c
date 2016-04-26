@@ -36,7 +36,7 @@
 
 #define WAVELET_SCALE 3
 
-static WORD Compute_threshold(fits *fit, double starfinder, int layer, WORD *norm) {
+static WORD Compute_threshold(fits *fit, double starfinder, int layer, WORD *norm, double *bg) {
 	WORD threshold;
 	imstats *stat;
 
@@ -45,7 +45,8 @@ static WORD Compute_threshold(fits *fit, double starfinder, int layer, WORD *nor
 	stat = statistics(fit, layer, NULL, STATS_BASIC);
 	threshold = (WORD) stat->median + starfinder * (WORD) stat->sigma;
 	*norm = (WORD) stat->normValue;
-	printf("Threshold = %d\n", threshold);
+	*bg = stat->median;
+//	printf("Threshold = %d\n", threshold);
 	free(stat);
 
 	return threshold;
@@ -126,9 +127,8 @@ fitted_PSF **peaker(fits *fit, int layer, starFinder *sf) {
 
 	results[0] = NULL;
 	get_structure(sf);
-	threshold = Compute_threshold(fit, sf->sigma, layer, &norm);
+	threshold = Compute_threshold(fit, sf->sigma, layer, &norm, &bg);
 
-	bg = background(fit, layer, NULL);
 	copyfits(fit, wave_fit, CP_ALLOC | CP_FORMAT | CP_COPYA, 0);
 	get_wavelet_layers(wave_fit, WAVELET_SCALE, 2, TO_PAVE_BSPLINE, layer);
 

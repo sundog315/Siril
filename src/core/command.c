@@ -494,7 +494,7 @@ int process_wavelet(int nb){
 		strcpy(dir[chan], tmpdir);
 		strcat(dir[chan], "/");
 		strcat(dir[chan], File_Name_Transform[chan]);
-		wavelet_transform_file (Imag, dir[chan], Type_Transform, Nbr_Plan, gfit.pdata[chan]);
+		wavelet_transform_file (Imag, gfit.ry, gfit.rx, dir[chan], Type_Transform, Nbr_Plan, gfit.pdata[chan]);
 		free(dir[chan]);
 	}
 	

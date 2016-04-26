@@ -5397,7 +5397,7 @@ void on_button_compute_w_clicked(GtkButton *button, gpointer user_data) {
 		strcpy(dir[i], tmpdir);
 		strcat(dir[i], "/");
 		strcat(dir[i], File_Name_Transform[i]);
-		wavelet_transform_file(Imag, dir[i], Type_Transform, Nbr_Plan,
+		wavelet_transform_file(Imag, gfit.ry, gfit.rx, dir[i], Type_Transform, Nbr_Plan,
 				gfit.pdata[i]);
 		free(dir[i]);
 	}

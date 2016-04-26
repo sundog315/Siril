@@ -1255,7 +1255,7 @@ int get_wavelet_layers(fits *fit, int Nbr_Plan, int Plan, int Type, int reqlayer
 		strcpy(dir[chan], tmpdir);
 		strcat(dir[chan], "/");
 		strcat(dir[chan], File_Name_Transform[chan]);
-		if (wavelet_transform_file(Imag, dir[chan], Type, Nbr_Plan,
+		if (wavelet_transform_file(Imag, fit->ry, fit->rx, dir[chan], Type, Nbr_Plan,
 				fit->pdata[chan])) {
 			free((char *) Imag);
 			free(dir[chan]);

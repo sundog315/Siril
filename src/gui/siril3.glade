@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 
+<!-- Generated with glade 3.18.3 
 
 Copyright (C) The free-astro development team, 2016
 
@@ -7530,6 +7530,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="valign">start</property>
+                            <property name="xalign">0.5</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="on_confirmDontShowButton_toggled" swapped="no"/>
                           </object>
@@ -7572,6 +7573,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="tooltip_text" translatable="yes">Some dialogs of Siril have non-standard bright colours. With a dark theme, where the text is bright too, that's unreadable. Checking here will change these non-standard colours to dark.</property>
+                            <property name="xalign">0.5</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="on_darkThemeCheck_toggled" swapped="no"/>
                           </object>
@@ -11218,6 +11220,7 @@ WARNING: Do not apply dark optimization on master-dark if master-bias has not be
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Check if the target frames are CFA images.
 Uncheck if images come from a monochrome sensor.</property>
+                        <property name="xalign">0.5</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
@@ -11252,6 +11255,7 @@ Uncheck if images come from a monochrome sensor.</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Check if you want to apply a hot pixel removal.
 Hot pixels are located on the master-dark.</property>
+                        <property name="xalign">0.5</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_cosmEnabledCheck_toggled" swapped="no"/>
@@ -11290,6 +11294,7 @@ Hot pixels are located on the master-dark.</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">How many times the standard deviation, the pixel value must differ to be considered as defective.</property>
                         <property name="halign">end</property>
+                        <property name="xalign">0.5</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -11306,6 +11311,7 @@ Hot pixels are located on the master-dark.</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">How many times the standard deviation, the pixel value must differ to be considered as defective.</property>
                         <property name="halign">end</property>
+                        <property name="xalign">0.5</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -11495,6 +11501,7 @@ The next action for DSLR images would be to debayer the preprocessed images, go 
                         <property name="receives_default">False</property>
                         <property name="border_width">2</property>
                         <property name="use_underline">True</property>
+                        <property name="xalign">0.5</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_register_all_toggle" swapped="no"/>
@@ -11514,6 +11521,7 @@ The next action for DSLR images would be to debayer the preprocessed images, go 
                         <property name="receives_default">False</property>
                         <property name="border_width">2</property>
                         <property name="use_underline">True</property>
+                        <property name="xalign">0.5</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">regallbutton</property>
                       </object>
@@ -11642,6 +11650,21 @@ When processing images, registration data is taken from the default layer if ava
                         <property name="position">1</property>
                       </packing>
                     </child>
+                    <child>
+                      <object class="GtkCheckButton" id="checkStarSelect">
+                        <property name="label" translatable="yes">Match stars in selection</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="xalign">0</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -11694,6 +11717,7 @@ When processing images, registration data is taken from the default layer if ava
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Use this option to use the position of the star found in the previous image as new centre for the current image registration. This allows the selection area to be smaller, registration faster, and accounts for drift or images with a large number of stars.
 Warning: enabling this option requries the registration to not be parallelized, it will run on one CPU core only.</property>
+                        <property name="xalign">0.5</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
@@ -11756,6 +11780,7 @@ Warning: enabling this option requries the registration to not be parallelized, 
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Display the reference image over the current image using a 50% transparency.
 To be enabled, the reference image must have been explicitly set and already displayed once on the selected registration layer.</property>
+                        <property name="xalign">0.5</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_checkbutton_displayref_toggled" swapped="no"/>
                       </object>

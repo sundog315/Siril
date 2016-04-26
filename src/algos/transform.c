@@ -117,14 +117,11 @@
 #include "algos/Def_Mem.h"
 #include "algos/Def_Wavelet.h"
 
-int prepare_rawdata(float *Imag, int *Nl, int *Nc, WORD *buf){
+int prepare_rawdata(float *Imag, int Nl, int Nc, WORD *buf){
 	float *im=Imag;
 	int i;
 
-	*Nl=gfit.ry;
-	*Nc=gfit.rx;
-
-	for (i=0;i<(*Nl)*(*Nc);++i){
+	for (i=0;i<(Nl)*(Nc);++i){
 		(im[i])=(float)buf[i];
 	}
 	return 0;
@@ -148,20 +145,21 @@ float *f_vector_alloc(Nbr_Elem)
 
 /*****************************************************************************/
 
-int wavelet_transform_file (Imag, File_Name_Transform, Type_Transform, Nbr_Plan, data)
+int wavelet_transform_file (Imag, Nl, Nc, File_Name_Transform, Type_Transform, Nbr_Plan, data)
 float *Imag;
+int Nl;
+int Nc;
 char *File_Name_Transform;
 int Type_Transform;
 int Nbr_Plan;
 WORD *data;
 {
 	wave_transf_des Wavelet;
-	int Nl, Nc;
     
     memset(&Wavelet, 0, sizeof(wave_transf_des));
 
 	/* read the input image */
-	prepare_rawdata (Imag, &Nl, &Nc, data);
+	prepare_rawdata (Imag, Nl, Nc, data);
 	snprintf (Wavelet.Name_Imag, MAX_SIZE_NAME_IMAG-1, "%s", File_Name_Transform);
 	Wavelet.Name_Imag[MAX_SIZE_NAME_IMAG-1] = '\0';
 
