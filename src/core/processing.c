@@ -19,6 +19,7 @@ gpointer generic_sequence_worker(gpointer p) {
 	int abort = 0; // variable for breaking out of loop
 	GString *desc; // temporary string description for logs
 	gchar *msg; // final string description for logs
+	fits fit;
 
 	assert(args);
 	assert(args->seq);
@@ -45,12 +46,12 @@ gpointer generic_sequence_worker(gpointer p) {
 	}
 
 	current = 0;
+	memset(&fit, 0, sizeof(fits));
 
-#pragma omp parallel for num_threads(com.max_thread) private(frame) schedule(static) \
+#pragma omp parallel for num_threads(com.max_thread) firstprivate(fit) schedule(static) \
 	if(args->parallel && ((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER))
 	for (frame = 0; frame < args->seq->number; frame++) {
 		if (!abort) {
-			fits fit;
 			char filename[256], msg[256];
 
 			if (!get_thread_run()) {
@@ -71,7 +72,6 @@ gpointer generic_sequence_worker(gpointer p) {
 			progress = (float) (args->nb_filtered_images <= 0 ? frame : current);
 			set_progress_bar_data(msg, progress / nb_framesf);
 
-			memset(&fit, 0, sizeof(fits));
 			if (seq_read_frame(args->seq, frame, &fit)) {
 				abort = 1;
 				clearfits(&fit);

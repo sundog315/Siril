@@ -879,28 +879,28 @@ gboolean sequence_is_loaded() {
 int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolean run_in_thread, gboolean run_in_parallel, void *arg) {
 	int i, abort = 0;
 	float cur_nb = 0.f, nb_frames;
+	rectangle area;
+	fits fit;
 
 	if (!com.selection.w || !com.selection.h) {
 		siril_log_message("No selection was made for a selection-based sequence processing\n");
 		return 1;
 	}
+	memcpy(&area, &com.selection, sizeof(rectangle));
+	memset(&fit, 0, sizeof(fits));
 	check_or_allocate_regparam(seq, layer);
 
 	nb_frames = (float)seq->number;
 
 	/* this loops could be run in parallel, but now the area depends on the previous star
 	 * detection, which makes it a bit hard to keep track of the star movement... */
-#pragma omp parallel for private(i) schedule(static) if(run_in_parallel && ((seq->type == SEQ_REGULAR && fits_is_reentrant()) || seq->type == SEQ_SER))
+#pragma omp parallel for firstprivate(fit) schedule(static) if(run_in_parallel && ((seq->type == SEQ_REGULAR && fits_is_reentrant()) || seq->type == SEQ_SER))
 	for (i=0; i<seq->number; ++i) {
 		if (!abort) {
 			if (run_in_thread && !get_thread_run()) {
 				abort = 1;
 				continue;
 			}
-			fits fit;
-			rectangle area;
-			memset(&fit, 0, sizeof(fits));
-			memcpy(&area, &com.selection, sizeof(rectangle));
 			check_area_is_in_image(&area, seq);
 
 			/* opening the image */
@@ -910,7 +910,7 @@ int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolea
 			}
 
 			/* processing the image
-			 * warning: area may be modified */
+			 * warning: area may be modified, only if !run_in_parallel */
 			if (process(seq, layer, i, &fit, &area, arg) < 0) {
 				abort = 1;
 				continue;
