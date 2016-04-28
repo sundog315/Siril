@@ -879,15 +879,11 @@ gboolean sequence_is_loaded() {
 int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolean run_in_thread, gboolean run_in_parallel, void *arg) {
 	int i, abort = 0;
 	float cur_nb = 0.f, nb_frames;
-	fits fit;
-	rectangle area;
 
 	if (!com.selection.w || !com.selection.h) {
 		siril_log_message("No selection was made for a selection-based sequence processing\n");
 		return 1;
 	}
-	memcpy(&area, &com.selection, sizeof(rectangle));
-	memset(&fit, 0, sizeof(fits));
 	check_or_allocate_regparam(seq, layer);
 
 	nb_frames = (float)seq->number;
@@ -901,6 +897,10 @@ int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolea
 				abort = 1;
 				continue;
 			}
+			fits fit;
+			rectangle area;
+			memset(&fit, 0, sizeof(fits));
+			memcpy(&area, &com.selection, sizeof(rectangle));
 			check_area_is_in_image(&area, seq);
 
 			/* opening the image */
