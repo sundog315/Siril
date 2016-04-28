@@ -786,6 +786,13 @@ void set_GUI_MEM(unsigned long size) {
 	set_label_text_from_main_thread("labelmem", str);
 }
 
+void initialize_preprocesing() {
+	GtkToggleButton *ToggleButton;
+
+	ToggleButton = GTK_TOGGLE_BUTTON(lookup_widget("cosmCFACheck"));
+	gtk_toggle_button_set_active(ToggleButton, com.prepro_cfa);
+}
+
 void remaprgb(void) {
 	guchar *dst;
 	guchar *bufr, *bufg, *bufb;
@@ -1791,6 +1798,11 @@ void on_cosmEnabledCheck_toggled(GtkToggleButton *button, gpointer user_data) {
 	gtk_widget_set_sensitive(SigCold, is_active);
 	gtk_widget_set_sensitive(checkHot, is_active);
 	gtk_widget_set_sensitive(checkCold, is_active);
+}
+
+void on_cosmCFACheck_toggled(GtkToggleButton *button, gpointer user_data) {
+	com.prepro_cfa = gtk_toggle_button_get_active(button);
+	writeinitfile();
 }
 
 void on_settings_activate(GtkMenuItem *menuitem, gpointer user_data) {

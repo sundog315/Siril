@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.20.0 
+<!-- Generated with glade 3.18.3 
 
 Copyright (C) The free-astro development team, 2016
 
@@ -11219,6 +11219,7 @@ WARNING: Do not apply dark optimization on master-dark if master-bias has not be
                         <property name="tooltip_text" translatable="yes">Check if the target frames are CFA images.
 Uncheck if images come from a monochrome sensor.</property>
                         <property name="draw_indicator">True</property>
+                        <signal name="toggled" handler="on_cosmCFACheck_toggled" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">4</property>
