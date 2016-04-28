@@ -201,8 +201,8 @@ fitted_PSF **peaker(fits *fit, int layer, starFinder *sf) {
 					if (cur_star) {
 						psf_update_units(fit, &cur_star);
 						if (is_star(cur_star, sf)) {
-							cur_star->xpos = x + cur_star->x0 - sf->radius;
-							cur_star->ypos = y + cur_star->y0 - sf->radius;
+							cur_star->xpos = x + cur_star->x0 - sf->radius - 1;
+							cur_star->ypos = y + cur_star->y0 - sf->radius - 1;
 #pragma omp critical
 							{
 								results[nbstars] = cur_star;

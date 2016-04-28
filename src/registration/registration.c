@@ -482,7 +482,7 @@ static void _print_result(TRANS *trans, float FWHMx, float FWHMy) {
 
 	switch (trans->order) {
 	case AT_TRANS_LINEAR:
-		rotation = atan2(trans->c, trans->b);
+		rotation = -atan2(trans->c, trans->b);
 		shift.x = trans->a;
 		shift.y = -trans->d;
 		scale = sqrt(trans->b * trans->b + trans->c * trans->c);
@@ -660,7 +660,9 @@ int register_star_alignment(struct registration_args *args) {
 					_print_result(&trans, FWHMx, FWHMy);
 					current_regdata[frame].fwhm = FWHMx;
 
+					fits_flip_top_to_bottom(&fit);	// this is because in cvTransformImage, rotation center point is at (0, 0)
 					cvTransformImage(&fit, trans, 0);
+					fits_flip_top_to_bottom(&fit);
 
 					i = 0;
 					while (i < MAX_STARS && stars[i])
