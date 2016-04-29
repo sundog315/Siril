@@ -488,12 +488,12 @@ static void _print_result(TRANS *trans, float FWHMx, float FWHMy) {
 		scale = sqrt(trans->b * trans->b + trans->c * trans->c);
 		siril_log_color_message("Matching stars: done\n", "green");
 		siril_log_message("%d pair matches.\n", trans->nr);
-		siril_log_message("scale:\t%*.3f\n", 9, scale);
-		siril_log_message("rotation:\t%*.2f deg\n", 8, rotation * 180 / M_PI);
-		siril_log_message("dx:\t\t%*.2f px\n", 8, shift.x);
-		siril_log_message("dy:\t\t%*.2f px\n", 8, shift.y);
-		siril_log_message("FWHMx:\t%*.2f px\n", 8, FWHMx);
-		siril_log_message("FWHMy:\t%*.2f px\n", 8, FWHMy);
+		siril_log_message("scale:%*.3f\n", 13, scale);
+		siril_log_message("rotation:%*.2f deg\n", 9, rotation * 180 / M_PI);
+		siril_log_message("dx:%*.2f px\n", 15, shift.x);
+		siril_log_message("dy:%*.2f px\n", 15, shift.y);
+		siril_log_message("FWHMx:%*.2f px\n", 12, FWHMx);
+		siril_log_message("FWHMy:%*.2f px\n", 12, FWHMy);
 		break;
 	default:
 		siril_log_color_message("Not handled yet\n", "red");
@@ -576,8 +576,8 @@ int register_star_alignment(struct registration_args *args) {
 #endif
 	fitted_stars = (sf.nb_stars > MAX_STARS_FITTED) ? MAX_STARS_FITTED : sf.nb_stars;
 	FWHM_average(com.stars, &FWHMx, &FWHMy, fitted_stars);
-	siril_log_message("FWHMx:\t%*.2f px\n", 8, FWHMx);
-	siril_log_message("FWHMy:\t%*.2f px\n", 8, FWHMy);
+	siril_log_message("FWHMx:%*.2f px\n", 12, FWHMx);
+	siril_log_message("FWHMy:%*.2f px\n", 12, FWHMy);
 	current_regdata[ref_image].fwhm = FWHMx;
 
 	/* then we compare to other frames */

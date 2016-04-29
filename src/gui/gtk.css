@@ -1,5 +1,5 @@
 GtkTextView {
-	font: Mono
+	font : Mono;
 }
 
 #neg_button, #mirrorx_button, #mirrory_button, #colormap_button, #seqlist_button {
