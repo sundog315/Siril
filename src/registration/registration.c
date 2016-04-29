@@ -174,7 +174,7 @@ static void normalizeQualityData(struct registration_args *args, double q_min, d
  * layer is the layer on which the registration will be done, green by default (set in siril_init())
  */
 int register_shift_dft(struct registration_args *args) {
-	fits fit_ref;
+	fits fit_ref, fit;
 	int frame, size, sqsize;
 	fftw_complex *ref, *in, *out, *convol;
 	fftw_plan p, q;
@@ -265,7 +265,9 @@ int register_shift_dft(struct registration_args *args) {
 	q_index = ref_image;
 
 	cur_nb = 0.f;
-#pragma omp parallel for num_threads(com.max_thread) private(frame) schedule(static) \
+
+	memset(&fit, 0, sizeof(fits));
+#pragma omp parallel for num_threads(com.max_thread) firstprivate(fit) schedule(static) \
 	if((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER)
 	for (frame = 0; frame < args->seq->number; ++frame) {
 		if (!abort) {
@@ -279,8 +281,6 @@ int register_shift_dft(struct registration_args *args) {
 				continue;
 
 			char tmpmsg[1024], tmpfilename[256];
-			fits fit;
-			memset(&fit, 0, sizeof(fits));
 
 			seq_get_image_filename(args->seq, frame, tmpfilename);
 			g_snprintf(tmpmsg, 1024, "Register: processing image %s\n",
@@ -711,7 +711,7 @@ int register_ecc(struct registration_args *args) {
 	int frame, ref_image, ret, failed = 0;
 	float nb_frames, cur_nb;
 	regdata *current_regdata;
-	fits ref;
+	fits ref, im;
 	double q_max = 0, q_min = DBL_MAX;
 	int q_index = -1;
 	int abort = 0;
@@ -768,7 +768,9 @@ int register_ecc(struct registration_args *args) {
 	else args->seq->new_total = args->seq->selnum;
 
 	cur_nb = 0.f;
-#pragma omp parallel for num_threads(com.max_thread) private(frame) schedule(static) \
+
+	memset(&im, 0, sizeof(fits));
+#pragma omp parallel for num_threads(com.max_thread) firstprivate(im) schedule(static) \
 	if((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER)
 	for (frame = 0; frame < args->seq->number; frame++) {
 		if (!abort) {
@@ -789,9 +791,7 @@ int register_ecc(struct registration_args *args) {
 			set_progress_bar_data(tmpmsg, PROGRESS_NONE);
 
 			if (frame != ref_image) {
-				fits im;
 
-				memset(&im, 0, sizeof(fits));
 				ret = seq_read_frame(args->seq, frame, &im);
 				if (!ret) {
 					reg_ecc reg_param;
