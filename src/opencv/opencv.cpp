@@ -183,17 +183,17 @@ int cvTransformImage(fits *image, TRANS trans, int interpolation) {
 	Mat out(image->ry, image->rx, CV_16UC3);
 
 	double angle = -atan2(trans.c, trans.b);
-	//double scale = sqrt(trans.b * trans.b + trans.c * trans.c);
+	double s = sqrt(trans.b * trans.b + trans.c * trans.c);
 
-    Mat homo = Mat::eye(3, 3, CV_64FC1);;
-	homo.at<double>(0, 0) = cos(angle);
-	homo.at<double>(0, 1) = -sin(angle);
-	homo.at<double>(1, 0) = sin(angle);
-	homo.at<double>(1, 1) = cos(angle);
-	homo.at<double>(0, 2) = trans.a;
-	homo.at<double>(1, 2) = trans.d;
+    // http://en.wikipedia.org/wiki/Transformation_matrix#Affine_transformations
+	Mat transform = Mat::eye(2, 3, CV_64FC1);
+	transform.at<double>(0, 0) = s * cos(angle);
+	transform.at<double>(0, 1) = -s * sin(angle);
+	transform.at<double>(1, 0) = s * sin(angle);
+	transform.at<double>(1, 1) = s * cos(angle);
+	transform.at<double>(0, 2) = trans.a;	// shift dx
+	transform.at<double>(1, 2) = trans.d;	// shift dy
 
-	Mat transform = homo(Rect(0, 0, 3, 2));
 	warpAffine(in, out, transform, in.size(), interpolation);
 
 	Mat channel[3];
@@ -223,7 +223,6 @@ int cvTransformImage(fits *image, TRANS trans, int interpolation) {
 	delete[] bgrbgr;
 	in = Mat();
 	out = Mat();
-	homo = Mat();
 	transform = Mat();
 	return 0;
 }
