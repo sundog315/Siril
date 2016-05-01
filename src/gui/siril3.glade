@@ -4888,6 +4888,7 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Close</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_button_extract_w_close_clicked" swapped="no"/>
               </object>
@@ -4903,6 +4904,7 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
+                <property name="tooltip_text" translatable="yes">Apply wavelet extraction.</property>
                 <property name="use_stock">True</property>
                 <signal name="clicked" handler="on_button_extract_w_ok_clicked" swapped="no"/>
               </object>
@@ -4929,7 +4931,7 @@ Uncheck if images come from a monochrome sensor.</property>
               <object class="GtkSpinButton" id="spinbutton_extract_w">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
-                <property name="tooltip_text" translatable="yes">Angle in degrees. Rotation center is the center of the image.</property>
+                <property name="tooltip_text" translatable="yes">Number of wavelet layers. You can choose up to 6 layers for wavelets computing.</property>
                 <property name="halign">end</property>
                 <property name="hexpand">True</property>
                 <property name="invisible_char">●</property>
@@ -4949,7 +4951,7 @@ Uncheck if images come from a monochrome sensor.</property>
               <object class="GtkComboBoxText" id="combo_interpolation_extract_w">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Average Neutral Protection is the default option. This is the recommended option in most cases.</property>
+                <property name="tooltip_text" translatable="yes">Type of algorithm</property>
                 <property name="halign">end</property>
                 <property name="valign">center</property>
                 <property name="active">1</property>
@@ -11772,7 +11774,7 @@ Warning: enabling this option requries the registration to not be parallelized, 
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Display the reference image over the current image using a 50% transparency.
 To be enabled, the reference image must have been explicitly set and already displayed once on the selected registration layer.</property>
-                        <property name="draw_indicator">True</property>
+x                        <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_checkbutton_displayref_toggled" swapped="no"/>
                       </object>
                       <packing>
