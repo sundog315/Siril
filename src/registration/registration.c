@@ -695,7 +695,7 @@ int register_star_alignment(struct registration_args *args) {
 		siril_log_message("Registration finished.\n");
 		siril_log_color_message("%d images processed.\n", "green",
 				args->seq->new_total + failed);
-		siril_log_color_message("Total: %d failed, %d registred.\n", "green",
+		siril_log_color_message("Total: %d failed, %d registered.\n", "green",
 				failed, args->seq->new_total);
 		args->load_new_sequance = TRUE;
 	}

@@ -786,7 +786,7 @@ void set_GUI_MEM(unsigned long size) {
 	set_label_text_from_main_thread("labelmem", str);
 }
 
-void initialize_preprocesing() {
+void initialize_preprocessing() {
 	GtkToggleButton *ToggleButton;
 
 	ToggleButton = GTK_TOGGLE_BUTTON(lookup_widget("cosmCFACheck"));
