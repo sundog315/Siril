@@ -246,7 +246,7 @@ int cosmeticCorrection(fits *fit, deviant_pixel *dev, int size, gboolean is_cfa)
 }
 
 /**** Autodetect *****/
-int cosmetic_image_hook(struct generic_seq_args *args, int i, int j, fits *fit) {
+int cosmetic_image_hook(struct generic_seq_args *args, int i, fits *fit) {
 	struct cosmetic_data *c_args = (struct cosmetic_data *) args->user;
 	int retval, chan;
 	/* Count variables, icold and ihot, need to be local in order to be parallelized */

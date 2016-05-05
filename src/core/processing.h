@@ -17,9 +17,9 @@ struct generic_seq_args {
 	int (*prepare_hook)(struct generic_seq_args *);
 	// function called for each image with image index in sequence, number
 	// of image currently processed and the image
-	int (*image_hook)(struct generic_seq_args *, int, int, fits *);
+	int (*image_hook)(struct generic_seq_args *, int, fits *);
 	// saving the processed image, can be NULL to get default behaviour
-	int (*save_hook)(struct generic_seq_args *, int, int, fits *);
+	int (*save_hook)(struct generic_seq_args *, int, fits *);
 	// function called after iterating through the sequence
 	int (*finalize_hook)(struct generic_seq_args *);
 
@@ -54,7 +54,7 @@ gboolean end_generic_sequence(gpointer p);
 
 int ser_prepare_hook(struct generic_seq_args *args);
 int ser_finalize_hook(struct generic_seq_args *args);
-int generic_save(struct generic_seq_args *, int, int, fits *);
+int generic_save(struct generic_seq_args *, int, fits *);
 
 int seq_filter_all(sequence *seq, int nb_img, double any);
 int seq_filter_included(sequence *seq, int nb_img, double any);

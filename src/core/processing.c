@@ -13,9 +13,11 @@
 gpointer generic_sequence_worker(gpointer p) {
 	struct generic_seq_args *args = (struct generic_seq_args *) p;
 	struct timeval t_end;
-	float nb_framesf, progress = 0.f; // 0 to nb_framesf, for progress
-	int frame;	// the current frame, sequence index
-	int current; // number of processed frames so far
+	int frame;
+	int current; // index of the frame being processed in the sequence
+	int *index_mapping = NULL;
+	int nb_frames, progress = 0;
+	float nb_framesf;
 	int abort = 0; // variable for breaking out of loop
 	GString *desc; // temporary string description for logs
 	gchar *msg; // final string description for logs
@@ -25,15 +27,33 @@ gpointer generic_sequence_worker(gpointer p) {
 	assert(args->seq);
 	assert(args->image_hook);
 	set_progress_bar_data(NULL, PROGRESS_RESET);
-	if (args->nb_filtered_images > 0)
-		nb_framesf = (float)args->nb_filtered_images;
-	else 	nb_framesf = (float)args->seq->number;
+	if (args->nb_filtered_images > 0)	// XXX can it be zero?
+		nb_frames = args->nb_filtered_images;
+	else 	nb_frames = args->seq->number + 1;
+	nb_framesf = (float)nb_frames + 0.3f;	// leave margin for rounding errors and post processing
 	args->retval = 0;
 
 	if (args->prepare_hook && args->prepare_hook(args)) {
 		siril_log_message("Preparing sequence processing failed.\n");
 		args->retval = 1;
 		goto the_end;
+	}
+
+	/* Creating a map of input sequence index to output sequence index, it cannot
+	 * be done in parallel. This is mandatory for SER contiguous output. */
+	if (args->filtering_criterion && args->seq->type == SEQ_SER) {
+		index_mapping = malloc(args->nb_filtered_images * sizeof(int));
+		for (current = 0, frame = 0; frame < args->seq->number; frame++) {
+			if (args->filtering_criterion(args->seq, frame, args->filtering_parameter))
+				continue;
+			index_mapping[current] = frame;
+			current++;
+		}
+		if (current != nb_frames) {
+			siril_log_message("Output index mapping failed.\n");
+			args->retval = 1;
+			goto the_end;
+		}
 	}
 
 	/* Output print of algorithm description */
@@ -50,7 +70,7 @@ gpointer generic_sequence_worker(gpointer p) {
 
 #pragma omp parallel for num_threads(com.max_thread) firstprivate(fit) schedule(static) \
 	if(args->parallel && ((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER))
-	for (frame = 0; frame < args->seq->number; frame++) {
+	for (frame = 0; frame < nb_frames; frame++) {
 		if (!abort) {
 			char filename[256], msg[256];
 
@@ -58,27 +78,22 @@ gpointer generic_sequence_worker(gpointer p) {
 				abort = 1;
 				continue;
 			}
-			if (args->filtering_criterion
-					&& !args->filtering_criterion(args->seq, frame,
-							args->filtering_parameter))
-				continue;
+			if (index_mapping)
+				current = index_mapping[frame];
+			else current = frame;
 
-			if (!seq_get_image_filename(args->seq, frame, filename)) {
+			if (!seq_get_image_filename(args->seq, current, filename)) {
 				abort = 1;
 				continue;
 			}
 
-			snprintf(msg, 256, "%s. Processing image %d (%s)", args->description, frame, filename);
-			progress = (float) (args->nb_filtered_images <= 0 ? frame : current);
-			set_progress_bar_data(msg, progress / nb_framesf);
-
-			if (seq_read_frame(args->seq, frame, &fit)) {
+			if (seq_read_frame(args->seq, current, &fit)) {
 				abort = 1;
 				clearfits(&fit);
 				continue;
 			}
 
-			if (args->image_hook(args, frame, current, &fit)) {
+			if (args->image_hook(args, current, &fit)) {
 				abort = 1;
 				clearfits(&fit);
 				continue;
@@ -86,8 +101,8 @@ gpointer generic_sequence_worker(gpointer p) {
 
 			int retval;
 			if (args->save_hook)
-				retval = args->save_hook(args, frame, current, &fit);
-			else retval = generic_save(args, frame, current, &fit);
+				retval = args->save_hook(args, frame, &fit);
+			else retval = generic_save(args, frame, &fit);
 			if (retval) {
 				abort = 1;
 				clearfits(&fit);
@@ -97,7 +112,9 @@ gpointer generic_sequence_worker(gpointer p) {
 			clearfits(&fit);
 
 #pragma omp atomic
-			current++;
+			progress++;
+			snprintf(msg, 256, "%s. Processing image %d (%s)", args->description, current, filename);
+			set_progress_bar_data(msg, (float)progress / nb_framesf);
 		}
 	}
 
@@ -166,14 +183,18 @@ int ser_finalize_hook(struct generic_seq_args *args) {
 	return retval;
 }
 
-int generic_save(struct generic_seq_args *args, int input_index, int processed_index, fits *fit) {
+/* index will be the index in the output sequence.
+ * For a FITS sequence, adding 1 is recommended because for users a sequence
+ * should start at 1 instead of 0
+ */
+int generic_save(struct generic_seq_args *args, int index, fits *fit) {
 	char dest[256];
+
 	if (args->force_ser_output || args->seq->type == SEQ_SER) {
-		snprintf(dest, 256, "%s%s.ser", args->new_seq_prefix, args->seq->seqname);
-		return ser_write_frame_from_fit(args->new_ser, fit, input_index);
+		return ser_write_frame_from_fit(args->new_ser, fit, index);
 	} else {
 		snprintf(dest, 256, "%s%s%05d%s", args->new_seq_prefix,
-				args->seq->seqname, processed_index, com.ext);
+				args->seq->seqname, index + 1, com.ext);
 		return savefits(dest, fit);
 	}
 }
