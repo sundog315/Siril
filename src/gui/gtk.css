@@ -1,11 +1,11 @@
-GtkTextView {
-	font : Mono;
+textview {
+	font: monospace;
 }
 
 #histoToolGreen {
-	color : green;
+	color: green;
 }
 
 #histoToolBlue {
-	color : blue;
+	color: blue;
 }
