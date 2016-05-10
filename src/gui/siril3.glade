@@ -25,7 +25,7 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
   <!-- interface-license-type gplv3 -->
   <!-- interface-name Siril -->
   <!-- interface-description Tool for astronomy image processing -->
-  <!-- interface-copyright The free-astro development team, 2015 -->
+  <!-- interface-copyright The free-astro development team, 2016 -->
   <object class="GtkAccelGroup" id="accelgroup1"/>
   <object class="GtkMenu" id="menugray">
     <property name="visible">True</property>
