@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.18.3 
+<!-- Generated with glade 3.20.0 
 
 Copyright (C) The free-astro development team, 2016
 
@@ -21,7 +21,7 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <interface>
   <requires lib="gtk+" version="3.6"/>
-  <!-- interface-local-resource-path pixmaps -->
+  <!-- interface-local-resource-path ../../pixmaps -->
   <!-- interface-license-type gplv3 -->
   <!-- interface-name Siril -->
   <!-- interface-description Tool for astronomy image processing -->
@@ -164,7 +164,6 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
       </object>
     </child>
   </object>
-  <object class="GtkAction" id="action1"/>
   <object class="GtkImage" id="add_convert_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -1411,7 +1410,6 @@ enter a visible wavelength in nm</property>
                         <property name="has_tooltip">True</property>
                         <property name="tooltip_markup" translatable="yes">Instead of keeping pixels with values above the &amp;quot;hi&amp;quot; value white, put them in black to see in which part of the image the threshold is exceeded.</property>
                         <property name="tooltip_text" translatable="yes">Instead of keeping pixels with values above the "hi" value white, put them in black to see in which part of the image the threshold is exceeded.</property>
-                        <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_checkcut_toggled" swapped="no"/>
                       </object>
@@ -1430,7 +1428,6 @@ enter a visible wavelength in nm</property>
                         <property name="tooltip_markup" translatable="yes">Click on this button to chain the layers all together</property>
                         <property name="tooltip_text" translatable="yes">Click on this button to chain the layers all together</property>
                         <property name="image">image_chain</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_checkchain_toggled" swapped="no"/>
@@ -1482,9 +1479,10 @@ enter a visible wavelength in nm</property>
                             <property name="tooltip_markup" translatable="yes">High</property>
                             <property name="tooltip_text" translatable="yes">High</property>
                             <property name="halign">end</property>
+                            <property name="valign">center</property>
                             <property name="max_length">5</property>
                             <property name="invisible_char">●</property>
-                            <property name="width_chars">5</property>
+                            <property name="width_chars">7</property>
                             <property name="max_width_chars">5</property>
                             <property name="text">65535</property>
                             <property name="truncate_multiline">True</property>
@@ -1539,9 +1537,10 @@ enter a visible wavelength in nm</property>
                             <property name="tooltip_markup" translatable="yes">High</property>
                             <property name="tooltip_text" translatable="yes">High</property>
                             <property name="halign">end</property>
+                            <property name="valign">center</property>
                             <property name="max_length">5</property>
                             <property name="invisible_char">●</property>
-                            <property name="width_chars">5</property>
+                            <property name="width_chars">7</property>
                             <property name="max_width_chars">5</property>
                             <property name="text">0</property>
                             <property name="truncate_multiline">True</property>
@@ -1588,7 +1587,6 @@ enter a visible wavelength in nm</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_radiobutton_minmax_toggled" swapped="no"/>
@@ -1605,7 +1603,6 @@ enter a visible wavelength in nm</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">radiobutton_minmax</property>
@@ -1623,7 +1620,6 @@ enter a visible wavelength in nm</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">radiobutton_minmax</property>
@@ -1934,7 +1930,6 @@ enter a visible wavelength in nm</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">You must click on the picture to pick your own background samples.</property>
-                                    <property name="xalign">0</property>
                                     <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
                                     <signal name="toggled" handler="on_bkgButtonManual_toggled" swapped="no"/>
@@ -1952,7 +1947,6 @@ enter a visible wavelength in nm</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">Siril picks background samples automatically.</property>
-                                    <property name="xalign">0</property>
                                     <property name="draw_indicator">True</property>
                                     <property name="group">bkgButtonManual</property>
                                   </object>
@@ -1998,7 +1992,6 @@ enter a visible wavelength in nm</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
-                            <property name="xalign">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="on_checkbutton_bkg_boxes_toggled" swapped="no"/>
@@ -2094,6 +2087,7 @@ enter a visible wavelength in nm</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">This is the distance in pixels between two adjacent background sample boxes.</property>
+                                        <property name="width_chars">6</property>
                                         <property name="adjustment">adjustment_bkg_Box_sep</property>
                                         <property name="climb_rate">1</property>
                                         <property name="snap_to_ticks">True</property>
@@ -2110,6 +2104,7 @@ enter a visible wavelength in nm</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">This is the radius in pixels of a background sample box. Multiply by 2 to have the length of a box.</property>
+                                        <property name="width_chars">6</property>
                                         <property name="max_width_chars">3</property>
                                         <property name="adjustment">adjustment_bkg_size_box</property>
                                         <property name="climb_rate">1</property>
@@ -2176,6 +2171,7 @@ enter a visible wavelength in nm</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">This parameter indicates the tolerance of local sample rejection, in sigma units.</property>
+                                        <property name="width_chars">6</property>
                                         <property name="adjustment">adjustment_bkg_tolerance</property>
                                         <property name="climb_rate">0.01</property>
                                         <property name="digits">3</property>
@@ -2242,6 +2238,7 @@ enter a visible wavelength in nm</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">Tolerance of global sample rejection, in sigma units.</property>
+                                        <property name="width_chars">6</property>
                                         <property name="adjustment">adjustment_bkg_deviation</property>
                                         <property name="climb_rate">0.01</property>
                                         <property name="digits">3</property>
@@ -2270,6 +2267,7 @@ enter a visible wavelength in nm</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">This is the factor multiplied by the deviation parameter in order to include more dark pixels in the background evaluation.</property>
+                                        <property name="width_chars">6</property>
                                         <property name="adjustment">adj_bkg_unbalance</property>
                                         <property name="climb_rate">0.01</property>
                                         <property name="digits">3</property>
@@ -2697,7 +2695,6 @@ The higher the degree order is, the stronger the gradient can be remove.</proper
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_markup" translatable="yes">Click on this button to show the image.</property>
                                     <property name="tooltip_text" translatable="yes">Click on this button to show the image.</property>
-                                    <property name="xalign">0</property>
                                     <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
                                     <signal name="toggled" handler="on_radiobutton_bkg_toggled" swapped="no"/>
@@ -2717,7 +2714,6 @@ The higher the degree order is, the stronger the gradient can be remove.</proper
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_markup" translatable="yes">Click on this button to show the background computed.</property>
                                     <property name="tooltip_text" translatable="yes">Click on this button to show the background computed.</property>
-                                    <property name="xalign">0</property>
                                     <property name="draw_indicator">True</property>
                                     <property name="group">radiobutton_bkg_img</property>
                                   </object>
@@ -2990,6 +2986,7 @@ If the parameters is null, so no filter is apply at all.</property>
                     <property name="tooltip_text" translatable="yes">Number of iterations of the algorithm.
 This is useful when modulation parameter is different to 1 helping the whole process to converge to better result.</property>
                     <property name="halign">end</property>
+                    <property name="width_chars">3</property>
                     <property name="adjustment">adj_median_iterations</property>
                     <property name="numeric">True</property>
                     <property name="value">1</property>
@@ -3012,7 +3009,6 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="halign">end</property>
-                <property name="xalign">0</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
@@ -3169,7 +3165,6 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Preserves the original CIE L* component in the processed image.</property>
                 <property name="halign">end</property>
-                <property name="xalign">0</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
@@ -3290,7 +3285,6 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
-                <property name="xalign">0</property>
                 <property name="draw_indicator">True</property>
                 <signal name="toggled" handler="on_checkbutton_fixbanding_toggled" swapped="no"/>
               </object>
@@ -3307,7 +3301,6 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Check this box if banding is vertical.</property>
-                <property name="xalign">0</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -3323,7 +3316,6 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">If a sequence is loaded and this is activated, perform the processing on all images of the sequence instead of only the loaded image.</property>
-                <property name="xalign">0</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -3560,7 +3552,6 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="halign">end</property>
-                <property name="xalign">0</property>
                 <property name="draw_indicator">True</property>
                 <signal name="toggled" handler="on_composition_use_lum_toggled" swapped="no"/>
               </object>
@@ -3664,8 +3655,8 @@ Modifying parameters in this windows afterward will void the colour balance, and
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="halign">start</property>
-                <property name="ypad">5</property>
                 <property name="label" translatable="yes">WARNING: You should not perform a LRGB combination with linear images. Process images before.</property>
+                <property name="single_line_mode">True</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -3718,8 +3709,6 @@ Modifying parameters in this windows afterward will void the colour balance, and
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
                 <property name="tooltip_text" translatable="yes">Automatic alignment using the selected registration method.</property>
-                <property name="xalign">0.55000001192092896</property>
-                <property name="yalign">0.49000000953674316</property>
                 <signal name="clicked" handler="on_button_align_clicked" swapped="no"/>
               </object>
               <packing>
@@ -3892,7 +3881,6 @@ Modifying parameters in this windows afterward will void the colour balance, and
                     <property name="receives_default">False</property>
                     <property name="tooltip_text" translatable="yes">Check if the target frames are CFA images.
 Uncheck if images come from a monochrome sensor.</property>
-                    <property name="xalign">0</property>
                     <property name="draw_indicator">True</property>
                   </object>
                   <packing>
@@ -3907,7 +3895,6 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
                     <property name="tooltip_text" translatable="yes">If a sequence is loaded and this is activated, perform the processing on all images of the sequence instead of only the loaded image.</property>
-                    <property name="xalign">0</property>
                     <property name="draw_indicator">True</property>
                   </object>
                   <packing>
@@ -3965,7 +3952,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                 <property name="receives_default">False</property>
                                 <property name="tooltip_text" translatable="yes">How many times (in averrage deviation units) a pixel value must differ from the value of surrounding neighbors to be considered as a cold pixel.</property>
                                 <property name="halign">start</property>
-                                <property name="xalign">0</property>
                                 <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
                                 <signal name="toggled" handler="on_checkSigCosme_toggled" swapped="no"/>
@@ -3983,6 +3969,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                 <property name="halign">end</property>
                                 <property name="hexpand">True</property>
                                 <property name="invisible_char">●</property>
+                                <property name="width_chars">6</property>
                                 <property name="text" translatable="yes">50,00</property>
                                 <property name="adjustment">adjSigCosmeCold</property>
                                 <property name="climb_rate">0.01</property>
@@ -4003,7 +3990,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                 <property name="receives_default">False</property>
                                 <property name="tooltip_text" translatable="yes">How many times (in averrage deviation units) a pixel value must differ from the value of surrounding neighbors to be considered as a hot pixel.</property>
                                 <property name="halign">start</property>
-                                <property name="xalign">0</property>
                                 <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
                                 <signal name="toggled" handler="on_checkSigCosme_toggled" swapped="no"/>
@@ -4020,6 +4006,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                 <property name="tooltip_text" translatable="yes">How many times (in averrage deviation units) a pixel value must differ from the value of surrounding neighbors to be considered as a hot pixel.</property>
                                 <property name="halign">end</property>
                                 <property name="hexpand">True</property>
+                                <property name="width_chars">6</property>
                                 <property name="text" translatable="yes">50,00</property>
                                 <property name="adjustment">adjSigCosmeHot</property>
                                 <property name="climb_rate">0.01</property>
@@ -4519,7 +4506,6 @@ Uncheck if images come from a monochrome sensor.</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -4535,7 +4521,6 @@ Uncheck if images come from a monochrome sensor.</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">fft_centered</property>
@@ -4558,7 +4543,6 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="receives_default">False</property>
-                    <property name="xalign">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                   </object>
@@ -5445,7 +5429,7 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="can_focus">True</property>
                 <property name="tooltip_text" translatable="yes">Midtones balance</property>
                 <property name="max_length">9</property>
-                <property name="width_chars">9</property>
+                <property name="width_chars">10</property>
                 <property name="max_width_chars">9</property>
                 <property name="text" translatable="yes">0.5000000</property>
                 <property name="overwrite_mode">True</property>
@@ -5463,7 +5447,7 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="can_focus">True</property>
                 <property name="tooltip_text" translatable="yes">Shadows clipping</property>
                 <property name="max_length">9</property>
-                <property name="width_chars">9</property>
+                <property name="width_chars">10</property>
                 <property name="max_width_chars">9</property>
                 <property name="text" translatable="yes">0.0000000</property>
                 <property name="overwrite_mode">True</property>
@@ -5481,7 +5465,7 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="can_focus">True</property>
                 <property name="tooltip_text" translatable="yes">Highlights clipping</property>
                 <property name="max_length">9</property>
-                <property name="width_chars">9</property>
+                <property name="width_chars">10</property>
                 <property name="max_width_chars">9</property>
                 <property name="text" translatable="yes">1.0000000</property>
                 <property name="overwrite_mode">True</property>
@@ -5636,7 +5620,6 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
                 <property name="halign">end</property>
-                <property name="xalign">0</property>
                 <property name="active">True</property>
                 <property name="draw_indicator">True</property>
               </object>
@@ -5804,7 +5787,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
                                         <property name="hexpand">True</property>
-                                        <property name="xalign">0</property>
                                         <property name="draw_indicator">True</property>
                                         <property name="group">radiobutton16bits</property>
                                       </object>
@@ -5821,7 +5803,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
-                                        <property name="xalign">0</property>
                                         <property name="active">True</property>
                                         <property name="draw_indicator">True</property>
                                       </object>
@@ -5873,7 +5854,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
-                                        <property name="xalign">0</property>
                                         <property name="active">True</property>
                                         <property name="draw_indicator">True</property>
                                       </object>
@@ -5892,7 +5872,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="can_focus">False</property>
                                         <property name="receives_default">False</property>
                                         <property name="tooltip_text" translatable="yes">Not available</property>
-                                        <property name="xalign">0</property>
                                         <property name="draw_indicator">True</property>
                                         <property name="group">radiobuttonCompNone</property>
                                       </object>
@@ -6169,7 +6148,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">Not available</property>
-                                    <property name="xalign">0</property>
                                     <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
                                     <property name="group">radiobutton_save_fit16</property>
@@ -6186,7 +6164,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
-                                    <property name="xalign">0</property>
                                     <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
                                   </object>
@@ -6203,7 +6180,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">Not available</property>
-                                    <property name="xalign">0</property>
                                     <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
                                     <property name="group">radiobutton_save_fit16</property>
@@ -6254,7 +6230,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="valign">start</property>
-                                <property name="xalign">0</property>
                                 <property name="active">True</property>
                                 <property name="draw_indicator">True</property>
                               </object>
@@ -6431,7 +6406,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">When this option is enabled,  coefficients for each channel are automatically computed. You can choose your own multiplier by unchecking this box.</property>
-                                    <property name="xalign">0</property>
                                     <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
                                     <signal name="toggled" handler="on_checkbutton_multipliers_toggled" swapped="no"/>
@@ -6470,6 +6444,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="tooltip_markup" translatable="yes">Specify your own raw white balance. The value for the Red scale is relative to the Green.</property>
                                         <property name="tooltip_text" translatable="yes">Specify your own raw white balance. The value for the Red scale is relative to the Green.</property>
                                         <property name="invisible_char">●</property>
+                                        <property name="width_chars">5</property>
                                         <property name="text" translatable="yes">1,00</property>
                                         <property name="progress_pulse_step">0.0099999997764825821</property>
                                         <property name="adjustment">adjustment_red</property>
@@ -6518,6 +6493,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="tooltip_markup" translatable="yes">Specify your own raw white balance. The value for the Blue scale is relative to the Green.</property>
                                         <property name="tooltip_text" translatable="yes">Specify your own raw white balance. The value for the Blue scale is relative to the Green.</property>
                                         <property name="invisible_char">●</property>
+                                        <property name="width_chars">5</property>
                                         <property name="text" translatable="yes">1,00</property>
                                         <property name="progress_pulse_step">0.0099999997764825821</property>
                                         <property name="adjustment">adjustment_blue</property>
@@ -6565,6 +6541,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="tooltip_markup" translatable="yes">Divide the white level by this number.</property>
                                         <property name="tooltip_text" translatable="yes">Divide the white level by this number.</property>
                                         <property name="invisible_char">●</property>
+                                        <property name="width_chars">5</property>
                                         <property name="text" translatable="yes">1,00</property>
                                         <property name="progress_pulse_step">0.0099999997764825821</property>
                                         <property name="adjustment">adjustment_brightness</property>
@@ -6592,7 +6569,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">When this option is enabled, no black point correction is applied to raw images.</property>
-                                    <property name="xalign">0</property>
                                     <property name="draw_indicator">True</property>
                                   </object>
                                   <packing>
@@ -6704,7 +6680,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">No gamma correction is applied to the image.</property>
-                                    <property name="xalign">0</property>
                                     <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
                                   </object>
@@ -6721,7 +6696,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">Apply a specific gamma curve to the image.</property>
-                                    <property name="xalign">0</property>
                                     <property name="draw_indicator">True</property>
                                     <property name="group">radiobutton_gamm0</property>
                                   </object>
@@ -6738,7 +6712,6 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">Apply a specific gamma curve to the image</property>
-                                    <property name="xalign">0</property>
                                     <property name="draw_indicator">True</property>
                                     <property name="group">radiobutton_gamm0</property>
                                   </object>
@@ -6793,7 +6766,6 @@ specified by the camera</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">By default, libraw uses a fixed white balance based on a color chart illuminated with a standard D65 lamp. If you check this box, libraw will try to use data specified by your camera.</property>
-                                    <property name="xalign">0</property>
                                     <property name="draw_indicator">True</property>
                                     <signal name="toggled" handler="on_checkbutton_cam_toggled" swapped="no"/>
                                   </object>
@@ -6811,7 +6783,6 @@ by averaging the entire image</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">By default, libraw uses a fixed white balance based on a color chart illuminated with a standard D65 lamp. If you check this box, libraw will compute the white balance by averaging the entire image.</property>
-                                    <property name="xalign">0</property>
                                     <property name="draw_indicator">True</property>
                                     <signal name="toggled" handler="on_checkbutton_auto_toggled" swapped="no"/>
                                   </object>
@@ -6892,7 +6863,6 @@ by averaging the entire image</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
                                 <property name="tooltip_text" translatable="yes">If this box is checked, Siril will automatically apply the bayer pattern found in the file's header. If the result looks wrong uncheck this box and choose manually your pattern in the Debayer box below.</property>
-                                <property name="xalign">0</property>
                                 <property name="draw_indicator">True</property>
                               </object>
                               <packing>
@@ -7319,7 +7289,6 @@ by averaging the entire image</property>
                                 <property name="single_line_mode">True</property>
                                 <property name="max_width_chars">50</property>
                                 <property name="track_visited_links">False</property>
-                                <property name="lines">1</property>
                               </object>
                               <packing>
                                 <property name="left_attach">1</property>
@@ -7411,6 +7380,7 @@ by averaging the entire image</property>
 WARNING: Reducing the ratio of memory allocated to computation will degrade performances.</property>
                                 <property name="halign">center</property>
                                 <property name="valign">center</property>
+                                <property name="width_chars">4</property>
                                 <property name="adjustment">adj_mem</property>
                                 <property name="climb_rate">0.050000000223517416</property>
                                 <property name="digits">1</property>
@@ -7777,6 +7747,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                             <property name="tooltip_text" translatable="yes">Number of wavelet layers that will be used</property>
                             <property name="halign">end</property>
                             <property name="hexpand">False</property>
+                            <property name="width_chars">1</property>
                             <property name="max_width_chars">2</property>
                             <property name="input_purpose">digits</property>
                             <property name="adjustment">adj_plans_w</property>
@@ -8254,7 +8225,6 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
-            <property name="xalign">0</property>
             <property name="draw_indicator">True</property>
             <signal name="toggled" handler="on_statCheckButton_toggled" swapped="no"/>
           </object>
@@ -8664,6 +8634,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Size in pixels of the search box.</property>
+                        <property name="width_chars">5</property>
                         <property name="adjustment">adjstarfinder_radius</property>
                         <property name="numeric">True</property>
                         <property name="value">7</property>
@@ -8680,6 +8651,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                         <property name="tooltip_text" translatable="yes">Threshold value above the noise for stars detection.
 The median and standard deviation values of the image are determined, then the threshold is : median + [threshold] x stdev.
 The default value for threshold is 1.00.</property>
+                        <property name="width_chars">5</property>
                         <property name="adjustment">adjstarfinder_threshold</property>
                         <property name="digits">2</property>
                         <property name="numeric">True</property>
@@ -8732,6 +8704,7 @@ The default value for threshold is 1.00.</property>
                         <property name="tooltip_text" translatable="yes">Threshold value of star roundnesses. Decrease this value if your stars show small trails.
 
 Warning: ensure you have a good reason to change this value because it may degrade the star detection.</property>
+                        <property name="width_chars">5</property>
                         <property name="adjustment">adjstarfinder_roundness</property>
                         <property name="climb_rate">0.10000000000000001</property>
                         <property name="digits">1</property>
@@ -8961,9 +8934,6 @@ Warning: ensure you have a good reason to change this value because it may degra
       </object>
     </child>
   </object>
-  <object class="GtkRadioAction" id="radioaction1">
-    <property name="draw_as_radio">True</property>
-  </object>
   <object class="GtkImage" id="remove_convert_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -9080,7 +9050,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                     <property name="can_focus">True</property>
                     <property name="receives_default">False</property>
                     <property name="halign">end</property>
-                    <property name="xalign">0</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                     <signal name="toggled" handler="on_button_sample_ratio_toggled" swapped="no"/>
@@ -9130,6 +9099,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                     <property name="can_focus">True</property>
                     <property name="halign">end</property>
                     <property name="hexpand">True</property>
+                    <property name="width_chars">9</property>
                     <property name="text" translatable="yes">100,00</property>
                     <property name="adjustment">resample_Y</property>
                     <property name="climb_rate">0.01</property>
@@ -9150,6 +9120,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                     <property name="halign">end</property>
                     <property name="hexpand">True</property>
                     <property name="invisible_char">●</property>
+                    <property name="width_chars">9</property>
                     <property name="text" translatable="yes">100,00</property>
                     <property name="adjustment">resample_X</property>
                     <property name="climb_rate">0.01</property>
@@ -9266,7 +9237,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                 <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Checking this box will crop the output image.</property>
                 <property name="halign">end</property>
-                <property name="xalign">0</property>
                 <property name="draw_indicator">True</property>
               </object>
               <packing>
@@ -9295,6 +9265,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                 <property name="halign">end</property>
                 <property name="hexpand">True</property>
                 <property name="invisible_char">●</property>
+                <property name="width_chars">6</property>
                 <property name="max_width_chars">7</property>
                 <property name="text" translatable="yes">0,00</property>
                 <property name="adjustment">rotation_angle</property>
@@ -10139,6 +10110,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Enter the base name of the sequence, for example NGC_6822-L. It will create images in the form NGC_6822-L_00001.fit. The name can also end with .ser, which will enable SER output format for the conversion.</property>
+                        <property name="valign">center</property>
                         <property name="hexpand">True</property>
                         <signal name="changed" handler="on_convtoroot_changed" swapped="no"/>
                       </object>
@@ -10177,7 +10149,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                             <property name="tooltip_text" translatable="yes">Keep the destination image with RGB channels, do not change the channels configuration.</property>
                             <property name="halign">start</property>
                             <property name="use_underline">True</property>
-                            <property name="xalign">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="on_conv3planefit_toggled" swapped="no"/>
@@ -10197,7 +10168,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                             <property name="tooltip_text" translatable="yes">Split an RGB image into three images, R, G and B.</property>
                             <property name="halign">start</property>
                             <property name="use_underline">True</property>
-                            <property name="xalign">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">radiobutton1</property>
@@ -10216,7 +10186,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="tooltip_text" translatable="yes">For an RGB image, only keep R. Useful for grey images stored as RGB.</property>
-                            <property name="xalign">0</property>
                             <property name="active">True</property>
                             <property name="draw_indicator">True</property>
                             <property name="group">radiobutton1</property>
@@ -10240,6 +10209,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Indicates the start indice of your converted files. This value must be included in the [1, 65535] range.</property>
+                        <property name="valign">center</property>
                         <property name="max_length">5</property>
                         <property name="width_chars">5</property>
                         <property name="max_width_chars">5</property>
@@ -10260,7 +10230,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="tooltip_text" translatable="yes">Debayer single-channel images (CFA format) using the bayer matrix layout given in the settings. Also applies to image opening, not only conversion.
 Only for RAW and FITS input images.
 Colour image target also applies to the debayer result for conversion.</property>
-                        <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_demosaicing_toggled" swapped="no"/>
                       </object>
@@ -10298,7 +10267,6 @@ Colour image target also applies to the debayer result for conversion.</property
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="tooltip_text" translatable="yes">Tick this to create several SER files instead of a single SER file for all input elements. Use this if input elements (films) don't share the same image size or must not be processed together.</property>
-                            <property name="xalign">0</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="on_multipleSER_toggled" swapped="no"/>
                           </object>
@@ -10521,7 +10489,6 @@ This button will be automatically unchecked after being used.
 
 WARNING: it will erase all registration and statistics data.</property>
                         <property name="halign">end</property>
-                        <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
@@ -10572,10 +10539,9 @@ WARNING: it will erase all registration and statistics data.</property>
                   <object class="GtkLabel" id="imagesel_label">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="ypad">2</property>
+                    <property name="halign">start</property>
                     <property name="label" translatable="yes">No sequence selected</property>
                     <property name="justify">right</property>
-                    <property name="xalign">0.10000000149011612</property>
                   </object>
                   <packing>
                     <property name="expand">False</property>
@@ -10620,7 +10586,6 @@ WARNING: it will erase all registration and statistics data.</property>
                         <property name="tooltip_text" translatable="yes">Whether or not the image is excluded from processing (the file itself is not deleted)</property>
                         <property name="valign">center</property>
                         <property name="use_underline">True</property>
-                        <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_excludebutton_toggled" swapped="no"/>
                       </object>
@@ -10639,7 +10604,6 @@ WARNING: it will erase all registration and statistics data.</property>
 Only one image can be the reference image in a sequence, setting it will unset the image previously set as reference.
 If not set manually, the first image of the sequence is taken as reference.</property>
                         <property name="valign">center</property>
-                        <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_ref_frame_toggled" swapped="no"/>
                       </object>
@@ -10806,7 +10770,6 @@ If not set manually, the first image of the sequence is taken as reference.</pro
 A first computation pass will be done on all images before exporting, it may take some time, only the first export of a sequence.
 			</property>
                         <property name="vexpand">True</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -10980,7 +10943,6 @@ A first computation pass will be done on all images before exporting, it may tak
                         <property name="tooltip_text" translatable="yes">All images in the sequence will be divided by the master flat image (each pixel value). If available above, the bias will be removed from the flat before doing so.</property>
                         <property name="halign">start</property>
                         <property name="use_underline">True</property>
-                        <property name="xalign">0.5</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="set_prepro_button_sensitiveness" swapped="no"/>
                       </object>
@@ -11029,7 +10991,6 @@ All images in the sequence will be divided by the master flat image (each pixel 
                         <property name="tooltip_text" translatable="yes">The dark master image will be removed from all images in the sequence.</property>
                         <property name="halign">start</property>
                         <property name="use_underline">True</property>
-                        <property name="xalign">0.5</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="set_prepro_button_sensitiveness" swapped="no"/>
                       </object>
@@ -11078,7 +11039,6 @@ The dark master image will be removed from all images in the sequence.</property
                         <property name="tooltip_text" translatable="yes">The bias/offset master image will be removed from all images in the sequence, but also from the flat image if it is used.</property>
                         <property name="halign">start</property>
                         <property name="use_underline">True</property>
-                        <property name="xalign">0.5</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="set_prepro_button_sensitiveness" swapped="no"/>
                       </object>
@@ -11148,7 +11108,6 @@ After preprocessing, check that no overflow have been detected in the console ou
 This value is the mean of the master flat calibrated with the master offset.
 If this occurs gives overflows you must choose manually.</property>
                         <property name="halign">end</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_checkbutton_auto_evaluate_toggled" swapped="no"/>
@@ -11170,7 +11129,6 @@ If this occurs gives overflows you must choose manually.</property>
 
 WARNING: Do not apply dark optimization on master-dark if master-bias has not been subtracted previously.</property>
                         <property name="halign">end</property>
-                        <property name="xalign">0</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
@@ -11234,7 +11192,7 @@ Uncheck if images come from a monochrome sensor.</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">How many times the standard deviation, the pixel value must differ to be considered as defective.</property>
                         <property name="halign">start</property>
-                        <property name="width_chars">6</property>
+                        <property name="width_chars">7</property>
                         <property name="max_width_chars">6</property>
                         <property name="input_purpose">number</property>
                         <property name="adjustment">adjSigCosmeHot</property>
@@ -11271,7 +11229,7 @@ Hot pixels are located on the master-dark.</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">How many times the standard deviation, the pixel value must differ to be considered as defective.</property>
                         <property name="halign">start</property>
-                        <property name="width_chars">6</property>
+                        <property name="width_chars">7</property>
                         <property name="max_width_chars">5</property>
                         <property name="text" translatable="yes">3,000</property>
                         <property name="input_purpose">number</property>
@@ -11774,7 +11732,7 @@ Warning: enabling this option requries the registration to not be parallelized, 
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Display the reference image over the current image using a 50% transparency.
 To be enabled, the reference image must have been explicitly set and already displayed once on the selected registration layer.</property>
-x                        <property name="draw_indicator">True</property>
+                        <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_checkbutton_displayref_toggled" swapped="no"/>
                       </object>
                       <packing>
@@ -11800,7 +11758,7 @@ x                        <property name="draw_indicator">True</property>
                         <property name="tooltip_text" translatable="yes">Change this value, using mouse wheel or up and down arrows, to align the image with the reference image on the X axis.</property>
                         <property name="halign">start</property>
                         <property name="invisible_char">●</property>
-                        <property name="width_chars">3</property>
+                        <property name="width_chars">4</property>
                         <property name="max_width_chars">3</property>
                         <property name="text" translatable="yes">0</property>
                         <property name="adjustment">adjustment_shiftx</property>
@@ -11830,7 +11788,7 @@ x                        <property name="draw_indicator">True</property>
                         <property name="tooltip_text" translatable="yes">Change this value, using mouse wheel or up and down arrows, to align the image with the reference image on the Y axis.</property>
                         <property name="halign">start</property>
                         <property name="invisible_char">●</property>
-                        <property name="width_chars">3</property>
+                        <property name="width_chars">4</property>
                         <property name="max_width_chars">3</property>
                         <property name="text" translatable="yes">0</property>
                         <property name="adjustment">adjustment_shifty</property>
@@ -12131,7 +12089,7 @@ Pixels of the image are replaced by pixels at the same coordinates if intensity 
                         <property name="can_focus">True</property>
                         <property name="halign">end</property>
                         <property name="invisible_char">●</property>
-                        <property name="width_chars">5</property>
+                        <property name="width_chars">6</property>
                         <property name="max_width_chars">5</property>
                         <property name="adjustment">adjustment_stack_filter</property>
                         <property name="climb_rate">1</property>
@@ -12152,7 +12110,6 @@ Pixels of the image are replaced by pixels at the same coordinates if intensity 
                         <property name="halign">end</property>
                         <property name="label" translatable="yes">Stack best: </property>
                         <property name="justify">center</property>
-                        <property name="xalign">0</property>
                       </object>
                       <packing>
                         <property name="left_attach">0</property>
@@ -12488,7 +12445,6 @@ Siril uses a 32-bit internal image to process the stacking, which is then saved 
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Overwrite file without notice if it already exists.</property>
-                        <property name="xalign">0</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -12542,7 +12498,6 @@ However, multiplicative normalisation must be used with flat-field frames.</prop
                             <property name="receives_default">False</property>
                             <property name="tooltip_text" translatable="yes">By default, Siril takes the normalisation coefficients from seq file if already computed. However you can force Siril to recompute it before stacking.</property>
                             <property name="valign">center</property>
-                            <property name="xalign">0</property>
                             <property name="draw_indicator">True</property>
                           </object>
                           <packing>
@@ -12873,8 +12828,6 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
                 <property name="justify">right</property>
                 <property name="width_chars">15</property>
                 <property name="max_width_chars">15</property>
-                <property name="xalign">1</property>
-                <property name="yalign">0</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -12917,7 +12870,6 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
             <property name="can_focus">False</property>
             <property name="halign">center</property>
             <property name="valign">center</property>
-            <property name="ypad">5</property>
             <property name="pixbuf">pixmaps/siril_logo.svg</property>
           </object>
           <packing>
@@ -13129,7 +13081,6 @@ and the Siril Development Team</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
-            <property name="xalign">0</property>
             <property name="draw_indicator">True</property>
             <signal name="toggled" handler="on_confirmDontShowButton_toggled" swapped="no"/>
           </object>
@@ -13250,6 +13201,7 @@ The Background Neutralization should be applied before this operation.</property
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">x coordinate of the start of the background selection</property>
                                     <property name="editable">False</property>
+                                    <property name="width_chars">6</property>
                                     <property name="adjustment">adjustment_bkg_x</property>
                                     <property name="climb_rate">1</property>
                                     <property name="numeric">True</property>
@@ -13265,6 +13217,7 @@ The Background Neutralization should be applied before this operation.</property
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">y coordinate of the start of the background selection</property>
                                     <property name="editable">False</property>
+                                    <property name="width_chars">6</property>
                                     <property name="adjustment">adjustment_bkg_y</property>
                                     <property name="numeric">True</property>
                                   </object>
@@ -13279,6 +13232,7 @@ The Background Neutralization should be applied before this operation.</property
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">Width of the background selection</property>
                                     <property name="editable">False</property>
+                                    <property name="width_chars">6</property>
                                     <property name="adjustment">adjustment_bkg_w</property>
                                     <property name="numeric">True</property>
                                   </object>
@@ -13293,6 +13247,7 @@ The Background Neutralization should be applied before this operation.</property
                                     <property name="can_focus">True</property>
                                     <property name="tooltip_text" translatable="yes">Height of the background selection</property>
                                     <property name="editable">False</property>
+                                    <property name="width_chars">6</property>
                                     <property name="adjustment">adjustment_bkg_h</property>
                                     <property name="numeric">True</property>
                                   </object>
@@ -13406,7 +13361,6 @@ This step should be run before any attempt of color calibration.</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="tooltip_text" translatable="yes">By clicking on this option, you will use your own color calibration factors. This option is disabled by default.</property>
-                            <property name="xalign">0</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="on_checkbutton_manual_calibration_toggled" swapped="no"/>
                           </object>
@@ -13538,6 +13492,7 @@ This step should be run before any attempt of color calibration.</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">x coordinate of the start of the white reference selection</property>
                                         <property name="editable">False</property>
+                                        <property name="width_chars">6</property>
                                         <property name="text" translatable="yes">0</property>
                                         <property name="adjustment">adjustment_white_x</property>
                                         <property name="numeric">True</property>
@@ -13553,6 +13508,7 @@ This step should be run before any attempt of color calibration.</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">y coordinate of the start of the white reference selection</property>
                                         <property name="editable">False</property>
+                                        <property name="width_chars">6</property>
                                         <property name="text" translatable="yes">0</property>
                                         <property name="adjustment">adjustment_white_y</property>
                                         <property name="numeric">True</property>
@@ -13568,6 +13524,7 @@ This step should be run before any attempt of color calibration.</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">Width of the white reference selection</property>
                                         <property name="editable">False</property>
+                                        <property name="width_chars">6</property>
                                         <property name="text" translatable="yes">0</property>
                                         <property name="adjustment">adjustment_white_w</property>
                                         <property name="numeric">True</property>
@@ -13583,6 +13540,7 @@ This step should be run before any attempt of color calibration.</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">Height of the white reference selection</property>
                                         <property name="editable">False</property>
+                                        <property name="width_chars">6</property>
                                         <property name="text" translatable="yes">0</property>
                                         <property name="adjustment">adjustment_white_h</property>
                                         <property name="numeric">True</property>
