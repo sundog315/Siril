@@ -5476,8 +5476,8 @@ void on_menu_wavelet_separation_activate(GtkMenuItem *menuitem,
 void on_button_extract_w_ok_clicked(GtkButton *button, gpointer user_data) {
 	fits *fit;
 	int Nbr_Plan, Type, maxplan, mins, i;
-	GtkSpinButton *Spin_Nbr_Plan = NULL;
-	GtkComboBox *Combo_Wavelets_Type = NULL;
+	static GtkSpinButton *Spin_Nbr_Plan = NULL;
+	static GtkComboBox *Combo_Wavelets_Type = NULL;
 
 	if (Spin_Nbr_Plan == NULL) {
 		Spin_Nbr_Plan = GTK_SPIN_BUTTON(lookup_widget("spinbutton_extract_w"));
@@ -5909,5 +5909,18 @@ void on_redo_item1_activate(GtkMenuItem *menuitem, gpointer user_data) {
 
 void on_darkThemeCheck_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
 	com.have_dark_theme = gtk_toggle_button_get_active(togglebutton);
+}
+
+void on_button_reset_css_clicked (GtkButton *button, gpointer user_data) {
+	gchar *homepath, *cssfile;
+	GString *homeStr;
+
+	homepath = getenv("HOME");
+	homeStr = g_string_new(homepath);
+	g_string_append(homeStr, "/."PACKAGE"/");
+	g_string_append(homeStr, CSS_FILE);
+	cssfile = g_string_free(homeStr, FALSE);
+	remove(cssfile);
+	g_free(cssfile);
 }
 

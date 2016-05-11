@@ -6334,7 +6334,6 @@ Uncheck if images come from a monochrome sensor.</property>
     <property name="modal">True</property>
     <property name="window_position">center</property>
     <property name="type_hint">normal</property>
-    <property name="skip_taskbar_hint">True</property>
     <property name="transient_for">main_window</property>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <signal name="hide" handler="on_settings_window_hide" swapped="no"/>
@@ -7269,7 +7268,6 @@ by averaging the entire image</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">True</property>
                                 <property name="tooltip_text" translatable="yes">Restore the defaut swap storage directory</property>
-                                <property name="halign">center</property>
                                 <property name="valign">center</property>
                                 <signal name="clicked" handler="on_button_reset_swap_clicked" swapped="no"/>
                               </object>
@@ -7446,7 +7444,6 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                               <object class="GtkComboBoxText" id="combobox_ext">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="halign">center</property>
                                 <property name="valign">center</property>
                                 <property name="margin_top">4</property>
                                 <property name="active">0</property>
@@ -7532,21 +7529,62 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                     <property name="label_xalign">0</property>
                     <property name="shadow_type">none</property>
                     <child>
-                      <object class="GtkAlignment" id="alignment66">
+                      <object class="GtkBox">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="left_padding">12</property>
+                        <property name="orientation">vertical</property>
+                        <property name="spacing">10</property>
                         <child>
-                          <object class="GtkCheckButton" id="darkThemeCheck">
-                            <property name="label" translatable="yes">Using dark GTK theme
-(may require restarting)</property>
+                          <object class="GtkAlignment" id="alignment66">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="left_padding">12</property>
+                            <child>
+                              <object class="GtkCheckButton" id="darkThemeCheck">
+                                <property name="label" translatable="yes">Using dark GTK theme</property>
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="receives_default">False</property>
+                                <property name="tooltip_text" translatable="yes">Some dialogs of Siril have non-standard bright colours. With a dark theme, where the text is bright too, that's unreadable. Checking here will change these non-standard colours to dark.</property>
+                                <property name="draw_indicator">True</property>
+                                <signal name="toggled" handler="on_darkThemeCheck_toggled" swapped="no"/>
+                              </object>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkButton" id="button_reset_css">
+                            <property name="label" translatable="yes">Restore default
+CSS attributes</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
-                            <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">Some dialogs of Siril have non-standard bright colours. With a dark theme, where the text is bright too, that's unreadable. Checking here will change these non-standard colours to dark.</property>
-                            <property name="draw_indicator">True</property>
-                            <signal name="toggled" handler="on_darkThemeCheck_toggled" swapped="no"/>
+                            <property name="receives_default">True</property>
+                            <property name="tooltip_text" translatable="yes">Restore the defaut CSS atributes</property>
+                            <property name="valign">center</property>
+                            <signal name="clicked" handler="on_button_reset_css_clicked" swapped="no"/>
                           </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">(may require restarting)</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
                         </child>
                       </object>
                     </child>
@@ -7563,11 +7601,9 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
-                    <property name="top_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="height">2</property>
                   </packing>
-                </child>
-                <child>
-                  <placeholder/>
                 </child>
               </object>
               <packing>
@@ -9076,7 +9112,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                   <object class="GtkComboBoxText" id="combo_interpolation">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="tooltip_text" translatable="yes">Average Neutral Protection is the default option. This is the recommended option in most cases.</property>
+                    <property name="tooltip_text" translatable="yes">Type of algorithm used for resampling</property>
                     <property name="halign">end</property>
                     <property name="valign">center</property>
                     <property name="active">1</property>
@@ -9282,7 +9318,7 @@ Warning: ensure you have a good reason to change this value because it may degra
               <object class="GtkComboBoxText" id="combo_interpolation_rotation">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Average Neutral Protection is the default option. This is the recommended option in most cases.</property>
+                <property name="tooltip_text" translatable="yes">Type of algorithm used for rotation</property>
                 <property name="halign">end</property>
                 <property name="valign">center</property>
                 <property name="active">1</property>

@@ -275,7 +275,7 @@ int main(int argc, char *argv[]) {
 	/* load the css sheet for general style */
 	homepath = getenv("HOME");
 	homeStr = g_string_new (homepath);
-	g_string_append(homeStr, "/.siril");
+	g_string_append(homeStr, "/."PACKAGE"/");
 	csspath = g_string_free (homeStr, FALSE);
 
 	load_css_style_sheet (siril_path, csspath);
