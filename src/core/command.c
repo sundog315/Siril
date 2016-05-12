@@ -1554,11 +1554,12 @@ int processcommand(const char *line) {
 				continue;
 			myline = strdup(linef);
 			parseLine(myline, read, &wordnb);
-			free(myline);
 			if (executeCommand(wordnb)) {
 				siril_log_message("Error in line: %d. Exiting batch processing\n", i);
+				free(myline);
 				return 1;
 			}
+			free(myline);
 		}
 
 		fclose(fp);
@@ -1567,10 +1568,10 @@ int processcommand(const char *line) {
 		myline = strdup(line);
 		len = strlen(line);
 		parseLine(myline, len, &wordnb);
-		free(myline);
 		if (executeCommand(wordnb)) {
 			return 1;
 		}
+		free(myline);
 	}
 	return 0;
 }
