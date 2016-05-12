@@ -1478,19 +1478,19 @@ int process_extract(int nb) {
 	return 0;
 }
 
-int processcommand(const char *line) {
-	int i = 0, wordnb = 0, len = strlen(line);
-	char *myline;
+static void parseLine(char *myline, int len, int *nb) {
+	int i = 0, wordnb = 0;
 	char string_starter = '\0';	// quotes don't split words on spaces
 	word[0] = NULL;
-	if (line[0] == '\0' || line[0] == '\n') return 0;
-	myline = strdup(line);
+
 	do {
-		while (i<len && isblank(myline[i])) i++;
+		while (i < len && isblank(myline[i]))
+			i++;
 		if (myline[i] == '"' || myline[i] == '\'')
 			string_starter = myline[i++];
-		if (myline[i] == '\0' || myline[i] == '\n') break;
-		word[wordnb++] = myline+i;	// the beginning of the word
+		if (myline[i] == '\0' || myline[i] == '\n')
+			break;
+		word[wordnb++] = myline + i;	// the beginning of the word
 		word[wordnb] = NULL;		// put next word to NULL
 		do {
 			i++;
@@ -1498,31 +1498,79 @@ int processcommand(const char *line) {
 				string_starter = '\0';
 				break;
 			}
-		} while (i < len && (!isblank(myline[i]) || string_starter != '\0') && myline[i] != '\n') ;
-		if (myline[i] == '\0')		// the end of the word and line (i == len)
+		} while (i < len && (!isblank(myline[i]) || string_starter != '\0')
+				&& myline[i] != '\n');
+		if (myline[i] == '\0')	// the end of the word and line (i == len)
 			break;
 		myline[i++] = '\0';		// the end of the word
-	} while (wordnb < MAX_COMMAND_WORDS - 1) ;
+	} while (wordnb < MAX_COMMAND_WORDS - 1);
+	*nb = wordnb;
+}
 
+static int executeCommand(int wordnb) {
+	int i;
 	// search for the command in the list
 	if (word[0] == NULL) return 1;
 	i = sizeof(commande)/sizeof(command);
 	while (strcasecmp (commande[--i].name, word[0])) {
 		if (i == 0) {
-			siril_log_message("*** Unknown command: '%s' or not implemented yet\n", word[0]);
+			siril_log_message("Unknown command: '%s' or not implemented yet\n", word[0]);
 			return 1 ;
 		}
 	}
 
 	// verify argument count
 	if(wordnb - 1 < commande[i].nbarg) {
-		siril_log_message("   *** usage: %s\n", commande[i].usage);
+		siril_log_message("Usage: %s\n", commande[i].usage);
 		return 1;
 	}
 
 	// process the command
 	commande[i].process(wordnb);
+	return 0;
+}
 
-	free(myline);
+int processcommand(const char *line) {
+	int wordnb = 0, len, i = 0;
+	char *myline;
+
+	if (line[0] == '\0' || line[0] == '\n')
+		return 0;
+	if (line[0] == '@') { // case of files
+		FILE * fp;
+		char * linef = NULL;
+		size_t lenf = 0;
+		ssize_t read;
+
+		fp = fopen(line + 1, "r");
+		if (fp == NULL) {
+			siril_log_message("File [%s] does not exist\n", line + 1);
+			return 1;
+		}
+		while ((read = getline(&linef, &lenf, fp)) != -1) {
+			++i;
+			if (linef[0] == '#') continue;	// comments
+			if (linef[0] == '\0' || linef[0] == '\n')
+				continue;
+			myline = strdup(linef);
+			parseLine(myline, read, &wordnb);
+			free(myline);
+			if (executeCommand(wordnb)) {
+				siril_log_message("Error in line: %d. Exiting batch processing\n", i);
+				return 1;
+			}
+		}
+
+		fclose(fp);
+		free(linef);
+	} else {
+		myline = strdup(line);
+		len = strlen(line);
+		parseLine(myline, len, &wordnb);
+		free(myline);
+		if (executeCommand(wordnb)) {
+			return 1;
+		}
+	}
 	return 0;
 }
