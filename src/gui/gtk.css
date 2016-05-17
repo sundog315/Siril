@@ -1,11 +1,18 @@
 textview {
-	font: monospace;
+        font-family: monospace;
 }
 
-#histoToolGreen {
-	color: green;
+#histoToolRed label {
+        font-weight: bold;
+        color: red;
 }
 
-#histoToolBlue {
-	color: blue;
+#histoToolGreen label {
+        font-weight: bold;
+        color: green;
+}
+
+#histoToolBlue label {
+        font-weight: bold;
+        color: blue;
 }
