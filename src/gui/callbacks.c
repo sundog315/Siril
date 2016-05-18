@@ -57,8 +57,6 @@
 #include "algos/Def_Wavelet.h"
 #include "core/undo.h"
 
-#define CSS_FILE "gtk.css"                      /* CSS style sheet name */
-
 static enum {
 	CD_NULL, CD_INCALL, CD_EXCALL, CD_QUIT
 } confirm;
@@ -85,17 +83,35 @@ static gboolean idle_messaging(gpointer p);
 static void progress_bar_set_text(const char *text);
 static void progress_bar_set_percent(double percent);
 
+static const gchar *checking_css_filename() {
+	printf("Checking GTK version ... GTK-%d.%d\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION);
+	if ((GTK_MAJOR_VERSION >= 3) && (GTK_MINOR_VERSION >= 20))
+		return "gtk.css";
+	else if ((GTK_MAJOR_VERSION >= 3) && (GTK_MINOR_VERSION < 20))
+		return "gtk_old.css";
+	else {
+		return NULL;
+	}
+}
+
 void load_css_style_sheet (char *original, char *path) {
 	GtkCssProvider *css_provider;
 	GdkDisplay *display;
 	GdkScreen *screen;
 	GFile *source, *dest;
 	gchar *CSSFile, *DefaultFile;
+	const gchar *css_filename;
 	gboolean OK;
 
-	CSSFile = g_build_filename (path, CSS_FILE, NULL);
+	css_filename = checking_css_filename();
+	if (css_filename == NULL) {
+		printf("The version of GTK does not match requirements: (GTK-%d.%d)\n", GTK_MAJOR_VERSION, GTK_MINOR_VERSION);
+		exit(1);
+	}
+
+	CSSFile = g_build_filename (path, css_filename, NULL);
 	if (!g_file_test (CSSFile, G_FILE_TEST_EXISTS)) {
-		DefaultFile = g_build_filename (original, CSS_FILE, NULL);
+		DefaultFile = g_build_filename (original, css_filename, NULL);
 		source = g_file_new_for_path (DefaultFile);
 		dest = g_file_new_for_path (CSSFile);
 		OK = g_file_copy (source, dest, G_FILE_COPY_OVERWRITE,
@@ -5914,11 +5930,19 @@ void on_darkThemeCheck_toggled(GtkToggleButton *togglebutton, gpointer user_data
 void on_button_reset_css_clicked (GtkButton *button, gpointer user_data) {
 	gchar *homepath, *cssfile;
 	GString *homeStr;
+	const gchar *css_filename;
+
+	css_filename = checking_css_filename();
+	if (css_filename == NULL) {
+		printf("The version of GTK does not match requirements: (GTK-%d.%d)\n",
+				GTK_MAJOR_VERSION, GTK_MINOR_VERSION);
+		exit(1);
+	}
 
 	homepath = getenv("HOME");
 	homeStr = g_string_new(homepath);
 	g_string_append(homeStr, "/."PACKAGE"/");
-	g_string_append(homeStr, CSS_FILE);
+	g_string_append(homeStr, css_filename);
 	cssfile = g_string_free(homeStr, FALSE);
 	remove(cssfile);
 	g_free(cssfile);

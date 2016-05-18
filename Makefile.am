@@ -13,6 +13,7 @@ install-data-local:
 	  done \
 	fi
 	$(INSTALL_DATA) src/gui/siril3.glade $(DESTDIR)$(pkgdatadir)
+	$(INSTALL_DATA) src/gui/gtk_old.css $(DESTDIR)$(pkgdatadir)
 	$(INSTALL_DATA) src/gui/gtk.css $(DESTDIR)$(pkgdatadir)
 	$(mkinstalldirs) $(DESTDIR)$(docdir)
 	$(INSTALL_DATA) AUTHORS LICENSE $(DESTDIR)$(docdir)
