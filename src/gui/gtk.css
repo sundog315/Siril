@@ -2,6 +2,10 @@ textview {
         font-family: monospace;
 }
 
+.main-toolbar button {
+	padding: 6px;
+}
+
 #histoToolRed label {
         font-weight: bold;
         color: red;

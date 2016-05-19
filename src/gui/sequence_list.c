@@ -136,11 +136,11 @@ void show_seqlist(GtkWidget *widget, gboolean show) {
 	gtk_paned_set_position(GTK_PANED(widget), show ? 200 : 0);
 }
 
-void on_toggle_show_seqlist_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
+void on_toggle_show_seqlist_toggled(GtkToggleToolButton *togglebutton, gpointer user_data) {
 	static GtkWidget *paned = NULL;
 	if (!paned)
 		paned = lookup_widget("paned1");
-	show_seqlist(paned, gtk_toggle_button_get_active(togglebutton));
+	show_seqlist(paned, gtk_toggle_tool_button_get_active(togglebutton));
 }
 
 int get_image_index_from_path(GtkTreePath *path) {

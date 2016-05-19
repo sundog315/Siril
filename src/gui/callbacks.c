@@ -1045,8 +1045,8 @@ void remap(int vport) {
 	/* Siril's FITS are stored bottom to top, so mapping needs to revert data order */
 	dst = com.graybuf[vport];
 
-	color = gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("colormap_button")));
+	color = gtk_toggle_tool_button_get_active(
+			GTK_TOGGLE_TOOL_BUTTON(lookup_widget("colormap_button")));
 
 	if (color == RAINBOW_COLOR)
 		make_index_for_rainbow(rainbow_index);
@@ -2666,7 +2666,7 @@ void on_radiobutton_user_toggled(GtkToggleButton *togglebutton,
 	}
 }
 
-void on_neg_button_clicked(GtkButton *button, gpointer user_data) {
+void on_neg_button_clicked(GtkToolButton *button, gpointer user_data) {
 	int tmp;
 	static GtkToggleButton *chainedbutton = NULL;
 	gboolean is_chained;
@@ -2714,7 +2714,7 @@ void on_neg_button_clicked(GtkButton *button, gpointer user_data) {
 	set_cursor_waiting(FALSE);
 }
 
-void on_colormap_button_toggled(GtkToggleButton *togglebutton,
+void on_colormap_button_toggled(GtkToggleToolButton *togglebutton,
 		gpointer user_data) {
 	set_cursor_waiting(TRUE);
 	redraw(com.cvport, REMAP_ALL);
@@ -2736,7 +2736,7 @@ void on_checkchain_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
 		redraw(com.cvport, REMAP_ALL);
 }
 
-void on_mirrorx_button_clicked(GtkButton *button, gpointer user_data) {
+void on_mirrorx_button_clicked(GtkToolButton *button, gpointer user_data) {
 	set_cursor_waiting(TRUE);
 	mirrorx(&gfit, TRUE);
 	redraw(com.cvport, REMAP_ALL);
@@ -2744,7 +2744,7 @@ void on_mirrorx_button_clicked(GtkButton *button, gpointer user_data) {
 	set_cursor_waiting(FALSE);
 }
 
-void on_mirrory_button_clicked(GtkButton *button, gpointer user_data) {
+void on_mirrory_button_clicked(GtkToolButton *button, gpointer user_data) {
 	set_cursor_waiting(TRUE);
 	mirrory(&gfit, TRUE);
 	redraw(com.cvport, REMAP_ALL);
@@ -3651,7 +3651,7 @@ void hide_rgb_window() {
 	gtk_widget_hide(lookup_widget("rgb_window"));
 }
 
-void toggle_histogram_window_visibility(GtkButton *button, gpointer user_data) {
+void toggle_histogram_window_visibility(GtkToolButton *button, gpointer user_data) {
 	GtkWidget *window = lookup_widget("histogram_window");
 	set_cursor_waiting(TRUE);
 	compute_histo_for_gfit(1);// it needs to be forced in the case where operation like background extraction have been done

@@ -273,6 +273,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	/* load the css sheet for general style */
+
 	homepath = getenv("HOME");
 	homeStr = g_string_new (homepath);
 	g_string_append(homeStr, "/."PACKAGE"/");
