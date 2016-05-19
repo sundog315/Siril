@@ -884,6 +884,7 @@ enter a visible wavelength in nm</property>
   <object class="GtkImage" id="rotate90-acw">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="tooltip_text" translatable="yes">Rotate 90 degrees, counter-clockwise</property>
     <property name="pixbuf">pixmaps/rotate-acw.svg</property>
   </object>
   <object class="GtkImage" id="rotate90-cw">
@@ -1203,7 +1204,7 @@ enter a visible wavelength in nm</property>
                   <object class="GtkLabel" id="label_layer1">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Red layer</property>
+                    <property name="label" translatable="yes">Red channel</property>
                     <property name="justify">center</property>
                   </object>
                   <packing>
@@ -1356,7 +1357,7 @@ enter a visible wavelength in nm</property>
                   <object class="GtkLabel" id="label_layer2">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Green layer</property>
+                    <property name="label" translatable="yes">Green channel</property>
                     <property name="justify">center</property>
                   </object>
                   <packing>
@@ -1511,7 +1512,7 @@ enter a visible wavelength in nm</property>
                   <object class="GtkLabel" id="label_layer3">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Blue layer</property>
+                    <property name="label" translatable="yes">Blue channel</property>
                     <property name="justify">center</property>
                   </object>
                   <packing>
@@ -1552,6 +1553,7 @@ enter a visible wavelength in nm</property>
                     <property name="name">rotate90_clock_button</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
+                    <property name="tooltip_text" translatable="yes">Rotate 90 degrees, clockwise</property>
                     <property name="use_underline">True</property>
                     <property name="label_widget">rotate90-cw</property>
                     <signal name="clicked" handler="on_menuitem_rotation90_activate" swapped="no"/>
