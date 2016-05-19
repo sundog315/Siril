@@ -976,7 +976,8 @@ gboolean on_color_button_motion_event(GtkWidget *widget, GdkEventMotion *event, 
 		v -= event->y / 600.0;
 		while (h < 0.0) h += 1.0;
 		while (h > 1.0) h -= 1.0;
-		if (v < 0.0) v = 0.0; if (v > 1.0) v = 1.0;
+		if (v < 0.0) v = 0.0;
+		if (v > 1.0) v = 1.0;
 		hsv_to_rgb(h,s,v, &layers[current_layer_color_choosing]->color.red,
 				&layers[current_layer_color_choosing]->color.green,
 				&layers[current_layer_color_choosing]->color.blue);

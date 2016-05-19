@@ -82,8 +82,7 @@ int main(int argc, char *argv[]) {
 	int i;
 	extern char *optarg;
 	extern int opterr;
-	GString *homeStr;
-	gchar *homepath, *siril_path;
+	gchar *siril_path;
 	char *cwd_orig = NULL;
 	struct sigaction sigIntHandler;
 #if (defined(__APPLE__) && defined(__MACH__))
@@ -258,6 +257,9 @@ int main(int argc, char *argv[]) {
 	/* initialize sequence-related stuff */
 	initialize_sequence(&com.seq, TRUE);
 	adjust_sellabel();
+	
+	/* load the css sheet for general style */
+	load_css_style_sheet (siril_path);
 
 	/* set default CWD and load init file */
 	com.wd = malloc(PATH_MAX + 1);// PATH_MAX may not be available on all systems
@@ -271,10 +273,6 @@ int main(int argc, char *argv[]) {
 		siril_log_message("could not load or create settings file in ~/.siril, exiting.\n");
 		exit(1);
 	}
-	
-	/* load the css sheet for general style */
-
-	load_css_style_sheet (siril_path);
 
 	/* initialize preprocessing */
 	initialize_preprocessing();

@@ -98,10 +98,8 @@ void load_css_style_sheet (char *path) {
 	GtkCssProvider *css_provider;
 	GdkDisplay *display;
 	GdkScreen *screen;
-	GFile *source, *dest;
-	gchar *CSSFile, *DefaultFile;
+	gchar *CSSFile;
 	const gchar *css_filename;
-	gboolean OK;
 
 	css_filename = checking_css_filename();
 	if (css_filename == NULL) {
@@ -111,7 +109,7 @@ void load_css_style_sheet (char *path) {
 
 	CSSFile = g_build_filename (path, css_filename, NULL);
 	if (!g_file_test (CSSFile, G_FILE_TEST_EXISTS)) {
-		g_error ("Unable to create CSS style sheet file: %s. Please reinstall %s\n", CSSFile, PACKAGE);
+		g_error ("Unable to load CSS style sheet file: %s. Please reinstall %s\n", CSSFile, PACKAGE);
 	}
 	else {
 		css_provider = gtk_css_provider_new();
@@ -120,12 +118,11 @@ void load_css_style_sheet (char *path) {
 		gtk_style_context_add_provider_for_screen(screen,
 				GTK_STYLE_PROVIDER(css_provider),
 				GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-		if (g_file_test(CSSFile, G_FILE_TEST_EXISTS))
-			gtk_css_provider_load_from_path(css_provider, CSSFile, NULL);
+		gtk_css_provider_load_from_path(css_provider, CSSFile, NULL);
 		fprintf(stdout, "Successfully loaded '%s'\n", CSSFile);
-		g_free(CSSFile);
 		g_object_unref (css_provider);
 	}
+	g_free(CSSFile);
 }
 
 void initialize_shortcuts() {
