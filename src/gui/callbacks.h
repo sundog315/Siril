@@ -5,7 +5,7 @@
 #include <sys/time.h>
 #include "core/siril.h"	// for sequence
 
-void load_css_style_sheet (char *original, char *path);
+void load_css_style_sheet (char *path);
 void initialize_shortcuts();
 void fill_about_dialog();
 void refresh_GUI();

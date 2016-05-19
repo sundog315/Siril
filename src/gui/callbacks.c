@@ -94,7 +94,7 @@ static const gchar *checking_css_filename() {
 	}
 }
 
-void load_css_style_sheet (char *original, char *path) {
+void load_css_style_sheet (char *path) {
 	GtkCssProvider *css_provider;
 	GdkDisplay *display;
 	GdkScreen *screen;
@@ -111,26 +111,21 @@ void load_css_style_sheet (char *original, char *path) {
 
 	CSSFile = g_build_filename (path, css_filename, NULL);
 	if (!g_file_test (CSSFile, G_FILE_TEST_EXISTS)) {
-		DefaultFile = g_build_filename (original, css_filename, NULL);
-		source = g_file_new_for_path (DefaultFile);
-		dest = g_file_new_for_path (CSSFile);
-		OK = g_file_copy (source, dest, G_FILE_COPY_OVERWRITE,
-					  NULL, NULL, NULL, NULL);
-		g_free (DefaultFile);
-		if (!OK)
-			g_error ("Unable to create CSS style sheet file: %s. Please reinstall %s\n", CSSFile, PACKAGE);
+		g_error ("Unable to create CSS style sheet file: %s. Please reinstall %s\n", CSSFile, PACKAGE);
 	}
-
-	css_provider = gtk_css_provider_new ();
-	display = gdk_display_get_default ();
-	screen = gdk_display_get_default_screen (display);
-	gtk_style_context_add_provider_for_screen (screen,
-									   GTK_STYLE_PROVIDER (css_provider),
-									   GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-	if (g_file_test (CSSFile, G_FILE_TEST_EXISTS))
-		gtk_css_provider_load_from_path (css_provider, CSSFile, NULL);
-	g_free (CSSFile);
-	g_object_unref (css_provider);
+	else {
+		css_provider = gtk_css_provider_new();
+		display = gdk_display_get_default();
+		screen = gdk_display_get_default_screen(display);
+		gtk_style_context_add_provider_for_screen(screen,
+				GTK_STYLE_PROVIDER(css_provider),
+				GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+		if (g_file_test(CSSFile, G_FILE_TEST_EXISTS))
+			gtk_css_provider_load_from_path(css_provider, CSSFile, NULL);
+		fprintf(stdout, "Successfully loaded '%s'\n", CSSFile);
+		g_free(CSSFile);
+		g_object_unref (css_provider);
+	}
 }
 
 void initialize_shortcuts() {

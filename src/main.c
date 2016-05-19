@@ -83,7 +83,7 @@ int main(int argc, char *argv[]) {
 	extern char *optarg;
 	extern int opterr;
 	GString *homeStr;
-	gchar *homepath, *csspath, *siril_path;
+	gchar *homepath, *siril_path;
 	char *cwd_orig = NULL;
 	struct sigaction sigIntHandler;
 #if (defined(__APPLE__) && defined(__MACH__))
@@ -274,14 +274,7 @@ int main(int argc, char *argv[]) {
 	
 	/* load the css sheet for general style */
 
-	homepath = getenv("HOME");
-	homeStr = g_string_new (homepath);
-	g_string_append(homeStr, "/."PACKAGE"/");
-	csspath = g_string_free (homeStr, FALSE);
-
-	load_css_style_sheet (siril_path, csspath);
-
-	g_free(csspath);
+	load_css_style_sheet (siril_path);
 
 	/* initialize preprocessing */
 	initialize_preprocessing();
