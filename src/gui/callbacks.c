@@ -4989,7 +4989,7 @@ void on_process_starfinder_button_clicked(GtkButton *button, gpointer user_data)
 	if (gfit.naxes[2] == 3)
 		layer = GLAYER;
 	delete_selected_area();
-	com.stars = peaker(&gfit, layer, &sf);
+	com.stars = peaker(&gfit, layer, &sf, NULL);
 	refresh_stars_list(com.stars);
 	set_cursor_waiting(FALSE);
 }

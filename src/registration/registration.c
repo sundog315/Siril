@@ -553,7 +553,13 @@ int register_star_alignment(struct registration_args *args) {
 		return 1;
 	}
 	siril_log_color_message("Reference Image:\n", "green");
-	com.stars = peaker(&fit, args->layer, &sf);
+
+	if ((com.selection.w != 0) && (com.selection.h != 0) && args->matchSelection) {
+		com.stars = peaker(&fit, args->layer, &sf, &com.selection);
+	}
+	else {
+		com.stars = peaker(&fit, args->layer, &sf, NULL);
+	}
 	if (sf.nb_stars < AT_MATCH_MINPAIRS) {
 		siril_log_message(
 				"There are not enough stars in reference image to perform alignment\n");
@@ -617,7 +623,7 @@ int register_star_alignment(struct registration_args *args) {
 				int nbpoints;
 
 				if (frame != ref_image) {
-					stars = peaker(&fit, args->layer, &sf);
+					stars = peaker(&fit, args->layer, &sf, NULL);
 					if (sf.nb_stars < AT_MATCH_MINPAIRS) {
 						siril_log_message(
 								"Not enough stars. Image %d skipped\n", frame);
@@ -1021,7 +1027,7 @@ void on_seqregister_button_clicked(GtkButton *button, gpointer user_data) {
 	struct registration_args *reg_args;
 	struct registration_method *method;
 	char *msg;
-	GtkToggleButton *regall, *follow;
+	GtkToggleButton *regall, *follow, *matchSel;
 	GtkComboBox *cbbt_layers;
 
 	if (get_thread_run()) {
@@ -1050,8 +1056,10 @@ void on_seqregister_button_clicked(GtkButton *button, gpointer user_data) {
 	reg_args->seq = &com.seq;
 	regall = GTK_TOGGLE_BUTTON(lookup_widget("regallbutton"));
 	follow = GTK_TOGGLE_BUTTON(lookup_widget("followStarCheckButton"));
+	matchSel = GTK_TOGGLE_BUTTON(lookup_widget("checkStarSelect"));
 	reg_args->process_all_frames = gtk_toggle_button_get_active(regall);
 	reg_args->follow_star = gtk_toggle_button_get_active(follow);
+	reg_args->matchSelection = gtk_toggle_button_get_active(matchSel);
 	/* getting the selected registration layer from the combo box. The value is the index
 	 * of the selected line, and they are in the same order than layers so there should be
 	 * an exact matching between the two */

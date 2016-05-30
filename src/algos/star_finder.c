@@ -96,9 +96,13 @@ static void get_structure(starFinder *sf) {
  */
 
 /* returns a NULL-ended array of FWHM info */
-fitted_PSF **peaker(fits *fit, int layer, starFinder *sf) {
+fitted_PSF **peaker(fits *fit, int layer, starFinder *sf, rectangle *area) {
 	int nx = fit->rx;
 	int ny = fit->ry;
+	int areaX0 = 0;
+	int areaY0 = 0;
+	int areaX1 = nx;
+	int areaY1 = ny;
 	int y, k, nbstars = 0;
 	double bg;
 	WORD threshold, norm;
@@ -155,10 +159,17 @@ fitted_PSF **peaker(fits *fit, int layer, starFinder *sf) {
 	for (k = 0; k < ny; k++)
 		real_image[ny - k - 1] = fit->pdata[layer] + k * nx;
 
+	if (area) {
+		areaX0 = area->x;
+		areaY0 = area->y;
+		areaX1 = area->w + areaX0;
+		areaY1 = area->h + areaY0;
+	}
+
 #pragma omp parallel for num_threads(com.max_thread) private(y) schedule(static)
-	for (y = sf->radius; y < ny - sf->radius; y++) {
+	for (y = sf->radius + areaY0; y < areaY1 - sf->radius; y++) {
 		int x;
-		for (x = sf->radius; x < nx - sf->radius; x++) {
+		for (x = sf->radius + areaX0; x < areaX1 - sf->radius; x++) {
 			WORD pixel = wave_image[y][x];
 			if (pixel > threshold && pixel < norm) {
 				int yy, xx;

@@ -11725,9 +11725,11 @@ When processing images, registration data is taken from the default layer if ava
                       <object class="GtkCheckButton" id="checkStarSelect">
                         <property name="label" translatable="yes">Match stars in selection</property>
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
+                        <property name="sensitive">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">Check this box if you want to perform the Global Star Alignment algorithm within the selected area in the reference image. If no selection are done, this option is ignored.
+Warning: Make sure to draw a selection with a sufficient number of stars.</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
@@ -11787,7 +11789,7 @@ When processing images, registration data is taken from the default layer if ava
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Use this option to use the position of the star found in the previous image as new centre for the current image registration. This allows the selection area to be smaller, registration faster, and accounts for drift or images with a large number of stars.
-Warning: enabling this option requries the registration to not be parallelized, it will run on one CPU core only.</property>
+Warning: enabling this option requires the registration to not be parallelized, it will run on one CPU core only.</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>

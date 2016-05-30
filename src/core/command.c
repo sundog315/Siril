@@ -954,7 +954,7 @@ int process_findstar(int nb){
 	if (!single_image_is_loaded()) return 0;
 	if (isrgb(&gfit)) layer = GLAYER;
 	delete_selected_area();
-	com.stars = peaker(&gfit, layer, &sf);
+	com.stars = peaker(&gfit, layer, &sf, NULL);
 	refresh_stars_list(com.stars);
 	return 0;
 }
