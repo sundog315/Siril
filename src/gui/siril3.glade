@@ -10843,6 +10843,7 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                           <item>FITS</item>
                           <item>SER</item>
                           <item>GIF</item>
+                          <item>AVI</item>
                         </items>
                         <signal name="changed" handler="on_comboExport_changed" swapped="no"/>
                       </object>
@@ -10887,6 +10888,7 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                         <property name="tooltip_text" translatable="yes">Activate image normalisation for the export. This will make all images the same brightness and is thus recommended for sequences with inconsistent exposures or pixel values.
 A first computation pass will be done on all images before exporting, it may take some time, only the first export of a sequence.
 			</property>
+                        <property name="halign">center</property>
                         <property name="vexpand">True</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
@@ -10919,6 +10921,7 @@ A first computation pass will be done on all images before exporting, it may tak
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip_text" translatable="yes">Delay between frames in the GIF animation, in centiseconds. Default, is 10cs, so 100ms.</property>
+                            <property name="valign">center</property>
                             <property name="width_chars">4</property>
                             <property name="text" translatable="yes">10</property>
                             <property name="input_purpose">number</property>
@@ -10948,6 +10951,7 @@ A first computation pass will be done on all images before exporting, it may tak
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="tooltip_text" translatable="yes">The number of loops to do, between 0 and 511. This does not change the size of the output GIF file.</property>
+                            <property name="valign">center</property>
                             <property name="width_chars">3</property>
                             <property name="text" translatable="yes">3</property>
                           </object>
@@ -10963,6 +10967,107 @@ A first computation pass will be done on all images before exporting, it may tak
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="boxAviOptions">
+                        <property name="can_focus">False</property>
+                        <child>
+                          <object class="GtkLabel" id="label68">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">Fps:</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entryAviFps">
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">Delay between frames in the GIF animation, in centiseconds. Default, is 10cs, so 100ms.</property>
+                            <property name="valign">center</property>
+                            <property name="width_chars">4</property>
+                            <property name="text" translatable="yes">10</property>
+                            <property name="input_purpose">number</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="padding">4</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkCheckButton" id="checkAviResize">
+                            <property name="label" translatable="yes">Resize output</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">True</property>
+                            <property name="receives_default">False</property>
+                            <property name="halign">center</property>
+                            <property name="draw_indicator">True</property>
+                            <signal name="toggled" handler="on_checkAviResize_toggled" swapped="no"/>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">2</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entryAviWidth">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">Width of output video</property>
+                            <property name="valign">center</property>
+                            <property name="width_chars">5</property>
+                            <property name="text" translatable="yes">640</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="padding">4</property>
+                            <property name="position">4</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkLabel" id="label172">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="label" translatable="yes">x</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">5</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkEntry" id="entryAviHeight">
+                            <property name="visible">True</property>
+                            <property name="sensitive">False</property>
+                            <property name="can_focus">True</property>
+                            <property name="tooltip_text" translatable="yes">Height of output video</property>
+                            <property name="valign">center</property>
+                            <property name="width_chars">5</property>
+                            <property name="text" translatable="yes">480</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">False</property>
+                            <property name="padding">4</property>
+                            <property name="position">6</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </object>
@@ -11725,7 +11830,6 @@ When processing images, registration data is taken from the default layer if ava
                       <object class="GtkCheckButton" id="checkStarSelect">
                         <property name="label" translatable="yes">Match stars in selection</property>
                         <property name="visible">True</property>
-                        <property name="sensitive">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Check this box if you want to perform the Global Star Alignment algorithm within the selected area in the reference image. If no selection are done, this option is ignored.

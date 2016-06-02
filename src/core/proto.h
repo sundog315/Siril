@@ -6,6 +6,7 @@
 #endif
 #include <fftw3.h>
 #include <gsl/gsl_histogram.h>
+#include <stdint.h>
 
 #ifdef HAVE_LIBTIFF
 #include <tiffio.h>
@@ -104,6 +105,7 @@ int	round_to_int(double x);
 WORD	round_to_WORD(double x);
 BYTE	round_to_BYTE(double x);
 BYTE	conv_to_BYTE(double x);
+uint8_t *fits_to_uint8(fits *fit);
 gboolean isrgb(fits *fit);
 gboolean ends_with(const char *str, const char *ending);
 int	get_extension_index(const char *filename);

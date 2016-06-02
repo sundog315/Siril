@@ -43,6 +43,10 @@
 #if defined(HAVE_FFMS2_1) || defined(HAVE_FFMS2_2)
 #include "io/films.h"
 #endif
+#ifdef HAVE_OPENCV
+#include "opencv/opencv.h"
+#endif
+#include "io/avi_pipp/avi_writer.h"
 #include "io/single_image.h"
 #include "gui/histogram.h"
 #include "algos/PSF.h"
@@ -1170,12 +1174,16 @@ struct exportseq_args {
 	int convflags;
 	gboolean normalize;
 	int gif_delay, gif_loops;
+	double avi_fps;
+	gboolean resize;
+	int32_t avi_width, avi_height;
 };
 
 gpointer export_sequence(gpointer ptr) {
 	int i, x, y, nx, ny, shiftx, shifty, layer, retval = 0, reglayer, nb_layers, skipped;
 	float cur_nb = 0.f, nb_frames;
 	unsigned int nbdata = 0;
+	uint8_t *data;
 	fits fit, destfit;
 	char filename[256], dest[256];
 	struct ser_struct *ser_file = NULL;
@@ -1197,6 +1205,35 @@ gpointer export_sequence(gpointer ptr) {
 		if (ser_create_file(dest, ser_file, TRUE, NULL))
 			siril_log_message("Creating the SER file failed, aborting.\n");
 	}
+	else if (args->convflags == TYPEAVI){
+		snprintf(dest, 256, "%s.avi", args->basename);
+		int32_t width;
+		int32_t height;
+		int32_t mode;
+
+		switch(args->seq->nb_layers) {
+		case 1:
+			mode = AVI_WRITER_INPUT_FORMAT_MONOCHROME;
+			break;
+		default:
+			mode = AVI_WRITER_INPUT_FORMAT_COLOUR;
+		}
+		if (args->resize) {
+			width = args->avi_width;
+			height = args->avi_height;
+			if ((width > args->seq->rx) || (height > args->seq->ry)) {
+				siril_log_message("Size cannot be larger than original\n");
+				retval = -4;
+				goto free_and_reset_progress_bar;
+			}
+		}
+		else {
+			width  = (int32_t) args->seq->rx;
+			height = (int32_t) args->seq->ry;
+		}
+
+		avi_file_create(dest, width, height, mode, AVI_WRITER_CODEC_DIB, args->avi_fps);
+}
 	else if (args->convflags == TYPEGIF) {
 #ifdef HAVE_LIBGIF
 		snprintf(giffilename, 256, "%s.gif", args->basename);
@@ -1320,25 +1357,39 @@ gpointer export_sequence(gpointer ptr) {
 
 
 		switch (args->convflags) {
-			case TYPEFITS:
-				snprintf(dest, 255, "%s%05d%s", args->basename, i, com.ext);
-				if (savefits(dest, &destfit)) {
-					retval = -1;
-					goto free_and_reset_progress_bar;
-				}
-				break;
-			case TYPESER:
-				if (ser_write_frame_from_fit(ser_file, &destfit, i - skipped))
-					siril_log_message("Error while converting to SER (no space left?)\n");
-				break;
-			case TYPEGIF:
+		case TYPEFITS:
+			snprintf(dest, 255, "%s%05d%s", args->basename, i, com.ext);
+			if (savefits(dest, &destfit)) {
+				retval = -1;
+				goto free_and_reset_progress_bar;
+			}
+			break;
+		case TYPESER:
+			if (ser_write_frame_from_fit(ser_file, &destfit, i - skipped))
+				siril_log_message(
+						"Error while converting to SER (no space left?)\n");
+			break;
+		case TYPEGIF:
 #ifdef HAVE_LIBGIF
-				if (savegif(giffilename, &destfit, 1, &gif, args->gif_delay, args->gif_loops)) {
-					retval = -1;
-					goto free_and_reset_progress_bar;
-				}
+			if (savegif(giffilename, &destfit, 1, &gif, args->gif_delay,
+					args->gif_loops)) {
+				retval = -1;
+				goto free_and_reset_progress_bar;
+			}
 #endif
-				break;
+			break;
+		case TYPEAVI:
+			if (args->resize) {
+#ifdef HAVE_OPENCV
+				cvResizeGaussian(&destfit, args->avi_width, args->avi_height, 0);
+#else
+				siril_log_message("Siril needs opencv to resize images\n");
+#endif
+			}
+			data = fits_to_uint8(&destfit);
+			avi_file_write_frame(0, data);
+			free(data);
+			break;
 		}
 		cur_nb += 1.f;
 		set_progress_bar_data(NULL, cur_nb / nb_frames);
@@ -1357,6 +1408,9 @@ free_and_reset_progress_bar:
 	if (args->convflags == TYPESER) {
 		ser_write_and_close(ser_file);
 		free(ser_file);
+	}
+	else if (args->convflags == TYPEAVI) {
+		avi_file_close(0);
 	}
 #ifdef HAVE_LIBGIF
 	else if (args->convflags == TYPEGIF) {
@@ -1384,10 +1438,11 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 	int selected = gtk_combo_box_get_active(GTK_COMBO_BOX(lookup_widget("comboExport")));
 	const char *bname = gtk_entry_get_text(GTK_ENTRY(lookup_widget("entryExportSeq")));
 	struct exportseq_args *args;
-	GtkToggleButton *exportNormalize;
+	GtkToggleButton *exportNormalize, *checkResize;
 #ifdef HAVE_LIBGIF
 	GtkEntry *delayEntry, *loopsEntry;
 #endif
+	GtkEntry *fpsEntry, *widthEntry, *heightEntry;
 
 	if (bname[0] == '\0') return;
 	if (selected == -1) return;
@@ -1418,6 +1473,17 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 			return;
 #endif
 			break;
+		case 3:
+			fpsEntry = GTK_ENTRY(lookup_widget("entryAviFps"));
+			args->avi_fps = atoi(gtk_entry_get_text(fpsEntry));
+			widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
+			args->avi_width = atof(gtk_entry_get_text(widthEntry));
+			heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
+			args->avi_height = atof(gtk_entry_get_text(heightEntry));
+			checkResize = GTK_TOGGLE_BUTTON(lookup_widget("checkAviResize"));
+			args->resize = gtk_toggle_button_get_active(checkResize);
+			args->convflags = TYPEAVI;
+			break;
 	}
 	set_cursor_waiting(TRUE);
 	start_in_new_thread(export_sequence, args);
@@ -1425,6 +1491,21 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 
 void on_comboExport_changed(GtkComboBox *box, gpointer user_data) {
 	GtkWidget *gif_options = lookup_widget("boxGifOptions");
+	GtkWidget *avi_options = lookup_widget("boxAviOptions");
+	GtkWidget *checkAviResize = lookup_widget("checkAviResize");
 	gtk_widget_set_visible(gif_options, 2 == gtk_combo_box_get_active(box));
+	gtk_widget_set_visible(avi_options, 3 == gtk_combo_box_get_active(box));
+#ifdef HAVE_OPENCV
+	gtk_widget_set_sensitive(checkAviResize, FALSE); // not available yet because resizing image crashes
+#else
+	gtk_widget_set_sensitive(checkAviResize, FALSE);
+#endif
+}
+
+void on_checkAviResize_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
+	GtkWidget *heightEntry = lookup_widget("entryAviWidth");
+	GtkWidget *widthEntry = lookup_widget("entryAviHeight");
+	gtk_widget_set_sensitive(heightEntry, gtk_toggle_button_get_active(togglebutton));
+	gtk_widget_set_sensitive(widthEntry, gtk_toggle_button_get_active(togglebutton));
 }
 
