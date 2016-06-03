@@ -36,8 +36,6 @@ fi
 CFLAGS="$CFLAGS $OPENMP_CFLAGS"
 CXXFLAGS="$CFLAGS"
 
-AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"])
-
 if test `uname` != "Darwin"; then
 	LDFLAGS="$LDFLAGS -rdynamic"
 fi
@@ -51,7 +49,7 @@ dnl     AC_DEFINE_UNQUOTED(PACKAGE_DATA_DIR, "${prefix}/share/${PACKAGE}", [Pack
 dnl   fi
 dnl else
 dnl   AC_DEFINE_UNQUOTED(PACKAGE_DATA_DIR, "${datadir}/${PACKAGE}", [Package data dir3])
-dnl fi
+dnl fi[]
 
 dnl Set PACKAGE_SOURCE_DIR in config.h.
 packagesrcdir=`cd $srcdir && pwd`
@@ -125,15 +123,19 @@ if test -n "$CXX" && ( test "X$CXX" != "Xno" &&
 		      ( (test "X$CXX" = "Xg++" && `g++ -v >/dev/null 2>&1` ) ||
 		      (test "X$CXX" != "Xg++"))) ; then
 	AC_PROG_CXXCPP
+	AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"], AC_MSG_ERROR([Compiler does not accept ISO C++11]))
+	
 	dnl AC_MSG_WARN(CXX is "$CXX")
 	dnl http://nerdland.net/2009/07/detecting-c-libraries-with-autotools/ solution 2
 	PKG_CHECK_MODULES([OPENCV], [opencv >= 2.0],
 			  [AC_DEFINE([HAVE_OPENCV], [1], [Using OpenCV])]
 			  [OPENCV_LIBS="-lopencv_core -lopencv_imgproc"],
 			  AC_MSG_WARN([opencv not found. Not using some image processing.]))
+
 else
 	AC_MSG_WARN([no C++ compiler found, opencv cannot be used])
 fi
+
 AM_CONDITIONAL(HAVE_OPENCV, [test "x$OPENCV_LIBS" != "x"])
 
 dnl if test "x$CXX" = "xno"; then
