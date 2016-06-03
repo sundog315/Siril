@@ -49,7 +49,7 @@ dnl     AC_DEFINE_UNQUOTED(PACKAGE_DATA_DIR, "${prefix}/share/${PACKAGE}", [Pack
 dnl   fi
 dnl else
 dnl   AC_DEFINE_UNQUOTED(PACKAGE_DATA_DIR, "${datadir}/${PACKAGE}", [Package data dir3])
-dnl fi[]
+dnl fi
 
 dnl Set PACKAGE_SOURCE_DIR in config.h.
 packagesrcdir=`cd $srcdir && pwd`
@@ -123,7 +123,15 @@ if test -n "$CXX" && ( test "X$CXX" != "Xno" &&
 		      ( (test "X$CXX" = "Xg++" && `g++ -v >/dev/null 2>&1` ) ||
 		      (test "X$CXX" != "Xg++"))) ; then
 	AC_PROG_CXXCPP
-	AX_CHECK_COMPILE_FLAG([-std=c++11], [CXXFLAGS="$CXXFLAGS -std=c++11"], AC_MSG_ERROR([Compiler does not accept ISO C++11]))
+	
+	for f in '-std=c++11' '-std=c++11 -stdlib=libc++'
+	do
+		AX_CHECK_COMPILE_FLAG([$f], [CXXFLAGS="$CXXFLAGS $f" stdpass=true], [], [],	[])
+	${stdpass-false} && break
+	done
+if ! "${stdpass-false}"; then
+	AC_MSG_ERROR([Unable to turn on C++11 mode with this compiler])
+fi
 	
 	dnl AC_MSG_WARN(CXX is "$CXX")
 	dnl http://nerdland.net/2009/07/detecting-c-libraries-with-autotools/ solution 2
