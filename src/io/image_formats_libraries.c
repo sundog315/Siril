@@ -961,16 +961,7 @@ int savegif(const char *filename, fits *fit, int anim, GifFileType **gif, int de
 		}
 	}
 
-	if (sequence_is_loaded() && !single_image_is_loaded()) {
-		hi = com.seq.layers[RLAYER].hi;
-		lo = com.seq.layers[RLAYER].lo;
-	}
-	else {
-		hi = com.uniq->layers[RLAYER].hi;
-		lo = com.uniq->layers[RLAYER].lo;
-	}
-
-	pente = UCHAR_MAX_SINGLE / (float) (hi - lo);
+	pente = computePente(&lo, &hi);
 	
 	for (i = 0; i <= USHRT_MAX; i++) {
 		map[i] = round_to_BYTE((float) i * pente);

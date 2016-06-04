@@ -371,6 +371,7 @@ int set_seq(const char *name){
 	adjust_reginfo();		// change registration displayed/editable values
 	update_gfit_histogram_if_needed();
 	adjust_sellabel();
+	fillSeqSizeExport();	// fill GtkEntry of export box
 
 	/* redraw and display image */
 	show_main_gray_window();
@@ -1179,6 +1180,30 @@ struct exportseq_args {
 	int32_t avi_width, avi_height;
 };
 
+/* Used for avi exporter */
+static uint8_t *fits_to_uint8(fits *fit) {
+	uint8_t *data;
+	int w, h, i, j, channel, step;
+	float pente;
+	WORD lo, hi;
+
+	w = fit->rx;
+	h = fit->ry;
+	channel = fit->naxes[2];
+	step = (channel == 3 ? 2 : 0);
+	pente = computePente(&lo, &hi);
+
+	data = malloc(w * h * channel * sizeof(uint8_t));
+	for (i = 0, j = 0; i < w * h * channel; i += channel, j++) {
+		data[i + step] = (uint8_t) round_to_BYTE(((double) fit->pdata[RLAYER][j] * pente));
+		if (channel > 1) {
+			data[i + 1] = (uint8_t) round_to_BYTE(((double) fit->pdata[GLAYER][j] * pente));
+			data[i + 2 - step] = (uint8_t) round_to_BYTE(((double) fit->pdata[BLAYER][j] * pente));
+		}
+	}
+	return data;
+}
+
 gpointer export_sequence(gpointer ptr) {
 	int i, x, y, nx, ny, shiftx, shifty, layer, retval = 0, reglayer, nb_layers, skipped;
 	float cur_nb = 0.f, nb_frames;
@@ -1221,11 +1246,6 @@ gpointer export_sequence(gpointer ptr) {
 		if (args->resize) {
 			width = args->avi_width;
 			height = args->avi_height;
-			if ((width > args->seq->rx) || (height > args->seq->ry)) {
-				siril_log_message("Size cannot be larger than original\n");
-				retval = -4;
-				goto free_and_reset_progress_bar;
-			}
 		}
 		else {
 			width  = (int32_t) args->seq->rx;
@@ -1379,15 +1399,24 @@ gpointer export_sequence(gpointer ptr) {
 #endif
 			break;
 		case TYPEAVI:
+			data = fits_to_uint8(&destfit);
+
 			if (args->resize) {
 #ifdef HAVE_OPENCV
-				cvResizeGaussian(&destfit, args->avi_width, args->avi_height, 0);
+				uint8_t *newdata = malloc(
+						sizeof(uint8_t) * args->avi_width * args->avi_height
+								* destfit.naxes[2]);
+				cvResizeGaussian_data8(data, destfit.rx, destfit.ry, newdata,
+						args->avi_width, args->avi_height, destfit.naxes[2], 0);
+				avi_file_write_frame(0, newdata);
+				free(newdata);
 #else
 				siril_log_message("Siril needs opencv to resize images\n");
+				avi_file_write_frame(0, data);
 #endif
 			}
-			data = fits_to_uint8(&destfit);
-			avi_file_write_frame(0, data);
+			else
+				avi_file_write_frame(0, data);
 			free(data);
 			break;
 		}
@@ -1496,15 +1525,15 @@ void on_comboExport_changed(GtkComboBox *box, gpointer user_data) {
 	gtk_widget_set_visible(gif_options, 2 == gtk_combo_box_get_active(box));
 	gtk_widget_set_visible(avi_options, 3 == gtk_combo_box_get_active(box));
 #ifdef HAVE_OPENCV
-	gtk_widget_set_sensitive(checkAviResize, FALSE); // not available yet because resizing image crashes
+	gtk_widget_set_sensitive(checkAviResize, TRUE); // not available yet because resizing image crashes
 #else
 	gtk_widget_set_sensitive(checkAviResize, FALSE);
 #endif
 }
 
 void on_checkAviResize_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
-	GtkWidget *heightEntry = lookup_widget("entryAviWidth");
-	GtkWidget *widthEntry = lookup_widget("entryAviHeight");
+	GtkWidget *heightEntry = lookup_widget("entryAviHeight");
+	GtkWidget *widthEntry = lookup_widget("entryAviWidth");
 	gtk_widget_set_sensitive(heightEntry, gtk_toggle_button_get_active(togglebutton));
 	gtk_widget_set_sensitive(widthEntry, gtk_toggle_button_get_active(togglebutton));
 }

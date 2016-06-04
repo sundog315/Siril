@@ -10890,7 +10890,6 @@ A first computation pass will be done on all images before exporting, it may tak
 			</property>
                         <property name="halign">center</property>
                         <property name="vexpand">True</property>
-                        <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>

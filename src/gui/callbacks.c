@@ -5919,24 +5919,13 @@ void on_darkThemeCheck_toggled(GtkToggleButton *togglebutton, gpointer user_data
 	com.have_dark_theme = gtk_toggle_button_get_active(togglebutton);
 }
 
-void on_button_reset_css_clicked (GtkButton *button, gpointer user_data) {
-	gchar *homepath, *cssfile;
-	GString *homeStr;
-	const gchar *css_filename;
+void fillSeqSizeExport() {
+	char width[6], height[6];
+	GtkEntry *heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
+	GtkEntry *widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
 
-	css_filename = checking_css_filename();
-	if (css_filename == NULL) {
-		printf("The version of GTK does not match requirements: (GTK-%d.%d)\n",
-				GTK_MAJOR_VERSION, GTK_MINOR_VERSION);
-		exit(1);
-	}
-
-	homepath = getenv("HOME");
-	homeStr = g_string_new(homepath);
-	g_string_append(homeStr, "/."PACKAGE"/");
-	g_string_append(homeStr, css_filename);
-	cssfile = g_string_free(homeStr, FALSE);
-	remove(cssfile);
-	g_free(cssfile);
+	sprintf(width, "%d", com.seq.rx);
+	sprintf(height, "%d", com.seq.ry);
+	gtk_entry_set_text(widthEntry, width);
+	gtk_entry_set_text(heightEntry, height);
 }
-
