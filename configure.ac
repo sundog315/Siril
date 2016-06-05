@@ -24,6 +24,9 @@ AC_PROG_CC
 AC_HEADER_STDC
 AC_OPENMP
 
+AC_LANG([C])
+AC_LANG([C++])
+
 dnl remove -g flag from default CFLAGS
 if test "x$remember_set_CFLAGS" = "x"; then
 	if test "$CFLAGS" = "-g -O2"; then
