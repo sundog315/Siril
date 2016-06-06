@@ -127,14 +127,8 @@ if test -n "$CXX" && ( test "X$CXX" != "Xno" &&
 		      (test "X$CXX" != "Xg++"))) ; then
 	AC_PROG_CXXCPP
 	
-	for f in '-std=c++11' '-std=c++11 -stdlib=libc++'
-	do
-		AX_CHECK_COMPILE_FLAG([$f], [CXXFLAGS="$CXXFLAGS $f" stdpass=true], [], [],	[])
-	${stdpass-false} && break
-	done
-if ! "${stdpass-false}"; then
-	AC_MSG_ERROR([Unable to turn on C++11 mode with this compiler])
-fi
+	dnl check for C++11 support
+	AX_CXX_COMPILE_STDCXX_11([], [mandatory])
 	
 	dnl AC_MSG_WARN(CXX is "$CXX")
 	dnl http://nerdland.net/2009/07/detecting-c-libraries-with-autotools/ solution 2
