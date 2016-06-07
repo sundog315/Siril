@@ -103,6 +103,6 @@ void fill_convert_list(GSList *list);
 void update_spinCPU(int max);
 
 
-void fillSeqSizeExport();
+void fillSeqAviExport();
 
 #endif

@@ -34,28 +34,29 @@
 #include <libgen.h>
 
 #include "core/siril.h"
-#include "io/conversion.h"
-#include "gui/callbacks.h"
 #include "core/proto.h"
-#include "algos/colors.h"
-#include "io/films.h"
-#include "core/command.h"	// for processcommand()
-#include "algos/PSF.h"
+#include "core/undo.h"
+#include "gui/callbacks.h"
 #include "gui/PSF_list.h"
-#include "algos/star_finder.h"
 #include "gui/histogram.h"
-#include "io/single_image.h"
+#include "algos/colors.h"
+#include "algos/PSF.h"
+#include "algos/star_finder.h"
+#include "algos/fft.h"
+#include "algos/Def_Wavelet.h"
+#include "algos/cosmetic_correction.h"
 #include "algos/gradient.h"
+#include "io/conversion.h"
+#include "io/films.h"
+#include "io/ser.h"
+#include "io/single_image.h"
+#include "core/command.h"	// for processcommand()
 #include "registration/registration.h"
 #include "stacking/stacking.h"
-#include "algos/fft.h"
-#include "algos/cosmetic_correction.h"
 #include "compositing/compositing.h"
 #ifdef HAVE_OPENCV
 #include "opencv/opencv.h"
 #endif
-#include "algos/Def_Wavelet.h"
-#include "core/undo.h"
 
 static enum {
 	CD_NULL, CD_INCALL, CD_EXCALL, CD_QUIT
@@ -5919,8 +5920,8 @@ void on_darkThemeCheck_toggled(GtkToggleButton *togglebutton, gpointer user_data
 	com.have_dark_theme = gtk_toggle_button_get_active(togglebutton);
 }
 
-void fillSeqSizeExport() {
-	char width[6], height[6];
+void fillSeqAviExport() {
+	char width[6], height[6], fps[7];
 	GtkEntry *heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
 	GtkEntry *widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
 
@@ -5928,4 +5929,16 @@ void fillSeqSizeExport() {
 	sprintf(height, "%d", com.seq.ry);
 	gtk_entry_set_text(widthEntry, width);
 	gtk_entry_set_text(heightEntry, height);
+	if (com.seq.type == SEQ_SER) {
+		GtkEntry *entryAviFps = GTK_ENTRY(lookup_widget("entryAviFps"));
+
+		if (com.seq.ser_file && com.seq.ser_file->fps <= 0.0) {
+			sprintf(fps, "10.000");
+		} else {
+			sprintf(fps, "%2.3lf", com.seq.ser_file->fps);
+		}
+		gtk_entry_set_text(entryAviFps, fps);
+
+	}
+
 }

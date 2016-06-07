@@ -17,6 +17,7 @@ AC_INIT([siril], [siril_version_full],
 AM_INIT_AUTOMAKE([subdir-objects])
 AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_SRCDIR([src/main.c])
+AC_CONFIG_MACRO_DIR([m4])
 
 remember_set_CFLAGS="$CFLAGS"
 
@@ -128,7 +129,9 @@ if test -n "$CXX" && ( test "X$CXX" != "Xno" &&
 	AC_PROG_CXXCPP
 	
 	dnl check for C++11 support
-	AX_CXX_COMPILE_STDCXX_11([], [mandatory])
+	m4_include([m4/ax_cxx_compile_stdcxx.m4])
+	m4_include([m4/ax_cxx_compile_stdcxx_11.m4])
+	AX_CXX_COMPILE_STDCXX_11
 	
 	dnl AC_MSG_WARN(CXX is "$CXX")
 	dnl http://nerdland.net/2009/07/detecting-c-libraries-with-autotools/ solution 2

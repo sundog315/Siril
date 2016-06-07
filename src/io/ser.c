@@ -41,23 +41,25 @@
 #include "io/ser.h"
 
 /* 62135596800 sec from year 0001 to 01 janv. 1970 00:00:00 GMT */
-const uint64_t epochTicks = 621355968000000000UL;
-const uint64_t ticksPerSecond = 10000000;
+static const uint64_t epochTicks = 621355968000000000UL;
+static const uint64_t ticksPerSecond = 10000000;
 
-int display_date(uint64_t date, char *txt) {
+static int display_date(uint64_t date, char *txt) {
 	struct tm *timeinfo;
 	char str[256];
 	time_t t_sec;
+	int32_t microsec;
 
 	if (date <= 0)
 		return -1;
 	t_sec = (time_t) (date - epochTicks) / ticksPerSecond;
+	microsec = (date - epochTicks) % ticksPerSecond;
 	if (t_sec < 0)
 		return -1;
 	timeinfo = gmtime(&t_sec);
 	strcpy(str, txt);
-	strftime(str + strlen(txt), 255, "%F %r", timeinfo);
-	puts(str);
+	strftime(str + strlen(txt), 255, "%F %R.%d", timeinfo);
+	printf("%s.%06d\n", str, microsec);
 	return 0;
 }
 
@@ -80,7 +82,7 @@ static time_t __timegm(struct tm *tm) {
 	return ret;
 }
 
-int convert_char_to_time(char *date, uint64_t *utc, uint64_t *local) {
+static int convert_char_to_time(char *date, uint64_t *utc, uint64_t *local) {
 	struct tm timeinfo = { };
 	time_t ut, t;
 
@@ -104,7 +106,7 @@ int convert_char_to_time(char *date, uint64_t *utc, uint64_t *local) {
 	return 0;
 }
 
-char *convert_color_id_to_char(ser_color color_id) {
+static char *convert_color_id_to_char(ser_color color_id) {
 	switch (color_id) {
 	case SER_MONO:
 		return "MONO";
@@ -132,27 +134,47 @@ char *convert_color_id_to_char(ser_color color_id) {
 		return "";
 	}
 }
+static int ser_read_timestamp(struct ser_struct *ser_file) {
+	int frame_size;
+	size_t ts_size;
 
-void ser_display_info(struct ser_struct *ser_file) {
-	char *color = convert_color_id_to_char(ser_file->color_id);
+	// Seek to start of timestamps
+	frame_size = ser_file->image_width * ser_file->image_height	* ser_file->number_of_planes;
+	off_t offset = SER_HEADER_LEN + (off_t) frame_size * (off_t) ser_file->byte_pixel_depth	* (off_t) ser_file->frame_count;
+	if ((off_t) -1 == lseek(ser_file->fd, offset, SEEK_SET)) {
+		return -1;
+	}
 
-	fprintf(stdout, "=========== SER file info ==============\n");
-	fprintf(stdout, "file id: %s\n", ser_file->file_id);
-	fprintf(stdout, "lu id: %d\n", ser_file->lu_id);
-	fprintf(stdout, "sensor type: %s\n", color);
-	fprintf(stdout, "image size: %d x %d (%d bits)\n", ser_file->image_width,
-			ser_file->image_height, ser_file->bit_pixel_depth);
-	fprintf(stdout, "frame count: %u\n", ser_file->frame_count);
-	fprintf(stdout, "observer: %s\n", ser_file->observer);
-	fprintf(stdout, "instrument: %s\n", ser_file->instrument);
-	fprintf(stdout, "telescope: %s\n", ser_file->telescope);
-	display_date(ser_file->date, "local time: ");
-	display_date(ser_file->date_utc, "UTC time: ");
-	fprintf(stdout, "========================================\n");
+	ts_size = ser_file->frame_count * 8;
+
+	ser_file->total_ts = calloc(1, ts_size);
+	if (ts_size == read(ser_file->fd, ser_file->total_ts, ts_size)) {
+
+		memcpy(&ser_file->ts_min, ser_file->total_ts, 8);
+		memcpy(&ser_file->ts_max,
+				ser_file->total_ts + 8 * (ser_file->frame_count - 1), 8);
+
+		uint64_t diff_ts = (ser_file->ts_max - ser_file->ts_min) / 1000.0; // Now in units of 100 us
+		if (diff_ts > 0) {
+			// There is a positive time difference between first and last timestamps
+			// We can calculate a frames per second value
+			ser_file->fps = ((double) (ser_file->frame_count - 1) * 10000)
+					/ (double) diff_ts;
+		} else {
+			// No valid frames per second value can be calculated
+			ser_file->fps = -1.0;
+			ser_file->fps = -1.0;
+		}
+	} else {
+		ser_file->fps = -1.0;
+	}
+
+	return 0;
 }
 
-int _ser_read_header(struct ser_struct *ser_file) {
+static int ser_read_header(struct ser_struct *ser_file) {
 	char header[SER_HEADER_LEN];
+
 	if (!ser_file || ser_file->fd <= 0)
 		return -1;
 	if ((off_t) -1 == lseek(ser_file->fd, 0, SEEK_SET)) {
@@ -165,7 +187,8 @@ int _ser_read_header(struct ser_struct *ser_file) {
 	}
 	// modify this to support big endian
 	memcpy(&ser_file->lu_id, header + 14, 28);	// read all integers
-	memcpy(&ser_file->date, header + 162, 16);
+	memcpy(&ser_file->date, header + 162, 8);
+	memcpy(&ser_file->date_utc, header + 170, 8);
 
 	// strings
 	ser_file->file_id = strndup(header, 14);
@@ -182,11 +205,36 @@ int _ser_read_header(struct ser_struct *ser_file) {
 		ser_file->number_of_planes = 3;
 	else ser_file->number_of_planes = 1;
 
+	ser_read_timestamp(ser_file);
+
 	return 0;
 }
 
-int ser_write_header(struct ser_struct *ser_file) {
+static int ser_write_timestamp(struct ser_struct *ser_file) {
+	int frame_size;
+	size_t ts_size;
+
+	if (ser_file->total_ts[0] != '\0') {
+		ts_size = ser_file->frame_count * 8;
+		// Seek to start of timestamps
+		frame_size = ser_file->image_width * ser_file->image_height	* ser_file->number_of_planes;
+		off_t offset = SER_HEADER_LEN
+				+ (off_t) frame_size * (off_t) ser_file->byte_pixel_depth * (off_t) ser_file->frame_count;
+		if ((off_t) -1 == lseek(ser_file->fd, offset, SEEK_SET)) {
+			return -1;
+		}
+
+		if (ts_size != write(ser_file->fd, ser_file->total_ts, ts_size)) {
+			perror("WriteTimetamps:");
+			return -1;
+		}
+	}
+	return 0;
+}
+
+static int ser_write_header(struct ser_struct *ser_file) {
 	char header[SER_HEADER_LEN];
+
 	if (!ser_file || ser_file->fd <= 0)
 		return -1;
 	if ((off_t) -1 == lseek(ser_file->fd, 0, SEEK_SET)) {
@@ -201,13 +249,60 @@ int ser_write_header(struct ser_struct *ser_file) {
 	memcpy(header + 42, ser_file->observer, 40);
 	memcpy(header + 82, ser_file->instrument, 40);
 	memcpy(header + 122, ser_file->telescope, 40);
-	memcpy(header + 162, &ser_file->date, 16);
+	memcpy(header + 162, &ser_file->date, 8);
 
 	if (sizeof(header) != write(ser_file->fd, header, sizeof(header))) {
 		perror("write");
 		return 1;
 	}
+
+	ser_write_timestamp(ser_file);
+
 	return 0;
+}
+
+/* once a buffer (data) has been acquired from the file, with frame_size pixels
+ * read in it, depending on ser_file's endianess and pixel depth, data is
+ * reorganized to match Siril's data format. */
+void ser_manage_endianess_and_depth(struct ser_struct *ser_file, WORD *data, int frame_size) {
+	WORD pixel;
+	int i;
+	if (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8) {
+		// inline conversion to 16 bit
+		for (i = frame_size - 1; i >= 0; i--)
+			data[i] = (WORD) (((BYTE*)data)[i]);
+	} else if (ser_file->little_endian) {	// TODO check if it is needed for big endian
+		// inline conversion to big endian
+		for (i = frame_size - 1; i >= 0; i--) {
+			pixel = data[i];
+			pixel = (pixel >> 8) | (pixel << 8);
+			data[i] = pixel;
+		}
+	}
+}
+
+
+/*
+ * Public functions
+ */
+
+void ser_display_info(struct ser_struct *ser_file) {
+	char *color = convert_color_id_to_char(ser_file->color_id);
+
+	fprintf(stdout, "=========== SER file info ==============\n");
+	fprintf(stdout, "file id: %s\n", ser_file->file_id);
+	fprintf(stdout, "lu id: %d\n", ser_file->lu_id);
+	fprintf(stdout, "sensor type: %s\n", color);
+	fprintf(stdout, "image size: %d x %d (%d bits)\n", ser_file->image_width,
+			ser_file->image_height, ser_file->bit_pixel_depth);
+	fprintf(stdout, "frame count: %u\n", ser_file->frame_count);
+	fprintf(stdout, "observer: %s\n", ser_file->observer);
+	fprintf(stdout, "instrument: %s\n", ser_file->instrument);
+	fprintf(stdout, "telescope: %s\n", ser_file->telescope);
+	display_date(ser_file->date, "local time: ");
+	display_date(ser_file->date_utc, "UTC time: ");
+	fprintf(stdout, "fps: %lf\n", ser_file->fps);
+	fprintf(stdout, "========================================\n");
 }
 
 int ser_write_and_close(struct ser_struct *ser_file) {
@@ -227,14 +322,15 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean 
 
 	if (copy_from) {
 		memcpy(&ser_file->lu_id, &copy_from->lu_id, 28);
-		memcpy(&ser_file->date, &copy_from->date, 16);
-		memcpy(&ser_file->date_utc, &copy_from->date_utc, 16);
+		memcpy(&ser_file->date, &copy_from->date, 8);
+		memcpy(&ser_file->date_utc, &copy_from->date_utc, 8);
 		ser_file->file_id = strdup(copy_from->file_id);
 		ser_file->observer = strdup(copy_from->observer);
 		ser_file->instrument = strdup(copy_from->instrument);
 		ser_file->telescope = strdup(copy_from->telescope);
 		ser_file->byte_pixel_depth = copy_from->byte_pixel_depth;
 		ser_file->number_of_planes = copy_from->number_of_planes;
+		ser_file->total_ts = copy_from->total_ts;
 		/* we write the header now, but it should be written again
 		 * before closing in case the number of the image in the new
 		 * SER changes from the copied SER */
@@ -246,7 +342,7 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean 
 		ser_file->observer = strdup("");
 		ser_file->instrument = strdup("");
 		ser_file->telescope = strdup("");
-		memset(&ser_file->date, 0, 16);
+		memset(&ser_file->date, 0, 8);
 		ser_file->number_of_planes = 0;	// used as an indicator of new SER
 
 		/* next operation should be ser_write_frame_from_fit, which writes with no
@@ -309,7 +405,7 @@ int ser_open_file(char *filename, struct ser_struct *ser_file) {
 		perror("SER file open");
 		return -1;
 	}
-	if (_ser_read_header(ser_file)) {
+	if (ser_read_header(ser_file)) {
 		fprintf(stderr, "SER: reading header failed, closing file %s\n",
 				filename);
 		ser_close_file(ser_file);
@@ -344,6 +440,8 @@ int ser_close_file(struct ser_struct *ser_file) {
 		free(ser_file->instrument);
 	if (ser_file->telescope)
 		free(ser_file->telescope);
+	if (ser_file->total_ts)
+		free(ser_file->total_ts);
 	if (ser_file->filename)
 		free(ser_file->filename);
 #ifdef _OPENMP
@@ -749,25 +847,5 @@ void set_combo_box_bayer_pattern(ser_color pattern) {
 		break;
 	}
 	gtk_combo_box_set_active(combo, entry);
-}
-
-/* once a buffer (data) has been acquired from the file, with frame_size pixels
- * read in it, depending on ser_file's endianess and pixel depth, data is
- * reorganized to match Siril's data format. */
-void ser_manage_endianess_and_depth(struct ser_struct *ser_file, WORD *data, int frame_size) {
-	WORD pixel;
-	int i;
-	if (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8) {
-		// inline conversion to 16 bit
-		for (i = frame_size - 1; i >= 0; i--)
-			data[i] = (WORD) (((BYTE*)data)[i]);
-	} else if (ser_file->little_endian) {	// TODO check if it is needed for big endian
-		// inline conversion to big endian
-		for (i = frame_size - 1; i >= 0; i--) {
-			pixel = data[i];
-			pixel = (pixel >> 8) | (pixel << 8);
-			data[i] = pixel;
-		}
-	}
 }
 

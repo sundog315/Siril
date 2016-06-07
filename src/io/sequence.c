@@ -371,7 +371,7 @@ int set_seq(const char *name){
 	adjust_reginfo();		// change registration displayed/editable values
 	update_gfit_histogram_if_needed();
 	adjust_sellabel();
-	fillSeqSizeExport();	// fill GtkEntry of export box
+	fillSeqAviExport();	// fill GtkEntry of export box
 
 	/* redraw and display image */
 	show_main_gray_window();
