@@ -214,7 +214,7 @@ static int ser_write_timestamp(struct ser_struct *ser_file) {
 	int frame_size;
 	size_t ts_size;
 
-	if (ser_file->total_ts[0] != '\0') {
+	if (ser_file->total_ts && ser_file->total_ts[0] != '\0') {
 		ts_size = ser_file->frame_count * 8;
 		// Seek to start of timestamps
 		frame_size = ser_file->image_width * ser_file->image_height	* ser_file->number_of_planes;
