@@ -330,7 +330,7 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean 
 		ser_file->telescope = strdup(copy_from->telescope);
 		ser_file->byte_pixel_depth = copy_from->byte_pixel_depth;
 		ser_file->number_of_planes = copy_from->number_of_planes;
-		ser_file->total_ts = strdup(copy_from->total_ts);
+		ser_file->total_ts = copy_from->total_ts;
 		/* we write the header now, but it should be written again
 		 * before closing in case the number of the image in the new
 		 * SER changes from the copied SER */
@@ -342,7 +342,6 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean 
 		ser_file->observer = strdup("");
 		ser_file->instrument = strdup("");
 		ser_file->telescope = strdup("");
-		ser_file->total_ts = strdup("");
 		memset(&ser_file->date, 0, 8);
 		ser_file->number_of_planes = 0;	// used as an indicator of new SER
 
