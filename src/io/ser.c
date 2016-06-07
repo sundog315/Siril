@@ -58,8 +58,8 @@ static int display_date(uint64_t date, char *txt) {
 		return -1;
 	timeinfo = gmtime(&t_sec);
 	strcpy(str, txt);
-	strftime(str + strlen(txt), 255, "%F %R.%d", timeinfo);
-	printf("%s.%06d\n", str, microsec);
+	strftime(str + strlen(txt), 255, "%F %R", timeinfo);
+	printf("%s.%d\n", str, microsec);
 	return 0;
 }
 
