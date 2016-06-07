@@ -136,24 +136,30 @@ static char *convert_color_id_to_char(ser_color color_id) {
 }
 static int ser_read_timestamp(struct ser_struct *ser_file) {
 	int frame_size;
-	size_t ts_size;
+	uint64_t *ts;
 
 	// Seek to start of timestamps
 	frame_size = ser_file->image_width * ser_file->image_height	* ser_file->number_of_planes;
-	off_t offset = SER_HEADER_LEN + (off_t) frame_size * (off_t) ser_file->byte_pixel_depth	* (off_t) ser_file->frame_count;
+	off_t offset = SER_HEADER_LEN
+			+ (off_t) frame_size * (off_t) ser_file->byte_pixel_depth
+					* (off_t) ser_file->frame_count;
 	if ((off_t) -1 == lseek(ser_file->fd, offset, SEEK_SET)) {
 		return -1;
 	}
 
-	ts_size = ser_file->frame_count * 8;
+	ser_file->ts = NULL;
 
-	ser_file->total_ts = calloc(1, ts_size);
-	if (ts_size == read(ser_file->fd, ser_file->total_ts, ts_size)) {
-
-		memcpy(&ser_file->ts_min, ser_file->total_ts, 8);
-		memcpy(&ser_file->ts_max,
-				ser_file->total_ts + 8 * (ser_file->frame_count - 1), 8);
-
+	ts = calloc(8, ser_file->frame_count);
+	if (ser_file->frame_count * 8 == read(ser_file->fd, ts, ser_file->frame_count * 8)) {
+		int i;
+		uint64_t *ptr = ts;
+		ser_file->ts = calloc(8, ser_file->frame_count);
+		for (i = 0; i < ser_file->frame_count; i++) {
+			memcpy(&ser_file->ts[i], ptr, 8);
+			ptr++;
+		}
+		ser_file->ts_min = ser_file->ts[0];
+		ser_file->ts_max = ser_file->ts[ser_file->frame_count - 1];
 		uint64_t diff_ts = (ser_file->ts_max - ser_file->ts_min) / 1000.0; // Now in units of 100 us
 		if (diff_ts > 0) {
 			// There is a positive time difference between first and last timestamps
@@ -163,11 +169,11 @@ static int ser_read_timestamp(struct ser_struct *ser_file) {
 		} else {
 			// No valid frames per second value can be calculated
 			ser_file->fps = -1.0;
-			ser_file->fps = -1.0;
 		}
 	} else {
 		ser_file->fps = -1.0;
 	}
+	free(ts);
 
 	return 0;
 }
@@ -212,21 +218,25 @@ static int ser_read_header(struct ser_struct *ser_file) {
 
 static int ser_write_timestamp(struct ser_struct *ser_file) {
 	int frame_size;
-	size_t ts_size;
 
-	if (ser_file->total_ts && ser_file->total_ts[0] != '\0') {
-		ts_size = ser_file->frame_count * 8;
+	if (ser_file->ts) {
 		// Seek to start of timestamps
 		frame_size = ser_file->image_width * ser_file->image_height	* ser_file->number_of_planes;
 		off_t offset = SER_HEADER_LEN
 				+ (off_t) frame_size * (off_t) ser_file->byte_pixel_depth * (off_t) ser_file->frame_count;
-		if ((off_t) -1 == lseek(ser_file->fd, offset, SEEK_SET)) {
-			return -1;
-		}
+		int i;
+		for (i = 0; i < ser_file->frame_count; i++) {
+			if ((off_t) -1 == lseek(ser_file->fd, offset + (i * 8), SEEK_SET)) {
+				return -1;
+			}
+			char timestamp[8];
 
-		if (ts_size != write(ser_file->fd, ser_file->total_ts, ts_size)) {
-			perror("WriteTimetamps:");
-			return -1;
+			memset(timestamp, 0, sizeof(timestamp));
+			memcpy(timestamp, &ser_file->ts[i], 8);
+			if (8 != write(ser_file->fd, timestamp, 8)) {
+				perror("WriteTimetamps:");
+				return -1;
+			}
 		}
 	}
 	return 0;
@@ -250,6 +260,7 @@ static int ser_write_header(struct ser_struct *ser_file) {
 	memcpy(header + 82, ser_file->instrument, 40);
 	memcpy(header + 122, ser_file->telescope, 40);
 	memcpy(header + 162, &ser_file->date, 8);
+	memcpy(header + 162, &ser_file->date_utc, 8);
 
 	if (sizeof(header) != write(ser_file->fd, header, sizeof(header))) {
 		perror("write");
@@ -330,7 +341,12 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean 
 		ser_file->telescope = strdup(copy_from->telescope);
 		ser_file->byte_pixel_depth = copy_from->byte_pixel_depth;
 		ser_file->number_of_planes = copy_from->number_of_planes;
-		ser_file->total_ts = copy_from->total_ts;
+		int i;
+		if (copy_from->ts) {
+			ser_file->ts = calloc(8, copy_from->frame_count);
+			for (i = 0; i < copy_from->frame_count; i++)
+				ser_file->ts[i] = copy_from->ts[i];
+		}
 		/* we write the header now, but it should be written again
 		 * before closing in case the number of the image in the new
 		 * SER changes from the copied SER */
@@ -342,7 +358,9 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean 
 		ser_file->observer = strdup("");
 		ser_file->instrument = strdup("");
 		ser_file->telescope = strdup("");
+		ser_file->ts = NULL;
 		memset(&ser_file->date, 0, 8);
+		memset(&ser_file->date_utc, 0, 8);
 		ser_file->number_of_planes = 0;	// used as an indicator of new SER
 
 		/* next operation should be ser_write_frame_from_fit, which writes with no
@@ -440,8 +458,8 @@ int ser_close_file(struct ser_struct *ser_file) {
 		free(ser_file->instrument);
 	if (ser_file->telescope)
 		free(ser_file->telescope);
-	if (ser_file->total_ts)
-		free(ser_file->total_ts);
+	if (ser_file->ts)
+		free(ser_file->ts);
 	if (ser_file->filename)
 		free(ser_file->filename);
 #ifdef _OPENMP

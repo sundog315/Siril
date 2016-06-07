@@ -59,10 +59,10 @@ struct ser_struct {
 	uint64_t date;	// 8	(162)
 	uint64_t date_utc;	// 8 (170)
 
-	/* timestamps */
-	char *total_ts;
-	uint64_t ts_min, ts_max;
-	double fps;
+	/* timestamps (not in the header, timestamps are in trailer) */
+	uint64_t *ts;			// total timestamps
+	uint64_t ts_min, ts_max;// min and max timestamp
+	double fps;				// frame rate
 
 	// internal representations of header data
 	ser_pixdepth byte_pixel_depth;	// more useful representation of the bit_pixel_depth
