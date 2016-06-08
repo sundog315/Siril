@@ -58,7 +58,7 @@ static int display_date(uint64_t date, char *txt) {
 		return -1;
 	timeinfo = gmtime(&t_sec);
 	strcpy(str, txt);
-	strftime(str + strlen(txt), 255, "%F %R", timeinfo);
+	strftime(str + strlen(txt), 255, "%F %T", timeinfo);
 	printf("%s.%d\n", str, microsec);
 	return 0;
 }
@@ -265,7 +265,7 @@ static int ser_write_header(struct ser_struct *ser_file) {
 	memcpy(header + 82, ser_file->instrument, 40);
 	memcpy(header + 122, ser_file->telescope, 40);
 	memcpy(header + 162, &ser_file->date, 8);
-	memcpy(header + 162, &ser_file->date_utc, 8);
+	memcpy(header + 170, &ser_file->date_utc, 8);
 
 	if (sizeof(header) != write(ser_file->fd, header, sizeof(header))) {
 		perror("write");

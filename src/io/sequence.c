@@ -1081,7 +1081,7 @@ gpointer crop_sequence(gpointer p) {
 
 		ser_file = malloc(sizeof(struct ser_struct));
 		sprintf(dest, "%s%s.ser", args->prefix, args->seq->seqname);
-		if (ser_create_file(dest, ser_file, TRUE, NULL)) {
+		if (ser_create_file(dest, ser_file, TRUE, com.seq.ser_file)) {
 			siril_log_message("Creating the SER file failed, aborting.\n");
 			free(ser_file);
 			args->retvalue = 1;
@@ -1105,6 +1105,8 @@ gpointer crop_sequence(gpointer p) {
 				savefits(dest, &wfit[0]);
 				break;
 			case SEQ_SER:
+				ser_file->image_width = wfit[0].rx;
+				ser_file->image_height = wfit[0].ry;
 				if (ser_write_frame_from_fit(ser_file, &wfit[0], frame)) {
 					siril_log_message(
 							"Error while converting to SER (no space left?)\n");
@@ -1119,8 +1121,6 @@ gpointer crop_sequence(gpointer p) {
 		}
 	}
 	if (args->seq->type == SEQ_SER) {
-		memcpy(&ser_file->date, &args->seq->ser_file->date, 16);
-		memcpy(&ser_file->date_utc, &args->seq->ser_file->date_utc, 16);
 		ser_write_and_close(ser_file);
 		free(ser_file);
 	}
