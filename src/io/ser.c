@@ -135,28 +135,32 @@ static char *convert_color_id_to_char(ser_color color_id) {
 	}
 }
 static int ser_read_timestamp(struct ser_struct *ser_file) {
-	int frame_size;
-	uint64_t *ts;
+	int frame_size, i;
 
-	// Seek to start of timestamps
-	frame_size = ser_file->image_width * ser_file->image_height	* ser_file->number_of_planes;
-	off_t offset = SER_HEADER_LEN
-			+ (off_t) frame_size * (off_t) ser_file->byte_pixel_depth
-					* (off_t) ser_file->frame_count;
-	if ((off_t) -1 == lseek(ser_file->fd, offset, SEEK_SET)) {
-		return -1;
-	}
-
-	ser_file->ts = NULL;
-
-	ts = calloc(8, ser_file->frame_count);
-	if (ser_file->frame_count * 8 == read(ser_file->fd, ts, ser_file->frame_count * 8)) {
-		int i;
-		uint64_t *ptr = ts;
+	if (ser_file->frame_count > 1) {
 		ser_file->ts = calloc(8, ser_file->frame_count);
+
+		// Seek to start of timestamps
+		frame_size = ser_file->image_width * ser_file->image_height
+				* ser_file->number_of_planes;
+		off_t offset = SER_HEADER_LEN
+				+ (off_t) frame_size * (off_t) ser_file->byte_pixel_depth
+						* (off_t) ser_file->frame_count;
+
 		for (i = 0; i < ser_file->frame_count; i++) {
-			memcpy(&ser_file->ts[i], ptr, 8);
-			ptr++;
+			if ((off_t) -1 == lseek(ser_file->fd, offset + (i * 8), SEEK_SET)) {
+				return -1;
+			}
+			char timestamp[8];
+
+			memset(timestamp, 0, sizeof(timestamp));
+			if (8 == read(ser_file->fd, timestamp, 8)) {
+				memcpy(&ser_file->ts[i], timestamp, 8);
+			} else {
+				// No valid frames per second value can be calculated
+				ser_file->fps = -1.0;
+				return 0;
+			}
 		}
 		ser_file->ts_min = ser_file->ts[0];
 		ser_file->ts_max = ser_file->ts[ser_file->frame_count - 1];
@@ -170,11 +174,7 @@ static int ser_read_timestamp(struct ser_struct *ser_file) {
 			// No valid frames per second value can be calculated
 			ser_file->fps = -1.0;
 		}
-	} else {
-		ser_file->fps = -1.0;
 	}
-	free(ts);
-
 	return 0;
 }
 
@@ -219,23 +219,28 @@ static int ser_read_header(struct ser_struct *ser_file) {
 static int ser_write_timestamp(struct ser_struct *ser_file) {
 	int frame_size;
 
-	if (ser_file->ts) {
-		// Seek to start of timestamps
-		frame_size = ser_file->image_width * ser_file->image_height	* ser_file->number_of_planes;
-		off_t offset = SER_HEADER_LEN
-				+ (off_t) frame_size * (off_t) ser_file->byte_pixel_depth * (off_t) ser_file->frame_count;
-		int i;
-		for (i = 0; i < ser_file->frame_count; i++) {
-			if ((off_t) -1 == lseek(ser_file->fd, offset + (i * 8), SEEK_SET)) {
-				return -1;
-			}
-			char timestamp[8];
+	if (ser_file->frame_count > 1) {
+		if (ser_file->ts) {
+			// Seek to start of timestamps
+			frame_size = ser_file->image_width * ser_file->image_height
+					* ser_file->number_of_planes;
+			off_t offset = SER_HEADER_LEN
+					+ (off_t) frame_size * (off_t) ser_file->byte_pixel_depth
+							* (off_t) ser_file->frame_count;
+			int i;
+			for (i = 0; i < ser_file->frame_count; i++) {
+				if ((off_t) -1
+						== lseek(ser_file->fd, offset + (i * 8), SEEK_SET)) {
+					return -1;
+				}
+				char timestamp[8];
 
-			memset(timestamp, 0, sizeof(timestamp));
-			memcpy(timestamp, &ser_file->ts[i], 8);
-			if (8 != write(ser_file->fd, timestamp, 8)) {
-				perror("WriteTimetamps:");
-				return -1;
+				memset(timestamp, 0, sizeof(timestamp));
+				memcpy(timestamp, &ser_file->ts[i], 8);
+				if (8 != write(ser_file->fd, timestamp, 8)) {
+					perror("WriteTimetamps:");
+					return -1;
+				}
 			}
 		}
 	}
@@ -274,7 +279,7 @@ static int ser_write_header(struct ser_struct *ser_file) {
 
 /* once a buffer (data) has been acquired from the file, with frame_size pixels
  * read in it, depending on ser_file's endianess and pixel depth, data is
- * reorganized to match Siril's data format. */
+ * reorganized to match Siril's data format . */
 void ser_manage_endianess_and_depth(struct ser_struct *ser_file, WORD *data, int frame_size) {
 	WORD pixel;
 	int i;
@@ -310,7 +315,7 @@ void ser_display_info(struct ser_struct *ser_file) {
 	fprintf(stdout, "observer: %s\n", ser_file->observer);
 	fprintf(stdout, "instrument: %s\n", ser_file->instrument);
 	fprintf(stdout, "telescope: %s\n", ser_file->telescope);
-	display_date(ser_file->date, "local time: ");
+	display_date(ser_file->date, "local time : ");
 	display_date(ser_file->date_utc, "UTC time: ");
 	fprintf(stdout, "fps: %lf\n", ser_file->fps);
 	fprintf(stdout, "========================================\n");
@@ -322,7 +327,8 @@ int ser_write_and_close(struct ser_struct *ser_file) {
 }
 
 /* ser_file must be allocated */
-int ser_create_file(const char *filename, struct ser_struct *ser_file, gboolean overwrite, struct ser_struct *copy_from) {
+int ser_create_file(const char *filename, struct ser_struct *ser_file,
+		gboolean overwrite, struct ser_struct *copy_from) {
 	if (overwrite)
 		unlink(filename);
 	if ((ser_file->fd = open(filename, O_CREAT | O_RDWR,
