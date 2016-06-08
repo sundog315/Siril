@@ -136,6 +136,8 @@ static char *convert_color_id_to_char(ser_color color_id) {
 }
 static int ser_read_timestamp(struct ser_struct *ser_file) {
 	int frame_size, i;
+	gboolean timestamps_in_order = TRUE;
+	uint64_t previous_ts = 0L;
 
 	if (ser_file->frame_count > 1) {
 		ser_file->ts = calloc(8, ser_file->frame_count);
@@ -162,8 +164,41 @@ static int ser_read_timestamp(struct ser_struct *ser_file) {
 				return 0;
 			}
 		}
-		ser_file->ts_min = ser_file->ts[0];
-		ser_file->ts_max = ser_file->ts[ser_file->frame_count - 1];
+
+		/* Check order of Timestamps */
+		uint64_t *ts_ptr = ser_file->ts;
+		uint64_t min_ts = *ts_ptr;
+		uint64_t max_ts = *ts_ptr;
+
+		for (i = 0; i < ser_file->frame_count; i++) {
+			if (*ts_ptr < previous_ts) {
+				// Timestamps are not in order
+				timestamps_in_order = FALSE;
+			}
+			previous_ts = *ts_ptr;
+			// Keep track of maximum timestamp value
+			if (*ts_ptr > max_ts) {
+				max_ts = *ts_ptr;
+			}
+			// Keep track of minimum timestamp value
+			if (*ts_ptr < min_ts) {
+				min_ts = *ts_ptr;
+			}
+			ts_ptr++;
+		}
+
+        if (timestamps_in_order) {
+            if (min_ts == max_ts) {
+				printf("Timestamps are all identical\n");
+            } else {
+				printf("Timestamps are all in order\n");
+            }
+        } else {
+			printf("Timestamps are not in order\n");
+        }
+
+		ser_file->ts_min = min_ts;
+		ser_file->ts_max = max_ts;
 		uint64_t diff_ts = (ser_file->ts_max - ser_file->ts_min) / 1000.0; // Now in units of 100 us
 		if (diff_ts > 0) {
 			// There is a positive time difference between first and last timestamps
