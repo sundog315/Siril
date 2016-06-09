@@ -406,9 +406,9 @@ void ser_display_info(struct ser_struct *ser_file) {
 	fprintf(stdout, "image size: %d x %d (%d bits)\n", ser_file->image_width,
 			ser_file->image_height, ser_file->bit_pixel_depth);
 	fprintf(stdout, "frame count: %u\n", ser_file->frame_count);
-	fprintf(stdout, "observer: %s\n", ser_file->observer);
-	fprintf(stdout, "instrument: %s\n", ser_file->instrument);
-	fprintf(stdout, "telescope: %s\n", ser_file->telescope);
+	fprintf(stdout, "observer: %.40s\n", ser_file->observer);
+	fprintf(stdout, "instrument: %.40s\n", ser_file->instrument);
+	fprintf(stdout, "telescope: %.40s\n", ser_file->telescope);
 	display_date(ser_file->date, "local time: ");
 	display_date(ser_file->date_utc, "UTC time: ");
 	fprintf(stdout, "fps: %.3lf\n", ser_file->fps);
@@ -926,4 +926,3 @@ void set_combo_box_bayer_pattern(ser_color pattern) {
 	}
 	gtk_combo_box_set_active(combo, entry);
 }
-
