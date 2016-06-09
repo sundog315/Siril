@@ -130,8 +130,7 @@ if test -n "$CXX" && ( test "X$CXX" != "Xno" &&
 	
 	dnl check for C++11 support
 	m4_include([m4/ax_cxx_compile_stdcxx.m4])
-	m4_include([m4/ax_cxx_compile_stdcxx_11.m4])
-	AX_CXX_COMPILE_STDCXX_11
+	AX_CXX_COMPILE_STDCXX(11, noext, mandatory)
 	
 	dnl AC_MSG_WARN(CXX is "$CXX")
 	dnl http://nerdland.net/2009/07/detecting-c-libraries-with-autotools/ solution 2
