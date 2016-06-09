@@ -22,9 +22,6 @@
  * on big endian systems.
  */
 
-#define __USE_XOPEN
-#define _GNU_SOURCE
-
 #include <sys/types.h>
 #include <sys/time.h>
 #include <sys/stat.h>
@@ -44,22 +41,32 @@
 static const uint64_t epochTicks = 621355968000000000UL;
 static const uint64_t ticksPerSecond = 10000000;
 
-static int display_date(uint64_t date, char *txt) {
-	struct tm *timeinfo;
-	char str[256];
-	time_t t_sec;
-	int32_t microsec;
+/* Given an SER timestamp, return a char string representation
+ * MUST be freed
+ */
+static char *ser_timestamp(uint64_t timestamp) {
+	char *str = malloc(64);
+	uint64_t t1970_ms = (timestamp - epochTicks) / 10000;
+	time_t secs = t1970_ms / 1000;
+	int ms = t1970_ms % 1000;
+	struct tm *t;
 
-	if (date <= 0)
+	t = gmtime(&secs);
+
+	sprintf(str, "%04d-%02d-%02d %02d:%02d:%02d.%03d", t->tm_year + 1900,
+			t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec, ms);
+
+	return str;
+}
+
+/* Output SER timestamp */
+static int display_date(uint64_t timestamp, char *txt) {
+	if (timestamp <= 0)
 		return -1;
-	t_sec = (time_t) (date - epochTicks) / ticksPerSecond;
-	microsec = (date - epochTicks) % ticksPerSecond;
-	if (t_sec < 0)
-		return -1;
-	timeinfo = gmtime(&t_sec);
-	strcpy(str, txt);
-	strftime(str + strlen(txt), 255, "%F %T", timeinfo);
-	printf("%s.%d\n", str, microsec);
+
+	char *str = ser_timestamp(timestamp);
+	printf("%s%s\n", txt, str);
+	free(str);
 	return 0;
 }
 
@@ -82,13 +89,31 @@ static time_t __timegm(struct tm *tm) {
 	return ret;
 }
 
-static int convert_char_to_time(char *date, uint64_t *utc, uint64_t *local) {
+/* Convert FITS keyword DATE in a UNIX time format
+ * DATE match this pattern: 1900-01-01T00:00:00
+ */
+static int FITS_date_key_to_Unix_time(char *date, uint64_t *utc,
+		uint64_t *local) {
 	struct tm timeinfo = { };
 	time_t ut, t;
+	int year = 0, month = 0, day = 0, hour = 0, min = 0, sec = 0;
 
 	if (date[0] == '\0')
 		return -1;
-	strptime(date, "%FT%T", &timeinfo); /* YYYY-MM-DDThh:mm:ss */
+
+	sscanf(date, "%04d-%02d-%02dT%02d:%02d:%02d", &year, &month, &day, &hour,
+			&min, &sec);
+
+	timeinfo.tm_year = year - 1900;
+	timeinfo.tm_mon = month - 1;
+	timeinfo.tm_mday = day;
+	timeinfo.tm_hour = hour;
+	timeinfo.tm_min = min;
+	timeinfo.tm_sec = sec;
+
+	// Hopefully these are not needed
+	timeinfo.tm_wday = 0;
+	timeinfo.tm_yday = 0;
 	timeinfo.tm_isdst = -1;
 
 	/* get UTC time from timeinfo* */
@@ -233,9 +258,10 @@ static int ser_read_header(struct ser_struct *ser_file) {
 
 	// strings
 	ser_file->file_id = strndup(header, 14);
-	ser_file->observer = strndup(header + 42, 40);
-	ser_file->instrument = strndup(header + 82, 40);
-	ser_file->telescope = strndup(header + 122, 40);
+
+	memcpy(ser_file->observer, header + 42, 40);
+	memcpy(ser_file->instrument, header + 82, 40);
+	memcpy(ser_file->telescope, header + 122, 40);
 
 	/* internal representations of header data */
 	if (ser_file->bit_pixel_depth <= 8)
@@ -312,6 +338,40 @@ static int ser_write_header(struct ser_struct *ser_file) {
 	return 0;
 }
 
+/* populate fields that are not already set in ser_create_file */
+static void ser_write_header_from_fit(struct ser_struct *ser_file, fits *fit) {
+	ser_file->image_width = fit->rx;
+	ser_file->image_height = fit->ry;
+	fprintf(stdout, "setting SER image size as %dx%d\n", fit->rx, fit->ry);
+	if (fit->naxes[2] == 1) {
+		// maybe it's read as CFA...
+		ser_file->color_id = SER_MONO;
+	} else if (fit->naxes[2] == 3) {
+		ser_file->color_id = SER_RGB;
+	}
+	if (ser_file->color_id == SER_RGB || ser_file->color_id == SER_BGR)
+		ser_file->number_of_planes = 3;
+	else ser_file->number_of_planes = 1;
+
+	if (fit->bitpix == BYTE_IMG) {
+		ser_file->byte_pixel_depth = SER_PIXEL_DEPTH_8;
+		ser_file->bit_pixel_depth = 8;
+	} else if (fit->bitpix == USHORT_IMG || fit->bitpix == SHORT_IMG) {
+		ser_file->byte_pixel_depth = SER_PIXEL_DEPTH_16;
+		ser_file->bit_pixel_depth = 16;
+	} else {
+		siril_log_message("Writing to SER files from larger than 16-bit FITS images is not yet implemented\n");
+	}
+	if (fit->instrume[0] != 0) {
+		memset(ser_file->instrument, 0, 40);
+		memcpy(ser_file->instrument, fit->instrume, 40);
+	}
+	int ret = FITS_date_key_to_Unix_time(fit->date_obs, &ser_file->date_utc, &ser_file->date);
+	if (ret == -1)
+		FITS_date_key_to_Unix_time(fit->date, &ser_file->date_utc, &ser_file->date);
+	// TODO: copy data from the fit header: observer, telescope
+}
+
 /* once a buffer (data) has been acquired from the file, with frame_size pixels
  * read in it, depending on ser_file's endianess and pixel depth, data is
  * reorganized to match Siril's data format . */
@@ -332,7 +392,6 @@ void ser_manage_endianess_and_depth(struct ser_struct *ser_file, WORD *data, int
 	}
 }
 
-
 /*
  * Public functions
  */
@@ -350,9 +409,9 @@ void ser_display_info(struct ser_struct *ser_file) {
 	fprintf(stdout, "observer: %s\n", ser_file->observer);
 	fprintf(stdout, "instrument: %s\n", ser_file->instrument);
 	fprintf(stdout, "telescope: %s\n", ser_file->telescope);
-	display_date(ser_file->date, "local time : ");
+	display_date(ser_file->date, "local time: ");
 	display_date(ser_file->date_utc, "UTC time: ");
-	fprintf(stdout, "fps: %lf\n", ser_file->fps);
+	fprintf(stdout, "fps: %.3lf\n", ser_file->fps);
 	fprintf(stdout, "========================================\n");
 }
 
@@ -377,9 +436,9 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file,
 		memcpy(&ser_file->date, &copy_from->date, 8);
 		memcpy(&ser_file->date_utc, &copy_from->date_utc, 8);
 		ser_file->file_id = strdup(copy_from->file_id);
-		ser_file->observer = strdup(copy_from->observer);
-		ser_file->instrument = strdup(copy_from->instrument);
-		ser_file->telescope = strdup(copy_from->telescope);
+		memcpy(ser_file->observer, copy_from->observer, 40);
+		memcpy(ser_file->instrument, copy_from->instrument, 40);
+		memcpy(ser_file->telescope, copy_from->telescope, 40);
 		ser_file->byte_pixel_depth = copy_from->byte_pixel_depth;
 		ser_file->number_of_planes = copy_from->number_of_planes;
 		int i;
@@ -396,9 +455,9 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file,
 		ser_file->file_id = strdup("Made by Siril");
 		ser_file->lu_id = 0;
 		ser_file->little_endian = SER_LITTLE_ENDIAN; // what will it do on big endian machine?
-		ser_file->observer = strdup("");
-		ser_file->instrument = strdup("");
-		ser_file->telescope = strdup("");
+		memset(ser_file->observer, 0, 40);
+		memset(ser_file->instrument, 0, 40);
+		memset(ser_file->telescope, 0, 40);
 		ser_file->ts = NULL;
 		memset(&ser_file->date, 0, 8);
 		memset(&ser_file->date_utc, 0, 8);
@@ -418,40 +477,6 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file,
 #endif
 	siril_log_message("Created SER file %s\n", filename);
 	return 0;
-}
-
-/* populate fields that are not already set in ser_create_file */
-void ser_header_from_fit(struct ser_struct *ser_file, fits *fit) {
-	ser_file->image_width = fit->rx;
-	ser_file->image_height = fit->ry;
-	fprintf(stdout, "setting SER image size as %dx%d\n", fit->rx, fit->ry);
-	if (fit->naxes[2] == 1) {
-		// maybe it's read as CFA...
-		ser_file->color_id = SER_MONO;
-	} else if (fit->naxes[2] == 3) {
-		ser_file->color_id = SER_RGB;
-	}
-	if (ser_file->color_id == SER_RGB || ser_file->color_id == SER_BGR)
-		ser_file->number_of_planes = 3;
-	else ser_file->number_of_planes = 1;
-
-	if (fit->bitpix == BYTE_IMG) {
-		ser_file->byte_pixel_depth = SER_PIXEL_DEPTH_8;
-		ser_file->bit_pixel_depth = 8;
-	} else if (fit->bitpix == USHORT_IMG || fit->bitpix == SHORT_IMG) {
-		ser_file->byte_pixel_depth = SER_PIXEL_DEPTH_16;
-		ser_file->bit_pixel_depth = 16;
-	} else {
-		siril_log_message("Writing to SER files from larger than 16-bit FITS images is not yet implemented\n");
-	}
-	if (fit->instrume[0] != 0) {
-		free(ser_file->instrument);
-		ser_file->instrument = strdup(fit->instrume);
-	}
-	int ret = convert_char_to_time(fit->date_obs, &ser_file->date_utc, &ser_file->date);
-	if (ret == -1)
-		convert_char_to_time(fit->date, &ser_file->date_utc, &ser_file->date);
-	// TODO: copy data from the fit header: observer, telescope
 }
 
 int ser_open_file(char *filename, struct ser_struct *ser_file) {
@@ -493,12 +518,6 @@ int ser_close_file(struct ser_struct *ser_file) {
 	}
 	if (ser_file->file_id)
 		free(ser_file->file_id);
-	if (ser_file->observer)
-		free(ser_file->observer);
-	if (ser_file->instrument)
-		free(ser_file->instrument);
-	if (ser_file->telescope)
-		free(ser_file->telescope);
 	if (ser_file->ts)
 		free(ser_file->ts);
 	if (ser_file->filename)
@@ -599,7 +618,7 @@ int ser_read_frame(struct ser_struct *ser_file, int frame_no, fits *fit) {
 		fit->pdata[BLAYER] = fit->data + fit->rx * fit->ry * 2;
 		for (i = 0, j = 0; j < fit->rx * fit->ry; i += 3, j++) {
 			fit->pdata[0 + swap][j] = tmp[i + RLAYER];
-			fit->pdata[1       ][j] = tmp[i + GLAYER];
+			fit->pdata[1][j] = tmp[i + GLAYER];
 			fit->pdata[2 - swap][j] = tmp[i + BLAYER];
 		}
 		free(tmp);
@@ -810,7 +829,7 @@ int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit, int frame_n
 		return -1;
 	if (ser_file->number_of_planes == 0) {
 		// adding first frame of a new sequence, use it to populate the header
-		ser_header_from_fit(ser_file, fit);
+		ser_write_header_from_fit(ser_file, fit);
 	}
 	if (fit->rx != ser_file->image_width || fit->ry != ser_file->image_height) {
 		siril_log_message("Trying to add an image of different size in a SER\n");
