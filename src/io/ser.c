@@ -159,21 +159,23 @@ static char *convert_color_id_to_char(ser_color color_id) {
 		return "";
 	}
 }
+
 static int ser_read_timestamp(struct ser_struct *ser_file) {
 	int frame_size, i;
 	gboolean timestamps_in_order = TRUE;
 	uint64_t previous_ts = 0L;
+	off_t filesize;
 
-	if (ser_file->frame_count > 1) {
+	filesize = ser_file->filesize;
+	frame_size = ser_file->image_width * ser_file->image_height	* ser_file->number_of_planes;
+	off_t offset = SER_HEADER_LEN + (off_t) frame_size * (off_t) ser_file->byte_pixel_depth
+							* (off_t) ser_file->frame_count;
+
+    /* Check if file is large enough to have timestamps */
+	if (filesize >= offset + (8 * ser_file->frame_count)) {
 		ser_file->ts = calloc(8, ser_file->frame_count);
 
 		// Seek to start of timestamps
-		frame_size = ser_file->image_width * ser_file->image_height
-				* ser_file->number_of_planes;
-		off_t offset = SER_HEADER_LEN
-				+ (off_t) frame_size * (off_t) ser_file->byte_pixel_depth
-						* (off_t) ser_file->frame_count;
-
 		for (i = 0; i < ser_file->frame_count; i++) {
 			if ((off_t) -1 == lseek(ser_file->fd, offset + (i * 8), SEEK_SET)) {
 				return -1;
@@ -212,15 +214,15 @@ static int ser_read_timestamp(struct ser_struct *ser_file) {
 			ts_ptr++;
 		}
 
-        if (timestamps_in_order) {
-            if (min_ts == max_ts) {
+		if (timestamps_in_order) {
+			if (min_ts == max_ts) {
 				printf("Timestamps are all identical\n");
-            } else {
+			} else {
 				printf("Timestamps are all in order\n");
-            }
-        } else {
+			}
+		} else {
 			printf("Timestamps are not in order\n");
-        }
+		}
 
 		ser_file->ts_min = min_ts;
 		ser_file->ts_max = max_ts;
@@ -234,6 +236,9 @@ static int ser_read_timestamp(struct ser_struct *ser_file) {
 			// No valid frames per second value can be calculated
 			ser_file->fps = -1.0;
 		}
+	} else {
+		printf("No timestamps stored in the file.\n");
+		ser_file->fps = -1.0;
 	}
 	return 0;
 }
@@ -243,11 +248,17 @@ static int ser_read_header(struct ser_struct *ser_file) {
 
 	if (!ser_file || ser_file->fd <= 0)
 		return -1;
-	if ((off_t) -1 == lseek(ser_file->fd, 0, SEEK_SET)) {
+
+	/* Get file size */
+	ser_file->filesize = lseek(ser_file->fd, 0, SEEK_END);
+	if (ser_file->filesize == -1) {
 		perror("seek");
 		return -1;
 	}
-	if (sizeof(header) != read(ser_file->fd, header, sizeof(header))) {
+	lseek(ser_file->fd, 0, SEEK_SET);
+
+	/* Read header (size of 178) */
+	if (SER_HEADER_LEN != read(ser_file->fd, header, sizeof(header))) {
 		perror("read");
 		return -1;
 	}

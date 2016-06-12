@@ -64,6 +64,8 @@ struct ser_struct {
 	uint64_t ts_min, ts_max;// min and max timestamp
 	double fps;				// frame rate
 
+	off_t filesize;			// size of the file
+
 	// internal representations of header data
 	ser_pixdepth byte_pixel_depth;	// more useful representation of the bit_pixel_depth
 	unsigned int number_of_planes;	// derived from the color_id

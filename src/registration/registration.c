@@ -489,9 +489,9 @@ static void _print_result(TRANS *trans, float FWHMx, float FWHMy) {
 		siril_log_color_message("Matching stars: done\n", "green");
 		siril_log_message("%d pair matches.\n", trans->nr);
 		siril_log_message("scale:%*.3f\n", 13, scale);
-		siril_log_message("rotation:%*.2f deg\n", 9, rotation * 180 / M_PI);
-		siril_log_message("dx:%*.2f px\n", 15, shift.x);
-		siril_log_message("dy:%*.2f px\n", 15, shift.y);
+		siril_log_message("rotation:%+*.2f deg\n", 9, rotation * 180 / M_PI);
+		siril_log_message("dx:%+*.2f px\n", 15, shift.x);
+		siril_log_message("dy:%+*.2f px\n", 15, shift.y);
 		siril_log_message("FWHMx:%*.2f px\n", 12, FWHMx);
 		siril_log_message("FWHMy:%*.2f px\n", 12, FWHMy);
 		break;
