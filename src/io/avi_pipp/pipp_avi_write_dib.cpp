@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <sstream>
 
+
 // 64-bit fseek for various platforms
 #ifdef __linux__
 #define fseek64 fseeko64  // Linux
@@ -13,6 +14,9 @@
 #elif defined (__APPLE__)
 #define fseek64 fseeko  // OS X
 #define ftell64 ftello  // OS X
+#elif defined (__unix__)	// other unices
+#define fseek64 fseeko	// Unix
+#define ftell64 ftello	// Unix
 #else
 #define fseek64 _fseeki64  // Windows
 #define ftell64 _ftelli64  // Windows

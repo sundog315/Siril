@@ -18,6 +18,9 @@
 #elif defined (__APPLE__)
 #define fseek64 fseeko  // OS X
 #define ftell64 ftello  // OS X
+#elif defined (__unix__)	// other unices
+#define fseek64 fseeko	// Unix
+#define ftell64 ftello	// Unix
 #else
 #define fseek64 _fseeki64  // Windows
 #define ftell64 _ftelli64  // Windows
@@ -543,7 +546,7 @@ bool c_pipp_avi_write::create(
                           + sizeof(m_movi_avix_list_header) - sizeof(m_movi_avix_list_header.four_cc)
                           + m_movi_avix_list_header.size;
 
-    mp_avi_file = fopen_utf8(filename, "wb+");
+    mp_avi_file = fopen(filename, "wb+");
 
     // Check file opened
     // Return if file did not open
@@ -600,7 +603,7 @@ void c_pipp_avi_write::split_create()
     }
 
     // Open new file
-    mp_avi_file = fopen_utf8(p_split_filename.get(), "wb+");
+    mp_avi_file = fopen(p_split_filename.get(), "wb+");
 
     // Check file opened
     // Return if file did not open
