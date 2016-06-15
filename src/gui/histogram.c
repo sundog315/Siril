@@ -478,11 +478,11 @@ void display_histo(gsl_histogram *histo, cairo_t *cr, int layer, int width,
 		while (i < nb_orig_bins
 				&& (float) i / vals_per_px <= (float) current_bin + 0.5f) {
 			double tmp_val = gsl_histogram_get(histo, i);
-			if (is_log_scale()) {
-				tmp_val = (tmp_val == 0) ? 0 : log(tmp_val);
-			}
 			bin_val += tmp_val;
 			i++;
+		}
+		if (is_log_scale()) {
+			bin_val = (bin_val == 0) ? bin_val : log(bin_val);
 		}
 		displayed_values[current_bin] = bin_val;
 		if (bin_val > graph_height)	// check for maximum
