@@ -140,7 +140,7 @@ if test -n "$CXX" && ( test "X$CXX" != "Xno" &&
 			  AC_MSG_WARN([opencv not found. Not using some image processing.]))
 
 else
-	AC_MSG_WARN([no C++ compiler found, opencv cannot be used])
+	AC_MSG_ERROR([no C++ compiler found])
 fi
 
 AM_CONDITIONAL(HAVE_OPENCV, [test "x$OPENCV_LIBS" != "x"])

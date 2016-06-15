@@ -477,8 +477,7 @@ void display_histo(gsl_histogram *histo, cairo_t *cr, int layer, int width,
 		double bin_val = 0.0;
 		while (i < nb_orig_bins
 				&& (float) i / vals_per_px <= (float) current_bin + 0.5f) {
-			double tmp_val = gsl_histogram_get(histo, i);
-			bin_val += tmp_val;
+			bin_val += gsl_histogram_get(histo, i);
 			i++;
 		}
 		if (is_log_scale()) {
