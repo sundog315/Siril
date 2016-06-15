@@ -22,7 +22,7 @@
 #include "pipp_avi_write.h"  // AVI write class
 #include "pipp_avi_write_dib.h"  // AVI write class
 #include "avi_writer.h"
-#include <stdlib.h>
+#include <cstdlib>
 #include <new>
 #include <mutex>
 

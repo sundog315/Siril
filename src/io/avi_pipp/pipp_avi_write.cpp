@@ -5,7 +5,6 @@
 #include <fstream>
 #include <cstring>
 #include "pipp_avi_write.h"
-#include "pipp_utf8.h"
 
 #include <cwchar>
 #include <memory>

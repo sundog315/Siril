@@ -289,9 +289,9 @@ static int ser_read_header(struct ser_struct *ser_file) {
 }
 
 static int ser_write_timestamp(struct ser_struct *ser_file) {
-	int frame_size;
+	int frame_size, i;
 
-	if (ser_file->frame_count > 1) {
+	if (ser_file->frame_count > 0) {
 		if (ser_file->ts) {
 			// Seek to start of timestamps
 			frame_size = ser_file->image_width * ser_file->image_height
@@ -299,7 +299,6 @@ static int ser_write_timestamp(struct ser_struct *ser_file) {
 			off_t offset = SER_HEADER_LEN
 					+ (off_t) frame_size * (off_t) ser_file->byte_pixel_depth
 							* (off_t) ser_file->frame_count;
-			int i;
 			for (i = 0; i < ser_file->frame_count; i++) {
 				if ((off_t) -1
 						== lseek(ser_file->fd, offset + (i * 8), SEEK_SET)) {
