@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stdint.h>
+#include <math.h>
 #include "core/siril.h"
 #include "core/proto.h"
 #include "io/single_image.h"
@@ -425,6 +426,14 @@ void erase_histo_display(cairo_t *cr, int width, int height) {
 		draw_grid(cr, width, height);
 }
 
+static gboolean is_log_scale() {
+	static GtkToggleButton *HistoCheckLogButton = NULL;
+
+	if (HistoCheckLogButton == NULL)
+		HistoCheckLogButton = GTK_TOGGLE_BUTTON(lookup_widget("HistoCheckLogButton"));
+	return (gtk_toggle_button_get_active(HistoCheckLogButton));
+}
+
 void display_histo(gsl_histogram *histo, cairo_t *cr, int layer, int width,
 		int height, double zoomH, double zoomV) {
 	int current_bin;
@@ -468,7 +477,11 @@ void display_histo(gsl_histogram *histo, cairo_t *cr, int layer, int width,
 		double bin_val = 0.0;
 		while (i < nb_orig_bins
 				&& (float) i / vals_per_px <= (float) current_bin + 0.5f) {
-			bin_val += gsl_histogram_get(histo, i);
+			double tmp_val = gsl_histogram_get(histo, i);
+			if (is_log_scale()) {
+				tmp_val = (tmp_val == 0) ? 0 : log(tmp_val);
+			}
+			bin_val += tmp_val;
 			i++;
 		}
 		displayed_values[current_bin] = bin_val;
@@ -477,8 +490,7 @@ void display_histo(gsl_histogram *histo, cairo_t *cr, int layer, int width,
 		current_bin++;
 	} while (i < nb_orig_bins && current_bin < nb_bins_allocated);
 	for (i = 0; i < nb_bins_allocated; i++) {
-		double bin_height = height
-				- height * displayed_values[i] / graph_height;
+		double bin_height = height - height * displayed_values[i] / graph_height;
 		cairo_line_to(cr, i, bin_height);
 	}
 	cairo_stroke(cr);

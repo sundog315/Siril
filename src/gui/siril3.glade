@@ -5470,6 +5470,28 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="homogeneous">False</property>
               </packing>
             </child>
+            <child>
+              <object class="GtkToolItem" id="histoToolLog">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="halign">end</property>
+                <child>
+                  <object class="GtkCheckButton" id="HistoCheckLogButton">
+                    <property name="label" translatable="yes">Logarithmic scale</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Logarithmic scale</property>
+                    <property name="draw_indicator">True</property>
+                    <signal name="toggled" handler="on_histo_toggled" swapped="no"/>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="homogeneous">True</property>
+              </packing>
+            </child>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -5486,11 +5508,37 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkDrawingArea" id="drawingarea_histograms">
+                  <object class="GtkBox">
                     <property name="visible">True</property>
-                    <property name="app_paintable">True</property>
                     <property name="can_focus">False</property>
-                    <signal name="draw" handler="redraw_histo" swapped="no"/>
+                    <property name="orientation">vertical</property>
+                    <child>
+                      <object class="GtkDrawingArea" id="drawingarea_histograms">
+                        <property name="visible">True</property>
+                        <property name="app_paintable">True</property>
+                        <property name="can_focus">False</property>
+                        <signal name="draw" handler="redraw_histo" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="position">0</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="labelShade">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <style>
+                          <class name="histo-shade"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">1</property>
+                      </packing>
+                    </child>
                   </object>
                 </child>
               </object>
@@ -5500,20 +5548,6 @@ Uncheck if images come from a monochrome sensor.</property>
             <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="labelShade">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <style>
-              <class name="histo-shade"/>
-            </style>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
           </packing>
         </child>
         <child>
