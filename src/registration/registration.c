@@ -101,8 +101,10 @@ void initialize_registration_methods() {
 #ifdef HAVE_OPENCV
 	reg_methods[i++] = new_reg_method("Global Star Alignment (deep-sky)",
 			&register_star_alignment, REQUIRES_NO_SELECTION, REGTYPE_DEEPSKY);
+#endif
 	reg_methods[i++] = new_reg_method("Image Pattern Alignment (planetary - Full Disk)",
 			&register_shift_dft, REQUIRES_SQUARED_SELECTION, REGTYPE_PLANETARY);
+#ifdef HAVE_OPENCV
 	reg_methods[i++] = new_reg_method("Enhanced Correlation Coefficient (planetary - Surfaces)",
 			&register_ecc, REQUIRES_NO_SELECTION, REGTYPE_PLANETARY);
 #endif
