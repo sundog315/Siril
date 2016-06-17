@@ -29,7 +29,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/resource.h>
-#include <sys/param.h>
+#if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
+#include <sys/param.h>		// define or not BSD macro
+#endif
 #include <fcntl.h>
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <mach/task.h>
