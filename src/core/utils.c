@@ -18,6 +18,10 @@
  * along with Siril. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
+
 #ifdef HAVE_CONFIG_H
 #include <config.h>
 #endif
@@ -39,7 +43,6 @@
 #include <ctype.h>
 #include <unistd.h>
 #include <errno.h>
-#define _WITH_GETLINE
 #include <stdio.h>
 #include <string.h>
 #include <locale.h>
