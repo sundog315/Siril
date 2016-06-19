@@ -36,6 +36,7 @@
 
 #include "core/siril.h"
 #include "core/proto.h"
+#include "core/initfile.h"
 #include "io/conversion.h"
 #include "gui/callbacks.h"
 #include "registration/registration.h"

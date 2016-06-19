@@ -8029,7 +8029,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>

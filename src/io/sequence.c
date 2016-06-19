@@ -38,6 +38,7 @@
 
 #include "core/siril.h"
 #include "core/proto.h"
+#include "core/initfile.h"
 #include "gui/callbacks.h"
 #include "io/ser.h"
 #if defined(HAVE_FFMS2_1) || defined(HAVE_FFMS2_2)

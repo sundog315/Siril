@@ -31,6 +31,7 @@
 
 #include "core/siril.h"
 #include "core/proto.h"
+#include "core/initfile.h"
 #include "gui/callbacks.h"
 #include "io/single_image.h"
 #include "registration/registration.h"

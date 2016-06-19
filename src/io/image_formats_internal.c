@@ -710,12 +710,12 @@ int readpic(const char *name, fits *fit) {
 
 	_pic_read_header(pic_file);
 
-	fit->rx = (int) pic_file->width;
-	fit->ry = (int) pic_file->height;
-	fit->binning_x = (int) pic_file->bin[4];
-	fit->binning_y = (int) pic_file->bin[5];
-	fit->hi = (int) pic_file->hi;
-	fit->lo = (int) pic_file->lo;
+	fit->rx = (unsigned int) pic_file->width;
+	fit->ry = (unsigned int) pic_file->height;
+	fit->binning_x = (unsigned int) pic_file->bin[4];
+	fit->binning_y = (unsigned int) pic_file->bin[5];
+	fit->hi = pic_file->hi;
+	fit->lo = pic_file->lo;
 
 	nbdata = fit->rx * fit->ry;
 	assert(nbdata > 0);

@@ -35,6 +35,7 @@
 
 #include "core/siril.h"
 #include "core/proto.h"
+#include "core/initfile.h"
 #include "core/undo.h"
 #include "gui/callbacks.h"
 #include "gui/PSF_list.h"

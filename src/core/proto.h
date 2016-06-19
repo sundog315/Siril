@@ -112,9 +112,6 @@ int	is_readable_file(const char *filename);
 int	stat_file(const char *filename2, image_type *type, char *realname);
 const char *get_filename_ext(const char *filename);
 
-int	writeinitfile();
-int	checkinitfile();
-
 int	changedir(const char *dir);
 int	update_sequences_list(const char *sequence_name_to_select);
 void	update_used_memory();
