@@ -28,15 +28,16 @@
 #include <float.h>
 #include <gtk/gtk.h>
 
+#include "core/siril.h"
+#include "gui/callbacks.h"
+#include "core/proto.h"
+#include "core/initfile.h"
 #include "registration/registration.h"
 #include "registration/matching/misc.h"
 #include "registration/matching/match.h"
 #include "registration/matching/atpmatch.h"
 #include "algos/star_finder.h"
 #include "stacking/stacking.h"
-#include "core/siril.h"
-#include "gui/callbacks.h"
-#include "core/proto.h"
 #include "algos/PSF.h"
 #include "gui/PSF_list.h"
 #include "algos/quality.h"
