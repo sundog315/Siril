@@ -107,8 +107,8 @@ int read_single_image(const char* filename, fits *dest, char **realname_out) {
 	realname = malloc(strlen(filename) + 10);
 	retval = stat_file(filename, &imagetype, realname);
 	if (retval) {
-		char *msg = siril_log_message("Error opening image %s: file not found or not supported.\n", filename);
-		show_dialog(msg, "Error", "gtk-dialog-error");
+		char *msg = siril_log_message(_("Error opening image %s: file not found or not supported.\n"), filename);
+		show_dialog(msg, _("Error"), "gtk-dialog-error");
 		set_cursor_waiting(FALSE);
 		free(realname);
 		return 1;
@@ -122,7 +122,7 @@ int read_single_image(const char* filename, fits *dest, char **realname_out) {
 			debayer_if_needed(imagetype, dest);
 	}
 	if (retval != 0 && retval != 3)
-		siril_log_message("Opening %s failed.\n", realname);
+		siril_log_message(_("Opening %s failed.\n"), realname);
 	if (realname_out)
 		*realname_out = realname;
 	else free(realname);
@@ -146,20 +146,20 @@ int open_single_image(const char* filename) {
 	
 	/* A single sequence has been loaded */
 	if (retval == 3) {
-		siril_log_message("Sequence loaded: %s\n", com.seq.seqname);
+		siril_log_message(_("Sequence loaded: %s\n"), com.seq.seqname);
 		return 0;
 	}
 	if (retval == 2) {
-		show_dialog("This file could not be openend because its extension is not supported.\n", "Error", "gtk-dialog-error");
+		show_dialog(_("This file could not be openend because its extension is not supported.\n"), _("Error"), "gtk-dialog-error");
 		return 1;
 	}
 	if (retval == 1) {
-		show_dialog("There was an error when opening this image. See the log for more information.", "Error", "gtk-dialog-error");
+		show_dialog(_("There was an error when opening this image. See the log for more information."), _("Error"), "gtk-dialog-error");
 		return 1;
 	}
 
 	if (sequence_is_loaded()) {
-		siril_log_message("Closing sequence %s\n", com.seq.seqname);
+		siril_log_message(_("Closing sequence %s\n"), com.seq.seqname);
 		clear_sequence_list();
 		free_sequence(&(com.seq), FALSE);
 		initialize_sequence(&com.seq, FALSE);

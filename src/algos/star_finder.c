@@ -126,7 +126,7 @@ fitted_PSF **peaker(fits *fit, int layer, starFinder *sf, rectangle *area) {
 		return NULL;
 	}
 
-	siril_log_color_message("Findstar: processing...\n", "red");
+	siril_log_color_message(_("Findstar: processing...\n"), "red");
 	gettimeofday(&t_start, NULL);
 
 	results[0] = NULL;
@@ -232,7 +232,7 @@ fitted_PSF **peaker(fits *fit, int layer, starFinder *sf, rectangle *area) {
 		free(results);
 		results = NULL;
 	}
-	siril_log_message("Found %d stars in image, channel #%d\n", nbstars, layer);
+	siril_log_message(_("Found %d stars in image, channel #%d\n"), nbstars, layer);
 	sort_stars(results, nbstars);
 	sf->nb_stars = nbstars;
 	free(wave_image);
@@ -285,8 +285,8 @@ fitted_PSF *add_star(fits *fit, int layer, int *index) {
 	if (already_found) {
 		free(result);
 		result = NULL;
-		char *msg = siril_log_message("This star has already been picked !\n");
-		show_dialog(msg, "Peaker", "gtk-dialog-info");
+		char *msg = siril_log_message(_("This star has already been picked !\n"));
+		show_dialog(msg, _("Peaker"), "gtk-dialog-info");
 	} else {
 		if (i < MAX_STARS) {
 			result->xpos = result->x0 + com.selection.x;

@@ -456,30 +456,30 @@ void on_filechooser_file_set(GtkFileChooserButton *widget, gpointer user_data) {
 #ifdef HAVE_OPENCV
 			if (gfit.rx < layers[layer]->the_fit.rx ||
 					gfit.ry < layers[layer]->the_fit.ry) {
-				siril_log_message("The first loaded image should have the greatest sizes for now\n");
-				sprintf(buf, "NOT OK %ux%u", layers[layer]->the_fit.rx, layers[layer]->the_fit.ry);
+				siril_log_message(_("The first loaded image should have the greatest sizes for now\n"));
+				sprintf(buf, _("NOT OK %ux%u"), layers[layer]->the_fit.rx, layers[layer]->the_fit.ry);
 				gtk_label_set_text(layers[layer]->label, buf);
 				retval = 1;
 			} else {
-				siril_log_message("Resizing the loaded image from %dx%d to %dx%d\n",
+				siril_log_message(_("Resizing the loaded image from %dx%d to %dx%d\n"),
 						layers[layer]->the_fit.rx,
 						layers[layer]->the_fit.ry, gfit.rx, gfit.ry);
-				sprintf(buf, "OK upscaled from %ux%u",
+				sprintf(buf, _("OK upscaled from %ux%u"),
 						layers[layer]->the_fit.rx, layers[layer]->the_fit.ry);
 				cvResizeGaussian(&layers[layer]->the_fit, gfit.rx, gfit.ry, OPENCV_LINEAR); // BILINEAR
 				image_find_minmax(&layers[layer]->the_fit, 0);
 				gtk_label_set_text(layers[layer]->label, buf);
 			}
 #else
-			siril_log_message("You need to install opencv to compose images with different sizes\n");
-			sprintf(buf, "NOT OK %ux%u", layers[layer]->the_fit.rx, layers[layer]->the_fit.ry);
+			siril_log_message(_("You need to install opencv to compose images with different sizes\n"));
+			sprintf(buf, _("NOT OK %ux%u"), layers[layer]->the_fit.rx, layers[layer]->the_fit.ry);
 			gtk_label_set_text(layers[layer]->label, buf);
 			retval = 1;
 #endif
 		}
 		else if (!retval) {
 			image_find_minmax(&layers[layer]->the_fit, 0);
-			sprintf(buf, "OK %ux%u", layers[layer]->the_fit.rx, layers[layer]->the_fit.ry);
+			sprintf(buf, _("OK %ux%u"), layers[layer]->the_fit.rx, layers[layer]->the_fit.ry);
 			gtk_label_set_text(layers[layer]->label, buf);
 		}
 	}
@@ -543,8 +543,8 @@ void create_the_internal_sequence() {
 
 	nb_layers = number_of_images_loaded();
 	if (nb_layers == 0 || nb_layers == 1) {
-		char *msg = siril_log_message("You must at least load two layers before!\n");
-		show_dialog(msg, "Warning", "gtk-dialog-warning");
+		char *msg = siril_log_message(_("You must at least load two layers before!\n"));
+		show_dialog(msg, _("Warning"), "gtk-dialog-warning");
 		seq = NULL;
 		return;
 	}
@@ -592,13 +592,13 @@ void on_button_align_clicked(GtkButton *button, gpointer user_data) {
 	regargs.layer = 0;	// TODO: fix with dynamic layers list
 	regargs.run_in_thread = FALSE;
 
-	msg = siril_log_message("Starting registration using method: %s\n", method->name);
+	msg = siril_log_message(_("Starting registration using method: %s\n"), method->name);
 	msg[strlen(msg)-1] = '\0';
 	set_cursor_waiting(TRUE);
 	set_progress_bar_data(msg, PROGRESS_RESET);
 	if (method->method_ptr(&regargs))
-		set_progress_bar_data("Error in layers alignment.", PROGRESS_DONE);
-	else set_progress_bar_data("Registration complete", PROGRESS_DONE);
+		set_progress_bar_data(_("Error in layers alignment."), PROGRESS_DONE);
+	else set_progress_bar_data(_("Registration complete"), PROGRESS_DONE);
 	set_cursor_waiting(FALSE);
 
 	/* display the values */
@@ -1115,10 +1115,10 @@ void autoadjust(int force_redraw) {
 
 	if (max_pixel.red <= 1.0 && max_pixel.green <= 1.0 && max_pixel.blue <= 1.0) {
 		if (force_redraw) {
-			siril_log_message("no overflow with the current colours, redrawing only\n");
+			siril_log_message(_("No overflow with the current colours, redrawing only\n"));
 			update_result(1);
 		} else {
-			siril_log_message("nothing to adjust, no overflow\n");
+			siril_log_message(_("Nothing to adjust, no overflow\n"));
 			set_cursor_waiting(FALSE);
 		}
 		return;
@@ -1151,7 +1151,7 @@ void autoadjust(int force_redraw) {
 					to_redistribute = to_redistribute_blue;
 			}
 
-			siril_log_message("readjusting layer %d to %g times bright\n",
+			siril_log_message(_("Readjusting layer %d to %g times bright\n"),
 					layer, 1.0-to_redistribute);
 			/* to_redistribute here is the maximum reduction we
 			 * need to give to the layer */

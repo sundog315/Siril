@@ -50,26 +50,26 @@
 #define MAX_STARS_FITTED 2000
 #undef DEBUG
 
-static char *tooltip_text[] = { "One Star Registration: This is the simplest method to register deep-sky images. "
+static char *tooltip_text[] = { gettext_noop("One Star Registration: This is the simplest method to register deep-sky images. "
 		"Because only one star is concerned for register, images are aligned using shifting"
 		"(at a fraction of pixel). No rotation or scaling are performed. "
-		"Shifts at pixel precision are saved in seq file.",
+		"Shifts at pixel precision are saved in seq file."),
 #ifdef HAVE_OPENCV
-		"Global Star Alignment: This is a more powerful and accurate algorithm (but also slower) "
+		gettext_noop("Global Star Alignment: This is a more powerful and accurate algorithm (but also slower) "
 		"to perform deep-sky images. The global matching is based on triangle similarity method for automatically "
 		"identify common stars in each image."
-		"A new sequence is created with the prefix of your choice (r_ by default). ",
+		"A new sequence is created with the prefix of your choice (r_ by default)."),
 #endif
-		"Image Pattern Alignment: This is a simple registration by translation method "
+		gettext_noop("Image Pattern Alignment: This is a simple registration by translation method "
 		"using cross correlation in the spatial domain. This method is fast and is used to register "
 		"planetary movies. It can also be used for some deep-sky images registration. "
-		"Shifts at pixel precision are saved in seq file."
+		"Shifts at pixel precision are saved in seq file.")
 #ifdef HAVE_OPENCV
 ,
-		"Enhanced Correlation Coefficient Maximization: This method is based on the enhanced correlation "
+		gettext_noop("Enhanced Correlation Coefficient Maximization: It is based on the enhanced correlation "
 		"coefficient maximization algorithm. This method is more complex and slower than Image Pattern Alignment "
 		"but no selection is required. It is good for moon surface images registration. Only translation is taken "
-		"into account yet."
+		"into account yet.")
 #endif
 };
 /* callback for the selected area event */
@@ -97,16 +97,16 @@ void initialize_registration_methods() {
 	GString *tip;
 	gchar *ctip;
 
-	reg_methods[i++] = new_reg_method("One Star Registration (deep-sky)",
+	reg_methods[i++] = new_reg_method(_("One Star Registration (deep-sky)"),
 			&register_shift_fwhm, REQUIRES_ANY_SELECTION, REGTYPE_DEEPSKY);
 #ifdef HAVE_OPENCV
-	reg_methods[i++] = new_reg_method("Global Star Alignment (deep-sky)",
+	reg_methods[i++] = new_reg_method(_("Global Star Alignment (deep-sky)"),
 			&register_star_alignment, REQUIRES_NO_SELECTION, REGTYPE_DEEPSKY);
 #endif
-	reg_methods[i++] = new_reg_method("Image Pattern Alignment (planetary - Full Disk)",
+	reg_methods[i++] = new_reg_method(_("Image Pattern Alignment (planetary - full disk)"),
 			&register_shift_dft, REQUIRES_SQUARED_SELECTION, REGTYPE_PLANETARY);
 #ifdef HAVE_OPENCV
-	reg_methods[i++] = new_reg_method("Enhanced Correlation Coefficient (planetary - Surfaces)",
+	reg_methods[i++] = new_reg_method(_("Enhanced Correlation Coefficient (planetary - surfaces)"),
 			&register_ecc, REQUIRES_NO_SELECTION, REGTYPE_PLANETARY);
 #endif
 	//if (theli_is_available())
@@ -115,7 +115,7 @@ void initialize_registration_methods() {
 
 	tip = g_string_new ("");
 	for (j = 0; j < i; j ++) {
-		g_string_append(tip, tooltip_text[j]);
+		g_string_append(tip, _(tooltip_text[j]));
 		if (j < i - 1)
 			g_string_append(tip, "\n\n");
 	}
@@ -130,7 +130,7 @@ void initialize_registration_methods() {
 	i = 0;
 	while (reg_methods[i] != NULL) {
 		gtk_combo_box_text_append_text(regcombo, reg_methods[i]->name);
-		siril_log_message("Added a registration method: %s\n",
+		siril_log_message(_("Added a registration method: %s\n"),
 				reg_methods[i]->name);
 		i++;
 	}
@@ -209,12 +209,12 @@ int register_shift_dft(struct registration_args *args) {
 	}
 	if (args->seq->regparam[args->layer]) {
 		siril_log_message(
-				"Recomputing already existing registration for this layers\n");
+				_("Recomputing already existing registration for this layer\n"));
 		current_regdata = args->seq->regparam[args->layer];
 	} else {
 		current_regdata = calloc(args->seq->number, sizeof(regdata));
 		if (current_regdata == NULL) {
-			siril_log_message("Error allocating registration data\n");
+			printf("Error allocating registration data\n");
 			return -2;
 		}
 	}
@@ -226,7 +226,7 @@ int register_shift_dft(struct registration_args *args) {
 		ref_image = args->seq->reference_image;
 
 	set_progress_bar_data(
-			"Register DFT: loading and processing reference frame",
+			_("Register DFT: loading and processing reference frame"),
 			PROGRESS_NONE);
 	memset(&fit_ref, 0, sizeof(fits));
 	ret = seq_read_frame_part(args->seq, args->layer, ref_image, &fit_ref,
@@ -234,7 +234,7 @@ int register_shift_dft(struct registration_args *args) {
 
 	if (ret) {
 		siril_log_message(
-				"Register: could not load first image to register, aborting.\n");
+				_("Register: could not load first image to register, aborting.\n"));
 		free(current_regdata);
 		clearfits(&fit_ref);
 		return ret;
@@ -286,7 +286,7 @@ int register_shift_dft(struct registration_args *args) {
 			char tmpmsg[1024], tmpfilename[256];
 
 			seq_get_image_filename(args->seq, frame, tmpfilename);
-			g_snprintf(tmpmsg, 1024, "Register: processing image %s\n",
+			g_snprintf(tmpmsg, 1024, _("Register: processing image %s\n"),
 					tmpfilename);
 			set_progress_bar_data(tmpmsg, PROGRESS_NONE);
 			if (!(seq_read_frame_part(args->seq, args->layer, frame, &fit,
@@ -384,8 +384,8 @@ int register_shift_dft(struct registration_args *args) {
 		args->seq->regparam[args->layer] = current_regdata;
 		normalizeQualityData(args, q_min, q_max);
 		update_used_memory();
-		siril_log_message("Registration finished.\n");
-		siril_log_color_message("Best frame: #%d.\n", "bold", q_index);
+		siril_log_message(_("Registration finished.\n"));
+		siril_log_color_message(_("Best frame: #%d.\n"), "bold", q_index);
 	}
 	return ret;
 }
@@ -423,7 +423,7 @@ int register_shift_fwhm(struct registration_args *args) {
 		ref_image = args->seq->reference_image;
 	if (!current_regdata[ref_image].fwhm_data) {
 		siril_log_message(
-				"Registration PSF: failed to compute PSF for reference frame at least\n");
+				_("Registration PSF: failed to compute PSF for reference frame at least\n"));
 		if (current_regdata != args->seq->regparam[args->layer])
 			free(current_regdata);
 		return -1;
@@ -471,8 +471,8 @@ int register_shift_fwhm(struct registration_args *args) {
 
 	args->seq->regparam[args->layer] = current_regdata;
 	update_used_memory();
-	siril_log_message("Registration finished.\n");
-	siril_log_color_message("Best frame: #%d with fwhm=%.3g.\n", "bold",
+	siril_log_message(_("Registration finished.\n"));
+	siril_log_color_message(_("Best frame: #%d with fwhm=%.3g.\n"), "bold",
 			fwhm_index, fwhm_min);
 	return 0;
 }
@@ -489,17 +489,17 @@ static void _print_result(TRANS *trans, float FWHMx, float FWHMy) {
 		shift.x = trans->a;
 		shift.y = -trans->d;
 		scale = sqrt(trans->b * trans->b + trans->c * trans->c);
-		siril_log_color_message("Matching stars: done\n", "green");
-		siril_log_message("%d pair matches.\n", trans->nr);
-		siril_log_message("scale:%*.3f\n", 13, scale);
-		siril_log_message("rotation:%+*.2f deg\n", 9, rotation * 180 / M_PI);
-		siril_log_message("dx:%+*.2f px\n", 15, shift.x);
-		siril_log_message("dy:%+*.2f px\n", 15, shift.y);
-		siril_log_message("FWHMx:%*.2f px\n", 12, FWHMx);
-		siril_log_message("FWHMy:%*.2f px\n", 12, FWHMy);
+		siril_log_color_message(_("Matching stars: done\n"), "green");
+		siril_log_message(_("%d pair matches.\n"), trans->nr);
+		siril_log_message(_("scale:%*.3f\n"), 13, scale);
+		siril_log_message(_("rotation:%+*.2f deg\n"), 9, rotation * 180 / M_PI);
+		siril_log_message(_("dx:%+*.2f px\n"), 15, shift.x);
+		siril_log_message(_("dy:%+*.2f px\n"), 15, shift.y);
+		siril_log_message(_("FWHMx:%*.2f px\n"), 12, FWHMx);
+		siril_log_message(_("FWHMy:%*.2f px\n"), 12, FWHMy);
 		break;
 	default:
-		siril_log_color_message("Not handled yet\n", "red");
+		siril_log_color_message(_("Not handled yet\n"), "red");
 	}
 }
 
@@ -530,7 +530,7 @@ int register_star_alignment(struct registration_args *args) {
 	} else {
 		current_regdata = calloc(args->seq->number, sizeof(regdata));
 		if (current_regdata == NULL) {
-			siril_log_message("Error allocating registration data\n");
+			printf("Error allocating registration data\n");
 			return -2;
 		}
 	}
@@ -549,13 +549,13 @@ int register_star_alignment(struct registration_args *args) {
 	/* first we're looking for stars in reference image */
 	ret = seq_read_frame(args->seq, ref_image, &fit);
 	if (ret) {
-		siril_log_message("Could not load reference image\n");
+		siril_log_message(_("Could not load reference image\n"));
 		if (current_regdata == args->seq->regparam[args->layer])
 			args->seq->regparam[args->layer] = NULL;
 		free(current_regdata);
 		return 1;
 	}
-	siril_log_color_message("Reference Image:\n", "green");
+	siril_log_color_message(_("Reference Image:\n"), "green");
 
 	if ((com.selection.w != 0) && (com.selection.h != 0) && args->matchSelection) {
 		com.stars = peaker(&fit, args->layer, &sf, &com.selection);
@@ -565,7 +565,7 @@ int register_star_alignment(struct registration_args *args) {
 	}
 	if (sf.nb_stars < AT_MATCH_MINPAIRS) {
 		siril_log_message(
-				"There are not enough stars in reference image to perform alignment\n");
+				_("There are not enough stars in reference image to perform alignment\n"));
 		if (current_regdata == args->seq->regparam[args->layer])
 			args->seq->regparam[args->layer] = NULL;
 		free(current_regdata);
@@ -585,8 +585,8 @@ int register_star_alignment(struct registration_args *args) {
 #endif
 	fitted_stars = (sf.nb_stars > MAX_STARS_FITTED) ? MAX_STARS_FITTED : sf.nb_stars;
 	FWHM_average(com.stars, &FWHMx, &FWHMy, fitted_stars);
-	siril_log_message("FWHMx:%*.2f px\n", 12, FWHMx);
-	siril_log_message("FWHMy:%*.2f px\n", 12, FWHMy);
+	siril_log_message(_("FWHMx:%*.2f px\n"), 12, FWHMx);
+	siril_log_message(_("FWHMy:%*.2f px\n"), 12, FWHMy);
 	current_regdata[ref_image].fwhm = FWHMx;
 
 	/* then we compare to other frames */
@@ -629,7 +629,7 @@ int register_star_alignment(struct registration_args *args) {
 					stars = peaker(&fit, args->layer, &sf, NULL);
 					if (sf.nb_stars < AT_MATCH_MINPAIRS) {
 						siril_log_message(
-								"Not enough stars. Image %d skipped\n", frame);
+								_("Not enough stars. Image %d skipped\n"), frame);
 						args->seq->new_total--;
 						failed++;
 						continue;
@@ -653,8 +653,7 @@ int register_star_alignment(struct registration_args *args) {
 									sf.nb_stars : fitted_stars;
 
 					if (star_match(stars, com.stars, nbpoints, &trans)) {
-						siril_log_color_message("Cannot perform"
-								"star matching. Image %d skipped\n",
+						siril_log_color_message(_("Cannot perform star matching. Image %d skipped\n"),
 								"red", frame);
 						args->seq->new_total--;
 						failed++;
@@ -701,15 +700,15 @@ int register_star_alignment(struct registration_args *args) {
 	args->seq->regparam[args->layer] = current_regdata;
 	update_used_memory();
 	if (!abort) {
-		siril_log_message("Registration finished.\n");
-		siril_log_color_message("%d images processed.\n", "green",
+		siril_log_message(_("Registration finished.\n"));
+		siril_log_color_message(_("%d images processed.\n"), "green",
 				args->seq->new_total + failed);
-		siril_log_color_message("Total: %d failed, %d registered.\n", "green",
+		siril_log_color_message(_("Total: %d failed, %d registered.\n"), "green",
 				failed, args->seq->new_total);
 		args->load_new_sequance = TRUE;
 	}
 	else {
-		siril_log_message("Registration aborted.\n");
+		siril_log_message(_("Registration aborted.\n"));
 		args->load_new_sequance = FALSE;
 	}
 
@@ -736,7 +735,7 @@ int register_ecc(struct registration_args *args) {
 	} else {
 		current_regdata = calloc(args->seq->number, sizeof(regdata));
 		if (current_regdata == NULL) {
-			siril_log_message("Error allocating registration data\n");
+			printf("Error allocating registration data\n");
 			return -2;
 		}
 	}
@@ -757,7 +756,7 @@ int register_ecc(struct registration_args *args) {
 	/* first we're looking for stars in reference image */
 	ret = seq_read_frame(args->seq, ref_image, &ref);
 	if (ret) {
-		siril_log_message("Could not load reference image\n");
+		siril_log_message(_("Could not load reference image\n"));
 		if (current_regdata == args->seq->regparam[args->layer])
 			args->seq->regparam[args->layer] = NULL;
 		free(current_regdata);
@@ -795,7 +794,7 @@ int register_ecc(struct registration_args *args) {
 			char tmpmsg[1024], tmpfilename[256];
 
 			seq_get_image_filename(args->seq, frame, tmpfilename);
-			g_snprintf(tmpmsg, 1024, "Register: processing image %s\n",
+			g_snprintf(tmpmsg, 1024, _("Register: processing image %s\n"),
 					tmpfilename);
 			set_progress_bar_data(tmpmsg, PROGRESS_NONE);
 
@@ -808,7 +807,7 @@ int register_ecc(struct registration_args *args) {
 
 					if (findTransform(&ref, &im, args->layer, &reg_param)) {
 						siril_log_message(
-								"Cannot perform ECC alignment for frame %d\n",
+								_("Cannot perform ECC alignment for frame %d\n"),
 								frame);
 						/* We exclude this frame */
 						com.seq.imgparam[frame].incl = FALSE;
@@ -846,10 +845,10 @@ int register_ecc(struct registration_args *args) {
 	normalizeQualityData(args, q_min, q_max);
 	clearfits(&ref);
 	update_used_memory();
-	siril_log_message("Registration finished.\n");
+	siril_log_message(_("Registration finished.\n"));
 	if (failed)
-		siril_log_color_message("%d frames were excluded.\n", "red", failed);
-	siril_log_color_message("Best frame: #%d.\n", "bold", q_index);
+		siril_log_color_message(_("%d frames were excluded.\n"), "red", failed);
+	siril_log_color_message(_("Best frame: #%d.\n"), "bold", q_index);
 
 	return 0;
 }
@@ -933,14 +932,14 @@ void update_reg_interface(gboolean dont_change_reg_radio) {
 		gtk_widget_set_visible(newSequence, FALSE);
 		if (nb_images_reg <= 1 && com.selection.w <= 0 && com.selection.h <= 0)
 			if (!sequence_is_loaded())
-				gtk_label_set_text(labelreginfo, "Load a sequence first.");
+				gtk_label_set_text(labelreginfo, _("Load a sequence first."));
 			else
 				gtk_label_set_text(labelreginfo,
-					"Select an area in image first, and select images in the sequence.");
+					_("Select an area in image first, and select images in the sequence."));
 		else if (nb_images_reg <= 1)
-			gtk_label_set_text(labelreginfo, "Select images in the sequence.");
+			gtk_label_set_text(labelreginfo, _("Select images in the sequence."));
 		else
-			gtk_label_set_text(labelreginfo, "Select an area in image first.");
+			gtk_label_set_text(labelreginfo, _("Select an area in image first."));
 	}
 }
 
@@ -1035,7 +1034,7 @@ void on_seqregister_button_clicked(GtkButton *button, gpointer user_data) {
 
 	if (get_thread_run()) {
 		siril_log_message(
-				"Another task is already in progress, ignoring new request.\n");
+				_("Another task is already in progress, ignoring new request.\n"));
 		return;
 	}
 
@@ -1045,8 +1044,8 @@ void on_seqregister_button_clicked(GtkButton *button, gpointer user_data) {
 	if (com.selection.w <= 0 && com.selection.h <= 0
 			&& method->sel != REQUIRES_NO_SELECTION) {
 		msg = siril_log_message(
-						"All prerequisites are not filled for registration. Select a rectangle first.\n");
-		show_dialog(msg, "Warning", "gtk-dialog-warning");
+				_("All prerequisites are not filled for registration. Select a rectangle first.\n"));
+		show_dialog(msg, _("Warning"), "gtk-dialog-warning");
 		return;
 	}
 	// TODO: check for reentrance
@@ -1075,7 +1074,7 @@ void on_seqregister_button_clicked(GtkButton *button, gpointer user_data) {
 	reg_args->prefix = gtk_entry_get_text(
 			GTK_ENTRY(gtk_builder_get_object(builder, "regseqname_entry")));
 
-	msg = siril_log_color_message("Registration: processing using method: %s\n",
+	msg = siril_log_color_message(_("Registration: processing using method: %s\n"),
 			"red", method->name);
 	msg[strlen(msg) - 1] = '\0';
 	gettimeofday(&(reg_args->t_start), NULL);
@@ -1155,7 +1154,7 @@ static gboolean end_register_idle(gpointer p) {
 		}
 #endif
 	}
-	set_progress_bar_data("Registration complete", PROGRESS_DONE);
+	set_progress_bar_data(_("Registration complete"), PROGRESS_DONE);
 	update_stack_interface();
 	set_cursor_waiting(FALSE);
 	gettimeofday(&t_end, NULL);

@@ -231,7 +231,7 @@ gpointer fourier_transform(gpointer p) {
 	struct timeval t_start, t_end;
 	WORD *from[3], *to[3];
 
-	siril_log_color_message("Fourier Transform: processing...\n", "red");
+	siril_log_color_message(_("Fourier Transform: processing...\n"), "red");
 	gettimeofday(&t_start, NULL);
 
 	//type must be either "ffti" or "fftd"
@@ -286,7 +286,7 @@ gpointer fourier_transform(gpointer p) {
 		else if (wfit[0].dft_ord[0] == 'R')	// REGULAR
 			args->type_order = 1;
 		else {
-			siril_log_message("There is something wrong in your files\n");
+			siril_log_message(_("There is something wrong in your files\n"));
 			gdk_threads_add_idle(end_fourier_transform, args);
 			return GINT_TO_POINTER(1);
 		}

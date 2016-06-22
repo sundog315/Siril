@@ -214,7 +214,7 @@ int changedir(const char *dir) {
 				return 1;
 			com.wd = getcwd(com.wd, PATH_MAX);
 		}
-		siril_log_message("Setting CWD (Current Working Directory) to '%s'\n",
+		siril_log_message(_("Setting CWD (Current Working Directory) to '%s'\n"),
 				com.wd);
 		set_GUI_CWD();
 
@@ -224,7 +224,7 @@ int changedir(const char *dir) {
 				str);
 		return 0;
 	}
-	siril_log_message("Could not change directory.\n");
+	siril_log_message(_("Could not change directory.\n"));
 	return 1;
 }
 
@@ -408,7 +408,7 @@ void expand_home_in_filename(char *filename, int size) {
 		char *homepath = getenv("HOME");
 		int j, homelen = strlen(homepath);
 		if (len + homelen > size - 1) {
-			siril_log_message("file name is too long, not expanding it\n");
+			siril_log_message(_("Filename is too long, not expanding it\n"));
 			return;
 		}
 		for (j = len; j > 0; j--)		// edit in place
@@ -611,7 +611,7 @@ char* str_append(char** data, const char* newdata) {
 	int len = (*data ? strlen(*data) : 0);
 	if ((p = realloc(*data, len + strlen(newdata) + 1)) == NULL) {
 		free(p);
-		siril_log_message("str_append: error allocating data\n");
+		printf("str_append: error allocating data\n");
 		return NULL;
 	}
 	*data = p;

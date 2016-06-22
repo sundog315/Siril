@@ -46,13 +46,13 @@ static int readinitfile() {
 
 	if (config_read_file(&config, com.initfile) == CONFIG_FALSE)
 		return 1;
-	siril_log_message("Loading init file: '%s'\n", com.initfile);
+	siril_log_message(_("Loading init file: '%s'\n"), com.initfile);
 
 	/* Working directory */
 	if (config_lookup_string(&config, keywords[WD], &dir)) {
 		if (changedir(dir)) {
 			siril_log_message(
-					"Reverting current working directory to startup directory, the saved directory is not available anymore\n");
+					_("Reverting current working directory to startup directory, the saved directory is not available anymore\n"));
 			set_GUI_CWD();
 			writeinitfile();
 		}

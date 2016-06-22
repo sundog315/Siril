@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-SUBDIRS = src
+SUBDIRS = po src
 
 install-data-local:
 	@$(NORMAL_INSTALL)
@@ -19,3 +19,6 @@ install-data-local:
 	$(INSTALL_DATA) AUTHORS LICENSE $(DESTDIR)$(docdir)
 	$(mkinstalldirs) $(DESTDIR)$(mandir)/man1
 	$(INSTALL_DATA) siril.1.gz $(DESTDIR)$(mandir)/man1
+
+ACLOCAL_AMFLAGS = -I m4
+EXTRA_DIST = config.rpath

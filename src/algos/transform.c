@@ -138,7 +138,7 @@ float *f_vector_alloc(Nbr_Elem)
 
 	Vector = (float*) calloc ((unsigned)Nbr_Elem * sizeof (float),1);
 	if (Vector == NULL) {
-		siril_log_message("wavelet: memory error\n");
+		printf("wavelet: memory error\n");
 	}	
 	return(Vector);
 }
@@ -197,7 +197,7 @@ int Nbr_Plan;
 	Exp = (double) Nbr_Plan + 2.;
 	temp = pow(2., Exp) + 0.5;
 	if (Min < temp) {
-		siril_log_message("wavelet_transform_data: bad plane number\n");
+		siril_log_message(_("wavelet_transform_data: bad plane number\n"));
 		return 1;
 	}
 	
@@ -213,7 +213,7 @@ int Nbr_Plan;
 			pave_2d_tfo (Imag, Pave, Nl, Nc, Nbr_Plan, Type_Transform);
 			break;
 		default:
-			siril_log_message("wavelet_transform_data: wrong transform type\n");
+			printf("wavelet_transform_data: wrong transform type\n");
 			return 1;
 			break;
 	} 

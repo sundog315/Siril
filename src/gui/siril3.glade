@@ -581,6 +581,7 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
 select a filter from the list or
 enter a visible wavelength in nm</property>
                 <property name="justify">center</property>
+                <property name="wrap">True</property>
               </object>
               <packing>
                 <property name="left_attach">0</property>
@@ -849,7 +850,7 @@ enter a visible wavelength in nm</property>
       <object class="GtkMenuItem" id="menu_rgb_savetiff">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="label" translatable="yes">Save TIFF image to 24- or 48-bit TIFF</property>
+        <property name="label" translatable="yes">Save RGB image to 24- or 48-bit TIFF</property>
         <property name="use_underline">True</property>
         <signal name="activate" handler="on_menu_rgb_savetiff_activate" swapped="no"/>
       </object>
@@ -919,7 +920,7 @@ enter a visible wavelength in nm</property>
   </object>
   <object class="GtkWindow" id="main_window">
     <property name="can_focus">False</property>
-    <property name="title" translatable="yes">siril-0.9.0</property>
+    <property name="title">siril-0.9.0</property>
     <property name="default_width">700</property>
     <property name="default_height">600</property>
     <accel-groups>
@@ -2191,6 +2192,7 @@ enter a visible wavelength in nm</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">True</property>
+                                    <property name="tooltip_text" translatable="yes">Clear background samples.</property>
                                     <property name="use_stock">True</property>
                                     <signal name="clicked" handler="on_bkgClearSamples_clicked" swapped="no"/>
                                   </object>
@@ -2317,6 +2319,7 @@ enter a visible wavelength in nm</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">This is the distance in pixels between two adjacent background sample boxes.</property>
                                         <property name="width_chars">6</property>
+                                        <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_bkg_Box_sep</property>
                                         <property name="climb_rate">1</property>
                                         <property name="snap_to_ticks">True</property>
@@ -2335,6 +2338,7 @@ enter a visible wavelength in nm</property>
                                         <property name="tooltip_text" translatable="yes">This is the radius in pixels of a background sample box. Multiply by 2 to have the length of a box.</property>
                                         <property name="width_chars">6</property>
                                         <property name="max_width_chars">3</property>
+                                        <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_bkg_size_box</property>
                                         <property name="climb_rate">1</property>
                                         <property name="snap_to_ticks">True</property>
@@ -2401,6 +2405,7 @@ enter a visible wavelength in nm</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">This parameter indicates the tolerance of local sample rejection, in sigma units.</property>
                                         <property name="width_chars">6</property>
+                                        <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_bkg_tolerance</property>
                                         <property name="climb_rate">0.01</property>
                                         <property name="digits">3</property>
@@ -2468,6 +2473,7 @@ enter a visible wavelength in nm</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">Tolerance of global sample rejection, in sigma units.</property>
                                         <property name="width_chars">6</property>
+                                        <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_bkg_deviation</property>
                                         <property name="climb_rate">0.01</property>
                                         <property name="digits">3</property>
@@ -2497,6 +2503,7 @@ enter a visible wavelength in nm</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">This is the factor multiplied by the deviation parameter in order to include more dark pixels in the background evaluation.</property>
                                         <property name="width_chars">6</property>
+                                        <property name="input_purpose">number</property>
                                         <property name="adjustment">adj_bkg_unbalance</property>
                                         <property name="climb_rate">0.01</property>
                                         <property name="digits">3</property>
@@ -2592,7 +2599,7 @@ enter a visible wavelength in nm</property>
                                       <object class="GtkSpinButton" id="spinbutton_bkg_Box_s_p_row">
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
-                                        <property name="tooltip_text" translatable="yes">This is the of sample box in a row.</property>
+                                        <property name="tooltip_text" translatable="yes">This is the number of sample box in a row.</property>
                                         <property name="text" translatable="yes">5</property>
                                         <property name="adjustment">adjustment_bkg_s_p_row</property>
                                         <property name="climb_rate">1</property>
@@ -2924,6 +2931,7 @@ The higher the degree order is, the stronger the gradient can be remove.</proper
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_markup" translatable="yes">Click on this button to show the image.</property>
                                     <property name="tooltip_text" translatable="yes">Click on this button to show the image.</property>
+                                    <property name="halign">start</property>
                                     <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
                                     <signal name="toggled" handler="on_radiobutton_bkg_toggled" swapped="no"/>
@@ -2943,6 +2951,7 @@ The higher the degree order is, the stronger the gradient can be remove.</proper
                                     <property name="has_tooltip">True</property>
                                     <property name="tooltip_markup" translatable="yes">Click on this button to show the background computed.</property>
                                     <property name="tooltip_text" translatable="yes">Click on this button to show the background computed.</property>
+                                    <property name="halign">start</property>
                                     <property name="draw_indicator">True</property>
                                     <property name="group">radiobutton_bkg_img</property>
                                   </object>
@@ -3016,6 +3025,9 @@ Division: it is mainly used to correct multiplicative phenomena, such as vignett
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
+                    <property name="tooltip_text" translatable="yes">This will compute the synthetic background.</property>
+                    <property name="margin_left">20</property>
+                    <property name="margin_right">20</property>
                     <signal name="clicked" handler="on_bkgCompute_clicked" swapped="no"/>
                   </object>
                   <packing>
@@ -3033,6 +3045,8 @@ Division: it is mainly used to correct multiplicative phenomena, such as vignett
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">This will apply the selected correction.</property>
                     <property name="valign">center</property>
+                    <property name="margin_left">20</property>
+                    <property name="margin_right">20</property>
                     <signal name="clicked" handler="on_button_bkg_correct_clicked" swapped="no"/>
                   </object>
                   <packing>
@@ -3216,6 +3230,7 @@ If the parameters is null, so no filter is apply at all.</property>
 This is useful when modulation parameter is different to 1 helping the whole process to converge to better result.</property>
                     <property name="halign">end</property>
                     <property name="width_chars">3</property>
+                    <property name="input_purpose">number</property>
                     <property name="adjustment">adj_median_iterations</property>
                     <property name="numeric">True</property>
                     <property name="value">1</property>
@@ -3747,7 +3762,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="tooltip_text" translatable="yes">Prefix of the image names resulting from the unband process.</property>
                 <property name="max_length">10</property>
                 <property name="width_chars">10</property>
-                <property name="text" translatable="yes">unband_</property>
+                <property name="text">unband_</property>
               </object>
               <packing>
                 <property name="left_attach">2</property>
@@ -3906,6 +3921,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="text" translatable="yes">0</property>
+                <property name="input_purpose">number</property>
                 <property name="adjustment">adjustment_lum_x</property>
               </object>
               <packing>
@@ -3919,6 +3935,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="text" translatable="yes">0</property>
+                <property name="input_purpose">number</property>
                 <property name="adjustment">adjustment_lum_y</property>
               </object>
               <packing>
@@ -4038,7 +4055,7 @@ Modifying parameters in this windows afterward will void the colour balance, and
                     <items>
                       <item translatable="yes">HSL composition</item>
                       <item translatable="yes">HSV composition</item>
-                      <item translatable="yes">CIELAB composition</item>
+                      <item translatable="yes">CIE L*a*b* composition</item>
                     </items>
                     <signal name="changed" handler="on_composition_combo_coloringtype_changed" swapped="no"/>
                   </object>
@@ -4316,7 +4333,7 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="max_length">10</property>
                     <property name="width_chars">10</property>
                     <property name="max_width_chars">10</property>
-                    <property name="text" translatable="yes">cc_</property>
+                    <property name="text">cc_</property>
                   </object>
                   <packing>
                     <property name="left_attach">2</property>
@@ -4377,6 +4394,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                 <property name="invisible_char">●</property>
                                 <property name="width_chars">6</property>
                                 <property name="text" translatable="yes">50,00</property>
+                                <property name="input_purpose">number</property>
                                 <property name="adjustment">adjSigCosmeCold</property>
                                 <property name="climb_rate">0.01</property>
                                 <property name="digits">2</property>
@@ -4414,6 +4432,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                 <property name="hexpand">True</property>
                                 <property name="width_chars">6</property>
                                 <property name="text" translatable="yes">50,00</property>
+                                <property name="input_purpose">number</property>
                                 <property name="adjustment">adjSigCosmeHot</property>
                                 <property name="climb_rate">0.01</property>
                                 <property name="digits">2</property>
@@ -4566,7 +4585,7 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="max_length">10</property>
                 <property name="width_chars">10</property>
                 <property name="max_width_chars">10</property>
-                <property name="text" translatable="yes">cropped_</property>
+                <property name="text">cropped_</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -4743,7 +4762,7 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="margin_left">6</property>
                 <property name="margin_right">6</property>
                 <property name="hexpand">True</property>
-                <property name="label" translatable="yes">msg</property>
+                <property name="label">msg</property>
                 <property name="wrap">True</property>
               </object>
               <packing>
@@ -4912,6 +4931,7 @@ Uncheck if images come from a monochrome sensor.</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
+                        <property name="halign">start</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -4927,6 +4947,7 @@ Uncheck if images come from a monochrome sensor.</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="receives_default">False</property>
+                        <property name="halign">start</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <property name="group">fft_centered</property>
@@ -4949,6 +4970,7 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="receives_default">False</property>
+                    <property name="halign">start</property>
                     <property name="active">True</property>
                     <property name="draw_indicator">True</property>
                   </object>
@@ -5327,6 +5349,7 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="invisible_char">●</property>
                 <property name="max_width_chars">7</property>
                 <property name="text" translatable="yes">2</property>
+                <property name="input_purpose">number</property>
                 <property name="adjustment">adj_extract_w</property>
                 <property name="climb_rate">1</property>
                 <property name="numeric">True</property>
@@ -5420,6 +5443,7 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="can_focus">True</property>
                     <property name="tooltip_text" translatable="yes">Horizontal Zoom</property>
                     <property name="text" translatable="yes">1</property>
+                    <property name="input_purpose">number</property>
                     <property name="adjustment">histoAdjZoomH</property>
                     <property name="numeric">True</property>
                     <property name="value">1</property>
@@ -5442,6 +5466,7 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="can_focus">True</property>
                     <property name="tooltip_text" translatable="yes">Vertical Zoom</property>
                     <property name="text" translatable="yes">1</property>
+                    <property name="input_purpose">number</property>
                     <property name="adjustment">histoAdjZoomV</property>
                     <property name="numeric">True</property>
                     <property name="value">1</property>
@@ -5648,7 +5673,7 @@ Uncheck if images come from a monochrome sensor.</property>
               <object class="GtkToolButton" id="histoToolAutoStretch">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="tooltip_text" translatable="yes">Apply autostretch algorithm to images</property>
+                <property name="tooltip_text" translatable="yes">Apply autostretch algorithm to image</property>
                 <property name="label" translatable="yes">autoStretch</property>
                 <property name="use_underline">True</property>
                 <property name="stock_id">gtk-execute</property>
@@ -5874,7 +5899,7 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="max_length">9</property>
                 <property name="width_chars">10</property>
                 <property name="max_width_chars">9</property>
-                <property name="text" translatable="yes">0.5000000</property>
+                <property name="text">0.5000000</property>
                 <property name="overwrite_mode">True</property>
                 <property name="input_purpose">digits</property>
                 <signal name="changed" handler="on_histoMidEntry_changed" swapped="no"/>
@@ -5892,7 +5917,7 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="max_length">9</property>
                 <property name="width_chars">10</property>
                 <property name="max_width_chars">9</property>
-                <property name="text" translatable="yes">0.0000000</property>
+                <property name="text">0.0000000</property>
                 <property name="overwrite_mode">True</property>
                 <property name="input_purpose">digits</property>
                 <signal name="changed" handler="on_histoShadEntry_changed" swapped="no"/>
@@ -5910,7 +5935,7 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="max_length">9</property>
                 <property name="width_chars">10</property>
                 <property name="max_width_chars">9</property>
-                <property name="text" translatable="yes">1.0000000</property>
+                <property name="text">1.0000000</property>
                 <property name="overwrite_mode">True</property>
                 <property name="input_purpose">digits</property>
                 <signal name="changed" handler="on_histoHighEntry_changed" swapped="no"/>
@@ -6078,6 +6103,7 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="hexpand">True</property>
                     <property name="width_chars">9</property>
                     <property name="text" translatable="yes">100,00</property>
+                    <property name="input_purpose">number</property>
                     <property name="adjustment">resample_Y</property>
                     <property name="climb_rate">0.01</property>
                     <property name="digits">2</property>
@@ -6099,6 +6125,7 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="invisible_char">●</property>
                     <property name="width_chars">9</property>
                     <property name="text" translatable="yes">100,00</property>
+                    <property name="input_purpose">number</property>
                     <property name="adjustment">resample_X</property>
                     <property name="climb_rate">0.01</property>
                     <property name="digits">2</property>
@@ -6427,6 +6454,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
+                                        <property name="halign">start</property>
                                         <property name="hexpand">True</property>
                                         <property name="draw_indicator">True</property>
                                         <property name="group">radiobutton16bits</property>
@@ -6444,6 +6472,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
+                                        <property name="halign">start</property>
                                         <property name="active">True</property>
                                         <property name="draw_indicator">True</property>
                                       </object>
@@ -6495,6 +6524,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="receives_default">False</property>
+                                        <property name="halign">start</property>
                                         <property name="active">True</property>
                                         <property name="draw_indicator">True</property>
                                       </object>
@@ -6513,6 +6543,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="can_focus">False</property>
                                         <property name="receives_default">False</property>
                                         <property name="tooltip_text" translatable="yes">Not available</property>
+                                        <property name="halign">start</property>
                                         <property name="draw_indicator">True</property>
                                         <property name="group">radiobuttonCompNone</property>
                                       </object>
@@ -7045,7 +7076,8 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="visible">True</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
-                                    <property name="tooltip_text" translatable="yes">When this option is enabled,  coefficients for each channel are automatically computed. You can choose your own multiplier by unchecking this box.</property>
+                                    <property name="tooltip_text" translatable="yes">When this option is enabled, coefficients for each channel are automatically computed. You can choose your own multiplier by unchecking this box.</property>
+                                    <property name="halign">start</property>
                                     <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
                                     <signal name="toggled" handler="on_checkbutton_multipliers_toggled" swapped="no"/>
@@ -7067,6 +7099,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                       <object class="GtkLabel" id="label51">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
+                                        <property name="halign">start</property>
                                         <property name="label" translatable="yes">Red</property>
                                         <property name="justify">center</property>
                                       </object>
@@ -7087,9 +7120,11 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="width_chars">5</property>
                                         <property name="text" translatable="yes">1,00</property>
                                         <property name="progress_pulse_step">0.0099999997764825821</property>
+                                        <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_red</property>
                                         <property name="climb_rate">0.001</property>
                                         <property name="digits">2</property>
+                                        <property name="numeric">True</property>
                                         <property name="value">1</property>
                                       </object>
                                       <packing>
@@ -7116,6 +7151,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                       <object class="GtkLabel" id="label53">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
+                                        <property name="halign">start</property>
                                         <property name="label" translatable="yes">Blue</property>
                                         <property name="justify">center</property>
                                       </object>
@@ -7136,9 +7172,11 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="width_chars">5</property>
                                         <property name="text" translatable="yes">1,00</property>
                                         <property name="progress_pulse_step">0.0099999997764825821</property>
+                                        <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_blue</property>
                                         <property name="climb_rate">0.01</property>
                                         <property name="digits">2</property>
+                                        <property name="numeric">True</property>
                                         <property name="value">1</property>
                                       </object>
                                       <packing>
@@ -7164,6 +7202,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                       <object class="GtkLabel" id="label52">
                                         <property name="visible">True</property>
                                         <property name="can_focus">False</property>
+                                        <property name="halign">start</property>
                                         <property name="label" translatable="yes">Brightness</property>
                                         <property name="justify">center</property>
                                       </object>
@@ -7184,9 +7223,11 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="width_chars">5</property>
                                         <property name="text" translatable="yes">1,00</property>
                                         <property name="progress_pulse_step">0.0099999997764825821</property>
+                                        <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_brightness</property>
                                         <property name="climb_rate">0.01</property>
                                         <property name="digits">2</property>
+                                        <property name="numeric">True</property>
                                         <property name="value">1</property>
                                       </object>
                                       <packing>
@@ -7209,6 +7250,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">When this option is enabled, no black point correction is applied to raw images.</property>
+                                    <property name="halign">start</property>
                                     <property name="draw_indicator">True</property>
                                   </object>
                                   <packing>
@@ -7320,6 +7362,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">No gamma correction is applied to the image.</property>
+                                    <property name="halign">start</property>
                                     <property name="active">True</property>
                                     <property name="draw_indicator">True</property>
                                   </object>
@@ -7336,6 +7379,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">Apply a specific gamma curve to the image.</property>
+                                    <property name="halign">start</property>
                                     <property name="draw_indicator">True</property>
                                     <property name="group">radiobutton_gamm0</property>
                                   </object>
@@ -7352,6 +7396,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">Apply a specific gamma curve to the image</property>
+                                    <property name="halign">start</property>
                                     <property name="draw_indicator">True</property>
                                     <property name="group">radiobutton_gamm0</property>
                                   </object>
@@ -7406,6 +7451,7 @@ specified by the camera</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">By default, libraw uses a fixed white balance based on a color chart illuminated with a standard D65 lamp. If you check this box, libraw will try to use data specified by your camera.</property>
+                                    <property name="halign">start</property>
                                     <property name="draw_indicator">True</property>
                                     <signal name="toggled" handler="on_checkbutton_cam_toggled" swapped="no"/>
                                   </object>
@@ -7423,6 +7469,7 @@ by averaging the entire image</property>
                                     <property name="can_focus">True</property>
                                     <property name="receives_default">False</property>
                                     <property name="tooltip_text" translatable="yes">By default, libraw uses a fixed white balance based on a color chart illuminated with a standard D65 lamp. If you check this box, libraw will compute the white balance by averaging the entire image.</property>
+                                    <property name="halign">start</property>
                                     <property name="draw_indicator">True</property>
                                     <signal name="toggled" handler="on_checkbutton_auto_toggled" swapped="no"/>
                                   </object>
@@ -7502,7 +7549,8 @@ by averaging the entire image</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">If this box is checked, Siril will automatically apply the bayer pattern found in the file's header. If the result looks wrong uncheck this box and choose manually your pattern in the Debayer box below.</property>
+                                <property name="tooltip_text" translatable="yes">If this box is checked, Siril will automatically apply the Bayer pattern found in the file's header. If the result looks wrong uncheck this box and choose manually your pattern in the Debayer box below.</property>
+                                <property name="halign">start</property>
                                 <property name="draw_indicator">True</property>
                               </object>
                               <packing>
@@ -7587,7 +7635,7 @@ by averaging the entire image</property>
                               <object class="GtkLabel" id="label95">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="tooltip_text" translatable="yes">Select a interpolation method to perform demosaicing.</property>
+                                <property name="tooltip_text" translatable="yes">Select an interpolation method to perform demosaicing.</property>
                                 <property name="label" translatable="yes">Debayer interpolation: </property>
                               </object>
                               <packing>
@@ -7834,7 +7882,7 @@ by averaging the entire image</property>
                         <property name="can_focus">False</property>
                         <property name="margin_top">10</property>
                         <property name="margin_bottom">10</property>
-                        <property name="label" translatable="yes">&lt;b&gt;Camera and Lens Settings&lt;/b&gt;</property>
+                        <property name="label" translatable="yes">&lt;b&gt;Camera and Optics&lt;/b&gt;</property>
                         <property name="use_markup">True</property>
                         <property name="single_line_mode">True</property>
                       </object>
@@ -8020,6 +8068,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                                 <property name="halign">center</property>
                                 <property name="valign">center</property>
                                 <property name="width_chars">4</property>
+                                <property name="input_purpose">number</property>
                                 <property name="adjustment">adj_mem</property>
                                 <property name="climb_rate">0.050000000223517416</property>
                                 <property name="digits">1</property>
@@ -8214,9 +8263,11 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                   </object>
                   <packing>
                     <property name="left_attach">1</property>
-                    <property name="top_attach">1</property>
-                    <property name="height">2</property>
+                    <property name="top_attach">2</property>
                   </packing>
+                </child>
+                <child>
+                  <placeholder/>
                 </child>
               </object>
               <packing>
@@ -8501,6 +8552,7 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Size in pixels of the search box.</property>
                         <property name="width_chars">5</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adjstarfinder_radius</property>
                         <property name="numeric">True</property>
                         <property name="value">7</property>
@@ -8515,9 +8567,10 @@ WARNING: Reducing the ratio of memory allocated to computation will degrade perf
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Threshold value above the noise for stars detection.
-The median and standard deviation values of the image are determined, then the threshold is : median + [threshold] x stdev.
+The median and standard deviation values of the image are determined, then the threshold is: median + [threshold] x stdev.
 The default value for threshold is 1.00.</property>
                         <property name="width_chars">5</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adjstarfinder_threshold</property>
                         <property name="digits">2</property>
                         <property name="numeric">True</property>
@@ -8571,6 +8624,7 @@ The default value for threshold is 1.00.</property>
 
 Warning: ensure you have a good reason to change this value because it may degrade the star detection.</property>
                         <property name="width_chars">5</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adjstarfinder_roundness</property>
                         <property name="climb_rate">0.10000000000000001</property>
                         <property name="digits">1</property>
@@ -8630,7 +8684,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                   <object class="GtkToolButton" id="process_starfinder_button">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">process_starfinder_button</property>
                     <property name="use_underline">True</property>
                     <property name="icon_widget">image_starfinder</property>
                     <signal name="clicked" handler="on_process_starfinder_button_clicked" swapped="no"/>
@@ -8645,7 +8698,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="is_important">True</property>
-                    <property name="label" translatable="yes">sum_button</property>
                     <property name="icon_widget">image_sum</property>
                     <signal name="clicked" handler="on_sum_button_clicked" swapped="no"/>
                   </object>
@@ -8671,7 +8723,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                     <property name="has_tooltip">True</property>
                     <property name="tooltip_markup" translatable="yes">Export PSF parameters in a ASCII file</property>
                     <property name="tooltip_text" translatable="yes">Export PSF parameters in a ASCII file</property>
-                    <property name="label" translatable="yes">exp_button</property>
                     <property name="use_underline">True</property>
                     <property name="icon_widget">image_export</property>
                     <signal name="clicked" handler="on_export_button_clicked" swapped="no"/>
@@ -8698,7 +8749,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                     <property name="has_tooltip">True</property>
                     <property name="tooltip_markup" translatable="yes">Remove selected star from the list</property>
                     <property name="tooltip_text" translatable="yes">Remove selected star from the list</property>
-                    <property name="label" translatable="yes">remove_button</property>
                     <property name="use_underline">True</property>
                     <property name="icon_widget">image_remove1</property>
                     <signal name="clicked" handler="on_remove_button_clicked" swapped="no"/>
@@ -8715,7 +8765,6 @@ Warning: ensure you have a good reason to change this value because it may degra
                     <property name="has_tooltip">True</property>
                     <property name="tooltip_markup" translatable="yes">Remove all stars from the list</property>
                     <property name="tooltip_text" translatable="yes">Remove all stars from the list</property>
-                    <property name="label" translatable="yes">remove_all_button</property>
                     <property name="use_underline">True</property>
                     <property name="stock_id">gtk-remove</property>
                     <signal name="clicked" handler="on_remove_all_button_clicked" swapped="no"/>
@@ -8897,7 +8946,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                             <property name="hexpand">False</property>
                             <property name="width_chars">1</property>
                             <property name="max_width_chars">2</property>
-                            <property name="input_purpose">digits</property>
+                            <property name="input_purpose">number</property>
                             <property name="adjustment">adj_plans_w</property>
                             <property name="snap_to_ticks">True</property>
                             <property name="numeric">True</property>
@@ -9126,7 +9175,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="can_focus">True</property>
                         <property name="width_chars">4</property>
                         <property name="max_width_chars">5</property>
-                        <property name="input_purpose">digits</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adj_w0</property>
                         <property name="digits">2</property>
                         <property name="numeric">True</property>
@@ -9143,7 +9192,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="can_focus">True</property>
                         <property name="width_chars">4</property>
                         <property name="max_width_chars">5</property>
-                        <property name="input_purpose">digits</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adj_w1</property>
                         <property name="digits">2</property>
                         <property name="numeric">True</property>
@@ -9160,7 +9209,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="can_focus">True</property>
                         <property name="width_chars">4</property>
                         <property name="max_width_chars">5</property>
-                        <property name="input_purpose">digits</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adj_w2</property>
                         <property name="digits">2</property>
                         <property name="numeric">True</property>
@@ -9177,7 +9226,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="can_focus">True</property>
                         <property name="width_chars">4</property>
                         <property name="max_width_chars">5</property>
-                        <property name="input_purpose">digits</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adj_w3</property>
                         <property name="digits">2</property>
                         <property name="numeric">True</property>
@@ -9194,7 +9243,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="can_focus">True</property>
                         <property name="width_chars">4</property>
                         <property name="max_width_chars">5</property>
-                        <property name="input_purpose">digits</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adj_w4</property>
                         <property name="digits">2</property>
                         <property name="numeric">True</property>
@@ -9211,7 +9260,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="can_focus">True</property>
                         <property name="width_chars">4</property>
                         <property name="max_width_chars">5</property>
-                        <property name="input_purpose">digits</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adj_w5</property>
                         <property name="digits">2</property>
                         <property name="numeric">True</property>
@@ -9420,6 +9469,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                 <property name="width_chars">6</property>
                 <property name="max_width_chars">7</property>
                 <property name="text" translatable="yes">0,00</property>
+                <property name="input_purpose">number</property>
                 <property name="adjustment">rotation_angle</property>
                 <property name="climb_rate">0.01</property>
                 <property name="digits">2</property>
@@ -9516,7 +9566,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                     </child>
                     <child>
                       <object class="GtkImageMenuItem" id="save1">
-                        <property name="label">Save as</property>
+                        <property name="label" translatable="yes">Save as</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="image">image3</property>
@@ -10365,7 +10415,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="max_length">5</property>
                         <property name="width_chars">5</property>
                         <property name="max_width_chars">5</property>
-                        <property name="text" translatable="yes">1</property>
+                        <property name="text">1</property>
                         <property name="input_purpose">digits</property>
                       </object>
                       <packing>
@@ -10379,7 +10429,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">Debayer single-channel images (CFA format) using the bayer matrix layout given in the settings. Also applies to image opening, not only conversion.
+                        <property name="tooltip_text" translatable="yes">Debayer single-channel images (CFA format) using the Bayer matrix layout given in the settings. Also applies to image opening, not only conversion.
 Only for RAW and FITS input images.
 Colour image target also applies to the debayer result for conversion.</property>
                         <property name="draw_indicator">True</property>
@@ -10485,7 +10535,7 @@ Films of any type can be converted as FITS or SER.
 SER files are directly handled as a sequence, and are not yet available for conversion.</property>
                         <property name="halign">start</property>
                         <property name="valign">start</property>
-                        <property name="label" translatable="yes">- list is filled at runtime -</property>
+                        <property name="label">- list is filled at runtime -</property>
                         <property name="wrap">True</property>
                       </object>
                       <packing>
@@ -10606,7 +10656,7 @@ SER files are directly handled as a sequence, and are not yet available for conv
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">Search current directory for sequences of FITS images.	</property>
+                        <property name="tooltip_text" translatable="yes">Search current directory for sequences of FITS images.</property>
                         <property name="use_underline">True</property>
                         <signal name="clicked" handler="on_checkseqbutton_clicked" swapped="no"/>
                       </object>
@@ -10717,6 +10767,7 @@ WARNING: it will erase all registration and statistics data.</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
                         <property name="text" translatable="yes">1</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adjustment5</property>
                         <property name="numeric">True</property>
                         <property name="value">1</property>
@@ -10736,6 +10787,7 @@ WARNING: it will erase all registration and statistics data.</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Whether or not the image is excluded from processing (the file itself is not deleted)</property>
+                        <property name="halign">start</property>
                         <property name="valign">center</property>
                         <property name="use_underline">True</property>
                         <property name="draw_indicator">True</property>
@@ -10755,6 +10807,7 @@ WARNING: it will erase all registration and statistics data.</property>
                         <property name="tooltip_text" translatable="yes">If set, the current image will be the reference image for registration.
 Only one image can be the reference image in a sequence, setting it will unset the image previously set as reference.
 If not set manually, the first image of the sequence is taken as reference.</property>
+                        <property name="halign">start</property>
                         <property name="valign">center</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_ref_frame_toggled" swapped="no"/>
@@ -10770,7 +10823,7 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">Exclude all images of the sequence  from the processing schedule</property>
+                        <property name="tooltip_text" translatable="yes">Exclude all images of the sequence from the processing schedule</property>
                         <property name="border_width">5</property>
                         <property name="use_underline">True</property>
                         <signal name="clicked" handler="on_seqexcludeall_button_clicked" swapped="no"/>
@@ -10956,7 +11009,7 @@ A first computation pass will be done on all images before exporting, it may tak
                             <property name="tooltip_text" translatable="yes">Delay between frames in the GIF animation, in centiseconds. Default, is 10cs, so 100ms.</property>
                             <property name="valign">center</property>
                             <property name="width_chars">4</property>
-                            <property name="text" translatable="yes">10</property>
+                            <property name="text">10</property>
                             <property name="input_purpose">number</property>
                           </object>
                           <packing>
@@ -10986,7 +11039,7 @@ A first computation pass will be done on all images before exporting, it may tak
                             <property name="tooltip_text" translatable="yes">The number of loops to do, between 0 and 511. This does not change the size of the output GIF file.</property>
                             <property name="valign">center</property>
                             <property name="width_chars">3</property>
-                            <property name="text" translatable="yes">3</property>
+                            <property name="text">3</property>
                             <property name="input_purpose">number</property>
                           </object>
                           <packing>
@@ -11026,7 +11079,7 @@ A first computation pass will be done on all images before exporting, it may tak
                             <property name="valign">center</property>
                             <property name="max_length">7</property>
                             <property name="width_chars">7</property>
-                            <property name="text" translatable="yes">10.000</property>
+                            <property name="text">10.000</property>
                             <property name="input_purpose">number</property>
                           </object>
                           <packing>
@@ -11061,7 +11114,7 @@ A first computation pass will be done on all images before exporting, it may tak
                             <property name="tooltip_text" translatable="yes">Width of output video</property>
                             <property name="valign">center</property>
                             <property name="width_chars">5</property>
-                            <property name="text" translatable="yes">640</property>
+                            <property name="text">640</property>
                             <property name="input_purpose">number</property>
                           </object>
                           <packing>
@@ -11091,7 +11144,7 @@ A first computation pass will be done on all images before exporting, it may tak
                             <property name="tooltip_text" translatable="yes">Height of output video</property>
                             <property name="valign">center</property>
                             <property name="width_chars">5</property>
-                            <property name="text" translatable="yes">480</property>
+                            <property name="text">480</property>
                             <property name="input_purpose">number</property>
                           </object>
                           <packing>
@@ -11201,7 +11254,7 @@ A first computation pass will be done on all images before exporting, it may tak
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">All images in the sequence will be divided by the master flat image (each pixel value). If available above, the bias will be removed from the flat before doing so.</property>
+                        <property name="tooltip_text" translatable="yes">All images in the sequence will be divided by the master flat image (each pixel value).</property>
                         <property name="halign">start</property>
                         <property name="use_underline">True</property>
                         <property name="draw_indicator">True</property>
@@ -11217,10 +11270,10 @@ A first computation pass will be done on all images before exporting, it may tak
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Enter the master flat file name here, or use the browse button.
-All images in the sequence will be divided by the master flat image (each pixel value). If available above, the bias will be removed from the flat before doing so.</property>
+All images in the sequence will be divided by the master flat image (each pixel value).</property>
                         <property name="hexpand">True</property>
                         <property name="width_chars">45</property>
-                        <property name="text" translatable="yes">master-flat.fit</property>
+                        <property name="text">master-flat.fit</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -11233,7 +11286,7 @@ All images in the sequence will be divided by the master flat image (each pixel 
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">All images in the sequence will be divided by the master flat image (each pixel value). If available above, the bias will be removed from the flat before doing so.</property>
+                        <property name="tooltip_text" translatable="yes">All images in the sequence will be divided by the master flat image (each pixel value).</property>
                         <property name="halign">start</property>
                         <property name="use_underline">True</property>
                         <signal name="clicked" handler="on_flatfile_button_clicked" swapped="no"/>
@@ -11284,7 +11337,7 @@ All images in the sequence will be divided by the master flat image (each pixel 
 The dark master image will be removed from all images in the sequence.</property>
                         <property name="hexpand">True</property>
                         <property name="width_chars">45</property>
-                        <property name="text" translatable="yes">master-dark.fit</property>
+                        <property name="text">master-dark.fit</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -11297,7 +11350,7 @@ The dark master image will be removed from all images in the sequence.</property
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">The bias/offset master image will be removed from all images in the sequence, but also from the flat image if it is used.</property>
+                        <property name="tooltip_text" translatable="yes">The bias/offset master image will be removed from all images in the sequence.</property>
                         <property name="halign">start</property>
                         <property name="use_underline">True</property>
                         <property name="draw_indicator">True</property>
@@ -11313,10 +11366,10 @@ The dark master image will be removed from all images in the sequence.</property
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Enter the master bias/offset file name here, or use the browse button.
-The bias/offset master image will be removed from all images in the sequence, but also from the flat image if it is used.</property>
+The bias/offset master image will be removed from all images in the sequence.</property>
                         <property name="hexpand">True</property>
                         <property name="width_chars">45</property>
-                        <property name="text" translatable="yes">master-offset.fit</property>
+                        <property name="text">master-offset.fit</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -11329,7 +11382,7 @@ The bias/offset master image will be removed from all images in the sequence, bu
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
-                        <property name="tooltip_text" translatable="yes">The bias/offset master image will be removed from all images in the sequence, but also from the flat image if it is used.</property>
+                        <property name="tooltip_text" translatable="yes">The bias/offset master image will be removed from all images in the sequence.</property>
                         <property name="halign">start</property>
                         <property name="use_underline">True</property>
                         <signal name="clicked" handler="on_offsetfile_button_clicked" swapped="no"/>
@@ -11344,8 +11397,7 @@ The bias/offset master image will be removed from all images in the sequence, bu
                         <property name="visible">True</property>
                         <property name="sensitive">False</property>
                         <property name="can_focus">True</property>
-                        <property name="tooltip_text" translatable="yes">Choose your own normalisation value.
-After preprocessing, check that no overflow have been detected in the console output.</property>
+                        <property name="tooltip_text" translatable="yes">Choose your own normalisation value.</property>
                         <property name="max_length">5</property>
                         <property name="width_chars">5</property>
                         <property name="max_width_chars">5</property>
@@ -11439,6 +11491,7 @@ WARNING: Do not apply dark optimization on master-dark if master-bias has not be
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Check if the target frames are CFA images.
 Uncheck if images come from a monochrome sensor.</property>
+                        <property name="halign">start</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_cosmCFACheck_toggled" swapped="no"/>
                       </object>
@@ -11474,6 +11527,7 @@ Uncheck if images come from a monochrome sensor.</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Check if you want to apply a hot pixel removal.
 Hot pixels are located on the master-dark.</property>
+                        <property name="halign">start</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_cosmEnabledCheck_toggled" swapped="no"/>
@@ -11914,6 +11968,7 @@ Warning: Make sure to draw a selection with a sufficient number of stars.</prope
                       <object class="GtkLabel" id="labelregisterinfo">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="halign">end</property>
                         <property name="label" translatable="yes">Load a sequence first.</property>
                         <attributes>
                           <attribute name="foreground" value="#bfb200000000"/>
@@ -11932,6 +11987,7 @@ Warning: Make sure to draw a selection with a sufficient number of stars.</prope
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Use this option to use the position of the star found in the previous image as new centre for the current image registration. This allows the selection area to be smaller, registration faster, and accounts for drift or images with a large number of stars.
 Warning: enabling this option requires the registration to not be parallelized, it will run on one CPU core only.</property>
+                        <property name="halign">end</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
@@ -12023,6 +12079,7 @@ To be enabled, the reference image must have been explicitly set and already dis
                         <property name="width_chars">4</property>
                         <property name="max_width_chars">3</property>
                         <property name="text" translatable="yes">0</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adjustment_shiftx</property>
                         <property name="numeric">True</property>
                         <signal name="value-changed" handler="on_spinbut_shift_value_change" swapped="no"/>
@@ -12053,6 +12110,7 @@ To be enabled, the reference image must have been explicitly set and already dis
                         <property name="width_chars">4</property>
                         <property name="max_width_chars">3</property>
                         <property name="text" translatable="yes">0</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adjustment_shifty</property>
                         <property name="numeric">True</property>
                         <signal name="value-changed" handler="on_spinbut_shift_value_change" swapped="no"/>
@@ -12195,7 +12253,7 @@ To be enabled, the reference image must have been explicitly set and already dis
                   <object class="GtkLabel" id="label35">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="label" translatable="yes">Stacking of images, either summing, median, mean with rejection or pixel maximum.</property>
+                    <property name="label" translatable="yes">Stacking of images, either summing, median, mean with rejection or pixel minimum/maximum.</property>
                     <attributes>
                       <attribute name="style" value="italic"/>
                       <attribute name="stretch" value="semi-condensed"/>
@@ -12353,6 +12411,7 @@ Pixels of the image are replaced by pixels at the same coordinates if intensity 
                         <property name="invisible_char">●</property>
                         <property name="width_chars">6</property>
                         <property name="max_width_chars">5</property>
+                        <property name="input_purpose">number</property>
                         <property name="adjustment">adjustment_stack_filter</property>
                         <property name="climb_rate">1</property>
                         <property name="digits">2</property>
@@ -12496,7 +12555,7 @@ median will be farthest than two given values in sigma units.
 replaced by the median value.
 - Winsorized Sigma Clipping is very similar to Sigma Clipping method but it uses an
 algorithm based on Huber's work [1] [2].
-- Linear FIt Clipping is an algorithm developed by Juan Conejero, main developer of
+- Linear Fit Clipping is an algorithm developed by Juan Conejero, main developer of
 PixInsight [2]. It fits the best straight line (y=ax+b) of the pixel stack and rejects
 outliers. This algorithm performs very well with large stack and images containing sky
 gradients with differing spatial distributions and orientations.
@@ -12693,7 +12752,7 @@ Siril uses a 32-bit internal image to process the stacking, which is then saved 
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="invisible_char">●</property>
-                        <property name="text" translatable="yes">stack_result.fit</property>
+                        <property name="text">stack_result.fit</property>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -12961,7 +13020,7 @@ However, multiplicative normalisation must be used with flat-field frames.</prop
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="tooltip_text" translatable="yes">The directory in which files will be read from and written to. Can be changed with the button Change dir on the right, or with the cd command.</property>
-                <property name="label" translatable="yes">/home/toto (filled at runtime)</property>
+                <property name="label">/home/toto (filled at runtime)</property>
                 <property name="ellipsize">start</property>
               </object>
               <packing>
@@ -13044,7 +13103,7 @@ However, multiplicative normalisation must be used with flat-field frames.</prop
               <object class="GtkLabel" id="labelseq">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">seq, 5 images selected (filled at runtime)</property>
+                <property name="label">seq, 5 images selected (filled at runtime)</property>
                 <property name="ellipsize">start</property>
               </object>
               <packing>
@@ -13064,7 +13123,7 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
                 <property name="width_chars">2</property>
                 <property name="max_width_chars">2</property>
                 <property name="progress_pulse_step">1</property>
-                <property name="input_purpose">digits</property>
+                <property name="input_purpose">number</property>
                 <property name="adjustment">adjCPU</property>
                 <property name="numeric">True</property>
                 <property name="update_policy">if-valid</property>
@@ -13086,7 +13145,7 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
                 <property name="tooltip_text" translatable="yes">Memory used by Siril</property>
                 <property name="valign">center</property>
                 <property name="hexpand">False</property>
-                <property name="label" translatable="yes">Mem: 200MB</property>
+                <property name="label">Mem: 200MB</property>
                 <property name="justify">right</property>
                 <property name="width_chars">15</property>
                 <property name="max_width_chars">15</property>
@@ -13146,7 +13205,7 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
             <property name="can_focus">False</property>
             <property name="margin_left">10</property>
             <property name="margin_right">10</property>
-            <property name="label" translatable="yes">Siril version, inserted at runtime.</property>
+            <property name="label">Siril version, inserted at runtime.</property>
             <property name="justify">center</property>
             <attributes>
               <attribute name="font-desc" value="TeX Gyre Heros Cn Bold Condensed 40"/>
@@ -13230,7 +13289,7 @@ and the Siril Development Team</property>
           <object class="GtkLabel" id="labelurl">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Free Astro URL, inserted at runtime</property>
+            <property name="label">Free Astro URL, inserted at runtime</property>
           </object>
           <packing>
             <property name="expand">False</property>
@@ -13343,6 +13402,7 @@ and the Siril Development Team</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
+            <property name="halign">start</property>
             <property name="draw_indicator">True</property>
             <signal name="toggled" handler="on_confirmDontShowButton_toggled" swapped="no"/>
           </object>
@@ -13464,6 +13524,7 @@ The Background Neutralization should be applied before this operation.</property
                                     <property name="tooltip_text" translatable="yes">x coordinate of the start of the background selection</property>
                                     <property name="editable">False</property>
                                     <property name="width_chars">6</property>
+                                    <property name="input_purpose">number</property>
                                     <property name="adjustment">adjustment_bkg_x</property>
                                     <property name="climb_rate">1</property>
                                     <property name="numeric">True</property>
@@ -13480,6 +13541,7 @@ The Background Neutralization should be applied before this operation.</property
                                     <property name="tooltip_text" translatable="yes">y coordinate of the start of the background selection</property>
                                     <property name="editable">False</property>
                                     <property name="width_chars">6</property>
+                                    <property name="input_purpose">number</property>
                                     <property name="adjustment">adjustment_bkg_y</property>
                                     <property name="numeric">True</property>
                                   </object>
@@ -13495,6 +13557,7 @@ The Background Neutralization should be applied before this operation.</property
                                     <property name="tooltip_text" translatable="yes">Width of the background selection</property>
                                     <property name="editable">False</property>
                                     <property name="width_chars">6</property>
+                                    <property name="input_purpose">number</property>
                                     <property name="adjustment">adjustment_bkg_w</property>
                                     <property name="numeric">True</property>
                                   </object>
@@ -13510,6 +13573,7 @@ The Background Neutralization should be applied before this operation.</property
                                     <property name="tooltip_text" translatable="yes">Height of the background selection</property>
                                     <property name="editable">False</property>
                                     <property name="width_chars">6</property>
+                                    <property name="input_purpose">number</property>
                                     <property name="adjustment">adjustment_bkg_h</property>
                                     <property name="numeric">True</property>
                                   </object>
@@ -13623,6 +13687,7 @@ This step should be run before any attempt of color calibration.</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
                             <property name="tooltip_text" translatable="yes">By clicking on this option, you will use your own color calibration factors. This option is disabled by default.</property>
+                            <property name="halign">start</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="on_checkbutton_manual_calibration_toggled" swapped="no"/>
                           </object>
@@ -13756,6 +13821,7 @@ This step should be run before any attempt of color calibration.</property>
                                         <property name="editable">False</property>
                                         <property name="width_chars">6</property>
                                         <property name="text" translatable="yes">0</property>
+                                        <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_white_x</property>
                                         <property name="numeric">True</property>
                                       </object>
@@ -13772,6 +13838,7 @@ This step should be run before any attempt of color calibration.</property>
                                         <property name="editable">False</property>
                                         <property name="width_chars">6</property>
                                         <property name="text" translatable="yes">0</property>
+                                        <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_white_y</property>
                                         <property name="numeric">True</property>
                                       </object>
@@ -13788,6 +13855,7 @@ This step should be run before any attempt of color calibration.</property>
                                         <property name="editable">False</property>
                                         <property name="width_chars">6</property>
                                         <property name="text" translatable="yes">0</property>
+                                        <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_white_w</property>
                                         <property name="numeric">True</property>
                                       </object>
@@ -13804,6 +13872,7 @@ This step should be run before any attempt of color calibration.</property>
                                         <property name="editable">False</property>
                                         <property name="width_chars">6</property>
                                         <property name="text" translatable="yes">0</property>
+                                        <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_white_h</property>
                                         <property name="numeric">True</property>
                                       </object>

@@ -4,10 +4,21 @@
 #  include <config.h>
 #endif
 
+#include <gtk/gtk.h>
+#include <fitsio.h>	// fitsfile
+#include <gsl/gsl_histogram.h>
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
+#include "gettext.h"
+
 // PATH_MAX is not available on Hurd at least
 #ifndef PATH_MAX
 #define PATH_MAX 4096
 #endif
+
+#define _(__string) gettext(__string)			/* for translation */
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
@@ -18,13 +29,6 @@
        __typeof__ (b) _b = (b); \
      _a < _b ? _a : _b; })
 #define SQR(x) ((x)*(x))
-
-#include <gtk/gtk.h>
-#include <fitsio.h>	// fitsfile
-#include <gsl/gsl_histogram.h>
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 
 #define USHRT_MAX_DOUBLE ((double)USHRT_MAX)
 #define USHRT_MAX_SINGLE ((float)USHRT_MAX)

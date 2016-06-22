@@ -34,7 +34,7 @@ gpointer generic_sequence_worker(gpointer p) {
 	args->retval = 0;
 
 	if (args->prepare_hook && args->prepare_hook(args)) {
-		siril_log_message("Preparing sequence processing failed.\n");
+		siril_log_message(_("Preparing sequence processing failed.\n"));
 		args->retval = 1;
 		goto the_end;
 	}
@@ -50,7 +50,7 @@ gpointer generic_sequence_worker(gpointer p) {
 			current++;
 		}
 		if (current != nb_frames) {
-			siril_log_message("Output index mapping failed.\n");
+			siril_log_message(_("Output index mapping failed.\n"));
 			args->retval = 1;
 			goto the_end;
 		}
@@ -59,7 +59,7 @@ gpointer generic_sequence_worker(gpointer p) {
 	/* Output print of algorithm description */
 	desc = g_string_new(args->description);
 	if (desc) {
-		desc = g_string_append(desc, ": processing...\n");
+		desc = g_string_append(desc, _(": processing...\n"));
 		msg = g_string_free(desc, FALSE);
 		siril_log_color_message(msg, "red");
 		g_free(msg);
@@ -113,26 +113,26 @@ gpointer generic_sequence_worker(gpointer p) {
 
 #pragma omp atomic
 			progress++;
-			snprintf(msg, 256, "%s. Processing image %d (%s)", args->description, current, filename);
+			snprintf(msg, 256, _("%s. Processing image %d (%s)"), args->description, current, filename);
 			set_progress_bar_data(msg, (float)progress / nb_framesf);
 		}
 	}
 
 	if (abort) {
-		set_progress_bar_data("Sequence processing failed. Check the log.", PROGRESS_RESET);
-		siril_log_message("Sequence processing failed.\n");
+		set_progress_bar_data(_("Sequence processing failed. Check the log."), PROGRESS_RESET);
+		siril_log_message(_("Sequence processing failed.\n"));
 		args->retval = abort;
 	}
 	else {
-		set_progress_bar_data("Sequence processing succeeded.", PROGRESS_RESET);
-		siril_log_message("Sequence processing succeeded.\n");
+		set_progress_bar_data(_("Sequence processing succeeded."), PROGRESS_RESET);
+		siril_log_message(_("Sequence processing succeeded.\n"));
 		gettimeofday(&t_end, NULL);
 		show_time(args->t_start, t_end);
 	}
 
 the_end:
 	if (args->finalize_hook && args->finalize_hook(args)) {
-		siril_log_message("Finalizing sequence processing failed.\n");
+		siril_log_message(_("Finalizing sequence processing failed.\n"));
 		args->retval = 1;
 	}
 
@@ -256,7 +256,7 @@ gboolean end_generic(gpointer arg) {
 
 void on_processes_button_cancel_clicked(GtkButton *button, gpointer user_data) {
 	if (com.thread != NULL)
-		siril_log_color_message("Process aborted by user\n", "red");
+		siril_log_color_message(_("Process aborted by user\n"), "red");
 	stop_processing_thread();
 }
 

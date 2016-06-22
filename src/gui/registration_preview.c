@@ -215,14 +215,14 @@ void on_spinbut_shift_value_change(GtkSpinButton *spinbutton, gpointer user_data
 	/* current layer: com.cvport or selected reg layer? */
 	current_layer = gtk_combo_box_get_active(cbbt_layers);
 	if (current_layer != com.cvport) {
-		siril_log_message("Switching to the registration layer\n");
+		siril_log_message(_("Switching to the registration layer\n"));
 		activate_tab(current_layer);
 	}
 	if (com.seq.regparam[current_layer] == NULL) {
-		siril_log_message("Allocating registration data for this layer\n");
+		printf("Allocating registration data for this layer\n");
 		com.seq.regparam[current_layer] = calloc(com.seq.number, sizeof(regdata));
 		if (com.seq.regparam[current_layer] == NULL) {
-			siril_log_message("FAILED: could not allocate registration data\n");
+			printf("FAILED: could not allocate registration data\n");
 			return;
 		}
 	}

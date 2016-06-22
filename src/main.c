@@ -29,6 +29,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include <locale.h>
 #if (defined(__APPLE__) && defined(__MACH__))
 #include <stdlib.h>
 #include <libproc.h>
@@ -93,10 +94,14 @@ int main(int argc, char *argv[]) {
 #endif
 	
 	setenv("LC_NUMERIC", "C", 1);		// avoid possible bugs using french separator ","
-	setenv("LANG", "C", 1);				// on french (or other) system, it avoids the mix between languages
+	//setenv("LANG", "C", 1);				// on french (or other) system, it avoids the mix between languages
 	opterr = 0;
 	memset(&com, 0, sizeof(struct cominf));	// needed?
 	com.initfile = NULL;
+
+	/* for translation */
+	bindtextdomain(PACKAGE, LOCALEDIR);
+	textdomain(PACKAGE);
 
 	/* Caught signals */
 	sigIntHandler.sa_handler = signal_handled;
@@ -137,7 +142,7 @@ int main(int argc, char *argv[]) {
 				exit(EXIT_SUCCESS);
 				break;
 			default:
-				fprintf(stderr, "unknown command line parameter `%c'\n", c);
+				fprintf(stderr, _("unknown command line parameter '%c'\n"), c);
 				/* no break */
 			case 'h':
 				usage(argv[0]);
@@ -174,17 +179,17 @@ int main(int argc, char *argv[]) {
 		gchar *path = g_string_free (pathStr, FALSE);
 
 		if (gtk_builder_add_from_file (builder, path, &err)) {
-			fprintf(stdout, "Successfully loaded '%s%s'\n", siril_sources[i], GLADE_FILE);
+			fprintf(stdout, _("Successfully loaded '%s%s'\n"), siril_sources[i], GLADE_FILE);
 			g_free(path);
 			break;
 		}
-		fprintf (stderr, "Unable to read file: %s\n", err->message);
+		fprintf (stderr, _("Unable to read file: %s\n"), err->message);
 		g_free(path);
 		g_error_free(err);
 		i++;
 	} while (i < sizeof(siril_sources)/sizeof(char *));
 	if (i == sizeof(siril_sources) / sizeof(char *)) {
-		fprintf(stderr, "%s was not found or contains errors, cannot render GUI. Exiting.\n", GLADE_FILE);
+		fprintf(stderr, _("%s was not found or contains errors, cannot render GUI. Exiting.\n"), GLADE_FILE);
 		exit(EXIT_FAILURE);
 	}
 	siril_path = siril_sources[i];
@@ -204,7 +209,7 @@ int main(int argc, char *argv[]) {
 	gtk_text_buffer_create_tag (tbuf, "blue", "foreground", "#7a7af8", NULL);
 	gtk_text_buffer_create_tag (tbuf, "plum", "foreground", "#8e4585", NULL);
 	
-	siril_log_color_message("Welcome to %s v%s\n", "bold", PACKAGE, VERSION);
+	siril_log_color_message(_("Welcome to %s v%s\n"), "bold", PACKAGE, VERSION);
 
 	/* initialize converters (utilities used for different image types importing) */
 	initialize_converters();
@@ -271,7 +276,7 @@ int main(int argc, char *argv[]) {
 		cwd_orig = strdup(com.wd);
 
 	if (checkinitfile()) {
-		siril_log_message("could not load or create settings file in ~/.siril, exiting.\n");
+		siril_log_message(_("Could not load or create settings file in ~/.siril, exiting.\n"));
 		exit(1);
 	}
 
@@ -307,11 +312,11 @@ int main(int argc, char *argv[]) {
 #endif
 	
 	/* Get CPU number and set the number of threads */
-	siril_log_message("Parallel processing %s: Using %d logical processor%s",
+	siril_log_message(_("Parallel processing %s: Using %d logical processor%s"),
 #ifdef _OPENMP
-			"enabled", com.max_thread = omp_get_num_procs(), "s.\n"
+			_("enabled"), com.max_thread = omp_get_num_procs(), "s.\n"
 #else
-			"disabled", com.max_thread = 1, ".\n"
+			_("disabled"), com.max_thread = 1, ".\n"
 #endif
 			);
 	update_spinCPU(com.max_thread);

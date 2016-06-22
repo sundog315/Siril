@@ -19,6 +19,18 @@ AC_CONFIG_HEADERS(config.h)
 AC_CONFIG_SRCDIR([src/main.c])
 AC_CONFIG_MACRO_DIR([m4])
 
+dnl ================================================================
+dnl Gettext stuff.
+dnl ================================================================
+IT_PROG_INTLTOOL([0.41.0])
+
+GETTEXT_PACKAGE=AC_PACKAGE_NAME
+AC_SUBST(GETTEXT_PACKAGE)
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Name of the gettext package.])
+AC_CONFIG_SUBDIRS([po])
+AM_GNU_GETTEXT([external])
+AM_GNU_GETTEXT_VERSION(0.19)
+
 remember_set_CFLAGS="$CFLAGS"
 
 AC_PROG_CC
@@ -169,6 +181,6 @@ dnl   AC_MSG_WARN([libnetpbm not found. jpeg and png conversions will not be ava
 dnl AM_CONDITIONAL(HAVE_NETPBM, test x$netpbm = xtrue)
 dnl ====================================================== 
 
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile po/Makefile.in])
 AC_OUTPUT
 

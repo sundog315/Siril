@@ -264,19 +264,19 @@ void computeStat() {
 	if (single_image_is_loaded())
 		g_snprintf(name, sizeof(name), "%s", com.uniq->filename);
 	else if (sequence_is_loaded())
-		g_snprintf(name, sizeof(name), "Image %d/%d from the sequence %s",
+		g_snprintf(name, sizeof(name), _("Image %d/%d from the sequence %s"),
 				com.seq.current, com.seq.number, com.seq.seqname);
 	else
-		g_snprintf(name, sizeof(name), "unknown image");
+		g_snprintf(name, sizeof(name), _("unknown image"));
 
 	gtk_label_set_text(statNameLabel, name);
 
 	if (com.selection.h && com.selection.w) {
 		g_snprintf(selection, sizeof(selection),
-				"Size of selection in pixel: (%d,%d)", com.selection.w,
+				_("Size of selection in pixel: (%d,%d)"), com.selection.w,
 				com.selection.h);
 	} else {
-		g_snprintf(selection, sizeof(selection), "No selection");
+		g_snprintf(selection, sizeof(selection), _("No selection"));
 	}
 
 	gtk_label_set_text(statSelecLabel, selection);
