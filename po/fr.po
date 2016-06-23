@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-22 23:04+0200\n"
+"POT-Creation-Date: 2016-06-23 09:34+0200\n"
 "PO-Revision-Date: 2016-06-23 00:19+0200\n"
 "Last-Translator: Cyril Richard <cyril@free-astro.fr>\n"
 "Language-Team: French\n"
@@ -4126,11 +4126,6 @@ msgstr "Mem : %ldMo"
 msgid "Mem: N/A"
 msgstr "Mem : N/A"
 
-#: ../src/gui/callbacks.c:1125
-#, c-format
-msgid "Re-using previous remap_index\n"
-msgstr "Ré-utilisation de remap_index précédent\n"
-
 #: ../src/gui/callbacks.c:1294
 #, c-format
 msgid ""
@@ -4313,11 +4308,6 @@ msgstr "nouvelle valeur du zoom : %f\n"
 #: ../src/gui/callbacks.c:3834
 msgid "Unknown zoom_value value, what is the current zoom?\n"
 msgstr "Valeur de zoom non connue, quel est le zoom actuel ?\n"
-
-#: ../src/gui/callbacks.c:3850
-#, c-format
-msgid "set new vport size (%d, %d)\n"
-msgstr "définir nouvelle taille du vport (%d, %d)\n"
 
 #: ../src/gui/callbacks.c:4000
 msgid "Save File"
@@ -5840,15 +5830,3 @@ msgstr ""
 #, c-format
 msgid "Based on quality"
 msgstr "Basé sur la qualité"
-
-#~ msgid "red"
-#~ msgstr "rouge"
-
-#~ msgid "green"
-#~ msgstr "vert"
-
-#~ msgid "blue"
-#~ msgstr "bleu"
-
-#~ msgid "rgb"
-#~ msgstr "rvb"

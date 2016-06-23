@@ -1181,7 +1181,7 @@ int verbose_resize_gaussian(fits *image, int toX, int toY, int interpolation) {
 
 int verbose_rotate_image(fits *image, double angle, int interpolation,
 		int cropped) {
-	char *str_inter;
+	const char *str_inter;
 	struct timeval t_start, t_end;
 
 	switch (interpolation) {
