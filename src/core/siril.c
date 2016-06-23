@@ -1144,7 +1144,7 @@ void show_FITS_header(fits *fit) {
  * Indeed, siril_log_message seems not working in a cpp file */
 int verbose_resize_gaussian(fits *image, int toX, int toY, int interpolation) {
 	int retvalue;
-	char *str_inter;
+	const char *str_inter;
 	struct timeval t_start, t_end;
 
 	switch (interpolation) {
@@ -1168,7 +1168,7 @@ int verbose_resize_gaussian(fits *image, int toX, int toY, int interpolation) {
 
 	siril_log_color_message(_("Resample (%s interpolation): processing...\n"),
 			"red", str_inter);
-	free(str_inter);
+
 	gettimeofday(&t_start, NULL);
 
 	retvalue = cvResizeGaussian(&gfit, toX, toY, interpolation);

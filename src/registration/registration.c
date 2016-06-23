@@ -81,7 +81,7 @@ static struct registration_method *reg_methods[NUMBER_OF_METHOD];
 static gpointer register_thread_func(gpointer p);
 static gboolean end_register_idle(gpointer p);
 
-struct registration_method *new_reg_method(char *name, registration_function f,
+struct registration_method *new_reg_method(const char *name, registration_function f,
 		selection_type s, registration_type t) {
 	struct registration_method *reg = malloc(sizeof(struct registration_method));
 	reg->name = strdup(name);

@@ -45,7 +45,7 @@ struct registration_method {
 	registration_type type;
 };
 
-struct registration_method *new_reg_method(char *name, registration_function f,
+struct registration_method *new_reg_method(const char *name, registration_function f,
 		selection_type s, registration_type t); // for compositing
 void initialize_registration_methods();
 struct registration_method * get_selected_registration_method();

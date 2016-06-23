@@ -1891,7 +1891,7 @@ void start_stacking() {
 }
 
 static void _show_summary(struct stacking_args *args) {
-	char *norm_str, *rej_str;
+	const char *norm_str, *rej_str;
 
 	siril_log_message(_("Integration of %d images:\n"), args->nb_images_to_stack);
 

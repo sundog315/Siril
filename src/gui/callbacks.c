@@ -1122,7 +1122,7 @@ int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
 	}
 	if ((mode != HISTEQ_DISPLAY && mode != STF_DISPLAY) && pente == last_pente[vport]
 			&& mode == last_mode[vport]) {
-		fprintf(stdout, _("Re-using previous remap_index\n"));
+		fprintf(stdout, "Re-using previous remap_index\n");
 		return 0;
 	}
 	fprintf(stdout, "Rebuilding remap_index\n");
@@ -3847,7 +3847,7 @@ void adjust_vport_size_to_image() {
 	h = (int) (((double) gfit.ry) * zoom);
 	for (vport = 0; vport < MAXVPORT; vport++)
 		gtk_widget_set_size_request(com.vport[vport], w, h);
-	fprintf(stdout, _("set new vport size (%d, %d)\n"), w, h);
+	fprintf(stdout, "set new vport size (%d, %d)\n", w, h);
 }
 
 void scrollbars_hadjustment_changed_handler(GtkAdjustment *adjustment,

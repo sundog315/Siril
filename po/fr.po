@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-06-22 23:04+0200\n"
-"PO-Revision-Date: 2016-06-22 23:30+0200\n"
+"PO-Revision-Date: 2016-06-23 00:19+0200\n"
 "Last-Translator: Cyril Richard <cyril@free-astro.fr>\n"
 "Language-Team: French\n"
 "Language: fr\n"
@@ -367,7 +367,7 @@ msgstr "Rejet local"
 
 #: ../src/gui/siril3.glade.h:79
 msgid "Deviation: "
-msgstr "Deviation : "
+msgstr "Déviation : "
 
 #: ../src/gui/siril3.glade.h:80
 msgid "Tolerance of global sample rejection, in sigma units."
@@ -1965,7 +1965,7 @@ msgstr "Étalonnage des couleurs..."
 
 #: ../src/gui/siril3.glade.h:453
 msgid "Remove Green Noise..."
-msgstr "Supprimer le \"Bruit\" Vert..."
+msgstr "Suppression du \"Bruit\" Vert (SCNR)..."
 
 #: ../src/gui/siril3.glade.h:454
 msgid "Color saturation..."
@@ -1993,7 +1993,7 @@ msgstr "Filtre Médian..."
 
 #: ../src/gui/siril3.glade.h:460
 msgid "Geometry"
-msgstr "Géometrie"
+msgstr "Géométrie"
 
 #: ../src/gui/siril3.glade.h:461
 msgid "Horizontal Mirror"
@@ -2162,7 +2162,7 @@ msgid ""
 "Only for RAW and FITS input images.\n"
 "Colour image target also applies to the debayer result for conversion."
 msgstr ""
-"Dématrice les images CFA en utilisant un schéma de matrice de Bayer défini "
+"Dématriçage des images CFA en utilisant un motif de matrice de Bayer défini "
 "dans les paramètres. S'applique aussi lors de l'ouverture des images et non "
 "à la conversion seule.\n"
 "Utilisable pour les images RAW et FITS seulement."
@@ -2369,7 +2369,7 @@ msgstr ""
 
 #: ../src/gui/siril3.glade.h:544
 msgid "Fps:"
-msgstr "Fps:"
+msgstr "Fps :"
 
 #: ../src/gui/siril3.glade.h:545
 msgid "Frame rate"
@@ -2479,7 +2479,7 @@ msgid ""
 msgstr ""
 "Entrer le le nom du fichier master bias/offset ici, ou cliquer sur le bouton "
 "parcourir.\n"
-"L'image master bias/offset est sosutrait de chaque image dans la séquence."
+"L'image master bias/offset est soustrait de chaque image dans la séquence."
 
 #: ../src/gui/siril3.glade.h:568
 msgid "Choose your own normalisation value."
@@ -2710,7 +2710,7 @@ msgid ""
 "displayed once on the selected registration layer."
 msgstr ""
 "Affiche l'image de référence sur l'image courante en utilisant une "
-"transparence a 50%.\n"
+"transparence de 50%.\n"
 "Pour être activé, l'image de référence doit avoir explicitement été "
 "sélectionnée et déjà affichée une fois sur le canal d'alignement sélectionné."
 
@@ -2950,7 +2950,7 @@ msgstr ""
 "mais il utilise un algorithme basé sur les travaux de Huber [1] [2].\n"
 "- Linear Fit Clipping est un algorithme développé par Juan Conejero, "
 "principal développeur de PixInsight [2]. Il ajuste la pile via une fonction "
-"affine (y=ax+b) et rejète les pixels déviants. Cet algorithme est très "
+"affine (y=ax+b) et rejette les pixels déviants. Cet algorithme est très "
 "performant pour les grands ensembles de données et les images contenant des "
 "gradients avec des distributions spatiales et orientations différentes.\n"
 "\n"
@@ -3057,7 +3057,7 @@ msgid ""
 "However, multiplicative normalisation must be used with flat-field frames."
 msgstr ""
 "Si un des ces items est sélectionné, un processus de normalisation sera "
-"appliqué à toutes les images entrantes avant l'empillement.\n"
+"appliqué à toutes les images entrantes avant l'empilement.\n"
 "- La normalisation met à niveau le FDC moyen de toutes les images, et, la "
 "normalisation est appliquée par multiplication ou addition. Les deux "
 "procédés mènent généralement à des résultats similaires, mais la "
@@ -3126,13 +3126,13 @@ msgid ""
 "Input command. Typing `help&apos; here will bring the list of supported "
 "commands."
 msgstr ""
-"Console Siril? Taper `help&apos; ici donne la liste des commandes supportées"
+"Console Siril. Taper `help&apos; ici donne la liste des commandes supportées"
 
 #: ../src/gui/siril3.glade.h:725
 msgid ""
 "Input command. Typing `help' here will bring the list of supported commands."
 msgstr ""
-"Console Siril? Taper `help' ici donne la liste des commandes supportées"
+"Console Siril. Taper `help' ici donne la liste des commandes supportées"
 
 #: ../src/gui/siril3.glade.h:726
 msgid "Type help for the list of supported commands"
@@ -3156,7 +3156,7 @@ msgid ""
 "changed with the button Change dir on the right, or with the cd command."
 msgstr ""
 "Le répertoire de travail dans lequel les fichiers vont être lus et à partir "
-"duquel on va écrire. Peut être changé avec le bouton \"Change rep\" sur la "
+"duquel on va écrire. Peut être changé avec le bouton \"Modifier rep\" sur la "
 "droite, ou en ligne de commande."
 
 #: ../src/gui/siril3.glade.h:731
@@ -3213,7 +3213,7 @@ msgstr "Crédits"
 
 #: ../src/gui/siril3.glade.h:745
 msgid "text"
-msgstr "text"
+msgstr "texte"
 
 #: ../src/gui/siril3.glade.h:746
 msgid "Don't ask me again"
@@ -3379,29 +3379,24 @@ msgid "Saturation enhancement: processing...\n"
 msgstr ""
 
 #: ../src/algos/colors.c:482
-#, fuzzy
 msgid "SCNR: processing...\n"
-msgstr "Prétraitement...\n"
+msgstr "SCNR : en cours...\n"
 
 #: ../src/algos/colors.c:732
-#, fuzzy
 msgid "Background reference:\n"
-msgstr "Référence de fond du ciel"
+msgstr "Référence de fond du ciel :\n"
 
 #: ../src/algos/colors.c:740
-#, fuzzy
 msgid "White reference:\n"
-msgstr "Référence des blancs"
+msgstr "Référence des blancs :\n"
 
 #: ../src/algos/colors.c:755
-#, fuzzy
 msgid "Color calibration factors:\n"
-msgstr "Étalonnage des couleurs"
+msgstr "Coefficients de l'étalonnage des couleurs :\n"
 
 #: ../src/algos/colors.c:818
-#, fuzzy
 msgid "Color Calibration: processing...\n"
-msgstr "Étalonnage des couleurs..."
+msgstr "Étalonnage des couleurs : en cours...\n"
 
 #: ../src/algos/cosmetic_correction.c:262
 #, c-format
@@ -3416,36 +3411,32 @@ msgid "%ld pixels corrected (%ld + %ld)\n"
 msgstr ""
 
 #: ../src/algos/cosmetic_correction.c:313
-#, fuzzy
 msgid "Cosmetic Correction: processing...\n"
-msgstr "Correction Cosmétique..."
+msgstr "Correction Cosmétique : en cours...\n"
 
 #: ../src/algos/fft.c:234
-#, fuzzy
 msgid "Fourier Transform: processing...\n"
-msgstr "Transformée de Fourier..."
+msgstr "Transformée de Fourier : en cours...\n"
 
 #: ../src/algos/fft.c:289
 msgid "There is something wrong in your files\n"
 msgstr ""
 
 #: ../src/algos/gradient.c:330 ../src/algos/gradient.c:373
-#, fuzzy, c-format
+#, c-format
 msgid "Channel #%d: background extraction done.\n"
-msgstr "Extraction du gradient..."
+msgstr "Canal #%d : extraction de gradient finie.\n"
 
 #: ../src/algos/gradient.c:401
-#, fuzzy
 msgid "Background extraction: processing...\n"
-msgstr "Extraction du gradient..."
+msgstr "Extraction du gradient : en cours...\n"
 
 #: ../src/algos/gradient.c:422 ../src/algos/gradient.c:428
-#, fuzzy
 msgid "Insufficient background samples.\n"
-msgstr "Effacer les échantillons."
+msgstr "Échantillons insuffisants.\n"
 
 #: ../src/algos/PSF.c:606
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "PSF fit Result:\n"
 "x0=%0.2f px, y0=%0.2f px\n"
@@ -3456,33 +3447,18 @@ msgid ""
 "Magnitude (%s)=%0.2f\n"
 "RMSE=%.3e\n"
 msgstr ""
-"Coordonnées du Centroïde :\n"
-"\t\tx0=%.2fpx\n"
-"\t\ty0=%.2fpx\n"
-"\n"
-"Largeur à mi-hauteur :\n"
-"\t\tFWHMx=%.2f%s\n"
-"\t\tFWHMy=%.2f%s\n"
-"\n"
-"Angle :\n"
-"\t\t%0.2fdeg\n"
-"\n"
-"Valeur du FDC :\n"
-"\t\tB=%.6f\n"
-"\n"
-"Intensité Maximale :\n"
-"\t\tA=%.6f\n"
-"\n"
-"Magnitude (%s) :\n"
-"\t\tm=%.2f\n"
-"\n"
-"RMSE :\n"
-"\t\tRMSE=%.3e"
+"Résultat de l'ajustement PSF :\n"
+"\\x0=%0.2f px, y0=%0.2f px\n"
+"FWHM X=%0.2f%s, FWHM Y=%0.2f%s\n"
+"Angle=%0.2f deg\n"
+"Valeur du FDC=%0.6f\n"
+"Inensité Maximale=%0.6f\n"
+"Magnitude (%s)=%0.2f\n"
+"RMSE=%.3e\n"
 
 #: ../src/algos/star_finder.c:129
-#, fuzzy
 msgid "Findstar: processing...\n"
-msgstr "Transformée de Fourier..."
+msgstr "Findstar : en cours...\n"
 
 #: ../src/algos/star_finder.c:235
 #, c-format
@@ -3490,9 +3466,8 @@ msgid "Found %d stars in image, channel #%d\n"
 msgstr ""
 
 #: ../src/algos/star_finder.c:288
-#, fuzzy
 msgid "This star has already been picked !\n"
-msgstr "Le fichier stars.lst a été créé.\n"
+msgstr "Cette étoile a déjà été choisie !\n"
 
 #: ../src/algos/star_finder.c:289
 msgid "Peaker"
@@ -3544,19 +3519,17 @@ msgid "Warning"
 msgstr "Attention"
 
 #: ../src/compositing/compositing.c:595
-#, fuzzy, c-format
+#, c-format
 msgid "Starting registration using method: %s\n"
-msgstr "Nouvelle méthode d’alignement : %s\n"
+msgstr "Début de l'alignement avec la méthode : %s\n"
 
 #: ../src/compositing/compositing.c:600
-#, fuzzy
 msgid "Error in layers alignment."
-msgstr "Alignements des canaux"
+msgstr "Erreur dans l'alignement des canaux."
 
 #: ../src/compositing/compositing.c:601 ../src/registration/registration.c:1157
-#, fuzzy
 msgid "Registration complete"
-msgstr "Alignement interrompu.\n"
+msgstr "Alignement complet"
 
 #: ../src/compositing/compositing.c:1118
 msgid "No overflow with the current colours, redrawing only\n"
@@ -3623,14 +3596,13 @@ msgid "Wavelet: type must be %d or %d\n"
 msgstr "Ondelettes : le type doit être %d ou %d\n"
 
 #: ../src/core/command.c:550
-#, fuzzy
 msgid "Cannot list files, set working directory first.\n"
-msgstr "Conversion: aucun répertoire de travail défini.\n"
+msgstr ""
+"Impossible de lister les fichier, veuillez d'abord définir un répertoire.\n"
 
 #: ../src/core/command.c:556
-#, fuzzy
 msgid "Siril cannot open the directory.\n"
-msgstr "Impossible de changer le répertoire de travail.\n"
+msgstr "Impossible d'ouvrir le répertoire.\n"
 
 #: ../src/core/command.c:581
 #, c-format
@@ -3638,14 +3610,14 @@ msgid "Link: %s\n"
 msgstr ""
 
 #: ../src/core/command.c:585
-#, fuzzy, c-format
+#, c-format
 msgid "Directory: %s\n"
-msgstr "Répertoire :"
+msgstr "Répertoire : %s\n"
 
 #: ../src/core/command.c:595 ../src/core/command.c:602
-#, fuzzy, c-format
+#, c-format
 msgid "Sequence: %s\n"
-msgstr "Séquence :"
+msgstr "Séquence : %s\n"
 
 #: ../src/core/command.c:598 ../src/core/command.c:600
 #, c-format
@@ -3662,14 +3634,12 @@ msgstr ""
 
 #: ../src/core/command.c:681 ../src/core/command.c:711
 #: ../src/core/command.c:740
-#, fuzzy
 msgid ""
 "Current selection is too large. To determine the PSF, please make a "
 "selection around a single star.\n"
 msgstr ""
-"La sélection courante est trop grande. \n"
-"Afin de déterminer la PSF, veuillez faire une sélection autour d'une "
-"étoile.\n"
+"La sélection courante est trop grande. Afin de déterminer la PSF, veuillez "
+"faire une sélection autour d'une seule étoile.\n"
 
 #: ../src/core/command.c:685 ../src/core/command.c:715
 #: ../src/core/command.c:744
@@ -4055,7 +4025,7 @@ msgstr ""
 #: ../src/core/utils.c:217
 #, c-format
 msgid "Setting CWD (Current Working Directory) to '%s'\n"
-msgstr "Définir CWD (répertoire de travail) à '%s'\n"
+msgstr "Définir le répertoire de travail à '%s'\n"
 
 #: ../src/core/utils.c:227
 msgid "Could not change directory.\n"
@@ -4068,7 +4038,7 @@ msgstr "Nom de fichier trop long, ne fera rien\n"
 #: ../src/gui/callbacks.c:89
 #, c-format
 msgid "Checking GTK version ... GTK-%d.%d\n"
-msgstr "Verifie la version de GTK ... GTK-%d.%d\n"
+msgstr "Vérifie la version de GTK ... GTK-%d.%d\n"
 
 #: ../src/gui/callbacks.c:108
 #, c-format
@@ -4154,7 +4124,7 @@ msgstr "Mem : %ldMo"
 #: ../src/gui/callbacks.c:793
 #, c-format
 msgid "Mem: N/A"
-msgstr "Mem: N/A"
+msgstr "Mem : N/A"
 
 #: ../src/gui/callbacks.c:1125
 #, c-format
@@ -4221,12 +4191,12 @@ msgstr "fwhm: aucune sélection"
 #: ../src/gui/callbacks.c:2819
 #, c-format
 msgid "Image %d has been unselected from sequence\n"
-msgstr "L'image %d a été déselectionnée de la séquence\n"
+msgstr "L'image %d a été désélectionnée de la séquence\n"
 
 #: ../src/gui/callbacks.c:2824
 #, c-format
 msgid "Image %d has been selected from sequence\n"
-msgstr "L'image %d a été déselectionné de la séquence\n"
+msgstr "L'image %d a été désélectionnée de la séquence\n"
 
 #: ../src/gui/callbacks.c:2856
 #, c-format
@@ -4444,11 +4414,11 @@ msgstr "Appliquer la correction sur l'image en cliquant sur Montrer Image\n"
 
 #: ../src/gui/callbacks.c:4789
 msgid "Subtraction done ...\n"
-msgstr "Soustraction faite ...\n"
+msgstr "Soustraction effectuée ...\n"
 
 #: ../src/gui/callbacks.c:4796
 msgid "Division done ...\n"
-msgstr "Division faite ...\n"
+msgstr "Division effectuée ...\n"
 
 #: ../src/gui/callbacks.c:4981
 msgid "Load an image first, aborted.\n"
@@ -4725,8 +4695,8 @@ msgid ""
 "Saving to 3 FITS files cannot be done because the source image does not have "
 "three channels\n"
 msgstr ""
-"L'enregistrement en 3 fichiers FITS ne peut pas être faite parceque l'image "
-"source ne possède pas trois cannaux\n"
+"L'enregistrement en 3 fichiers FITS ne peut pas être faite parce que l'image "
+"source ne possède pas trois canaux\n"
 
 #: ../src/io/conversion.c:727
 msgid "Cannot perform debayering on image with more than one channel\n"
