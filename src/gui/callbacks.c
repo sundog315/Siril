@@ -3150,7 +3150,7 @@ void on_prepro_button_clicked(GtkButton *button, gpointer user_data) {
 				gtk_entry_set_text(entry, "");
 			} else {
 				if (dark_fit->naxes[2] != gfit.naxes[2]) {
-					char *msg = _("NOT USING DARK: number of channels is different");
+					const char *msg = _("NOT USING DARK: number of channels is different");
 					siril_log_message("%s\n", msg);
 					progress_bar_set_text(msg);
 					free(dark_fit);
@@ -3199,7 +3199,7 @@ void on_prepro_button_clicked(GtkButton *button, gpointer user_data) {
 				gtk_entry_set_text(entry, "");
 			} else {
 				if (flat_fit->naxes[2] != gfit.naxes[2]) {
-					char *msg = _("NOT USING FLAT: number of channels is different");
+					const char *msg = _("NOT USING FLAT: number of channels is different");
 					siril_log_message("%s\n", msg);
 					progress_bar_set_text(msg);
 					free(flat_fit);
@@ -3235,7 +3235,7 @@ void on_prepro_button_clicked(GtkButton *button, gpointer user_data) {
 				gtk_entry_set_text(entry, "");
 			} else {
 				if (bias_fit->naxes[2] != gfit.naxes[2]) {
-					char *msg = _("NOT USING OFFSET: number of channels is different");
+					const char *msg = _("NOT USING OFFSET: number of channels is different");
 					siril_log_message("%s\n", msg);
 					progress_bar_set_text(msg);
 					free(bias_fit);
