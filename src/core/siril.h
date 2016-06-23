@@ -10,15 +10,16 @@
 #ifdef _OPENMP
 #include <omp.h>
 #endif
-
-#include "gettext.h"
+#include <libintl.h>
 
 // PATH_MAX is not available on Hurd at least
 #ifndef PATH_MAX
 #define PATH_MAX 4096
 #endif
 
-#define _(__string) gettext(__string)			/* for translation */
+#define _(String) gettext (String)
+#define gettext_noop(String) String
+#define N_(String) gettext_noop (String)
 
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \

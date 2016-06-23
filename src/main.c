@@ -94,7 +94,6 @@ int main(int argc, char *argv[]) {
 #endif
 	
 	setenv("LC_NUMERIC", "C", 1);		// avoid possible bugs using french separator ","
-	//setenv("LANG", "C", 1);				// on french (or other) system, it avoids the mix between languages
 	opterr = 0;
 	memset(&com, 0, sizeof(struct cominf));	// needed?
 	com.initfile = NULL;
@@ -109,17 +108,17 @@ int main(int argc, char *argv[]) {
 	sigIntHandler.sa_flags = 0;
 	sigaction(SIGINT, &sigIntHandler, NULL);
 
-	while(1) {
+	while (1) {
 		signed char c = getopt(argc, argv, "i:hfv");
-		if (c=='?') {
-			for(i=1; i<argc; i++) {
-				if(argv[i][1] == '-') {
-					if(!strcmp(argv[i], "--version"))
-						c='v';
-					else if(!strcmp(argv[i], "--help"))
-						c='h';				
-					else if(!strcmp(argv[i], "--format"))
-						c='f';					
+		if (c == '?') {
+			for (i = 1; i < argc; i++) {
+				if (argv[i][1] == '-') {
+					if (!strcmp(argv[i], "--version"))
+						c = 'v';
+					else if (!strcmp(argv[i], "--help"))
+						c = 'h';
+					else if (!strcmp(argv[i], "--format"))
+						c = 'f';
 					else {
 						usage(argv[0]);
 						exit(EXIT_FAILURE);
@@ -128,25 +127,26 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-		if (c==-1) break;
-		switch(c) {
-			case 'i':
-				com.initfile = strdup(optarg);
-				break;
-			case 'v':
-				fprintf(stdout, "%s %s\n", PACKAGE, VERSION);
-				exit(EXIT_SUCCESS);
-				break;
-			case 'f':
-				list_format_available();
-				exit(EXIT_SUCCESS);
-				break;
-			default:
-				fprintf(stderr, _("unknown command line parameter '%c'\n"), c);
-				/* no break */
-			case 'h':
-				usage(argv[0]);
-				exit(EXIT_SUCCESS);
+		if (c == -1)
+			break;
+		switch (c) {
+		case 'i':
+			com.initfile = strdup(optarg);
+			break;
+		case 'v':
+			fprintf(stdout, "%s %s\n", PACKAGE, VERSION);
+			exit(EXIT_SUCCESS);
+			break;
+		case 'f':
+			list_format_available();
+			exit(EXIT_SUCCESS);
+			break;
+		default:
+			fprintf(stderr, _("unknown command line parameter '%c'\n"), argv[argc - 1][1]);
+			/* no break */
+		case 'h':
+			usage(argv[0]);
+			exit(EXIT_SUCCESS);
 		}
 	}
 

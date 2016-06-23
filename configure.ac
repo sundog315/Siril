@@ -22,14 +22,8 @@ AC_CONFIG_MACRO_DIR([m4])
 dnl ================================================================
 dnl Gettext stuff.
 dnl ================================================================
-IT_PROG_INTLTOOL([0.41.0])
-
-GETTEXT_PACKAGE=AC_PACKAGE_NAME
-AC_SUBST(GETTEXT_PACKAGE)
-AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, "$GETTEXT_PACKAGE", [Name of the gettext package.])
-AC_CONFIG_SUBDIRS([po])
-AM_GLIB_GNU_GETTEXT([external])
-AM_GNU_GETTEXT_VERSION(0.19)
+IT_PROG_INTLTOOL([0.50])
+AC_SUBST([GETTEXT_PACKAGE], [siril])
 
 remember_set_CFLAGS="$CFLAGS"
 

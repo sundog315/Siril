@@ -309,7 +309,7 @@ gpointer extract_channels(gpointer p) {
 
 	if (args->fit->naxes[2] != 3) {
 		siril_log_message(
-				_("Siril cannot axtract layers. Make sure your image is in RGB mode.\n"));
+				_("Siril cannot extract layers. Make sure your image is in RGB mode.\n"));
 		args->process = FALSE;
 		gdk_threads_add_idle(end_extract_channels, args);
 		return GINT_TO_POINTER(1);
