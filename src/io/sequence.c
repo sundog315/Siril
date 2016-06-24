@@ -1324,7 +1324,7 @@ gpointer export_sequence(gpointer ptr) {
 			nb_layers = fit.naxes[2];
 			destfit.data = calloc(nbdata * fit.naxes[2], sizeof(WORD));
 			if (!destfit.data) {
-				siril_log_message(_("Could not allocate memory for the export, aborting\n"));
+				printf("Could not allocate memory for the export, aborting\n");
 				retval = -1;
 				goto free_and_reset_progress_bar;
 			}
@@ -1339,7 +1339,7 @@ gpointer export_sequence(gpointer ptr) {
 			}
 		}
 		else if (fit.ry * fit.rx != nbdata || nb_layers != fit.naxes[2]) {
-			siril_log_message(_("Export: image in args->sequence doesn't has the same dimensions\n"));
+			printf("Export: image in args->sequence doesn't has the same dimensions\n");
 			retval = -3;
 			goto free_and_reset_progress_bar;
 		}

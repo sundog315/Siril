@@ -635,7 +635,7 @@ int savefits(const char *name, fits *f) {
 	case DOUBLE_IMG:
 	default:
 		msg = siril_log_message(
-				_("ERROR: trying to save a FITS image"
+				_("ERROR: trying to save a FITS image "
 				"with an unsupported format (%d).\n"), f->bitpix);
 		show_dialog(msg, _("Error"), "gtk-dialog-error");
 		fits_close_file(f->fptr, &status);

@@ -50,23 +50,23 @@
 #define MAX_STARS_FITTED 2000
 #undef DEBUG
 
-static char *tooltip_text[] = { gettext_noop("One Star Registration: This is the simplest method to register deep-sky images. "
-		"Because only one star is concerned for register, images are aligned using shifting"
+static char *tooltip_text[] = { N_("One Star Registration: This is the simplest method to register deep-sky images. "
+		"Because only one star is concerned for register, images are aligned using shifting "
 		"(at a fraction of pixel). No rotation or scaling are performed. "
 		"Shifts at pixel precision are saved in seq file."),
 #ifdef HAVE_OPENCV
-		gettext_noop("Global Star Alignment: This is a more powerful and accurate algorithm (but also slower) "
+		N_("Global Star Alignment: This is a more powerful and accurate algorithm (but also slower) "
 		"to perform deep-sky images. The global matching is based on triangle similarity method for automatically "
-		"identify common stars in each image."
+		"identify common stars in each image. "
 		"A new sequence is created with the prefix of your choice (r_ by default)."),
 #endif
-		gettext_noop("Image Pattern Alignment: This is a simple registration by translation method "
+		N_("Image Pattern Alignment: This is a simple registration by translation method "
 		"using cross correlation in the spatial domain. This method is fast and is used to register "
 		"planetary movies. It can also be used for some deep-sky images registration. "
 		"Shifts at pixel precision are saved in seq file.")
 #ifdef HAVE_OPENCV
 ,
-		gettext_noop("Enhanced Correlation Coefficient Maximization: It is based on the enhanced correlation "
+		N_("Enhanced Correlation Coefficient Maximization: It is based on the enhanced correlation "
 		"coefficient maximization algorithm. This method is more complex and slower than Image Pattern Alignment "
 		"but no selection is required. It is good for moon surface images registration. Only translation is taken "
 		"into account yet.")

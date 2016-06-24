@@ -4037,7 +4037,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                     <property name="can_focus">True</property>
                     <property name="receives_default">True</property>
                     <property name="tooltip_text" translatable="yes">Open the RGB calibration tool on the resulting image. This will modify the result in a destructive way to align the three channels of the result.
-Modifying parameters in this windows afterward will void the colour balance, and it will have to be remade	.</property>
+Modifying parameters in this windows afterward will void the colour balance, and it will have to be remade.</property>
                     <signal name="clicked" handler="on_composition_rgbcolor_clicked" swapped="no"/>
                   </object>
                   <packing>
