@@ -2598,7 +2598,7 @@ void calculate_fwhm(GtkWidget *widget) {
 	/* calculate and display FWHM */
 	int layer = match_drawing_area_widget(widget, FALSE);
 	if (layer != -1) {
-		char buf[32], label_name[16];
+		char buf[64], label_name[16];
 		char *layer_name = vport_number_to_name(layer);
 		GtkLabel *label;
 		if (com.selection.w && com.selection.h) {// Now we don't care about the size of the sample. Minimization checks that
@@ -2610,9 +2610,9 @@ void calculate_fwhm(GtkWidget *widget) {
 				g_snprintf(buf, sizeof(buf), "fwhm = %.2f, r = %.2f", fwhm_val,
 						roundness);
 			} else
-				strcpy(buf, _("fwhm: selection is too large"));
+				g_snprintf(buf, sizeof(buf), _("fwhm: selection is too large"));
 		} else {
-			strcpy(buf, _("fwhm: no selection"));
+			g_snprintf(buf, sizeof(buf), _("fwhm: no selection"));
 		}
 		g_snprintf(label_name, sizeof(label_name), "labelfwhm%s", layer_name);
 		free(layer_name);
