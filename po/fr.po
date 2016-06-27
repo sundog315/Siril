@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: siril 0.9.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-27 15:50+0200\n"
+"POT-Creation-Date: 2016-06-27 16:26+0200\n"
 "PO-Revision-Date: 2016-06-27 16:06+0200\n"
 "Last-Translator: Cyril <cyril@free-astro.fr>\n"
 "Language-Team: French <cyril@free-astro.fr>\n"
@@ -1168,11 +1168,13 @@ msgstr "Plus Proches Voisins"
 msgid "Bilinear (default)"
 msgstr "Bilinéaire (défaut)"
 
-#: ../src/gui/siril3.glade.h:267 ../src/core/siril.c:1199
+#: ../src/gui/siril3.glade.h:267 ../src/core/siril.c:1159
+#: ../src/core/siril.c:1199
 msgid "Pixel Area Relation"
 msgstr "Zone de relation des pixels"
 
-#: ../src/gui/siril3.glade.h:268 ../src/core/siril.c:1202
+#: ../src/gui/siril3.glade.h:268 ../src/core/siril.c:1162
+#: ../src/core/siril.c:1202
 msgid "Bicubic"
 msgstr "Bicubique"
 
@@ -1518,7 +1520,8 @@ msgstr "Sélectionner une méthode d'interpolation pour exécuter le dématriça
 msgid "Debayer interpolation: "
 msgstr "Interpolation de dématriçage :"
 
-#: ../src/gui/siril3.glade.h:344 ../src/core/siril.c:1196
+#: ../src/gui/siril3.glade.h:344 ../src/core/siril.c:1156
+#: ../src/core/siril.c:1196
 msgid "Bilinear"
 msgstr "Bilinéaire"
 
@@ -4054,6 +4057,14 @@ msgid "Could not read one of the raw files: %s. Aborting preprocessing."
 msgstr ""
 "Impossible de lire un des fichiers raw : %s. Abandon du pré-traitement."
 
+#: ../src/core/siril.c:1152 ../src/core/siril.c:1192
+msgid "Nearest-Neighbor"
+msgstr "Plus Proches Voisins"
+
+#: ../src/core/siril.c:1165 ../src/core/siril.c:1205
+msgid "Lanczos4"
+msgstr "Lanczos4"
+
 #: ../src/core/siril.c:1169
 #, c-format
 msgid "Resample (%s interpolation): processing...\n"
@@ -4062,14 +4073,6 @@ msgstr "Ré-échantillonner (interpolation %s) : en cours...\n"
 #: ../src/core/siril.c:1189
 msgid "No"
 msgstr "Non"
-
-#: ../src/core/siril.c:1192
-msgid "Nearest-Neighbor"
-msgstr "Plus Proches Voisins"
-
-#: ../src/core/siril.c:1205
-msgid "Lanczos4"
-msgstr "Lanczos4"
 
 #: ../src/core/siril.c:1210
 #, c-format

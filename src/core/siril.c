@@ -1149,20 +1149,20 @@ int verbose_resize_gaussian(fits *image, int toX, int toY, int interpolation) {
 
 	switch (interpolation) {
 	case OPENCV_NEAREST:
-		str_inter = strdup("Nearest-Neighbor");
+		str_inter = _("Nearest-Neighbor");
 		break;
 	default:
 	case OPENCV_LINEAR:
-		str_inter = strdup("Bilinear");
+		str_inter = _("Bilinear");
 		break;
 	case OPENCV_AREA:
-		str_inter = strdup("Pixel Area Relation");
+		str_inter = _("Pixel Area Relation");
 		break;
 	case OPENCV_CUBIC:
-		str_inter = strdup("Bicubic");
+		str_inter = _("Bicubic");
 		break;
 	case OPENCV_LANCZOS4:
-		str_inter = strdup("Lanczos4");
+		str_inter = _("Lanczos4");
 		break;
 	}
 
