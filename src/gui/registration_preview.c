@@ -53,7 +53,7 @@ gboolean redraw_preview(GtkWidget *widget, cairo_t *cr, gpointer data) {
 
 	/* display current image with shifts */
 	if (!com.preview_surface[current_preview]) {
-		gchar text[10];
+		gchar text[32];
 		cairo_set_source_rgba(cr, 0.5, 0.5, 0.5, 0.5);
 		cairo_rectangle(cr, 0, 0, area_width, area_height);
 		cairo_fill(cr);
@@ -62,7 +62,7 @@ gboolean redraw_preview(GtkWidget *widget, cairo_t *cr, gpointer data) {
 		cairo_set_font_size(cr, 15);
 		cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
 		cairo_move_to(cr, area_width / 2.0 - 30, area_height / 2.0);
-		g_snprintf(text, sizeof(text), "Preview %d", current_preview + 1);
+		g_snprintf(text, sizeof(text), _("Preview %d"), current_preview + 1);
 		cairo_show_text(cr, text);
 		return TRUE;
 	}

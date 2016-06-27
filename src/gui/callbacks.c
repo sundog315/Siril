@@ -1522,8 +1522,8 @@ void opendial(void) {
 	case OD_DARK:
 	case OD_OFFSET:
 		widgetdialog = gtk_file_chooser_dialog_new(_("Open File"), control_window,
-				GTK_FILE_CHOOSER_ACTION_OPEN, ("_Cancel"), GTK_RESPONSE_CANCEL,
-				("_Open"), GTK_RESPONSE_ACCEPT,
+				GTK_FILE_CHOOSER_ACTION_OPEN, _("_Cancel"), GTK_RESPONSE_CANCEL,
+				_("_Open"), GTK_RESPONSE_ACCEPT,
 				NULL);
 		dialog = GTK_FILE_CHOOSER(widgetdialog);
 		gtk_file_chooser_set_current_folder(dialog, com.wd);
@@ -1532,8 +1532,8 @@ void opendial(void) {
 		break;
 	case OD_CWD:
 		widgetdialog = gtk_file_chooser_dialog_new(_("Open File"), control_window,
-				GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, ("_Cancel"),
-				GTK_RESPONSE_CANCEL, ("_Open"), GTK_RESPONSE_ACCEPT,
+				GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER, _("_Cancel"),
+				GTK_RESPONSE_CANCEL, _("_Open"), GTK_RESPONSE_ACCEPT,
 				NULL);
 		dialog = GTK_FILE_CHOOSER(widgetdialog);
 		gtk_file_chooser_set_current_folder(dialog, com.wd);
@@ -1541,8 +1541,8 @@ void opendial(void) {
 		break;
 	case OD_OPEN:
 		widgetdialog = gtk_file_chooser_dialog_new(_("Open File"), main_window,
-				GTK_FILE_CHOOSER_ACTION_OPEN, ("_Cancel"), GTK_RESPONSE_CANCEL,
-				("_Open"), GTK_RESPONSE_ACCEPT,
+				GTK_FILE_CHOOSER_ACTION_OPEN, _("_Cancel"), GTK_RESPONSE_CANCEL,
+				_("_Open"), GTK_RESPONSE_ACCEPT,
 				NULL);
 		dialog = GTK_FILE_CHOOSER(widgetdialog);
 		gtk_file_chooser_set_current_folder(dialog, com.wd);
@@ -1551,8 +1551,8 @@ void opendial(void) {
 		break;
 	case OD_CONVERT:
 		widgetdialog = gtk_file_chooser_dialog_new(_("Open File"), control_window,
-				GTK_FILE_CHOOSER_ACTION_OPEN, ("_Cancel"), GTK_RESPONSE_CANCEL,
-				("_Open"), GTK_RESPONSE_ACCEPT,
+				GTK_FILE_CHOOSER_ACTION_OPEN, _("_Cancel"), GTK_RESPONSE_CANCEL,
+				_("_Open"), GTK_RESPONSE_ACCEPT,
 				NULL);
 		dialog = GTK_FILE_CHOOSER(widgetdialog);
 		gtk_file_chooser_set_current_folder(dialog, com.wd);
@@ -3998,7 +3998,7 @@ int savedial(char *filename, const gchar *title, const gchar *pattern) {
 	gint res, retval = 0;
 
 	dialog = gtk_file_chooser_dialog_new(_("Save File"), parent_window, action,
-			("_Cancel"), GTK_RESPONSE_CANCEL, ("_Save"), GTK_RESPONSE_ACCEPT,
+			_("_Cancel"), GTK_RESPONSE_CANCEL, _("_Save"), GTK_RESPONSE_ACCEPT,
 			NULL);
 
 	chooser = GTK_FILE_CHOOSER(dialog);

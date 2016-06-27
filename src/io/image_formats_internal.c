@@ -504,7 +504,7 @@ int import_pnm_to_fits(const char *filename, fits *fit) {
 		fit->binning_x = fit->binning_y = 1;
 		fits_flip_top_to_bottom(fit);
 	} else {
-		msg = siril_log_message(_("Not handled max value for PNM: %d\n."),
+		msg = siril_log_message(_("Not handled max value for PNM: %d.\n"),
 				max_val);
 		show_dialog(msg, _("Error"), "gtk-dialog-error");
 		fclose(fd);

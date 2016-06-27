@@ -7605,6 +7605,7 @@ by averaging the entire image</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="tooltip_text" translatable="yes">Select your camera's Bayer pattern.</property>
+                                <property name="halign">start</property>
                                 <property name="label" translatable="yes">Bayer/mosaic pattern: </property>
                               </object>
                               <packing>
@@ -7636,6 +7637,7 @@ by averaging the entire image</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="tooltip_text" translatable="yes">Select an interpolation method to perform demosaicing.</property>
+                                <property name="halign">start</property>
                                 <property name="label" translatable="yes">Debayer interpolation: </property>
                               </object>
                               <packing>
@@ -7730,7 +7732,7 @@ by averaging the entire image</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="halign">start</property>
-                                <property name="label" translatable="yes">Focal length (mm):</property>
+                                <property name="label" translatable="yes">Focal length (mm): </property>
                               </object>
                               <packing>
                                 <property name="left_attach">0</property>
