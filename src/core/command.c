@@ -1315,6 +1315,7 @@ int select_unselect(gboolean select) {
 	}
 
 	update_reg_interface(FALSE);
+	adjust_sellabel();
 	writeseqfile(&com.seq);
 	siril_log_message(_("Selection update finished, %d images are selected in the sequence\n"), com.seq.selnum);
 
