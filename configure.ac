@@ -117,9 +117,9 @@ PKG_CHECK_MODULES(LIBPNG, [libpng],
 dnl check gif lib
 AC_CHECK_LIB(gif, EGifGetGifVersion, [])
 AS_IF([test "$ac_cv_lib_gif_EGifGetGifVersion" != yes],
-      AC_MSG_WARN([giflib not found. Not using GIF exporter.]))
+      AC_MSG_WARN([giflib not found or too old. Not using GIF exporter.]))
 
-dnl check ffms2		  
+dnl check ffms2
 PKG_CHECK_MODULES(FFMS2, [ffms2 < 2.21],
 		  [AC_DEFINE([HAVE_FFMS2_1], [1], [Use FFMS2 < 2.21])],
 		  [PKG_CHECK_MODULES(FFMS2, [ffms2 >= 2.21],
