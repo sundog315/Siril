@@ -13,14 +13,14 @@
 gpointer generic_sequence_worker(gpointer p) {
 	struct generic_seq_args *args = (struct generic_seq_args *) p;
 	struct timeval t_end;
-	int frame;
-	int current; // index of the frame being processed in the sequence
+	int frame;	// output frame index
+	int input_idx;	// index of the frame being processed in the sequence
 	int *index_mapping = NULL;
 	int nb_frames, progress = 0;
 	float nb_framesf;
-	int abort = 0; // variable for breaking out of loop
-	GString *desc; // temporary string description for logs
-	gchar *msg; // final string description for logs
+	int abort = 0;	// variable for breaking out of loop
+	GString *desc;	// temporary string description for logs
+	gchar *msg;	// final string description for logs
 	fits fit;
 
 	assert(args);
@@ -29,7 +29,7 @@ gpointer generic_sequence_worker(gpointer p) {
 	set_progress_bar_data(NULL, PROGRESS_RESET);
 	if (args->nb_filtered_images > 0)	// XXX can it be zero?
 		nb_frames = args->nb_filtered_images;
-	else 	nb_frames = args->seq->number + 1;
+	else 	nb_frames = args->seq->number;
 	nb_framesf = (float)nb_frames + 0.3f;	// leave margin for rounding errors and post processing
 	args->retval = 0;
 
@@ -39,18 +39,23 @@ gpointer generic_sequence_worker(gpointer p) {
 		goto the_end;
 	}
 
-	/* Creating a map of input sequence index to output sequence index, it cannot
-	 * be done in parallel. This is mandatory for SER contiguous output. */
-	if (args->filtering_criterion && args->seq->type == SEQ_SER) {
+	/* We have a sequence in which images can be filtered out. In order to
+	 * distribute the workload fairly among all threads, the main iteration
+	 * should not be on the list of images of the sequence, but on the
+	 * actual list of selected images.
+	 * Here we create this map of images to be processed, each cell of the
+	 * array providing the image number in the input sequence. It cannot be
+	 * done in parallel.
+	 * This is mandatory for SER contiguous output. */
+	if (args->filtering_criterion) {
 		index_mapping = malloc(args->nb_filtered_images * sizeof(int));
-		for (current = 0, frame = 0; frame < args->seq->number; frame++) {
-			if (args->filtering_criterion(args->seq, frame, args->filtering_parameter))
+		for (input_idx = 0, frame = 0; input_idx < args->seq->number; input_idx++) {
+			if (!args->filtering_criterion(args->seq, input_idx, args->filtering_parameter))
 				continue;
-			index_mapping[current] = frame;
-			current++;
+			index_mapping[frame++] = input_idx;
 		}
-		if (current != nb_frames) {
-			siril_log_message(_("Output index mapping failed.\n"));
+		if (frame != nb_frames) {
+			siril_log_message(_("Output index mapping failed (%d/%d).\n"), frame, nb_frames);
 			args->retval = 1;
 			goto the_end;
 		}
@@ -65,10 +70,9 @@ gpointer generic_sequence_worker(gpointer p) {
 		g_free(msg);
 	}
 
-	current = 0;
 	memset(&fit, 0, sizeof(fits));
 
-#pragma omp parallel for num_threads(com.max_thread) firstprivate(fit) schedule(static) \
+#pragma omp parallel for num_threads(com.max_thread) firstprivate(fit) private(input_idx) schedule(static) \
 	if(args->parallel && ((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER))
 	for (frame = 0; frame < nb_frames; frame++) {
 		if (!abort) {
@@ -79,21 +83,21 @@ gpointer generic_sequence_worker(gpointer p) {
 				continue;
 			}
 			if (index_mapping)
-				current = index_mapping[frame];
-			else current = frame;
+				input_idx = index_mapping[frame];
+			else input_idx = frame;
 
-			if (!seq_get_image_filename(args->seq, current, filename)) {
+			if (!seq_get_image_filename(args->seq, input_idx, filename)) {
 				abort = 1;
 				continue;
 			}
 
-			if (seq_read_frame(args->seq, current, &fit)) {
+			if (seq_read_frame(args->seq, input_idx, &fit)) {
 				abort = 1;
 				clearfits(&fit);
 				continue;
 			}
 
-			if (args->image_hook(args, current, &fit)) {
+			if (args->image_hook(args, input_idx, &fit)) {
 				abort = 1;
 				clearfits(&fit);
 				continue;
@@ -101,8 +105,8 @@ gpointer generic_sequence_worker(gpointer p) {
 
 			int retval;
 			if (args->save_hook)
-				retval = args->save_hook(args, frame, &fit);
-			else retval = generic_save(args, frame, &fit);
+				retval = args->save_hook(args, frame, input_idx, &fit);
+			else retval = generic_save(args, frame, input_idx, &fit);
 			if (retval) {
 				abort = 1;
 				clearfits(&fit);
@@ -113,7 +117,7 @@ gpointer generic_sequence_worker(gpointer p) {
 
 #pragma omp atomic
 			progress++;
-			snprintf(msg, 256, _("%s. Processing image %d (%s)"), args->description, current, filename);
+			snprintf(msg, 256, _("%s. Processing image %d (%s)"), args->description, input_idx, filename);
 			set_progress_bar_data(msg, (float)progress / nb_framesf);
 		}
 	}
@@ -131,6 +135,7 @@ gpointer generic_sequence_worker(gpointer p) {
 	}
 
 the_end:
+	if (index_mapping) free(index_mapping);
 	if (args->finalize_hook && args->finalize_hook(args)) {
 		siril_log_message(_("Finalizing sequence processing failed.\n"));
 		args->retval = 1;
@@ -183,18 +188,20 @@ int ser_finalize_hook(struct generic_seq_args *args) {
 	return retval;
 }
 
-/* index will be the index in the output sequence.
- * For a FITS sequence, adding 1 is recommended because for users a sequence
- * should start at 1 instead of 0
+/* For a FITS sequence, adding 1 is recommended because for users a sequence
+ * should start at 1 instead of 0.
+ * With SER, all images must be in a contiguous sequence, so we use the out_index.
+ * With FITS sequences, to keep track of image accross processings, we keep the
+ * input index all along.
  */
-int generic_save(struct generic_seq_args *args, int index, fits *fit) {
+int generic_save(struct generic_seq_args *args, int out_index, int in_index, fits *fit) {
 	char dest[256];
 
 	if (args->force_ser_output || args->seq->type == SEQ_SER) {
-		return ser_write_frame_from_fit(args->new_ser, fit, index);
+		return ser_write_frame_from_fit(args->new_ser, fit, out_index);
 	} else {
 		snprintf(dest, 256, "%s%s%05d%s", args->new_seq_prefix,
-				args->seq->seqname, index + 1, com.ext);
+				args->seq->seqname, in_index, com.ext);
 		return savefits(dest, fit);
 	}
 }

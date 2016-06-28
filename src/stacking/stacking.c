@@ -643,7 +643,7 @@ int stack_median(struct stacking_args *args) {
 	assert(pool_size > 0);
 #endif
 	npixels_in_block = largest_block_height * naxes[0];
-	fprintf(stdout, "allocating data for %d threads (each %'zu MB)\n", pool_size,
+	fprintf(stdout, "allocating data for %d threads (each %'lu MB)\n", pool_size,
 			nb_frames * npixels_in_block * sizeof(WORD) / 1048576L);
 	data_pool = malloc(pool_size * sizeof(struct _data_block));
 	for (i = 0; i < pool_size; i++) {
@@ -1468,7 +1468,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 	assert(pool_size > 0);
 #endif
 	npixels_in_block = largest_block_height * naxes[0];
-	fprintf(stdout, "allocating data for %d threads (each %'zu MB)\n", pool_size,
+	fprintf(stdout, "allocating data for %d threads (each %'lu MB)\n", pool_size,
 			nb_frames * npixels_in_block * sizeof(WORD) / 1048576L);
 	data_pool = malloc(pool_size * sizeof(struct _data_block));
 	for (i = 0; i < pool_size; i++) {

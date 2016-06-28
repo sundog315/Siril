@@ -167,11 +167,11 @@ static int ser_read_timestamp(struct ser_struct *ser_file) {
 	off_t filesize;
 
 	filesize = ser_file->filesize;
-	frame_size = ser_file->image_width * ser_file->image_height	* ser_file->number_of_planes;
+	frame_size = ser_file->image_width * ser_file->image_height * ser_file->number_of_planes;
 	off_t offset = SER_HEADER_LEN + (off_t) frame_size * (off_t) ser_file->byte_pixel_depth
-							* (off_t) ser_file->frame_count;
+		* (off_t) ser_file->frame_count;
 
-    /* Check if file is large enough to have timestamps */
+	/* Check if file is large enough to have timestamps */
 	if (filesize >= offset + (8 * ser_file->frame_count)) {
 		ser_file->ts = calloc(8, ser_file->frame_count);
 
@@ -231,7 +231,7 @@ static int ser_read_timestamp(struct ser_struct *ser_file) {
 			// There is a positive time difference between first and last timestamps
 			// We can calculate a frames per second value
 			ser_file->fps = ((double) (ser_file->frame_count - 1) * 10000)
-					/ (double) diff_ts;
+				/ (double) diff_ts;
 		} else {
 			// No valid frames per second value can be calculated
 			ser_file->fps = -1.0;
@@ -456,6 +456,9 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file,
 			ser_file->ts = calloc(8, copy_from->frame_count);
 			for (i = 0; i < copy_from->frame_count; i++)
 				ser_file->ts[i] = copy_from->ts[i];
+		} else {
+			ser_file->ts = NULL;
+			ser_file->fps = -1.0;
 		}
 		/* we write the header now, but it should be written again
 		 * before closing in case the number of the image in the new
