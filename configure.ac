@@ -50,16 +50,6 @@ if test `uname` != "Darwin"; then
 	LDFLAGS="$LDFLAGS -rdynamic"
 fi
 
-dnl Set PACKAGE_DATA_DIR in config.h.
-dnl if test "x${datadir}" = 'x${prefix}/share'; then
-dnl   if test "x${prefix}" = "xNONE"; then
-dnl     AC_DEFINE_UNQUOTED(PACKAGE_DATA_DIR, "${ac_default_prefix}/share/${PACKAGE}", [Package data dir1])
-dnl   else
-dnl     AC_DEFINE_UNQUOTED(PACKAGE_DATA_DIR, "${prefix}/share/${PACKAGE}", [Package data dir2])
-dnl   fi
-dnl else
-dnl   AC_DEFINE_UNQUOTED(PACKAGE_DATA_DIR, "${datadir}/${PACKAGE}", [Package data dir3])
-dnl fi
 
 dnl Set PACKAGE_SOURCE_DIR in config.h.
 packagesrcdir=`cd $srcdir && pwd`
@@ -150,30 +140,6 @@ else
 fi
 
 AM_CONDITIONAL(HAVE_OPENCV, [test "x$OPENCV_LIBS" != "x"])
-
-dnl if test "x$CXX" = "xno"; then
-dnl 	dnl TODO: is it possible to require CXX only when there is opencv?
-dnl 	AC_MSG_WARN([no C++ compiler found, opencv cannot be used])
-dnl else
-dnl 	AC_MSG_WARN(CXX is "$CXX")
-dnl 	dnl http://nerdland.net/2009/07/detecting-c-libraries-with-autotools/ solution 2
-dnl PKG_CHECK_MODULES([OPENCV], [opencv >= 2.0],
-dnl  		  [AC_DEFINE([HAVE_OPENCV], [1], [Using OpenCV])]
-dnl 		  [OPENCV_LIBS="-lopencv_core -lopencv_imgproc"],
-dnl 		  AC_MSG_WARN([opencv not found. Not using image resizing.]))
-dnl fi
-
-dnl checking several ffmpeg libraries - replaced by ffms2
-dnl can replace ffms2, but cannot have both enabled at the same time
-dnl PKG_CHECK_MODULES(FFMPEG, [libavformat libavutil libavcodec libswscale],
-dnl 		  [AC_DEFINE([HAVE_FFMPEG], [1], [Using AVI files natively])],
-dnl 		  AC_MSG_WARN([ffmpeg libav libraries not found. Not using AVI format.]))
-
-dnl netpbm is not used anymore, it is replaced by an internal PPM/PNM loader
-dnl AC_CHECK_LIB(netpbm, pgm_init, netpbm="true",
-dnl   AC_MSG_WARN([libnetpbm not found. jpeg and png conversions will not be available.]))
-dnl AM_CONDITIONAL(HAVE_NETPBM, test x$netpbm = xtrue)
-dnl ====================================================== 
 
 AC_CONFIG_FILES([Makefile src/Makefile po/Makefile.in])
 AC_OUTPUT

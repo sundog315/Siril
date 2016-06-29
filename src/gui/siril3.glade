@@ -11252,7 +11252,7 @@ A first computation pass will be done on all images before exporting, it may tak
                     <property name="column_spacing">10</property>
                     <child>
                       <object class="GtkCheckButton" id="useflat_button">
-                        <property name="label" translatable="yes">Use flat</property>
+                        <property name="label" translatable="yes" comments="Flat is the kind of the picture used here. In french I've decided to not translate the word.">Use flat</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -11300,7 +11300,7 @@ All images in the sequence will be divided by the master flat image (each pixel 
                     </child>
                     <child>
                       <object class="GtkCheckButton" id="usedark_button">
-                        <property name="label" translatable="yes">Use dark</property>
+                        <property name="label" translatable="yes" comments="Dark is the kind of the picture used here. In french I've decided to not translate the word.">Use dark</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -11348,7 +11348,7 @@ The dark master image will be removed from all images in the sequence.</property
                     </child>
                     <child>
                       <object class="GtkCheckButton" id="useoffset_button">
-                        <property name="label" translatable="yes">Use offset</property>
+                        <property name="label" translatable="yes" comments="Offset is the kind of the picture used here. In french I've decided to not translate the word.">Use offset</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
@@ -11403,7 +11403,7 @@ The bias/offset master image will be removed from all images in the sequence.</p
                         <property name="max_length">5</property>
                         <property name="width_chars">5</property>
                         <property name="max_width_chars">5</property>
-                        <property name="text" translatable="yes">5000</property>
+                        <property name="text">5000</property>
                         <property name="primary_icon_tooltip_text" translatable="yes">Normalisation value for flat division</property>
                         <property name="input_purpose">number</property>
                       </object>
@@ -13226,7 +13226,7 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
           <object class="GtkLabel" id="label61">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Copyright © 2004-2011 François Meyer 
+            <property name="label" translatable="yes" comments="At the end, add a line with this template:&#10;Translator: name_of_translator&#10;Do not forget to add a '\n' char at the end of the line before.">Copyright © 2004-2011 François Meyer 
 Copyright © 2012-2016 team free-astro
 Project leader: Vincent Hourdin
 Project scientist: Cyril Richard
