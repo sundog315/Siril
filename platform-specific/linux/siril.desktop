@@ -1,11 +1,17 @@
 [Desktop Entry]
-Version=0.9.2
+Version=0.9.4
 Name=Siril
 Name[fr]=Siril
 Comment=Astronomical image (pre-)processing program
+Comment[ar_DZ]=برنامج معالجة الصور الفلكية
 Comment[fr]=Programme de (pré-)traitement des images astronomiques
+Comment[nl]=Programma voor (voor)behandeling van astronomische beelden
+Comment[zh_CN]=天文图像（预）处理软件
 Keywords=astronomy;stacking;registration;
+Keywords[ar_DZ]=فلك; تراص; إنحياز;
 Keywords[fr]=astronomie;empilement;alignement;
+Keywords[nl]=astronomie;stacking;afstemming;
+Keywords[zh_CN]=天文;叠加;对齐
 Exec=siril %F
 Icon=siril
 Terminal=false

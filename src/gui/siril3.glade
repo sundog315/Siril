@@ -2579,7 +2579,7 @@ enter a visible wavelength in nm</property>
                       <object class="GtkLabel" id="label65">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">page 1</property>
+                        <property name="label">page 1</property>
                       </object>
                       <packing>
                         <property name="tab_fill">False</property>
@@ -2637,7 +2637,7 @@ enter a visible wavelength in nm</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">This is the number of sample box in a row.</property>
-                                        <property name="text" translatable="yes">5</property>
+                                        <property name="text">5</property>
                                         <property name="adjustment">adjustment_bkg_s_p_row</property>
                                         <property name="climb_rate">1</property>
                                         <property name="snap_to_ticks">True</property>
@@ -2707,7 +2707,7 @@ enter a visible wavelength in nm</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">This parameter indicates the tolerance of local sample rejection, in sigma units.</property>
-                                        <property name="text" translatable="yes">1,00</property>
+                                        <property name="text">1,00</property>
                                         <property name="adjustment">adjustment_bkg_tolerance</property>
                                         <property name="climb_rate">0.01</property>
                                         <property name="digits">3</property>
@@ -2775,7 +2775,7 @@ enter a visible wavelength in nm</property>
                                         <property name="visible">True</property>
                                         <property name="can_focus">True</property>
                                         <property name="tooltip_text" translatable="yes">Tolerance of global sample rejection, in sigma units.</property>
-                                        <property name="text" translatable="yes">0,80</property>
+                                        <property name="text">0,80</property>
                                         <property name="adjustment">adjustment_bkg_deviation</property>
                                         <property name="climb_rate">0.01</property>
                                         <property name="digits">3</property>
@@ -2846,7 +2846,7 @@ enter a visible wavelength in nm</property>
                       <object class="GtkLabel" id="label111">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">page 2</property>
+                        <property name="label">page 2</property>
                       </object>
                       <packing>
                         <property name="position">1</property>
@@ -2906,10 +2906,10 @@ The higher the degree order is, the stronger the gradient can be remove.</proper
                                     <property name="valign">center</property>
                                     <property name="active">0</property>
                                     <items>
-                                      <item translatable="yes">1</item>
-                                      <item translatable="yes">2</item>
-                                      <item translatable="yes">3</item>
-                                      <item translatable="yes">4</item>
+                                      <item>1</item>
+                                      <item>2</item>
+                                      <item>3</item>
+                                      <item>4</item>
                                     </items>
                                   </object>
                                   <packing>
@@ -3191,13 +3191,13 @@ Division: it is mainly used to correct multiplicative phenomena, such as vignett
                     <property name="hexpand">True</property>
                     <property name="active">0</property>
                     <items>
-                      <item translatable="yes">3x3</item>
-                      <item translatable="yes">5x5</item>
-                      <item translatable="yes">7x7</item>
-                      <item translatable="yes">9x9</item>
-                      <item translatable="yes">11x11</item>
-                      <item translatable="yes">13x13</item>
-                      <item translatable="yes">15x15</item>
+                      <item>3x3</item>
+                      <item>5x5</item>
+                      <item>7x7</item>
+                      <item>9x9</item>
+                      <item>11x11</item>
+                      <item>13x13</item>
+                      <item>15x15</item>
                     </items>
                   </object>
                   <packing>
@@ -4430,7 +4430,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                 <property name="hexpand">True</property>
                                 <property name="invisible_char">●</property>
                                 <property name="width_chars">6</property>
-                                <property name="text" translatable="yes">50,00</property>
+                                <property name="text">50,00</property>
                                 <property name="input_purpose">number</property>
                                 <property name="adjustment">adjSigCosmeCold</property>
                                 <property name="climb_rate">0.01</property>
@@ -4468,7 +4468,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                 <property name="halign">end</property>
                                 <property name="hexpand">True</property>
                                 <property name="width_chars">6</property>
-                                <property name="text" translatable="yes">50,00</property>
+                                <property name="text">50,00</property>
                                 <property name="input_purpose">number</property>
                                 <property name="adjustment">adjSigCosmeHot</property>
                                 <property name="climb_rate">0.01</property>
@@ -5385,7 +5385,7 @@ Uncheck if images come from a monochrome sensor.</property>
                 <property name="hexpand">True</property>
                 <property name="invisible_char">●</property>
                 <property name="max_width_chars">7</property>
-                <property name="text" translatable="yes">2</property>
+                <property name="text">2</property>
                 <property name="input_purpose">number</property>
                 <property name="adjustment">adj_extract_w</property>
                 <property name="climb_rate">1</property>
@@ -5479,7 +5479,7 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="tooltip_text" translatable="yes">Horizontal Zoom</property>
-                    <property name="text" translatable="yes">1</property>
+                    <property name="text">1</property>
                     <property name="input_purpose">number</property>
                     <property name="adjustment">histoAdjZoomH</property>
                     <property name="numeric">True</property>
@@ -5502,7 +5502,7 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="tooltip_text" translatable="yes">Vertical Zoom</property>
-                    <property name="text" translatable="yes">1</property>
+                    <property name="text">1</property>
                     <property name="input_purpose">number</property>
                     <property name="adjustment">histoAdjZoomV</property>
                     <property name="numeric">True</property>
@@ -6139,7 +6139,7 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="halign">end</property>
                     <property name="hexpand">True</property>
                     <property name="width_chars">9</property>
-                    <property name="text" translatable="yes">100,00</property>
+                    <property name="text">100,00</property>
                     <property name="input_purpose">number</property>
                     <property name="adjustment">resample_Y</property>
                     <property name="climb_rate">0.01</property>
@@ -6161,7 +6161,7 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="hexpand">True</property>
                     <property name="invisible_char">●</property>
                     <property name="width_chars">9</property>
-                    <property name="text" translatable="yes">100,00</property>
+                    <property name="text">100,00</property>
                     <property name="input_purpose">number</property>
                     <property name="adjustment">resample_X</property>
                     <property name="climb_rate">0.01</property>
@@ -7155,7 +7155,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="tooltip_text" translatable="yes">Specify your own raw white balance. The value for the Red scale is relative to the Green.</property>
                                         <property name="invisible_char">●</property>
                                         <property name="width_chars">5</property>
-                                        <property name="text" translatable="yes">1,00</property>
+                                        <property name="text">1,00</property>
                                         <property name="progress_pulse_step">0.0099999997764825821</property>
                                         <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_red</property>
@@ -7207,7 +7207,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="tooltip_text" translatable="yes">Specify your own raw white balance. The value for the Blue scale is relative to the Green.</property>
                                         <property name="invisible_char">●</property>
                                         <property name="width_chars">5</property>
-                                        <property name="text" translatable="yes">1,00</property>
+                                        <property name="text">1,00</property>
                                         <property name="progress_pulse_step">0.0099999997764825821</property>
                                         <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_blue</property>
@@ -7258,7 +7258,7 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="tooltip_text" translatable="yes">Divide the white level by this number.</property>
                                         <property name="invisible_char">●</property>
                                         <property name="width_chars">5</property>
-                                        <property name="text" translatable="yes">1,00</property>
+                                        <property name="text">1,00</property>
                                         <property name="progress_pulse_step">0.0099999997764825821</property>
                                         <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_brightness</property>
@@ -7851,14 +7851,14 @@ by averaging the entire image</property>
                                 <property name="halign">end</property>
                                 <property name="active">0</property>
                                 <items>
-                                  <item translatable="yes">1x1</item>
-                                  <item translatable="yes">2x2</item>
-                                  <item translatable="yes">3x3</item>
-                                  <item translatable="yes">4x4</item>
-                                  <item translatable="yes">1x2</item>
-                                  <item translatable="yes">1x3</item>
-                                  <item translatable="yes">2x1</item>
-                                  <item translatable="yes">3x1</item>
+                                  <item>1x1</item>
+                                  <item>2x2</item>
+                                  <item>3x3</item>
+                                  <item>4x4</item>
+                                  <item>1x2</item>
+                                  <item>1x3</item>
+                                  <item>2x1</item>
+                                  <item>3x1</item>
                                 </items>
                                 <signal name="changed" handler="on_combobinning_changed" swapped="no"/>
                               </object>
@@ -10805,7 +10805,7 @@ WARNING: it will erase all registration and statistics data.</property>
                         <property name="valign">center</property>
                         <property name="margin_left">5</property>
                         <property name="margin_right">5</property>
-                        <property name="text" translatable="yes">1</property>
+                        <property name="text">1</property>
                         <property name="input_purpose">number</property>
                         <property name="adjustment">adjustment5</property>
                         <property name="numeric">True</property>
@@ -11585,7 +11585,7 @@ Hot pixels are located on the master-dark.</property>
                         <property name="halign">start</property>
                         <property name="width_chars">7</property>
                         <property name="max_width_chars">5</property>
-                        <property name="text" translatable="yes">3,000</property>
+                        <property name="text">3,000</property>
                         <property name="input_purpose">number</property>
                         <property name="adjustment">adjSigCosmeCold</property>
                         <property name="digits">3</property>
@@ -12526,7 +12526,7 @@ Pixels of the image are replaced by pixels at the same coordinates if intensity 
                                         <property name="halign">start</property>
                                         <property name="width_chars">5</property>
                                         <property name="max_width_chars">6</property>
-                                        <property name="text" translatable="yes">2,00</property>
+                                        <property name="text">2,00</property>
                                         <property name="adjustment">stack_siglow_adjustment</property>
                                         <property name="climb_rate">0.10000000000000001</property>
                                         <property name="digits">3</property>
@@ -12557,7 +12557,7 @@ Pixels of the image are replaced by pixels at the same coordinates if intensity 
                                         <property name="halign">start</property>
                                         <property name="width_chars">5</property>
                                         <property name="max_width_chars">6</property>
-                                        <property name="text" translatable="yes">2,00</property>
+                                        <property name="text">2,00</property>
                                         <property name="adjustment">stack_sighigh_adjustment</property>
                                         <property name="climb_rate">0.10000000000000001</property>
                                         <property name="digits">3</property>
@@ -12669,7 +12669,7 @@ gradients with differing spatial distributions and orientations.
                           <object class="GtkLabel" id="label119">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">page 3</property>
+                            <property name="label">page 3</property>
                           </object>
                           <packing>
                             <property name="position">2</property>
@@ -12693,7 +12693,7 @@ gradients with differing spatial distributions and orientations.
                           <object class="GtkLabel" id="label144">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">page 4</property>
+                            <property name="label">page 4</property>
                           </object>
                           <packing>
                             <property name="position">3</property>
@@ -12717,7 +12717,7 @@ gradients with differing spatial distributions and orientations.
                           <object class="GtkLabel" id="label47">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">page 5</property>
+                            <property name="label">page 5</property>
                           </object>
                           <packing>
                             <property name="position">4</property>
