@@ -882,6 +882,43 @@ enter a visible wavelength in nm</property>
         <signal name="activate" handler="on_menu_rgb_save8ppm_activate" swapped="no"/>
       </object>
     </child>
+    <child>
+      <object class="GtkSeparatorMenuItem" id="&lt;séparateur&gt;4">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkMenuItem" id="menu_rgb_align">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">RGB Align</property>
+        <property name="use_underline">True</property>
+        <signal name="select" handler="on_menu_rgb_align_select" swapped="no"/>
+        <child type="submenu">
+          <object class="GtkMenu">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkMenuItem" id="rgb_align_dft">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">Image pattern alignment (planetary/deep-sky)</property>
+                <property name="use_underline">True</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuItem" id="rgb_align_psf">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="label" translatable="yes">One star registration (deep-sky)</property>
+                <property name="use_underline">True</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
   </object>
   <object class="GtkImage" id="remove_convert_image">
     <property name="visible">True</property>

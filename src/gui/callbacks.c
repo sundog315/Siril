@@ -5936,3 +5936,10 @@ void fillSeqAviExport() {
 
 	}
 }
+
+void on_menu_rgb_align_select(GtkMenuItem *menuitem, gpointer user_data) {
+	gboolean sel_is_drawn = ((com.selection.w > 0.0) && (com.selection.h > 0.0));
+
+	gtk_widget_set_sensitive(lookup_widget("rgb_align_dft"), sel_is_drawn);
+	gtk_widget_set_sensitive(lookup_widget("rgb_align_psf"), sel_is_drawn);
+}
