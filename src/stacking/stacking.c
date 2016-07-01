@@ -1411,7 +1411,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 		}
 		remainder = naxes[1] - (nb_parallel_stacks / nb_channels * size_of_stacks);
 	}
-	siril_log_message("We have %d parallel blocks of size %d (+%d) for stacking.\n",
+	siril_log_message(_("We have %d parallel blocks of size %d (+%d) for stacking.\n"),
 			nb_parallel_stacks, size_of_stacks, remainder);
 	struct image_block {
 		unsigned long channel, start_row, end_row, height;

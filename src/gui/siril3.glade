@@ -1013,7 +1013,7 @@ enter a visible wavelength in nm</property>
                     <child>
                       <object class="GtkTreeViewColumn" id="treeviewcolumn16">
                         <property name="resizable">True</property>
-                        <property name="title" translatable="yes">#</property>
+                        <property name="title">#</property>
                         <property name="clickable">True</property>
                         <property name="reorderable">True</property>
                         <property name="sort_indicator">True</property>
@@ -2256,7 +2256,7 @@ enter a visible wavelength in nm</property>
                         </child>
                         <child>
                           <object class="GtkCheckButton" id="checkbutton_bkg_boxes">
-                            <property name="label" translatable="yes">Draw boxes</property>
+                            <property name="label" translatable="yes">Draw samples</property>
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
@@ -3957,7 +3957,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
-                <property name="text" translatable="yes">0</property>
+                <property name="text">0</property>
                 <property name="input_purpose">number</property>
                 <property name="adjustment">adjustment_lum_x</property>
               </object>
@@ -3971,7 +3971,7 @@ This is useful when modulation parameter is different to 1 helping the whole pro
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
-                <property name="text" translatable="yes">0</property>
+                <property name="text">0</property>
                 <property name="input_purpose">number</property>
                 <property name="adjustment">adjustment_lum_y</property>
               </object>
@@ -4914,7 +4914,7 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Order :</property>
+                    <property name="label" translatable="yes">Order: </property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -4926,7 +4926,7 @@ Uncheck if images come from a monochrome sensor.</property>
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="halign">start</property>
-                    <property name="label" translatable="yes">Type :</property>
+                    <property name="label" translatable="yes">Type: </property>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -7939,7 +7939,7 @@ by averaging the entire image</property>
                     <property name="margin_left">15</property>
                     <property name="margin_right">15</property>
                     <property name="margin_bottom">4</property>
-                    <property name="label" translatable="yes">Warning: these fields are automatically read from FITS file on opening and setting them here will only work for the currently loaded file.</property>
+                    <property name="label" translatable="yes">WARNING: these fields are automatically read from FITS file on opening and setting them here will only work for the currently loaded file.</property>
                     <property name="wrap">True</property>
                     <property name="max_width_chars">0</property>
                     <attributes>
@@ -8661,7 +8661,7 @@ The default value for threshold is 1.00.</property>
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Threshold value of star roundnesses. Decrease this value if your stars show small trails.
 
-Warning: ensure you have a good reason to change this value because it may degrade the star detection.</property>
+WARNING: ensure you have a good reason to change this value because it may degrade the star detection.</property>
                         <property name="width_chars">5</property>
                         <property name="input_purpose">number</property>
                         <property name="adjustment">adjstarfinder_roundness</property>
@@ -9507,7 +9507,7 @@ Warning: ensure you have a good reason to change this value because it may degra
                 <property name="invisible_char">●</property>
                 <property name="width_chars">6</property>
                 <property name="max_width_chars">7</property>
-                <property name="text" translatable="yes">0,00</property>
+                <property name="text">0,00</property>
                 <property name="input_purpose">number</property>
                 <property name="adjustment">rotation_angle</property>
                 <property name="climb_rate">0.01</property>
@@ -11964,7 +11964,7 @@ When processing images, registration data is taken from the default layer if ava
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Check this box if you want to perform the Global Star Alignment algorithm within the selected area in the reference image. If no selection are done, this option is ignored.
-Warning: Make sure to draw a selection with a sufficient number of stars.</property>
+WARNING: Make sure to draw a selection with a sufficient number of stars.</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
@@ -12025,7 +12025,7 @@ Warning: Make sure to draw a selection with a sufficient number of stars.</prope
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Use this option to use the position of the star found in the previous image as new centre for the current image registration. This allows the selection area to be smaller, registration faster, and accounts for drift or images with a large number of stars.
-Warning: enabling this option requires the registration to not be parallelized, it will run on one CPU core only.</property>
+WARNING: enabling this option requires the registration to not be parallelized, it will run on one CPU core only.</property>
                         <property name="halign">end</property>
                         <property name="draw_indicator">True</property>
                       </object>
@@ -12117,7 +12117,7 @@ To be enabled, the reference image must have been explicitly set and already dis
                         <property name="invisible_char">●</property>
                         <property name="width_chars">4</property>
                         <property name="max_width_chars">3</property>
-                        <property name="text" translatable="yes">0</property>
+                        <property name="text">0</property>
                         <property name="input_purpose">number</property>
                         <property name="adjustment">adjustment_shiftx</property>
                         <property name="numeric">True</property>
@@ -12148,7 +12148,7 @@ To be enabled, the reference image must have been explicitly set and already dis
                         <property name="invisible_char">●</property>
                         <property name="width_chars">4</property>
                         <property name="max_width_chars">3</property>
-                        <property name="text" translatable="yes">0</property>
+                        <property name="text">0</property>
                         <property name="input_purpose">number</property>
                         <property name="adjustment">adjustment_shifty</property>
                         <property name="numeric">True</property>
@@ -12645,7 +12645,7 @@ gradients with differing spatial distributions and orientations.
                           <object class="GtkLabel" id="label84">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">page 2</property>
+                            <property name="label">page 2</property>
                           </object>
                           <packing>
                             <property name="position">1</property>
@@ -13419,7 +13419,7 @@ and the Siril Development Team</property>
               <object class="GtkLabel" id="confirmlabel">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">text</property>
+                <property name="label">text</property>
                 <property name="justify">center</property>
               </object>
               <packing>
@@ -13859,7 +13859,7 @@ This step should be run before any attempt of color calibration.</property>
                                         <property name="tooltip_text" translatable="yes">x coordinate of the start of the white reference selection</property>
                                         <property name="editable">False</property>
                                         <property name="width_chars">6</property>
-                                        <property name="text" translatable="yes">0</property>
+                                        <property name="text">0</property>
                                         <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_white_x</property>
                                         <property name="numeric">True</property>
@@ -13876,7 +13876,7 @@ This step should be run before any attempt of color calibration.</property>
                                         <property name="tooltip_text" translatable="yes">y coordinate of the start of the white reference selection</property>
                                         <property name="editable">False</property>
                                         <property name="width_chars">6</property>
-                                        <property name="text" translatable="yes">0</property>
+                                        <property name="text">0</property>
                                         <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_white_y</property>
                                         <property name="numeric">True</property>
@@ -13893,7 +13893,7 @@ This step should be run before any attempt of color calibration.</property>
                                         <property name="tooltip_text" translatable="yes">Width of the white reference selection</property>
                                         <property name="editable">False</property>
                                         <property name="width_chars">6</property>
-                                        <property name="text" translatable="yes">0</property>
+                                        <property name="text">0</property>
                                         <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_white_w</property>
                                         <property name="numeric">True</property>
@@ -13910,7 +13910,7 @@ This step should be run before any attempt of color calibration.</property>
                                         <property name="tooltip_text" translatable="yes">Height of the white reference selection</property>
                                         <property name="editable">False</property>
                                         <property name="width_chars">6</property>
-                                        <property name="text" translatable="yes">0</property>
+                                        <property name="text">0</property>
                                         <property name="input_purpose">number</property>
                                         <property name="adjustment">adjustment_white_h</property>
                                         <property name="numeric">True</property>

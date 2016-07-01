@@ -598,7 +598,7 @@ void on_button_align_clicked(GtkButton *button, gpointer user_data) {
 	set_progress_bar_data(msg, PROGRESS_RESET);
 	if (method->method_ptr(&regargs))
 		set_progress_bar_data(_("Error in layers alignment."), PROGRESS_DONE);
-	else set_progress_bar_data(_("Registration complete"), PROGRESS_DONE);
+	else set_progress_bar_data(_("Registration complete."), PROGRESS_DONE);
 	set_cursor_waiting(FALSE);
 
 	/* display the values */

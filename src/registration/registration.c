@@ -1154,7 +1154,7 @@ static gboolean end_register_idle(gpointer p) {
 		}
 #endif
 	}
-	set_progress_bar_data(_("Registration complete"), PROGRESS_DONE);
+	set_progress_bar_data(_("Registration complete."), PROGRESS_DONE);
 	update_stack_interface();
 	set_cursor_waiting(FALSE);
 	gettimeofday(&t_end, NULL);
