@@ -1579,7 +1579,7 @@ int backgroundnoise(fits* fit, double sigma[]) {
 	cvComputeFinestScale(waveimage);
 #else
 	if (get_wavelet_layers(waveimage, 4, 0, TO_PAVE_BSPLINE, -1)) {
-		siril_log_message(_("Siril cannot evaluate the noise in the image\n");
+		siril_log_message(_("Siril cannot evaluate the noise in the image\n"));
 		clearfits(waveimage);
 		return 1;
 	}
