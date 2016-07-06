@@ -896,7 +896,7 @@ enter a visible wavelength in nm</property>
         <property name="use_underline">True</property>
         <signal name="select" handler="on_menu_rgb_align_select" swapped="no"/>
         <child type="submenu">
-          <object class="GtkMenu">
+          <object class="GtkMenu" id="menu_align">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
