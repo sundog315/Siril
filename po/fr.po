@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: siril 0.9.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-01 22:00+0200\n"
-"PO-Revision-Date: 2016-07-01 22:02+0200\n"
+"POT-Creation-Date: 2016-07-06 23:27+0200\n"
+"PO-Revision-Date: 2016-07-06 15:57+0200\n"
 "Last-Translator: Cyril <cyril@free-astro.fr>\n"
 "Language-Team: French <cyril@free-astro.fr>\n"
 "Language: fr\n"
@@ -94,11 +94,14 @@ msgstr "Enregistrer l'image RVB en PPM 48-bit"
 msgid "RGB Align"
 msgstr "Alignement RVB"
 
-#: ../src/gui/siril3.glade.h:19
+#: ../src/gui/siril3.glade.h:19 ../src/compositing/compositing.c:360
 msgid "Image pattern alignment (planetary/deep-sky)"
 msgstr "Alignement par motif de l'image (planétaire/ciel profond)"
 
-#: ../src/gui/siril3.glade.h:20
+#. the list below depends on the content of the glade file. It
+#. * should be done in the same way as in registration.c, but it
+#. * woud be easier if the two glades are merged.
+#: ../src/gui/siril3.glade.h:20 ../src/compositing/compositing.c:359
 msgid "One star registration (deep-sky)"
 msgstr "Alignement sur une étoile (ciel profond)"
 
@@ -1580,8 +1583,9 @@ msgid "<b>Swap Storage Directory</b>"
 msgstr "<b>Dossier Swap</b>"
 
 #: ../src/gui/siril3.glade.h:351
+#, fuzzy
 msgid "Ratio of Available Memory Used: "
-msgstr "Ratio de la Mémoire Utilisée : "
+msgstr "Ratio de mémoire utilisée : "
 
 #: ../src/gui/siril3.glade.h:352
 msgid ""
@@ -1957,7 +1961,7 @@ msgstr "Couches des Ondelettes..."
 
 #: ../src/gui/siril3.glade.h:442
 msgid "RGB Compositing..."
-msgstr "Composition RVB"
+msgstr "Composition RVB..."
 
 #: ../src/gui/siril3.glade.h:443
 msgid "_Analysis"
@@ -3494,7 +3498,7 @@ msgstr "Réajustement du canal %d (x%g)\n"
 #: ../src/gui/callbacks.c:3130 ../src/gui/callbacks.c:4480
 #: ../src/gui/callbacks.c:4695 ../src/gui/callbacks.c:5032
 #: ../src/gui/callbacks.c:5168 ../src/gui/callbacks.c:5546
-#: ../src/gui/callbacks.c:5691 ../src/io/conversion.c:460
+#: ../src/gui/callbacks.c:5695 ../src/io/conversion.c:460
 #: ../src/registration/registration.c:1037 ../src/stacking/stacking.c:1854
 #: ../src/stacking/stacking.c:1981
 msgid "Another task is already in progress, ignoring new request.\n"
@@ -4482,7 +4486,7 @@ msgstr "Veuillez d'abord ouvrir une image !\n"
 msgid "Select magnitude and phase before !\n"
 msgstr "Veuillez d'abord sélectionner des fichiers de module et de phase !\n"
 
-#: ../src/gui/callbacks.c:5759
+#: ../src/gui/callbacks.c:5763
 #, c-format
 msgid "%d files loaded"
 msgstr "%d fichiers chargés"

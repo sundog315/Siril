@@ -5594,6 +5594,8 @@ void on_menuitem_cosmetic_activate(GtkMenuItem *menuitem, gpointer user_data) {
 		// not a processing result
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lookup_widget("checkCosmeticSeq")), FALSE);
 	}
+	else
+		return;
 	gtk_widget_show(lookup_widget("cosmetic_dialog"));
 }
 
@@ -5670,6 +5672,8 @@ void on_menuitem_fixbanding_activate(GtkMenuItem *menuitem, gpointer user_data) 
 		// not a processing result
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(lookup_widget("checkBandingSeq")), FALSE);
 	}
+	else
+		return;
 	gtk_widget_show(lookup_widget("canon_fixbanding_dialog"));
 }
 

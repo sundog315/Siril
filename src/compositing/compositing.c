@@ -356,8 +356,8 @@ void open_compositing_window() {
 		/* the list below depends on the content of the glade file. It
 		 * should be done in the same way as in registration.c, but it
 		 * woud be easier if the two glades are merged. */
-		reg_methods[0] = new_reg_method("One star registration (deep-sky)", &register_shift_fwhm, REQUIRES_ANY_SELECTION, REGTYPE_DEEPSKY);
-		reg_methods[1] = new_reg_method("Image pattern alignment (planetary/deep-sky)", &register_shift_dft, REQUIRES_SQUARED_SELECTION, REGTYPE_PLANETARY);
+		reg_methods[0] = new_reg_method(_("One star registration (deep-sky)"), &register_shift_fwhm, REQUIRES_ANY_SELECTION, REGTYPE_DEEPSKY);
+		reg_methods[1] = new_reg_method(_("Image pattern alignment (planetary/deep-sky)"), &register_shift_dft, REQUIRES_SQUARED_SELECTION, REGTYPE_PLANETARY);
 
 		reg_methods[2] = NULL;
 		update_compositing_interface();
@@ -572,7 +572,7 @@ void create_the_internal_sequence() {
 	seq->ry = gfit.ry;
 }
 
-/* start alignming the layers: create an 'internal' sequence and run the seected method on it */
+/* start alignming the layers: create an 'internal' sequence and run the selected method on it */
 void on_button_align_clicked(GtkButton *button, gpointer user_data) {
 	int i, j;
 	struct registration_args regargs;
