@@ -445,7 +445,7 @@ char *seq_get_image_filename(sequence *seq, int index, char *name_buf) {
 			if (!name_buf || index < 0 || index > seq->end) {
 				return NULL;
 			}
-			snprintf(name_buf, 255, "%d from %s.ser", index, seq->seqname);
+			snprintf(name_buf, 255, _("%d from %s.ser"), index, seq->seqname);
 			name_buf[255] = '\0';
 			return name_buf;
 #if defined(HAVE_FFMS2_1) || defined(HAVE_FFMS2_2)
@@ -453,7 +453,6 @@ char *seq_get_image_filename(sequence *seq, int index, char *name_buf) {
 			if (!name_buf || index < 0 || index > seq->end) {
 				return NULL;
 			}
-			//snprintf(name_buf, 255, "%d from %s.avi", index, seq->seqname);
 			snprintf(name_buf, 255, "%s_%d", seq->seqname, index);
 			name_buf[255] = '\0';
 			return name_buf;
