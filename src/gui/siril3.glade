@@ -9587,7 +9587,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">_File</property>
                 <property name="use_underline">True</property>
-                <signal name="activate" handler="on_file1_activate" swapped="no"/>
                 <child type="submenu">
                   <object class="GtkMenu" id="file_1menu">
                     <property name="visible">True</property>
@@ -9725,7 +9724,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">_Edit</property>
                 <property name="use_underline">True</property>
-                <signal name="activate" handler="on_edit_activate" swapped="no"/>
                 <child type="submenu">
                   <object class="GtkMenu" id="menu6">
                     <property name="visible">True</property>
@@ -9764,7 +9762,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">_Image Processing</property>
                 <property name="use_underline">True</property>
-                <signal name="activate" handler="on_processing_activate" swapped="no"/>
                 <child type="submenu">
                   <object class="GtkMenu" id="processing_menu">
                     <property name="visible">True</property>
@@ -10007,7 +10004,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">_Analysis</property>
                 <property name="use_underline">True</property>
-                <signal name="activate" handler="on_menuAnalysis_activate" swapped="no"/>
                 <child type="submenu">
                   <object class="GtkMenu" id="menu2">
                     <property name="visible">True</property>
@@ -10033,7 +10029,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                     <child>
                       <object class="GtkMenuItem" id="menuitem_noise">
                         <property name="visible">True</property>
-                        <property name="sensitive">False</property>
                         <property name="can_focus">False</property>
                         <property name="label" translatable="yes">Noise Estimation</property>
                         <property name="use_underline">True</property>
@@ -10050,7 +10045,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">_Windows</property>
                 <property name="use_underline">True</property>
-                <signal name="activate" handler="on_menuitemWindows_activate" swapped="no"/>
                 <child type="submenu">
                   <object class="GtkMenu" id="menu1">
                     <property name="visible">True</property>

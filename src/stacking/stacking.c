@@ -2049,10 +2049,14 @@ static gboolean end_stacking(gpointer p) {
 
 		set_display_mode();
 
+		/* update menus */
+		update_MenuItem();
+
 		redraw(com.cvport, REMAP_ALL);
 		redraw_previews();
 		sequence_list_change_current();
 	}
+
 	set_cursor_waiting(FALSE);
 	gettimeofday (&t_end, NULL);
 	show_time(args->t_start, t_end);

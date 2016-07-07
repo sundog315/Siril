@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: siril 0.9.4\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-07-07 07:45+0200\n"
-"PO-Revision-Date: 2016-07-07 07:45+0200\n"
+"PO-Revision-Date: 2016-07-07 14:09+0200\n"
 "Last-Translator: Cyril <cyril@free-astro.fr>\n"
 "Language-Team: French <cyril@free-astro.fr>\n"
 "Language: fr\n"
@@ -1988,7 +1988,7 @@ msgstr "Images en niveau de gris"
 
 #: ../src/gui/siril3.glade.h:449
 msgid "Color Image"
-msgstr "Couleur de l'image"
+msgstr "Image en couleur"
 
 #: ../src/gui/siril3.glade.h:450
 msgid "_Help"

@@ -26,6 +26,7 @@ void set_GUI_CWD();
 void set_GUI_MEM(unsigned long size);
 void set_GUI_misc();
 void initialize_preprocessing();
+void update_MenuItem();
 void test_and_allocate_reference_image(int vport);
 void enable_view_reference_checkbox(gboolean status);
 gboolean redraw(int vport, int remap);

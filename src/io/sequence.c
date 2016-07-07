@@ -39,6 +39,7 @@
 #include "core/siril.h"
 #include "core/proto.h"
 #include "core/initfile.h"
+#include "core/undo.h"
 #include "gui/callbacks.h"
 #include "io/ser.h"
 #if defined(HAVE_FFMS2_1) || defined(HAVE_FFMS2_2)
@@ -374,6 +375,9 @@ int set_seq(const char *name){
 	adjust_sellabel();
 	fillSeqAviExport();	// fill GtkEntry of export box
 
+	/* update menus */
+	update_MenuItem();
+
 	/* redraw and display image */
 	show_main_gray_window();
 	close_tab();	//close Green and Blue Tab if a 1-layer sequence is loaded
@@ -421,6 +425,11 @@ int seq_load_image(sequence *seq, int index, fits *dest, gboolean load_it) {
 	}
 	/* change the displayed value in the spin button to have the real file number
 	 * instead of the index of the adjustment */
+
+	undo_flush();
+	/* initialize menu gui */
+	update_MenuItem();
+
 	display_image_number(index);
 	sequence_list_change_current();
 	adjust_exclude(index, FALSE);	// check or uncheck excluded checkbox
@@ -843,6 +852,7 @@ void free_sequence(sequence *seq, gboolean free_seq_too) {
 		free(seq->internal_fits);
 	}
 	if (free_seq_too)	free(seq);
+	undo_flush();
 }
 
 void sequence_free_preprocessing_data(sequence *seq) {

@@ -280,6 +280,9 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
+	/* initialize menu gui */
+	update_MenuItem();
+
 	/* initialize preprocessing */
 	initialize_preprocessing();
 

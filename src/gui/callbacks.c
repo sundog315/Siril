@@ -895,6 +895,65 @@ void set_viewer_mode_widgets_sensitive(gboolean sensitive) {
 	gtk_widget_set_sensitive(user, sensitive);
 }
 
+void update_MenuItem() {
+	gboolean is_a_single_image_loaded;		/* An image is loaded. Not a sequence or only the result of stacking process */
+	gboolean is_a_singleRGB_image_loaded;	/* A RGB image is laoded. Not a sequence or only the result of stacking process */
+	gboolean any_image_is_loaded;			/* Something is loaded. Single image or Sequence */
+	gboolean any_RGB_image_is_loaded;		/* Some RGB data are loaded. Single image or Sequence */
+
+	is_a_singleRGB_image_loaded = isrgb(&gfit) && (!sequence_is_loaded()
+			|| (sequence_is_loaded() && com.seq.current == RESULT_IMAGE));
+
+	is_a_single_image_loaded = single_image_is_loaded()	&& (!sequence_is_loaded()
+			|| (sequence_is_loaded() && com.seq.current == RESULT_IMAGE));
+
+	any_image_is_loaded = single_image_is_loaded() || sequence_is_loaded();
+
+	any_RGB_image_is_loaded = isrgb(&gfit) && (single_image_is_loaded() || sequence_is_loaded());
+
+	/* File Menu */
+	gtk_widget_set_sensitive(lookup_widget("save1"), any_image_is_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menu_FITS_header"), any_image_is_loaded && gfit.header != NULL);
+
+	/* Edit Menu */
+	gtk_widget_set_sensitive(lookup_widget("undo_item"), is_undo_available());
+	gtk_widget_set_sensitive(lookup_widget("redo_item"), is_redo_available());
+
+	/* Image processing Menu */
+	gtk_widget_set_sensitive(lookup_widget("removegreen"), is_a_singleRGB_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_satu"), is_a_singleRGB_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitemcalibration"), is_a_singleRGB_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menu_channel_separation"), is_a_singleRGB_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_histo"), any_image_is_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"), any_image_is_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_cosmetic"), any_image_is_loaded);
+#ifdef HAVE_OPENCV
+	gtk_widget_set_sensitive(lookup_widget("menuitem_resample"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation90"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation270"), is_a_single_image_loaded);
+#else
+	gtk_widget_set_sensitive(lookup_widget("menuitem_resample"), FALSE);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation"), FALSE);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation90"), FALSE);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation270"), FALSE);
+#endif
+	gtk_widget_set_sensitive(lookup_widget("menuitem_mirrorx"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_mirrory"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_bkg_extraction"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_wavelets"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menu_wavelet_separation"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_medianfilter"), is_a_single_image_loaded);
+
+	/* Analysis Menu */
+	gtk_widget_set_sensitive(lookup_widget("menuitem_noise"), any_image_is_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_stat"), any_image_is_loaded);
+
+	/* Windows Menu */
+	gtk_widget_set_sensitive(lookup_widget("menuitemgray"), any_image_is_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitemcolor"), any_RGB_image_is_loaded);
+}
+
 int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
 		int vport);
 int make_index_for_rainbow(BYTE index[][3]);
@@ -1815,27 +1874,6 @@ void on_cosmCFACheck_toggled(GtkToggleButton *button, gpointer user_data) {
 
 void on_settings_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	gtk_widget_show(lookup_widget("settings_window"));
-}
-
-void on_file1_activate(GtkMenuItem *menuitem, gpointer user_data) {
-	if (single_image_is_loaded() || sequence_is_loaded()) {
-		gtk_widget_set_sensitive(lookup_widget("save1"), TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menu_FITS_header"), gfit.header != NULL);
-	} else {
-		gtk_widget_set_sensitive(lookup_widget("save1"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menu_FITS_header"), FALSE);
-	}
-}
-
-void on_edit_activate(GtkMenuItem *menuitem, gpointer user_data) {
-	if (is_undo_available())
-		gtk_widget_set_sensitive(lookup_widget("undo_item"), TRUE);
-	else
-		gtk_widget_set_sensitive(lookup_widget("undo_item"), FALSE);
-	if (is_redo_available())
-		gtk_widget_set_sensitive(lookup_widget("redo_item"), TRUE);
-	else
-		gtk_widget_set_sensitive(lookup_widget("redo_item"), FALSE);
 }
 
 void on_menu_FITS_header_activate(GtkMenuItem *menuitem, gpointer user_data) {
@@ -3574,19 +3612,6 @@ void on_button_data_ok_clicked(GtkButton *button, gpointer user_data) {
 	gtk_widget_hide(lookup_widget("data_dialog"));
 }
 
-void on_menuitemWindows_activate(GtkMenuItem *menuitem, gpointer user_data) {
-	if (single_image_is_loaded() || sequence_is_loaded()) {
-		gtk_widget_set_sensitive(lookup_widget("menuitemgray"), TRUE);
-		if (isrgb(&gfit))
-			gtk_widget_set_sensitive(lookup_widget("menuitemcolor"), TRUE);
-		else
-			gtk_widget_set_sensitive(lookup_widget("menuitemcolor"), FALSE);
-	} else {
-		gtk_widget_set_sensitive(lookup_widget("menuitemgray"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitemcolor"), FALSE);
-	}
-}
-
 void on_menuitemgray_toggled(GtkCheckMenuItem *checkmenuitem,
 		gpointer user_data) {
 	if (gtk_check_menu_item_get_active(checkmenuitem))
@@ -4294,85 +4319,6 @@ void control_window_switch_to_tab(main_tabs tab) {
 	gtk_notebook_set_current_page(notebook, tab);
 }
 
-void on_processing_activate(GtkMenuItem *menuitem, gpointer user_data) {
-	if (isrgb(&gfit)
-			&& (!sequence_is_loaded()
-					|| (sequence_is_loaded() && com.seq.current == RESULT_IMAGE))) {
-		gtk_widget_set_sensitive(lookup_widget("removegreen"), TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_satu"), TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menuitemcalibration"),
-		TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menu_channel_separation"),
-		TRUE);
-	} else {
-		gtk_widget_set_sensitive(lookup_widget("removegreen"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_satu"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitemcalibration"),
-		FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menu_channel_separation"),
-		FALSE);
-	}
-	if (single_image_is_loaded() || (sequence_is_loaded())) {
-		gtk_widget_set_sensitive(lookup_widget("menuitem_histo"), TRUE);
-	} else {
-		gtk_widget_set_sensitive(lookup_widget("menuitem_histo"), FALSE);
-	}
-
-	if ((sequence_is_loaded()) || single_image_is_loaded()) {
-		gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"), TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_cosmetic"), TRUE);
-	}
-	else {
-		gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_cosmetic"), FALSE);
-	}
-
-	if (single_image_is_loaded()
-			&& (!sequence_is_loaded()
-					|| (sequence_is_loaded() && com.seq.current == RESULT_IMAGE))) {
-#ifdef HAVE_OPENCV
-		gtk_widget_set_sensitive(lookup_widget("menuitem_resample"), TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_rotation"), TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_rotation90"),
-		TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_rotation270"),
-		TRUE);
-#else
-		gtk_widget_set_sensitive(lookup_widget("menuitem_resample"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_rotation"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_rotation90"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_rotation270"), FALSE);
-#endif
-		gtk_widget_set_sensitive(lookup_widget("menuitem_mirrorx"), TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_mirrory"), TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_bkg_extraction"),
-		TRUE);
-		//gtk_widget_set_sensitive(lookup_widget("menuitem_fft"), TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_wavelets"), TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menu_wavelet_separation"),
-		TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_medianfilter"),
-		TRUE);
-	} else {
-		gtk_widget_set_sensitive(lookup_widget("menuitem_resample"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_rotation"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_rotation90"),
-		FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_rotation270"),
-		FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_mirrorx"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_mirrory"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_bkg_extraction"),
-		FALSE);
-		//gtk_widget_set_sensitive(lookup_widget("menuitem_fft"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_wavelets"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menu_wavelet_separation"),
-		FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_medianfilter"),
-		FALSE);
-	}
-}
-
 void on_removegreen_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	if (single_image_is_loaded() && isrgb(&gfit))
 		gtk_widget_show_all(lookup_widget("SCNR_dialog"));
@@ -4675,16 +4621,6 @@ void on_menuitem_mirrory_activate(GtkMenuItem *menuitem, gpointer user_data) {
 		redraw(com.cvport, REMAP_ALL);
 		redraw_previews();
 		set_cursor_waiting(FALSE);
-	}
-}
-
-void on_menuAnalysis_activate(GtkMenuItem *menuitem, gpointer user_data) {
-	if (single_image_is_loaded() || (sequence_is_loaded())) {
-		gtk_widget_set_sensitive(lookup_widget("menuitem_noise"), TRUE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_stat"), TRUE);
-	} else {
-		gtk_widget_set_sensitive(lookup_widget("menuitem_noise"), FALSE);
-		gtk_widget_set_sensitive(lookup_widget("menuitem_stat"), FALSE);
 	}
 }
 
@@ -5889,6 +5825,9 @@ void on_undo_item_activate(GtkMenuItem *menuitem, gpointer user_data) {
 		undo_display_data(UNDO);
 		set_cursor_waiting(FALSE);
 	}
+
+	/* update menus */
+	update_MenuItem();
 }
 
 void on_redo_item_activate(GtkMenuItem *menuitem, gpointer user_data) {
@@ -5897,6 +5836,9 @@ void on_redo_item_activate(GtkMenuItem *menuitem, gpointer user_data) {
 		undo_display_data(REDO);
 		set_cursor_waiting(FALSE);
 	}
+
+	/* update menus */
+	update_MenuItem();
 }
 
 void on_undo_item1_activate(GtkMenuItem *menuitem, gpointer user_data) {
