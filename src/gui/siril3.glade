@@ -7165,8 +7165,8 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="value">1</property>
                                       </object>
                                       <packing>
-                                        <property name="expand">True</property>
-                                        <property name="fill">True</property>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
@@ -7217,8 +7217,8 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="value">1</property>
                                       </object>
                                       <packing>
-                                        <property name="expand">True</property>
-                                        <property name="fill">True</property>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
@@ -7268,8 +7268,8 @@ Uncheck if images come from a monochrome sensor.</property>
                                         <property name="value">1</property>
                                       </object>
                                       <packing>
-                                        <property name="expand">True</property>
-                                        <property name="fill">True</property>
+                                        <property name="expand">False</property>
+                                        <property name="fill">False</property>
                                         <property name="position">1</property>
                                       </packing>
                                     </child>
@@ -10463,7 +10463,7 @@ WARNING: ensure you have a good reason to change this value because it may degra
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">Debayer single-channel images (CFA format) using the Bayer matrix layout given in the settings. Also applies to image opening, not only conversion.
-Only for RAW and FITS input images.
+Only for RAW and FITS input images and SER films.
 Colour image target also applies to the debayer result for conversion.</property>
                         <property name="draw_indicator">True</property>
                         <signal name="toggled" handler="on_demosaicing_toggled" swapped="no"/>
@@ -12490,7 +12490,7 @@ Pixels of the image are replaced by pixels at the same coordinates if intensity 
                           <object class="GtkLabel" id="label83">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="label" translatable="yes">page 1</property>
+                            <property name="label">page 1</property>
                           </object>
                           <packing>
                             <property name="tab_fill">False</property>
@@ -13257,7 +13257,7 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
           <object class="GtkLabel" id="label61">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes" comments="At the end, add a line with this template:&#10;Translator: name_of_translator&#10;Do not forget to add a '\n' char at the end of the line before.">Copyright © 2004-2011 François Meyer 
+            <property name="label" translatable="yes" comments="At the end, add a line with this template: Translation: name_of_translator. Do not forget to add a '\n' char at the end of the line before.">Copyright © 2004-2011 François Meyer 
 Copyright © 2012-2016 team free-astro
 Project leader: Vincent Hourdin
 Project scientist: Cyril Richard
