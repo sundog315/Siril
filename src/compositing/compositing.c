@@ -444,7 +444,7 @@ void on_filechooser_file_set(GtkFileChooserButton *widget, gpointer user_data) {
 	filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(widget));
 	if (!filename) return;
 	if ((retval = read_single_image(filename, &layers[layer]->the_fit, NULL))) {
-		gtk_label_set_text(layers[layer]->label, "ERROR");
+		gtk_label_set_text(layers[layer]->label, _("ERROR"));
 	} else {
 		if (number_of_images_loaded() > 1 &&
 				(gfit.rx != layers[layer]->the_fit.rx ||
@@ -687,13 +687,13 @@ void update_compositing_interface() {
 	}
 
 	if (com.selection.w <= 0 && com.selection.h <= 0) {
-		gtk_label_set_text(label, "An image area must be selected for align");
+		gtk_label_set_text(label, _("An image area must be selected for align"));
 		gtk_widget_set_sensitive(lookup_widget("button_align"), FALSE);
 	/*} else if (ref_layer == -1 || (!luminance_mode && ref_layer == 0)) {
 		gtk_label_set_text(label, "A reference layer must be selected for align");
 		gtk_widget_set_sensitive(lookup_widget("button_align"), FALSE);*/
 	} else if (number_of_images_loaded() < 2) {
-		gtk_label_set_text(label, "At least 2 channels must be loaded for align");
+		gtk_label_set_text(label, _("At least 2 channels must be loaded for align"));
 		gtk_widget_set_sensitive(lookup_widget("button_align"), FALSE);
 	} else {
 		gtk_label_set_text(label, "");
@@ -1069,7 +1069,7 @@ void on_compositing_reset_clicked(GtkButton *button, gpointer user_data){
 	luminance_mode = 0;
 	GtkToggleButton *lum_button = GTK_TOGGLE_BUTTON(gtk_builder_get_object(builder, "composition_use_lum"));
 	gtk_toggle_button_set_active(lum_button, 0);
-	gtk_label_set_text(layers[0]->label, "not loaded");
+	gtk_label_set_text(layers[0]->label, _("not loaded"));
 
 
 	update_compositing_interface();
