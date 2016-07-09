@@ -905,6 +905,7 @@ enter a visible wavelength in nm</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">Image pattern alignment (planetary/deep-sky)</property>
                 <property name="use_underline">True</property>
+                <signal name="activate" handler="on_rgb_align_dft_activate" swapped="no"/>
               </object>
             </child>
             <child>
@@ -913,6 +914,7 @@ enter a visible wavelength in nm</property>
                 <property name="can_focus">False</property>
                 <property name="label" translatable="yes">One star registration (deep-sky)</property>
                 <property name="use_underline">True</property>
+                <signal name="activate" handler="on_rgb_align_psf_activate" swapped="no"/>
               </object>
             </child>
           </object>

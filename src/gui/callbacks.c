@@ -55,6 +55,7 @@
 #include "registration/registration.h"
 #include "stacking/stacking.h"
 #include "compositing/compositing.h"
+#include "compositing/align_rgb.h"
 #ifdef HAVE_OPENCV
 #include "opencv/opencv.h"
 #endif
@@ -5888,4 +5889,12 @@ void on_menu_rgb_align_select(GtkMenuItem *menuitem, gpointer user_data) {
 
 	gtk_widget_set_sensitive(lookup_widget("rgb_align_dft"), sel_is_drawn);
 	gtk_widget_set_sensitive(lookup_widget("rgb_align_psf"), sel_is_drawn);
+}
+
+void on_rgb_align_dft_activate(GtkMenuItem *menuitem, gpointer user_data) {
+	rgb_align(1);
+}
+
+void on_rgb_align_psf_activate(GtkMenuItem *menuitem, gpointer user_data) {
+	rgb_align(0);
 }
