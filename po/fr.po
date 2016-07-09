@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: siril 0.9.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-09 18:09+0200\n"
-"PO-Revision-Date: 2016-07-09 18:11+0200\n"
+"POT-Creation-Date: 2016-07-09 18:38+0200\n"
+"PO-Revision-Date: 2016-07-09 18:25+0200\n"
 "Last-Translator: Cyril <cyril@free-astro.fr>\n"
 "Language-Team: French <cyril@free-astro.fr>\n"
 "Language: fr\n"
@@ -662,7 +662,9 @@ msgstr "Composition d'image multi-canaux"
 msgid "Layer alignments"
 msgstr "Alignements des canaux"
 
-#: ../src/gui/siril3.glade.h:146 ../src/compositing/compositing.c:1072
+#. don't destroy it on removal from grid
+#: ../src/gui/siril3.glade.h:146 ../src/compositing/compositing.c:181
+#: ../src/compositing/compositing.c:1073
 msgid "not loaded"
 msgstr "non chargée"
 
@@ -3454,11 +3456,11 @@ msgstr ""
 msgid "OK %ux%u"
 msgstr "OK %ux%u"
 
-#: ../src/compositing/compositing.c:546
+#: ../src/compositing/compositing.c:547
 msgid "You must at least load two layers before!\n"
 msgstr "Vous devez au moins charger 2 canaux\n"
 
-#: ../src/compositing/compositing.c:547 ../src/gui/callbacks.c:5019
+#: ../src/compositing/compositing.c:548 ../src/gui/callbacks.c:5019
 #: ../src/gui/callbacks.c:5059 ../src/gui/callbacks.c:5332
 #: ../src/gui/callbacks.c:5341 ../src/gui/callbacks.c:5440
 #: ../src/io/conversion.c:491 ../src/io/image_formats_libraries.c:96
@@ -3467,36 +3469,36 @@ msgstr "Vous devez au moins charger 2 canaux\n"
 msgid "Warning"
 msgstr "Attention"
 
-#: ../src/compositing/compositing.c:595
+#: ../src/compositing/compositing.c:596
 #, c-format
 msgid "Starting registration using method: %s\n"
 msgstr "Début de l'alignement avec la méthode : %s\n"
 
-#: ../src/compositing/compositing.c:600
+#: ../src/compositing/compositing.c:601
 msgid "Error in layers alignment."
 msgstr "Erreur dans l'alignement des canaux."
 
-#: ../src/compositing/compositing.c:601 ../src/registration/registration.c:1157
+#: ../src/compositing/compositing.c:602 ../src/registration/registration.c:1157
 msgid "Registration complete."
 msgstr "Alignement terminé."
 
-#: ../src/compositing/compositing.c:690
+#: ../src/compositing/compositing.c:691
 msgid "An image area must be selected for align"
-msgstr "Une sélection doit être fait pour l'alignement"
+msgstr "Une sélection doit être faite pour l'alignement"
 
-#: ../src/compositing/compositing.c:696
+#: ../src/compositing/compositing.c:697
 msgid "At least 2 channels must be loaded for align"
 msgstr "Au moins 2 canaux doivent être chargé pour l'alignement"
 
-#: ../src/compositing/compositing.c:1118
+#: ../src/compositing/compositing.c:1119
 msgid "No overflow with the current colours, redrawing only\n"
 msgstr "Aucun débordement avec les couleurs actuelles\n"
 
-#: ../src/compositing/compositing.c:1121
+#: ../src/compositing/compositing.c:1122
 msgid "Nothing to adjust, no overflow\n"
 msgstr "Rien à ajuster, aucun débordement\n"
 
-#: ../src/compositing/compositing.c:1154
+#: ../src/compositing/compositing.c:1155
 #, c-format
 msgid "Readjusting layer %d to %g times bright\n"
 msgstr "Réajustement du canal %d (x%g)\n"

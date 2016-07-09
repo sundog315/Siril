@@ -178,7 +178,7 @@ layer *create_layer(int index) {
 	g_signal_connect(ret->chooser, "file-set", G_CALLBACK(on_filechooser_file_set), NULL);
 	g_object_ref(G_OBJECT(ret->chooser));	// don't destroy it on removal from grid
 
-	ret->label = GTK_LABEL(gtk_label_new("not loaded"));
+	ret->label = GTK_LABEL(gtk_label_new(_("not loaded")));
 	g_object_ref(G_OBJECT(ret->label));	// don't destroy it on removal from grid
 
 	ret->spinbutton_x = GTK_SPIN_BUTTON(gtk_spin_button_new_with_range(-1000.0, 1000.0, 1.0));
@@ -532,6 +532,7 @@ void on_filechooser_file_set(GtkFileChooserButton *widget, gpointer user_data) {
 		sequence_list_change_current();
 	}
 	else {
+		update_MenuItem();
 		adjust_cutoff_from_updated_gfit();
 		redraw(com.cvport, REMAP_ALL);
 	}
