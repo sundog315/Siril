@@ -96,7 +96,6 @@ static void align_and_compose() {
 int rgb_align(int m) {
 	struct registration_args regargs;
 	struct registration_method *method;
-	char *msg;
 
 	initialize_methods();
 	initialize_internal_rgb_sequence();
@@ -112,7 +111,7 @@ int rgb_align(int m) {
 	regargs.run_in_thread = FALSE;
 
 	set_cursor_waiting(TRUE);
-	set_progress_bar_data(msg, PROGRESS_RESET);
+	set_progress_bar_data(NULL, PROGRESS_RESET);
 	if (method->method_ptr(&regargs))
 		set_progress_bar_data(_("Error in layers alignment."), PROGRESS_DONE);
 	else
