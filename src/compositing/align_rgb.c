@@ -94,11 +94,9 @@ static void align_and_compose() {
 }
 
 int rgb_align(int m) {
-	int i;
 	struct registration_args regargs;
 	struct registration_method *method;
 	char *msg;
-	GtkComboBox *regcombo;
 
 	initialize_methods();
 	initialize_internal_rgb_sequence();

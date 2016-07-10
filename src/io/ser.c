@@ -61,7 +61,7 @@ static char *ser_timestamp(uint64_t timestamp) {
 
 /* Output SER timestamp */
 static int display_date(uint64_t timestamp, char *txt) {
-	if (timestamp <= 0)
+	if (timestamp == 0)
 		return -1;
 
 	char *str = ser_timestamp(timestamp);
