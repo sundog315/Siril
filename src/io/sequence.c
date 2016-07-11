@@ -851,8 +851,15 @@ void free_sequence(sequence *seq, gboolean free_seq_too) {
 		/* the fits in internal_fits should still be referenced somewhere */
 		free(seq->internal_fits);
 	}
+	/* Here this is a bit tricky. An internal sequence is a single image. So some
+	 * processes like RGB alignment could free sequences and load it again: we need
+	 * to keep undo history.
+	 * In the case of a standard sequence, loading a new sequence MUST remove all
+	 * undo history.
+	 */
+	if (seq->type != SEQ_INTERNAL)
+		undo_flush();
 	if (free_seq_too)	free(seq);
-	undo_flush();
 }
 
 void sequence_free_preprocessing_data(sequence *seq) {
