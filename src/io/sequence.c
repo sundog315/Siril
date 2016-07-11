@@ -1493,36 +1493,41 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 	args->normalize = gtk_toggle_button_get_active(exportNormalize);
 
 	switch (selected) {
-		case 0:
-			args->convflags = TYPEFITS;
-			args->basename = format_basename(args->basename);
-			break;
-		case 1:
-			args->convflags = TYPESER;
-			break;
-		case 2:
+	case 0:
+		args->convflags = TYPEFITS;
+		args->basename = format_basename(args->basename);
+		break;
+	case 1:
+		args->convflags = TYPESER;
+		break;
+	case 2:
 #ifdef HAVE_LIBGIF
-			delayEntry = GTK_ENTRY(lookup_widget("entryGifDelay"));
-			args->gif_delay = atoi(gtk_entry_get_text(delayEntry));
-			loopsEntry = GTK_ENTRY(lookup_widget("entryGifLoops"));
-			args->gif_loops = atoi(gtk_entry_get_text(loopsEntry));
-			args->convflags = TYPEGIF;
+		delayEntry = GTK_ENTRY(lookup_widget("entryGifDelay"));
+		args->gif_delay = atoi(gtk_entry_get_text(delayEntry));
+		loopsEntry = GTK_ENTRY(lookup_widget("entryGifLoops"));
+		args->gif_loops = atoi(gtk_entry_get_text(loopsEntry));
+		args->convflags = TYPEGIF;
 #else
-			siril_log_message(_("GIF support was not compiled, aborting.\n"));
-			return;
+		siril_log_message(_("GIF support was not compiled, aborting.\n"));
+		return;
 #endif
-			break;
-		case 3:
-			fpsEntry = GTK_ENTRY(lookup_widget("entryAviFps"));
-			args->avi_fps = atoi(gtk_entry_get_text(fpsEntry));
-			widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
-			args->avi_width = atof(gtk_entry_get_text(widthEntry));
-			heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
-			args->avi_height = atof(gtk_entry_get_text(heightEntry));
-			checkResize = GTK_TOGGLE_BUTTON(lookup_widget("checkAviResize"));
+		break;
+	case 3:
+		fpsEntry = GTK_ENTRY(lookup_widget("entryAviFps"));
+		args->avi_fps = atoi(gtk_entry_get_text(fpsEntry));
+		widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
+		args->avi_width = atof(gtk_entry_get_text(widthEntry));
+		heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
+		args->avi_height = atof(gtk_entry_get_text(heightEntry));
+		checkResize = GTK_TOGGLE_BUTTON(lookup_widget("checkAviResize"));
+		if (args->avi_height == 0 || args->avi_width == 0) {
+			siril_log_message(_("Width or height cannot be null. Not resizing.\n"));
+			args->resize = FALSE;
+		} else {
 			args->resize = gtk_toggle_button_get_active(checkResize);
-			args->convflags = TYPEAVI;
-			break;
+		}
+		args->convflags = TYPEAVI;
+		break;
 	}
 	set_cursor_waiting(TRUE);
 	start_in_new_thread(export_sequence, args);
