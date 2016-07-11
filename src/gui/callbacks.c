@@ -5867,22 +5867,56 @@ void fillSeqAviExport() {
 	GtkEntry *heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
 	GtkEntry *widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
 
-	sprintf(width, "%d", com.seq.rx);
-	sprintf(height, "%d", com.seq.ry);
+	g_snprintf(width, sizeof(width), "%d", com.seq.rx);
+	g_snprintf(height, sizeof(width), "%d", com.seq.ry);
 	gtk_entry_set_text(widthEntry, width);
 	gtk_entry_set_text(heightEntry, height);
 	if (com.seq.type == SEQ_SER) {
 		GtkEntry *entryAviFps = GTK_ENTRY(lookup_widget("entryAviFps"));
 
 		if (com.seq.ser_file && com.seq.ser_file->fps <= 0.0) {
-			sprintf(fps, "10.000");
+			g_snprintf(fps, sizeof(fps), "10.000");
 		} else {
-			sprintf(fps, "%2.3lf", com.seq.ser_file->fps);
+			g_snprintf(fps, sizeof(fps), "%2.3lf", com.seq.ser_file->fps);
 		}
 		gtk_entry_set_text(entryAviFps, fps);
 
 	}
 }
+
+void on_entryAviHeight_changed(GtkEditable *editable, gpointer user_data);
+
+void on_entryAviWidth_changed(GtkEditable *editable, gpointer user_data) {
+	double ratio, width, height;
+	char c_height[6];
+	GtkEntry *heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
+
+	ratio = (double) com.seq.ry / (double) com.seq.rx;
+	width = atof(gtk_entry_get_text(GTK_ENTRY(editable)));
+	height = ratio * width;
+	g_snprintf(c_height, sizeof(c_height), "%d", (int)(height));
+
+	g_signal_handlers_block_by_func(heightEntry, on_entryAviHeight_changed, NULL);
+	gtk_entry_set_text(heightEntry, c_height);
+	g_signal_handlers_unblock_by_func(heightEntry, on_entryAviHeight_changed, NULL);
+}
+
+void on_entryAviHeight_changed(GtkEditable *editable, gpointer user_data) {
+	double ratio, width, height;
+	char c_width[6];
+	GtkEntry *widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
+
+	ratio = (double) com.seq.rx / (double) com.seq.ry;
+	height = atof(gtk_entry_get_text(GTK_ENTRY(editable)));
+	width = ratio * height;
+	g_snprintf(c_width, sizeof(c_width), "%d", (int)(width));
+
+	g_signal_handlers_block_by_func(widthEntry, on_entryAviWidth_changed, NULL);
+	gtk_entry_set_text(widthEntry, c_width);
+	g_signal_handlers_unblock_by_func(widthEntry, on_entryAviWidth_changed, NULL);
+
+}
+
 
 void on_menu_rgb_align_select(GtkMenuItem *menuitem, gpointer user_data) {
 	gboolean sel_is_drawn = ((com.selection.w > 0.0) && (com.selection.h > 0.0));

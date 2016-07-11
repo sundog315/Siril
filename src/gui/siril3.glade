@@ -11148,9 +11148,12 @@ A first computation pass will be done on all images before exporting, it may tak
                             <property name="can_focus">True</property>
                             <property name="tooltip_text" translatable="yes">Width of output video</property>
                             <property name="valign">center</property>
+                            <property name="max_length">5</property>
                             <property name="width_chars">5</property>
-                            <property name="text">640</property>
+                            <property name="max_width_chars">5</property>
+                            <property name="text">620</property>
                             <property name="input_purpose">number</property>
+                            <signal name="changed" handler="on_entryAviWidth_changed" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -11178,9 +11181,12 @@ A first computation pass will be done on all images before exporting, it may tak
                             <property name="can_focus">True</property>
                             <property name="tooltip_text" translatable="yes">Height of output video</property>
                             <property name="valign">center</property>
+                            <property name="max_length">5</property>
                             <property name="width_chars">5</property>
+                            <property name="max_width_chars">5</property>
                             <property name="text">480</property>
                             <property name="input_purpose">number</property>
+                            <signal name="changed" handler="on_entryAviHeight_changed" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
