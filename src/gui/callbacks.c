@@ -5926,9 +5926,11 @@ void on_menu_rgb_align_select(GtkMenuItem *menuitem, gpointer user_data) {
 }
 
 void on_rgb_align_dft_activate(GtkMenuItem *menuitem, gpointer user_data) {
+	undo_save_state("Processing: RGB alignment (DFT)");
 	rgb_align(1);
 }
 
 void on_rgb_align_psf_activate(GtkMenuItem *menuitem, gpointer user_data) {
+	undo_save_state("Processing: RGB alignment (PSF)");
 	rgb_align(0);
 }
