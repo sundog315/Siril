@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Siril 0.9.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-07-13 10:56+0200\n"
-"PO-Revision-Date: 2016-07-13 02:31+0800\n"
+"POT-Creation-Date: 2016-07-13 18:35+0800\n"
+"PO-Revision-Date: 2016-07-13 23:26+0800\n"
 "Last-Translator: \n"
 "Language-Team: astronomy.com.cn <yecloud@me.com>\n"
 "Language: zh_CN\n"
@@ -3122,7 +3122,7 @@ msgstr "Saturation enhancement: processing...\n"
 
 #: ../src/algos/colors.c:482
 msgid "SCNR: processing...\n"
-msgstr "SCNR: processing...\n"
+msgstr "SCNR: 处理中...\n"
 
 #: ../src/algos/colors.c:732
 msgid "Background reference:\n"
@@ -3138,7 +3138,7 @@ msgstr "色彩校准因子:\n"
 
 #: ../src/algos/colors.c:818
 msgid "Color Calibration: processing...\n"
-msgstr "Color Calibration: processing...\n"
+msgstr "色彩校准：处理中...\n"
 
 #: ../src/algos/cosmetic_correction.c:262
 #, c-format
@@ -3154,11 +3154,11 @@ msgstr "%ld pixels corrected (%ld + %ld)\n"
 
 #: ../src/algos/cosmetic_correction.c:313
 msgid "Cosmetic Correction: processing...\n"
-msgstr "Cosmetic Correction: processing...\n"
+msgstr "降噪：处理中...\n"
 
 #: ../src/algos/fft.c:234
 msgid "Fourier Transform: processing...\n"
-msgstr "Fourier Transform: processing...\n"
+msgstr "傅立叶变换：处理中...\n"
 
 #: ../src/algos/fft.c:289
 msgid "There is something wrong in your files\n"
@@ -3171,7 +3171,7 @@ msgstr "Channel #%d: background extraction done.\n"
 
 #: ../src/algos/gradient.c:401
 msgid "Background extraction: processing...\n"
-msgstr "Background extraction: processing...\n"
+msgstr "背景提取：处理中...\n"
 
 #: ../src/algos/gradient.c:422 ../src/algos/gradient.c:428
 msgid "Insufficient background samples.\n"
@@ -3426,7 +3426,7 @@ msgstr ""
 #: ../src/core/command.c:784
 #, c-format
 msgid "Background value: %d\n"
-msgstr ""
+msgstr "背景值: %d\n"
 
 #: ../src/core/command.c:830
 #, c-format
@@ -3448,7 +3448,7 @@ msgstr "数值必须为正并且小于 %d.\n"
 
 #: ../src/core/command.c:939
 msgid "Fill2: select a region or provide x, y, width, height\n"
-msgstr ""
+msgstr "Fill2: select a region or provide x, y, width, height\n"
 
 #: ../src/core/command.c:973
 msgid "find_hot must be applied on an one-channel master-dark frame"
@@ -3457,7 +3457,7 @@ msgstr ""
 #: ../src/core/command.c:981
 #, c-format
 msgid "%ld cold and %ld hot pixels\n"
-msgstr ""
+msgstr "%ld 冷像素 %ld 热像素\n"
 
 #: ../src/core/command.c:987 ../src/core/command.c:1020
 #, c-format
@@ -3516,8 +3516,9 @@ msgid "Selection update finished, %d images are selected in the sequence\n"
 msgstr ""
 
 #: ../src/core/command.c:1337
+#, fuzzy
 msgid "Siril cannot split layers. Make sure your image is in RGB mode.\n"
-msgstr ""
+msgstr "Siril无法提取通道，请确保你的图像为RGB模式。\n"
 
 #: ../src/core/command.c:1356
 #, c-format
@@ -3528,11 +3529,11 @@ msgstr ""
 
 #: ../src/core/command.c:1371
 msgid "Looking for sequences in current working directory...\n"
-msgstr ""
+msgstr "在当前工作目录中搜索队列...\n"
 
 #: ../src/core/command.c:1373
 msgid "Error while searching sequences or opening the directory.\n"
-msgstr ""
+msgstr "搜索或打开目录出错。\n"
 
 #: ../src/core/command.c:1378
 msgid "Starting stacking of found sequences...\n"
@@ -3541,7 +3542,7 @@ msgstr ""
 #: ../src/core/command.c:1397
 #, c-format
 msgid "Could not save the stacking result %s\n"
-msgstr ""
+msgstr "无法保存叠加结果 %s\n"
 
 #: ../src/core/command.c:1407
 #, c-format
@@ -3616,7 +3617,7 @@ msgstr "Output index mapping failed (%d/%d).\n"
 
 #: ../src/core/processing.c:67
 msgid ": processing...\n"
-msgstr ": processing...\n"
+msgstr ": 处理中…\n"
 
 #: ../src/core/processing.c:120
 #, c-format
@@ -3666,29 +3667,29 @@ msgstr ""
 
 #: ../src/core/siril.c:317
 msgid "Unsharp: processing...\n"
-msgstr ""
+msgstr "Unsharp: processing...\n"
 
 #: ../src/core/siril.c:432
 msgid "Crop: processing...\n"
-msgstr ""
+msgstr "Crop: processing...\n"
 
 #: ../src/core/siril.c:708
 msgid "Horizontal mirror: processing...\n"
-msgstr ""
+msgstr "水平翻转：处理中...\n"
 
 #: ../src/core/siril.c:736
 msgid "Vertical mirror: processing...\n"
-msgstr ""
+msgstr "垂直翻转：处理中...\n"
 
 #: ../src/core/siril.c:953
 #, c-format
 msgid "Dark optimization: %.3lf\n"
-msgstr ""
+msgstr "暗场优化： %.3lf\n"
 
 #: ../src/core/siril.c:989
 #, c-format
 msgid "Normalisation value auto evaluated: %.2lf\n"
-msgstr ""
+msgstr "自动估算归一化参数：%.2lf\n"
 
 #: ../src/core/siril.c:996
 #, c-format
@@ -3698,7 +3699,7 @@ msgstr "预处理图像 %s"
 #: ../src/core/siril.c:1017 ../src/core/siril.c:1049
 msgid ""
 "Darkmap cosmetic correctionis only supported with single channel images\n"
-msgstr ""
+msgstr "暗场降噪只支持单通道图像\n"
 
 #: ../src/core/siril.c:1024
 #, c-format
@@ -3708,7 +3709,7 @@ msgstr "保存图像 %s"
 #: ../src/core/siril.c:1059
 #, c-format
 msgid "Loading and pre-processing image %d/%d (%s)"
-msgstr ""
+msgstr "读取并且预处理图像 %d/%d (%s)"
 
 #: ../src/core/siril.c:1065
 #, c-format
@@ -3726,11 +3727,11 @@ msgstr "Lanczos4"
 #: ../src/core/siril.c:1169
 #, c-format
 msgid "Resample (%s interpolation): processing...\n"
-msgstr ""
+msgstr "Resample (%s interpolation): processing...\n"
 
 #: ../src/core/siril.c:1189
 msgid "No"
-msgstr ""
+msgstr "无"
 
 #: ../src/core/siril.c:1210
 #, c-format
@@ -3739,7 +3740,7 @@ msgstr ""
 
 #: ../src/core/siril.c:1316
 msgid "Median Filter: processing...\n"
-msgstr ""
+msgstr "中位数滤镜：处理中...\n"
 
 #: ../src/core/siril.c:1321
 #, c-format
@@ -3748,7 +3749,7 @@ msgstr "迭代 #%d...\n"
 
 #: ../src/core/siril.c:1463
 msgid "Banding Reducing: processing...\n"
-msgstr ""
+msgstr "Banding Reducing: processing...\n"
 
 #: ../src/core/siril.c:1492
 msgid ""
@@ -3757,7 +3758,7 @@ msgstr ""
 
 #: ../src/core/siril.c:1582
 msgid "Siril cannot evaluate the noise in the image\n"
-msgstr ""
+msgstr "Siril无法估算图像的噪声\n"
 
 #: ../src/core/siril.c:1635
 msgid "backgroundnoise: Error, no data computed\n"
@@ -3765,7 +3766,7 @@ msgstr ""
 
 #: ../src/core/siril.c:1645
 msgid "backgroundnoise: does not converge\n"
-msgstr ""
+msgstr "backgroundnoise: does not converge\n"
 
 #: ../src/core/siril.c:1666
 #, c-format
@@ -3807,7 +3808,7 @@ msgstr ""
 #: ../src/gui/callbacks.c:125
 #, c-format
 msgid "Successfully loaded '%s'\n"
-msgstr ""
+msgstr "成功载入'%s'\n"
 
 #: ../src/gui/callbacks.c:173
 #, c-format
@@ -4169,11 +4170,11 @@ msgstr "请点击显示图像按钮以应用修正\n"
 
 #: ../src/gui/callbacks.c:4726
 msgid "Subtraction done ...\n"
-msgstr ""
+msgstr "减法完成...\n"
 
 #: ../src/gui/callbacks.c:4733
 msgid "Division done ...\n"
-msgstr ""
+msgstr "除法完成...\n"
 
 #: ../src/gui/callbacks.c:4918
 msgid "Load an image first, aborted.\n"
@@ -4383,7 +4384,7 @@ msgstr "Conversion: processing...\n"
 
 #: ../src/io/conversion.c:490
 msgid "Conversion: no working directory set.\n"
-msgstr ""
+msgstr "转化：工作目录未设置。\n"
 
 #: ../src/io/conversion.c:496
 #, c-format
@@ -4404,7 +4405,7 @@ msgstr ""
 #: ../src/io/conversion.c:550 ../src/io/conversion.c:551
 #, c-format
 msgid "Converting %s..."
-msgstr ""
+msgstr "转化 %s..."
 
 #: ../src/io/conversion.c:556
 #, c-format
@@ -4462,7 +4463,7 @@ msgstr ""
 #: ../src/io/conversion.c:731
 #, c-format
 msgid "Filter Pattern: %s\n"
-msgstr ""
+msgstr "Filter Pattern: %s\n"
 
 #: ../src/io/conversion.c:734
 msgid "Cannot perform debayering\n"
@@ -4513,7 +4514,7 @@ msgstr ""
 
 #: ../src/io/image_format_fits.c:220
 msgid "Unknown FITS image format.\n"
-msgstr ""
+msgstr "Unknown FITS image format.\n"
 
 #: ../src/io/image_format_fits.c:230
 #, c-format
@@ -4533,7 +4534,7 @@ msgstr ""
 #: ../src/io/image_format_fits.c:408
 #, c-format
 msgid "FITS error: %s\n"
-msgstr ""
+msgstr "FITS error: %s\n"
 
 #: ../src/io/image_format_fits.c:443
 #, c-format
@@ -4561,12 +4562,12 @@ msgstr ""
 
 #: ../src/io/image_formats_internal.c:46
 msgid "Error opening BMP.\n"
-msgstr ""
+msgstr "Error opening BMP.\n"
 
 #: ../src/io/image_formats_internal.c:101
 msgid ""
 "Sorry but Siril cannot open this kind of BMP. Try to convert it before.\n"
-msgstr ""
+msgstr "抱歉，Siril无法打开此类BMP文件，请先转化该文件。\n"
 
 #: ../src/io/image_formats_internal.c:105
 #, c-format
@@ -4585,7 +4586,7 @@ msgstr ""
 #: ../src/io/image_formats_internal.c:332
 #: ../src/io/image_formats_internal.c:743
 msgid "Sorry but Siril cannot open this file.\n"
-msgstr ""
+msgstr "抱歉，Siril无法打开此文件。\n"
 
 #: ../src/io/image_formats_internal.c:343
 msgid ""
@@ -4628,11 +4629,13 @@ msgstr ""
 #: ../src/io/image_formats_internal.c:705
 #, c-format
 msgid "Sorry but Siril cannot open the PIC file: %s.\n"
-msgstr ""
+msgstr "抱歉，Siril无法打开PIC文件：%s\n"
 
 #: ../src/io/image_formats_internal.c:727
 msgid "Cannot Read the data\n"
 msgstr ""
+"无法读取数据\n"
+"\n"
 
 #: ../src/io/image_formats_internal.c:747
 #, c-format
@@ -4642,17 +4645,17 @@ msgstr ""
 #: ../src/io/image_formats_internal.c:754
 #, c-format
 msgid "Date (of observation): %s\n"
-msgstr ""
+msgstr "Date (of observation): %s\n"
 
 #: ../src/io/image_formats_internal.c:756
 #, c-format
 msgid "Time (of observation): %s\n"
-msgstr ""
+msgstr "Time (of observation): %s\n"
 
 #: ../src/io/image_formats_libraries.c:70
 #, c-format
 msgid "Could not open the TIFF file %s\n"
-msgstr ""
+msgstr "无法打开TIFF文件: %s\n"
 
 #: ../src/io/image_formats_libraries.c:99
 msgid "Siril only works with 8/16-bit TIFF format.\n"
@@ -4666,17 +4669,17 @@ msgstr ""
 #: ../src/io/image_formats_libraries.c:153
 #: ../src/io/image_formats_libraries.c:214
 msgid "Alpha channel is ignored.\n"
-msgstr ""
+msgstr "Alpha channel is ignored.\n"
 
 #: ../src/io/image_formats_libraries.c:169
 #: ../src/io/image_formats_libraries.c:187
 #: ../src/io/image_formats_libraries.c:238
 msgid "An unexpected error was encountered while trying to read the file.\n"
-msgstr ""
+msgstr "读取文件时产生了未知的错误。\n"
 
 #: ../src/io/image_formats_libraries.c:197
 msgid "Unknown TIFF file.\n"
-msgstr ""
+msgstr "Unknown TIFF file.\n"
 
 #: ../src/io/image_formats_libraries.c:263
 msgid "Siril cannot create TIFF file.\n"
@@ -4695,7 +4698,7 @@ msgstr ""
 #: ../src/io/image_formats_libraries.c:528
 #, c-format
 msgid "Sorry but Siril cannot open the file: %s.\n"
-msgstr ""
+msgstr "抱歉，Siril无法打开文件：%s\n"
 
 #: ../src/io/image_formats_libraries.c:422
 #, c-format
@@ -4719,7 +4722,7 @@ msgstr ""
 #: ../src/io/image_formats_libraries.c:661
 #, c-format
 msgid "Error in libraw %s\n"
-msgstr ""
+msgstr "Error in libraw %s\n"
 
 #: ../src/io/image_formats_libraries.c:668
 #: ../src/io/image_formats_libraries.c:840
@@ -4773,13 +4776,13 @@ msgstr ""
 #: ../src/io/image_formats_libraries.c:1060
 #, c-format
 msgid "Error opening GIF file: %s\n"
-msgstr ""
+msgstr "Error opening GIF file: %s\n"
 
 #: ../src/io/image_formats_libraries.c:1067
 #: ../src/io/image_formats_libraries.c:1109
 #, c-format
 msgid "Error describing GIF file: %s\n"
-msgstr ""
+msgstr "Error describing GIF file: %s\n"
 
 #: ../src/io/image_formats_libraries.c:1075
 msgid "Error adding comment in GIF file\n"
@@ -4797,11 +4800,11 @@ msgstr ""
 #: ../src/io/image_formats_libraries.c:1150
 #, c-format
 msgid "Error closing GIF file: %s\n"
-msgstr ""
+msgstr "Error closing GIF file: %s\n"
 
 #: ../src/io/seqfile.c:244
 msgid "The file seems to be corrupted\n"
-msgstr ""
+msgstr "文件似乎已损坏\n"
 
 #: ../src/io/seqfile.c:254
 #, c-format
@@ -4812,7 +4815,7 @@ msgstr ""
 
 #: ../src/io/seqfile.c:265
 msgid "Could not load sequence\n"
-msgstr ""
+msgstr "无法载入队列\n"
 
 #: ../src/io/seqfile.c:386
 #, c-format
@@ -4823,7 +4826,7 @@ msgstr ""
 
 #: ../src/io/sequence.c:122 ../src/io/sequence.c:254
 msgid "Current working directory is not set, aborting.\n"
-msgstr ""
+msgstr "在当前工作目录未定义，异常中止。\n"
 
 #: ../src/io/sequence.c:220
 msgid ""
@@ -4833,12 +4836,12 @@ msgstr ""
 #: ../src/io/sequence.c:231
 #, c-format
 msgid "sequence %d, found: %d to %d"
-msgstr ""
+msgstr "sequence %d, found: %d to %d"
 
 #: ../src/io/sequence.c:345
 #, c-format
 msgid "Sequence loaded: %s (%d->%d)\n"
-msgstr ""
+msgstr "Sequence loaded: %s (%d->%d)\n"
 
 #: ../src/io/sequence.c:457
 #, c-format
@@ -4848,7 +4851,7 @@ msgstr ""
 #: ../src/io/sequence.c:487
 #, c-format
 msgid "Could not load image %d from sequence %s\n"
-msgstr ""
+msgstr "Could not load image %d from sequence %s\n"
 
 #: ../src/io/sequence.c:495 ../src/io/sequence.c:545
 #, c-format
@@ -4880,11 +4883,11 @@ msgstr ""
 
 #: ../src/io/sequence.c:982
 msgid "Starting sequence processing of PSF\n"
-msgstr ""
+msgstr "Starting sequence processing of PSF\n"
 
 #: ../src/io/sequence.c:983
 msgid "Computing PSF on selected star"
-msgstr ""
+msgstr "Computing PSF on selected star"
 
 #: ../src/io/sequence.c:986
 msgid "Failed to compute PSF for the sequence. Ready."
@@ -4892,7 +4895,7 @@ msgstr ""
 
 #: ../src/io/sequence.c:990
 msgid "Finished sequence processing of PSF\n"
-msgstr ""
+msgstr "Finished sequence processing of PSF\n"
 
 #: ../src/io/sequence.c:996
 msgid "See the console for a dump of star data over the sequence (stdout)\n"
@@ -4915,7 +4918,7 @@ msgstr ""
 #: ../src/io/sequence.c:1322 ../src/stacking/stacking.c:226
 #: ../src/stacking/stacking.c:846 ../src/stacking/stacking.c:1003
 msgid "Processing image "
-msgstr ""
+msgstr "处理图像 "
 
 #: ../src/io/sequence.c:1329
 msgid "Export: could not read frame, aborting\n"
@@ -4923,23 +4926,23 @@ msgstr ""
 
 #: ../src/io/sequence.c:1431
 msgid "Siril needs opencv to resize images\n"
-msgstr ""
+msgstr "Siril需要opencv的支持来缩放图像\n"
 
 #: ../src/io/sequence.c:1469
 msgid "Sequence export failed. Check the log."
-msgstr ""
+msgstr "Sequence export failed. Check the log."
 
 #: ../src/io/sequence.c:1470
 msgid "Sequence export failed\n"
-msgstr ""
+msgstr "Sequence export failed\n"
 
 #: ../src/io/sequence.c:1473
 msgid "Sequence export succeeded."
-msgstr ""
+msgstr "Sequence export succeeded."
 
 #: ../src/io/sequence.c:1474
 msgid "Sequence export succeeded.\n"
-msgstr ""
+msgstr "Sequence export succeeded.\n"
 
 #: ../src/io/sequence.c:1518
 msgid "GIF support was not compiled, aborting.\n"
@@ -4958,7 +4961,7 @@ msgstr ""
 #: ../src/io/ser.c:491
 #, c-format
 msgid "Created SER file %s\n"
-msgstr ""
+msgstr "Created SER file %s\n"
 
 #: ../src/io/ser.c:644 ../src/io/ser.c:825
 msgid "This type of Bayer pattern is not handled yet.\n"
@@ -4970,26 +4973,26 @@ msgstr ""
 
 #: ../src/io/ser.c:737 ../src/io/ser.c:797
 msgid "Out of memory - aborting\n"
-msgstr ""
+msgstr "内存不足，异常中止\n"
 
 #: ../src/io/ser.c:846
 msgid "Trying to add an image of different size in a SER\n"
-msgstr ""
+msgstr "试图在SER文件中加入不是一致尺寸的图像\n"
 
 #: ../src/io/single_image.c:110
 #, c-format
 msgid "Error opening image %s: file not found or not supported.\n"
-msgstr ""
+msgstr "Error opening image %s: file not found or not supported.\n"
 
 #: ../src/io/single_image.c:125
 #, c-format
 msgid "Opening %s failed.\n"
-msgstr ""
+msgstr "打开 %s 失败。\n"
 
 #: ../src/io/single_image.c:149
 #, c-format
 msgid "Sequence loaded: %s\n"
-msgstr ""
+msgstr "Sequence loaded: %s\n"
 
 #: ../src/io/single_image.c:153
 msgid ""
@@ -5004,7 +5007,7 @@ msgstr ""
 #: ../src/io/single_image.c:162
 #, c-format
 msgid "Closing sequence %s\n"
-msgstr ""
+msgstr "Closing sequence %s\n"
 
 #: ../src/main.c:145
 #, c-format
@@ -5014,12 +5017,12 @@ msgstr ""
 #: ../src/main.c:182
 #, c-format
 msgid "Successfully loaded '%s%s'\n"
-msgstr ""
+msgstr "Successfully loaded '%s%s'\n"
 
 #: ../src/main.c:186
 #, c-format
 msgid "Unable to read file: %s\n"
-msgstr ""
+msgstr "无法读取文件：%s\n"
 
 #: ../src/main.c:192
 #, c-format
@@ -5029,7 +5032,7 @@ msgstr ""
 #: ../src/main.c:212
 #, c-format
 msgid "Welcome to %s v%s\n"
-msgstr ""
+msgstr "Welcome to %s v%s\n"
 
 #: ../src/main.c:279
 msgid "Could not load or create settings file in ~/.siril, exiting.\n"
@@ -5043,11 +5046,11 @@ msgstr ""
 
 #: ../src/main.c:320
 msgid "enabled"
-msgstr ""
+msgstr "enabled"
 
 #: ../src/main.c:322
 msgid "disabled"
-msgstr ""
+msgstr "disabled"
 
 #: ../src/registration/registration.c:53
 msgid ""
@@ -5132,14 +5135,14 @@ msgstr ""
 #: ../src/registration/registration.c:797
 #, c-format
 msgid "Register: processing image %s\n"
-msgstr ""
+msgstr "对齐：处理图像 %s\n"
 
 #: ../src/registration/registration.c:387
 #: ../src/registration/registration.c:474
 #: ../src/registration/registration.c:703
 #: ../src/registration/registration.c:848
 msgid "Registration finished.\n"
-msgstr ""
+msgstr "对齐结束。\n"
 
 #: ../src/registration/registration.c:388
 #: ../src/registration/registration.c:851
@@ -5273,7 +5276,7 @@ msgstr "Registration: processing using method: %s\n"
 
 #: ../src/stacking/stacking.c:137
 msgid "Computing normalization...\n"
-msgstr ""
+msgstr "计算归一化...\n"
 
 #: ../src/stacking/stacking.c:154
 msgid "Normalization failed."
@@ -5287,7 +5290,7 @@ msgstr "没有图像被选中用于叠加（至少2），异常中止。\n"
 #: ../src/stacking/stacking.c:234 ../src/stacking/stacking.c:854
 #: ../src/stacking/stacking.c:1011
 msgid "Stacking: could not read frame, aborting\n"
-msgstr ""
+msgstr "叠加：无法读取帧，异常中止\n"
 
 #: ../src/stacking/stacking.c:265 ../src/stacking/stacking.c:878
 #: ../src/stacking/stacking.c:1034
@@ -5298,12 +5301,12 @@ msgstr ""
 #: ../src/stacking/stacking.c:929 ../src/stacking/stacking.c:1085
 #: ../src/stacking/stacking.c:1775
 msgid "Finalizing stacking..."
-msgstr ""
+msgstr "叠加最终定稿..."
 
 #: ../src/stacking/stacking.c:338 ../src/stacking/stacking.c:950
 #: ../src/stacking/stacking.c:1106
 msgid "Stacking failed. Check the log."
-msgstr ""
+msgstr "Stacking failed. Check the log."
 
 #: ../src/stacking/stacking.c:339 ../src/stacking/stacking.c:792
 #: ../src/stacking/stacking.c:951 ../src/stacking/stacking.c:1107
@@ -5314,7 +5317,7 @@ msgstr "叠加失败。\n"
 #: ../src/stacking/stacking.c:341 ../src/stacking/stacking.c:953
 #: ../src/stacking/stacking.c:1109
 msgid "Stacking complete."
-msgstr ""
+msgstr "叠加完成。"
 
 #: ../src/stacking/stacking.c:371
 msgid "Median stacking is only supported for FITS images and SER sequences.\n"
@@ -5352,7 +5355,7 @@ msgstr ""
 
 #: ../src/stacking/stacking.c:552 ../src/stacking/stacking.c:1377
 msgid "Processing the sequence as RGB\n"
-msgstr ""
+msgstr "Processing the sequence as RGB\n"
 
 #: ../src/stacking/stacking.c:589 ../src/stacking/stacking.c:1414
 #, c-format
@@ -5367,23 +5370,23 @@ msgstr "发现一个Bug，无法将图像区域拆分成正确的待处理块。
 
 #: ../src/stacking/stacking.c:666 ../src/stacking/stacking.c:1492
 msgid "Starting stacking...\n"
-msgstr ""
+msgstr "开始叠加...\n"
 
 #: ../src/stacking/stacking.c:667
 msgid "Median stacking in progress..."
-msgstr ""
+msgstr "中位数叠加处理中..."
 
 #: ../src/stacking/stacking.c:705 ../src/stacking/stacking.c:1567
 msgid "Error reading one of the image areas\n"
-msgstr ""
+msgstr "图像区域读取错误\n"
 
 #: ../src/stacking/stacking.c:791
 msgid "Median stacking failed. Check the log."
-msgstr ""
+msgstr "Median stacking failed. Check the log."
 
 #: ../src/stacking/stacking.c:794
 msgid "Median stacking complete."
-msgstr ""
+msgstr "中位数叠加完成。"
 
 #: ../src/stacking/stacking.c:795
 #, c-format
@@ -5416,7 +5419,7 @@ msgstr ""
 
 #: ../src/stacking/stacking.c:1493
 msgid "Rejection stacking in progress..."
-msgstr ""
+msgstr "Rejection stacking in progress..."
 
 #: ../src/stacking/stacking.c:1779
 #, c-format
@@ -5425,11 +5428,11 @@ msgstr ""
 
 #: ../src/stacking/stacking.c:1815
 msgid "Rejection stacking failed. Check the log."
-msgstr ""
+msgstr "Rejection stacking failed. Check the log."
 
 #: ../src/stacking/stacking.c:1818
 msgid "Rejection stacking complete."
-msgstr ""
+msgstr "剔除叠加完成。"
 
 #: ../src/stacking/stacking.c:1869
 #, c-format
@@ -5438,16 +5441,16 @@ msgstr ""
 
 #: ../src/stacking/stacking.c:1881
 msgid "Stacking: processing...\n"
-msgstr "Stacking: processing...\n"
+msgstr "叠加：处理中...\n"
 
 #: ../src/stacking/stacking.c:1896
 #, c-format
 msgid "Integration of %d images:\n"
-msgstr ""
+msgstr "Integration of %d images:\n"
 
 #: ../src/stacking/stacking.c:1900
 msgid "Pixel combination ......... average\n"
-msgstr ""
+msgstr "Pixel combination ......... average\n"
 
 #: ../src/stacking/stacking.c:1903
 msgid "Pixel combination ......... normalized sum\n"
@@ -5455,19 +5458,19 @@ msgstr ""
 
 #: ../src/stacking/stacking.c:1906
 msgid "Pixel combination ......... median\n"
-msgstr ""
+msgstr "Pixel combination ......... median\n"
 
 #: ../src/stacking/stacking.c:1909
 msgid "Pixel combination ......... minimum\n"
-msgstr ""
+msgstr "Pixel combination ......... minimum\n"
 
 #: ../src/stacking/stacking.c:1912
 msgid "Pixel combination ......... maximum\n"
-msgstr ""
+msgstr "Pixel combination ......... maximum\n"
 
 #: ../src/stacking/stacking.c:1915
 msgid "Pixel combination ......... none\n"
-msgstr ""
+msgstr "Pixel combination ......... none\n"
 
 #: ../src/stacking/stacking.c:1925 ../src/stacking/stacking.c:1954
 msgid "none"
@@ -5492,40 +5495,40 @@ msgstr "累乘带拉伸"
 #: ../src/stacking/stacking.c:1942
 #, c-format
 msgid "Normalization ............. %s\n"
-msgstr ""
+msgstr "Normalization ............. %s\n"
 
 #: ../src/stacking/stacking.c:1946
 msgid "Pixel rejection ........... none\n"
-msgstr ""
+msgstr "Pixel rejection ........... none\n"
 
 #: ../src/stacking/stacking.c:1947
 msgid "Rejection parameters ...... none\n"
-msgstr ""
+msgstr "Rejection parameters ...... none\n"
 
 #: ../src/stacking/stacking.c:1957
 msgid "percentile clipping"
-msgstr ""
+msgstr "percentile clipping"
 
 #: ../src/stacking/stacking.c:1960
 msgid "sigma clipping"
-msgstr ""
+msgstr "sigma clipping"
 
 #: ../src/stacking/stacking.c:1963
 msgid "median sigma clipping"
-msgstr ""
+msgstr "median sigma clipping"
 
 #: ../src/stacking/stacking.c:1966
 msgid "Winsorized sigma clipping"
-msgstr ""
+msgstr "Winsorized sigma clipping"
 
 #: ../src/stacking/stacking.c:1969
 msgid "linear fit clipping"
-msgstr ""
+msgstr "linear fit clipping"
 
 #: ../src/stacking/stacking.c:1972
 #, c-format
 msgid "Pixel rejection ........... %s\n"
-msgstr ""
+msgstr "Pixel rejection ........... %s\n"
 
 #: ../src/stacking/stacking.c:1973
 #, c-format
