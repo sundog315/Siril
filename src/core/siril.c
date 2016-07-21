@@ -1014,7 +1014,7 @@ gpointer seqpreprocess(gpointer p) {
 				free(dev);
 			}
 			else
-				siril_log_message(_("Darkmap cosmetic correction"
+				siril_log_message(_("Darkmap cosmetic correction "
 						"is only supported with single channel images\n"));
 		}
 
@@ -1046,7 +1046,7 @@ gpointer seqpreprocess(gpointer p) {
 				siril_log_message(_("%ld pixels corrected (%ld + %ld)\n"),
 						icold + ihot, icold, ihot);
 			} else
-				siril_log_message(_("Darkmap cosmetic correction"
+				siril_log_message(_("Darkmap cosmetic correction "
 						"is only supported with single channel images\n"));
 		}
 

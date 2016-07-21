@@ -1423,7 +1423,7 @@ int process_set_cpu(int nb){
 	proc_in = atoi(word[1]);
 	proc_max = omp_get_num_procs();
 	if (proc_in > proc_max || proc_in < 1) {
-		siril_log_message(_("Number of logical processor MUST be greater "
+		siril_log_message(_("Number of logical processors MUST be greater "
 				"than 0 and lower or equal to %d.\n"), proc_max);
 		return 1;
 	}
@@ -1433,7 +1433,7 @@ int process_set_cpu(int nb){
 	{
 		proc_out = omp_get_num_threads();
 	}
-	siril_log_message(_("Using now %d logical processor\n"), proc_out);
+	siril_log_message(_("Using now %d logical processors\n"), proc_out);
 	com.max_thread = proc_out;
 	update_spinCPU(0);
 
