@@ -1424,7 +1424,7 @@ gpointer export_sequence(gpointer ptr) {
 						sizeof(uint8_t) * args->avi_width * args->avi_height
 								* destfit.naxes[2]);
 				cvResizeGaussian_data8(data, destfit.rx, destfit.ry, newdata,
-						args->avi_width, args->avi_height, destfit.naxes[2], 0);
+						args->avi_width, args->avi_height, destfit.naxes[2], OPENCV_LINEAR);
 				avi_file_write_frame(0, newdata);
 				free(newdata);
 #else
