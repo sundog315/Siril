@@ -620,7 +620,8 @@ char* str_append(char** data, const char* newdata) {
 }
 
 /* cut a base name to 120 characters and add a trailing underscore if needed.
- * WARNING: may return a newly allocated string and free the argument */
+ * WARNING: may return a newly allocated string and free the argument
+ * TODO: Should be replaced by 'g_path_get_basename' from glib */
 char *format_basename(char *root) {
 	int len = strlen(root);
 	if (len > 120) {
