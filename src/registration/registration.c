@@ -605,7 +605,13 @@ int register_star_alignment(struct registration_args *args) {
 		else
 			snprintf(dest, 255, "%s%s.ser", args->prefix, args->seq->seqname);
 
-		ser_create_file(dest, new_ser, TRUE, args->seq->ser_file);
+		/* Here the last argument is NULL because we do not want copy SER file
+		 * from the original. Indeed in the demosaicing case this would lead to
+		 * a wrong file (B&W and not in RAW data). Moreover, header informations
+		 * (like fps, local and UTC time, ...) have no sense now since some frames
+		 * could be removed from the sequence.
+		 */
+		ser_create_file(dest, new_ser, TRUE, NULL);
 	}
 
 	skipped = 0;

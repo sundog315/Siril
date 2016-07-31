@@ -281,7 +281,8 @@ static int ser_read_header(struct ser_struct *ser_file) {
 
 	if (ser_file->color_id == SER_RGB || ser_file->color_id == SER_BGR)
 		ser_file->number_of_planes = 3;
-	else ser_file->number_of_planes = 1;
+	else
+		ser_file->number_of_planes = 1;
 
 	ser_read_timestamp(ser_file);
 
@@ -451,6 +452,8 @@ int ser_create_file(const char *filename, struct ser_struct *ser_file,
 		memcpy(ser_file->telescope, copy_from->telescope, 40);
 		ser_file->byte_pixel_depth = copy_from->byte_pixel_depth;
 		ser_file->number_of_planes = copy_from->number_of_planes;
+		printf("NUMBER OF PLANE: %d\n\n\n\n", copy_from->number_of_planes);
+
 		int i;
 		if (copy_from->ts) {
 			ser_file->ts = calloc(8, copy_from->frame_count);
@@ -612,6 +615,7 @@ int ser_read_frame(struct ser_struct *ser_file, int frame_no, fits *fit) {
 	case SER_BAYER_GRBG:
 		fit->naxes[0] = fit->rx = ser_file->image_width;
 		fit->naxes[1] = fit->ry = ser_file->image_height;
+		fit->naxes[2] = 3;
 		if (com.debayer.ser_use_bayer_header)
 			set_combo_box_bayer_pattern(type_ser);
 		debayer(fit, com.debayer.bayer_inter);
