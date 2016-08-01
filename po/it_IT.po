@@ -5,12 +5,12 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: \n"
+"Project-Id-Version: Siril in Italiano\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-07-21 16:29+0200\n"
-"PO-Revision-Date: 2016-08-01 22:15+0100\n"
-"Last-Translator: \n"
-"Language-Team: \n"
+"PO-Revision-Date: 2016-08-01 23:07+0100\n"
+"Last-Translator: Sonia Zorba <sonia@zonia3000.net>\n"
+"Language-Team: Italian <sonia@zonia3000.net>\n"
 "Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -430,7 +430,7 @@ msgid ""
 "By default the value is of 4.\n"
 "The higher the degree order is, the stronger the gradient can be remove."
 msgstr ""
-"Segli il grado della funzione polinomiale usata nel fit.\n"
+"Scegli il grado della funzione polinomiale usata nel fit.\n"
 "Di default questo valore è 4.\n"
 "Maggiore è il grado, più forte sarà la rimozione del gradiente."
 
@@ -844,7 +844,7 @@ msgstr "Trasformata di Fourier"
 
 #: ../src/gui/siril3.glade.h:181
 msgid "Name of the magnitude file: "
-msgstr "Nome del file di magintudine:"
+msgstr "Nome del file di magnitudine:"
 
 #: ../src/gui/siril3.glade.h:182
 msgid "Name of the phase file: "
@@ -2012,7 +2012,7 @@ msgid ""
 "This conversion tab is used to import files and convert them into a format "
 "with which Siril can work: FITS or SER."
 msgstr ""
-"Il tab conversione è usato per importare i file e convertirli in un fomato "
+"Il tab conversione è usato per importare i file e convertirli in un formato "
 "con il quale Siril può lavorare: FITS o SER."
 
 #: ../src/gui/siril3.glade.h:452
@@ -2411,7 +2411,7 @@ msgid ""
 "pixel value)."
 msgstr ""
 "Inserisci qui il nome del file master flat, o usa il pulsante sfoglia.\n"
-"Tutte le imagini nella sequenza verranno divise per l'immagine master flat "
+"Tutte le immagini nella sequenza verranno divise per l'immagine master flat "
 "(ciascun valore del pixel)."
 
 #: ../src/gui/siril3.glade.h:533
@@ -2639,7 +2639,7 @@ msgid ""
 "sequences' tab, current sequence name is at the bottom of the window too)."
 msgstr ""
 "Inizia il processo di registrazione. Esso registrerà le immagini nella "
-"sequenza caricata usando il meotod selezionato e il livello di riferimento "
+"sequenza caricata usando il metodo selezionato e il livello di riferimento "
 "(caricato nel tab 'Sequenze di immagini', il nome della sequenza attuale è "
 "anch'esso in fondo alla finestra)."
 
@@ -2711,7 +2711,7 @@ msgid ""
 "Change this value, using mouse wheel or up and down arrows, to align the "
 "image with the reference image on the Y axis."
 msgstr ""
-"Modifica questo valore, usando la rotellina del mouse oppure le freccie su e "
+"Modifica questo valore, usando la rotellina del mouse oppure le frecce su e "
 "giù, per allineare l'immagine con quella di riferimento lungo l'asse Y."
 
 #: ../src/gui/siril3.glade.h:595
@@ -2910,7 +2910,7 @@ msgstr ""
 "Cinque algoritmi di rejection sono disponibili.\n"
 "- Il Percentile Clipping è un algoritmo di rejection ideale per piccoli "
 "insiemi di dati (fino\n"
-"a 6 imagini).\n"
+"a 6 immagini).\n"
 "- Il Sigma Clipping è un algoritmo iterativo che scarta i pixel la cui "
 "distanza dalla\n"
 "mediana è maggiore dei due valori dati in unità di sigma.\n"
@@ -3057,7 +3057,7 @@ msgstr "Moltiplicativo"
 
 #: ../src/gui/siril3.glade.h:687
 msgid "Additive with scaling"
-msgstr "Addittivo con ridimensionamento"
+msgstr "Additivo con ridimensionamento"
 
 #: ../src/gui/siril3.glade.h:688
 msgid "Multiplicative with scaling"
@@ -3662,7 +3662,7 @@ msgid ""
 "Results will be displayed at the end of the processing, on the console "
 "output, in the following form:\n"
 msgstr ""
-"I risultati verrano visualizzati alla fine dell'elaborazione, sul terminale "
+"I risultati verranno visualizzati alla fine dell'elaborazione, sul terminale "
 "di output, nella forma seguente:\n"
 
 #: ../src/core/command.c:756
@@ -5460,7 +5460,7 @@ msgstr "Allineamento Image Pattern (immagini planetarie - intero disco)"
 msgid "Enhanced Correlation Coefficient (planetary - surfaces)"
 msgstr ""
 "Massimizzazione del Coefficiente Migliorata dalla Correlazione (immagini "
-"planetarie - superifici)"
+"planetarie - superfici)"
 
 #: ../src/registration/registration.c:133
 #, c-format
@@ -5860,7 +5860,7 @@ msgstr "moltiplicativo"
 
 #: ../src/stacking/stacking.c:1934
 msgid "additive + scaling"
-msgstr "addittivo + ridimensionamento"
+msgstr "additivo + ridimensionamento"
 
 #: ../src/stacking/stacking.c:1937
 msgid "multiplicative + scaling"
