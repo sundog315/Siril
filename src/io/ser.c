@@ -393,8 +393,8 @@ void ser_manage_endianess_and_depth(struct ser_struct *ser_file, WORD *data, int
 		// inline conversion to 16 bit
 		for (i = frame_size - 1; i >= 0; i--)
 			data[i] = (WORD) (((BYTE*)data)[i]);
-	} else if (ser_file->little_endian) {	// TODO check if it is needed for big endian
-		// inline conversion to big endian
+	} else if (ser_file->little_endian == SER_BIG_ENDIAN) {
+		// inline conversion
 		for (i = frame_size - 1; i >= 0; i--) {
 			pixel = data[i];
 			pixel = (pixel >> 8) | (pixel << 8);
@@ -870,7 +870,7 @@ int ser_write_frame_from_fit(struct ser_struct *ser_file, fits *fit, int frame_n
 			if (ser_file->byte_pixel_depth == SER_PIXEL_DEPTH_8)
 				data8[dest] = (BYTE)(fit->pdata[plane][pixel]);
 			else {
-				if (ser_file->little_endian == SER_LITTLE_ENDIAN)
+				if (ser_file->little_endian == SER_BIG_ENDIAN)
 					data16[dest] = (fit->pdata[plane][pixel] >> 8 | fit->pdata[plane][pixel] << 8);
 				else
 					data16[dest] = fit->pdata[plane][pixel];

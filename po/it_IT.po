@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-07-21 16:29+0200\n"
-"PO-Revision-Date: 2016-07-21 16:30+0200\n"
+"PO-Revision-Date: 2016-08-01 22:15+0100\n"
 "Last-Translator: \n"
 "Language-Team: \n"
 "Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.8\n"
+"X-Generator: Poedit 1.6.10\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../src/gui/siril3.glade.h:1
@@ -555,16 +555,16 @@ msgid ""
 "Average Neutral Protection is the default option. This is the recommended "
 "option in most cases."
 msgstr ""
-"L'opzione di default è \"Average Neutral Protection\". Questa è l'opzione "
+"L'opzione di default è la Protezione Neutra Media. Questa è l'opzione "
 "raccomandata nella maggior parte dei casi."
 
 #: ../src/gui/siril3.glade.h:121
 msgid "Average Neutral"
-msgstr ""
+msgstr "Neutra media"
 
 #: ../src/gui/siril3.glade.h:122
 msgid "Maximum Neutral"
-msgstr ""
+msgstr "Neutra massima"
 
 #: ../src/gui/siril3.glade.h:123
 msgid "Maximum Mask"
@@ -616,7 +616,7 @@ msgstr "Riduzione del banding"
 
 #: ../src/gui/siril3.glade.h:135
 msgid "Protect from Highlights"
-msgstr "Proteggi dall'evidenziazione"
+msgstr "Proteggi dalle alteluci"
 
 #: ../src/gui/siril3.glade.h:136
 msgid "Vertical banding"
@@ -635,8 +635,8 @@ msgid ""
 "If a sequence is loaded and this is activated, perform the processing on all "
 "images of the sequence instead of only the loaded image."
 msgstr ""
-"Se una sequenza è caricata e questo è attivato, esegui l'elaborazione di "
-"tutte le immagini nella sequenza invece che solo dell'immagine caricata."
+"Se una sequenza è caricata e questa opzione è attiva, esegui l'elaborazione "
+"di tutte le immagini nella sequenza invece che solo dell'immagine caricata."
 
 #: ../src/gui/siril3.glade.h:140
 msgid "Output prefix:"
@@ -1043,7 +1043,7 @@ msgstr "Applica trasformazione istogramma"
 
 #: ../src/gui/siril3.glade.h:230
 msgid "Highlights clipping"
-msgstr "Evidenzia ritaglio"
+msgstr "Ritaglio alteluci"
 
 #: ../src/gui/siril3.glade.h:231
 msgid "Midtones balance"
@@ -1051,11 +1051,11 @@ msgstr "Bilanciamento mezzitoni"
 
 #: ../src/gui/siril3.glade.h:232
 msgid "Shadows clipping"
-msgstr ""
+msgstr "Taglio delle ombre"
 
 #: ../src/gui/siril3.glade.h:233
 msgid "Highlights: "
-msgstr "Evidenziazione:"
+msgstr "Alteluci:"
 
 #: ../src/gui/siril3.glade.h:234
 msgid "Midtones: "
@@ -1068,7 +1068,7 @@ msgstr "Ombre:"
 #: ../src/gui/siril3.glade.h:237
 #, no-c-format
 msgid "Clip (%)"
-msgstr "Ritaglio (%)"
+msgstr "Taglio (%)"
 
 #: ../src/gui/siril3.glade.h:238
 msgid "Clipped pixels count (shadows)"
@@ -1076,7 +1076,7 @@ msgstr "Conteggio dei pixel tagliati (ombre)"
 
 #: ../src/gui/siril3.glade.h:239
 msgid "Clipped pixels count (highlights)"
-msgstr "Conteggio dei pixel tagliati (evidenziazione)"
+msgstr "Conteggio dei pixel tagliati (alteluci)"
 
 #: ../src/gui/siril3.glade.h:240
 msgid "Resample"
@@ -2085,7 +2085,7 @@ msgstr "Mantieni solo il primo canale"
 #: ../src/gui/siril3.glade.h:466
 msgid "For an RGB image, only keep R. Useful for grey images stored as RGB."
 msgstr ""
-"Per un immagine RGB, mantieni solo il rosso. Utile per immagini in scala di "
+"Per un'immagine RGB, mantieni solo il rosso. Utile per immagini in scala di "
 "grigi memorizzate in RGB."
 
 #: ../src/gui/siril3.glade.h:467
@@ -2226,15 +2226,15 @@ msgstr ""
 
 #: ../src/gui/siril3.glade.h:494
 msgid "excluded"
-msgstr "escluso"
+msgstr "escludi"
 
 #: ../src/gui/siril3.glade.h:495
 msgid ""
 "Whether or not the image is excluded from processing (the file itself is not "
 "deleted)"
 msgstr ""
-"Se l'immagine è esclusa dall'elaborazione o meno (il file stesso non viene "
-"eliminato)"
+"Indica se l'immagine è esclusa dall'elaborazione o meno (il file stesso non "
+"viene eliminato)"
 
 #: ../src/gui/siril3.glade.h:496
 msgid "reference image"
@@ -2312,7 +2312,7 @@ msgstr ""
 "tutte le immagini ad avere la stessa luminosità ed è quindi raccomandato per "
 "sequenze con valori d'esposizione inconsistenti.\n"
 "Un primo passaggio d'elaborazione verrà fatto su tutte le immagini prima di "
-"esportarle, può richiedere del tempo, ma solo per la prima esportazione di "
+"esportarle; può richiedere del tempo, ma solo per la prima esportazione di "
 "una sequenza.\n"
 "\t\t\t"
 
@@ -2630,7 +2630,7 @@ msgstr ""
 
 #: ../src/gui/siril3.glade.h:580
 msgid "Go register"
-msgstr "Vai alla registrazione"
+msgstr "Inizia registrazione"
 
 #: ../src/gui/siril3.glade.h:581
 msgid ""
@@ -2808,8 +2808,9 @@ msgstr ""
 "offset.\n"
 "Il valore mediano dei pixel nello stack è calcolato per ciascun pixel.\n"
 "Poiché questo metodo dovrebbe essere utilizzato solo per stacking di dark/"
-"flat/offset, esso non tiene\n"
-"conto di degli spostamenti calcolati durante la registrazione.\n"
+"flat/offset,\n"
+"esso non tiene conto di degli spostamenti calcolati durante la "
+"registrazione.\n"
 "\n"
 "Pixel massimo: questo caso è usato principalmente per costruire immagini di "
 "tracce stellari a lunga esposizione.\n"
@@ -2967,7 +2968,7 @@ msgstr "%"
 
 #: ../src/gui/siril3.glade.h:665
 msgid "Normalisation:"
-msgstr "Normallizzazione:"
+msgstr "Normalizzazione:"
 
 #: ../src/gui/siril3.glade.h:666
 msgid "Start stacking"
@@ -3445,7 +3446,7 @@ msgstr "Questa stella è già stata scelta!\n"
 
 #: ../src/algos/star_finder.c:289
 msgid "Peaker"
-msgstr ""
+msgstr "Peaker"
 
 #: ../src/algos/transform.c:200
 msgid "wavelet_transform_data: bad plane number\n"
@@ -3496,9 +3497,8 @@ msgid "OK %ux%u"
 msgstr "OK %ux%u"
 
 #: ../src/compositing/compositing.c:516
-#, fuzzy
 msgid "Unsaved compositing result"
-msgstr "Composizione dell'immagine"
+msgstr "Risultato della composizione non salvato"
 
 #: ../src/compositing/compositing.c:547
 msgid "You must at least load two layers before!\n"
@@ -4050,7 +4050,7 @@ msgstr "Deviazione standard del rumore: sto calcolando...\n"
 #: ../src/core/utils.c:217
 #, c-format
 msgid "Setting CWD (Current Working Directory) to '%s'\n"
-msgstr "Impostando la CLC (Cartella di Lavoro Corrente) a '%s'\n"
+msgstr "Impostazione CLC (Cartella di Lavoro Corrente) a '%s'\n"
 
 #: ../src/core/utils.c:227
 msgid "Could not change directory.\n"
@@ -4117,15 +4117,14 @@ msgstr "impostazione intervalli scalemin=%d, scalemax=%d\n"
 #, c-format
 msgid "<%%s.seq>: %%d images selected out of %%d, reference image is %%d"
 msgstr ""
-"<%%s.seq>: %%d immagini selezionate fuori da %%d, l'immagine di riferimento "
-"è %%d"
+"<%%s.seq>: selezionate %%d immagini su %%d, l'immagine di riferimento è %%d"
 
 #: ../src/gui/callbacks.c:724
 #, c-format
 msgid "<%%s.seq>: %%d images selected out of %%d, reference image is %%.%dd"
 msgstr ""
-"<%%s.seq>: %%d immagini selezionate fuori da %%d, l'immagine di riferimento "
-"è %%.%dd"
+"<%%s.seq>: selezionate %%d immagini su %%d, l'immagine di riferimento è %%."
+"%dd"
 
 #: ../src/gui/callbacks.c:733
 #, c-format
@@ -4147,7 +4146,7 @@ msgstr "Nessuna sequenza"
 #: ../src/gui/callbacks.c:741
 #, c-format
 msgid "- none -"
-msgstr "- nessuno -"
+msgstr "- nessuna -"
 
 #: ../src/gui/callbacks.c:792
 #, c-format
@@ -4194,7 +4193,7 @@ msgstr "File RAW di camere DSLR"
 #: ../src/gui/callbacks.c:1751
 #, c-format
 msgid "Graphics Files (*.bmp"
-msgstr "File grafici (*.bmp)"
+msgstr "File grafici (*.bmp"
 
 #. NETPBM FILES
 #: ../src/gui/callbacks.c:1773
@@ -4423,7 +4422,8 @@ msgstr ""
 #: ../src/io/image_format_fits.c:99 ../src/io/image_format_fits.c:113
 #: ../src/io/image_format_fits.c:128 ../src/io/image_format_fits.c:223
 #: ../src/io/image_format_fits.c:232 ../src/io/image_format_fits.c:640
-#: ../src/io/image_formats_internal.c:47 ../src/io/image_formats_internal.c:102
+#: ../src/io/image_formats_internal.c:47
+#: ../src/io/image_formats_internal.c:102
 #: ../src/io/image_formats_internal.c:165
 #: ../src/io/image_formats_internal.c:333
 #: ../src/io/image_formats_internal.c:345
@@ -4621,11 +4621,11 @@ msgstr "Nessuna selezione"
 
 #: ../src/io/conversion.c:266
 msgid "BMP images, "
-msgstr "Immagini BMP,"
+msgstr "Immagini BMP, "
 
 #: ../src/io/conversion.c:268
 msgid "PIC images (IRIS), "
-msgstr "Immagini PIC (IRIS),"
+msgstr "Immagini PIC (IRIS), "
 
 #: ../src/io/conversion.c:270
 msgid "PGM and PPM binary images"
@@ -4809,6 +4809,8 @@ msgid ""
 "FITS images with 64 bits signed integer per pixel.channel are not "
 "supported.\n"
 msgstr ""
+"Le immagini FITS a interi con segno a 64 bit per pixel.canale non sono "
+"supportate.\n"
 
 #: ../src/io/image_format_fits.c:220
 msgid "Unknown FITS image format.\n"
@@ -4822,7 +4824,7 @@ msgstr "Errore Fitsio leggendo i dati del file %s.\n"
 #: ../src/io/image_format_fits.c:245
 #, c-format
 msgid "Reading FITS: file %s, %ld layer(s), %ux%u pixels\n"
-msgstr "Leggendo i FITS: file %s, %ld livello/i, %ux%u pixel\n"
+msgstr "Lettura FITS: file %s, %ld livello/i, %ux%u pixel\n"
 
 #: ../src/io/image_format_fits.c:263
 #, c-format
@@ -4860,7 +4862,7 @@ msgstr ""
 #: ../src/io/image_format_fits.c:649
 #, c-format
 msgid "Saving FITS: file %s, %ld layer(s), %ux%u pixels\n"
-msgstr "Salvataggio FITS: file %s, %ld laivello/i, %ux%u pixel\n"
+msgstr "Salvataggio FITS: file %s, %ld livello/i, %ux%u pixel\n"
 
 #: ../src/io/image_formats_internal.c:46
 msgid "Error opening BMP.\n"
@@ -5239,7 +5241,7 @@ msgstr ""
 #: ../src/io/sequence.c:1322 ../src/stacking/stacking.c:226
 #: ../src/stacking/stacking.c:846 ../src/stacking/stacking.c:1003
 msgid "Processing image "
-msgstr "Elaborazione dell'immagine"
+msgstr "Elaborazione dell'immagine "
 
 #: ../src/io/sequence.c:1329
 msgid "Export: could not read frame, aborting\n"
@@ -5381,7 +5383,7 @@ msgstr "Elaborazione parallela %s: utilizzando %d processori logici %s"
 
 #: ../src/main.c:320
 msgid "enabled"
-msgstr "abilitato"
+msgstr "abilitata"
 
 #: ../src/main.c:322
 msgid "disabled"
@@ -5756,7 +5758,7 @@ msgstr "Stacking mediano completato."
 #: ../src/stacking/stacking.c:795
 #, c-format
 msgid "Median stacking complete. %d have been stacked.\n"
-msgstr "Stacking mediano completato. Sono stati sommati %d.\n"
+msgstr "Stacking mediano completato. Sono state sommate %d immagini.\n"
 
 #: ../src/stacking/stacking.c:1196
 msgid ""
@@ -5908,9 +5910,8 @@ msgid "Rejection parameters ...... low=%.3f high=%.3f\n"
 msgstr "Parametri di scarto ...... basso=%.3f alto=%.3f\n"
 
 #: ../src/stacking/stacking.c:2032 ../src/stacking/stacking.c:2037
-#, fuzzy
 msgid "Unsaved stacking result"
-msgstr "Non posso salvare il risultato dello stacking %s\n"
+msgstr "Risultato dello stacking non salvato"
 
 #: ../src/stacking/stacking.c:2219
 msgid ""
