@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-08-04 14:52+0200\n"
-"PO-Revision-Date: 2016-07-21 21:38+0200\n"
+"PO-Revision-Date: 2016-08-05 11:36+0200\n"
 "Last-Translator: Antoine Hoeffelman <antoine.hoeffelman[-at-]gmail.com>\n"
 "Language-Team: Dutch <antoine.hoeffelman[-at-]gmail.com>\n"
 "Language: nl_BE\n"
@@ -5193,11 +5193,11 @@ msgstr "Breedte of hoogte mag niet nul zijn. Geen herschaling.\n"
 
 #: ../src/io/ser.c:252
 msgid "Trying to fix broken SER file...\n"
-msgstr ""
+msgstr "Probeert gebroken SER bestanden te herstellen...\n"
 
 #: ../src/io/ser.c:319
 msgid "SER file has been fixed...\n"
-msgstr ""
+msgstr "SER bestand werd hersteld...\n"
 
 #: ../src/io/ser.c:410
 msgid ""
