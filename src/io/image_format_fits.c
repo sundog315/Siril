@@ -922,6 +922,33 @@ int copyfits(fits *from, fits *to, unsigned char oper, int layer) {
 	return 0;
 }
 
+/* copy non-mandatory keywords from 'from' to 'to' */
+int copy_header(fits *from, fits *to) {
+	to->pixel_size_x = from->pixel_size_x;
+	to->pixel_size_y = from->pixel_size_y;
+	to->binning_x = from->binning_x;
+	to->binning_y = from->binning_y;
+
+	strncpy(to->date_obs, from->date_obs, FLEN_VALUE);
+	strncpy(to->date, from->date, FLEN_VALUE);
+	strncpy(to->instrume, from->instrume, FLEN_VALUE);
+	strncpy(to->dft_type, from->dft_type, FLEN_VALUE);
+	strncpy(to->dft_ord, from->dft_ord, FLEN_VALUE);
+
+	to->focal_length = from->focal_length;
+	to->iso_speed = from->iso_speed;
+	to->exposure = from->exposure;
+	to->aperture = from->aperture;
+	to->ccd_temp = from->ccd_temp;
+	to->dft_norm[0] = from->dft_norm[0];
+	to->dft_norm[1] = from->dft_norm[1];
+	to->dft_norm[2] = from->dft_norm[2];
+	to->dft_rx = from->dft_rx;
+	to->dft_ry = from->dft_ry;
+
+	return 0;
+}
+
 int save1fits16(const char *filename, fits *fit, int layer) {
 	if (layer != RLAYER) {
 		int nbdata = fit->naxes[0] * fit->naxes[1];

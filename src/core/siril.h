@@ -410,7 +410,7 @@ struct ffit {
 	/* data obtained from FITS or RAW files */
 	double focal_length, iso_speed, exposure, aperture, ccd_temp;
 
-	/* data used in the Fourrier space */
+	/* data used in the Fourier space */
 	double dft_norm[3];			// Normalization value
 	char dft_type[FLEN_VALUE];		// spectrum, phase
 	char dft_ord[FLEN_VALUE];		// regular, centered
