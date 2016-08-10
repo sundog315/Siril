@@ -407,6 +407,8 @@ struct ffit {
 	char date_obs[FLEN_VALUE];		// YYYY-MM-DDThh:mm:ss observation start, UT
 	char date[FLEN_VALUE];		// YYYY-MM-DDThh:mm:ss creation of file, UT
 	char instrume[FLEN_VALUE];		// INSTRUME key
+	char telescop[FLEN_VALUE];		// TELESCOP key
+	char observer[FLEN_VALUE];		// OBSERVER key
 	/* data obtained from FITS or RAW files */
 	double focal_length, iso_speed, exposure, aperture, ccd_temp;
 

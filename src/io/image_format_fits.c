@@ -290,6 +290,14 @@ void read_fits_header(fits *fit) {
 			&status);
 
 	status = 0;
+	fits_read_key(fit->fptr, TSTRING, "TELESCOP", &(fit->telescop), NULL,
+			&status);
+
+	status = 0;
+	fits_read_key(fit->fptr, TSTRING, "OBSERVER", &(fit->observer), NULL,
+			&status);
+
+	status = 0;
 	fits_read_key(fit->fptr, TSTRING, "DATE-OBS", &(fit->date_obs), NULL,
 			&status);
 
@@ -699,7 +707,14 @@ void save_fits_header(fits *fit) {
 	if (fit->instrume[0] != '\0')
 		fits_update_key(fit->fptr, TSTRING, "INSTRUME", &(fit->instrume),
 				"instrument name", &status);
-
+	status = 0;
+	if (fit->telescop[0] != '\0')
+		fits_update_key(fit->fptr, TSTRING, "TELESCOP", &(fit->telescop),
+				"telescope used to acquire this image", &status);
+	status = 0;
+	if (fit->observer[0] != '\0')
+		fits_update_key(fit->fptr, TSTRING, "OBSERVER", &(fit->observer),
+				"observer name", &status);
 	status = 0;
 	int itmp;
 	char fit_date[40];
