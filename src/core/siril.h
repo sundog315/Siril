@@ -555,13 +555,13 @@ struct cominf {
 	fitted_PSF **stars;		// list of stars detected in the current image
 	gboolean star_is_seqdata;	// the only star in stars belongs to seq, don't free it
 	int selected_star;		// current selected star in the GtkListStore
-	double magOffset;		// offset to reduce the real magitude
+	double magOffset;		// offset to reduce the real magnitude
 	
 	gradient *grad;
 	int grad_nb_boxes, grad_size_boxes;
 	gboolean grad_boxes_drawn;
 
-	GThread *thread;		// the thread for processings
+	GThread *thread;		// the thread for processing
 	GMutex mutex;			// a mutex we use for this thread
 	gboolean run_thread;		// the main thread loop condition
 	int max_thread;			// maximum of thread used
