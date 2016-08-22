@@ -2243,7 +2243,7 @@ void gtk_main_quit() {
 	if (!com.dontShowConfirm) {
 		gtk_widget_set_visible(dontShow, TRUE);
 		gtk_label_set_text(GTK_LABEL(widget),
-				"Are you sure you want to quit ?");
+				_("Are you sure you want to quit ?"));
 		gtk_widget_show(lookup_widget("confirm_dialog"));
 	} else {
 		undo_flush();
