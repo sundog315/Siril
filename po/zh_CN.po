@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: Siril 0.9.4\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-08-18 15:07+0200\n"
-"PO-Revision-Date: 2016-08-05 22:45+0200\n"
-"Last-Translator: \n"
+"PO-Revision-Date: 2016-08-29 10:04+0200\n"
+"Last-Translator: Cyril Richard <cyril@free-astro.fr>\n"
 "Language-Team: astronomy.com.cn <yecloud@me.com>\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
@@ -3944,7 +3944,7 @@ msgstr "该合并模式不被支持\n"
 
 #: ../src/gui/callbacks.c:2246
 msgid "Are you sure you want to quit ?"
-msgstr ""
+msgstr "真的要退出"
 
 #: ../src/gui/callbacks.c:2652
 #, c-format
