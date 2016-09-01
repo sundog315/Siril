@@ -1239,10 +1239,6 @@ gpointer export_sequence(gpointer ptr) {
 	struct exportseq_args *args = (struct exportseq_args *)ptr;
 	memset(&fit, 0, sizeof(fits));
 	memset(&destfit, 0, sizeof(fits));
-#ifdef HAVE_LIBGIF
-	GifFileType *gif = NULL;
-	char giffilename[256];
-#endif
 	norm_coeff coeff;
 
 	reglayer = get_registration_layer();
@@ -1278,11 +1274,7 @@ gpointer export_sequence(gpointer ptr) {
 
 		avi_file_create(dest, width, height, mode, AVI_WRITER_CODEC_DIB, args->avi_fps);
 }
-	else if (args->convflags == TYPEGIF) {
-#ifdef HAVE_LIBGIF
-		snprintf(giffilename, 256, "%s.gif", args->basename);
-#endif
-	}
+
 	if (args->normalize) {
 		struct stacking_args stackargs;
 
@@ -1414,15 +1406,6 @@ gpointer export_sequence(gpointer ptr) {
 				siril_log_message(
 						_("Error while converting to SER (no space left?)\n"));
 			break;
-		case TYPEGIF:
-#ifdef HAVE_LIBGIF
-			if (savegif(giffilename, &destfit, 1, &gif, args->gif_delay,
-					args->gif_loops)) {
-				retval = -1;
-				goto free_and_reset_progress_bar;
-			}
-#endif
-			break;
 		case TYPEAVI:
 			data = fits_to_uint8(&destfit);
 
@@ -1466,12 +1449,6 @@ free_and_reset_progress_bar:
 	else if (args->convflags == TYPEAVI) {
 		avi_file_close(0);
 	}
-#ifdef HAVE_LIBGIF
-	else if (args->convflags == TYPEGIF) {
-		if (gif)
-			closegif(&gif);
-	}
-#endif
 
 	if (retval) {
 		set_progress_bar_data(_("Sequence export failed. Check the log."), PROGRESS_RESET);
@@ -1493,9 +1470,6 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 	const char *bname = gtk_entry_get_text(GTK_ENTRY(lookup_widget("entryExportSeq")));
 	struct exportseq_args *args;
 	GtkToggleButton *exportNormalize, *checkResize;
-#ifdef HAVE_LIBGIF
-	GtkEntry *delayEntry, *loopsEntry;
-#endif
 	GtkEntry *fpsEntry, *widthEntry, *heightEntry;
 
 	if (bname[0] == '\0') return;
@@ -1516,18 +1490,6 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 		args->convflags = TYPESER;
 		break;
 	case 2:
-#ifdef HAVE_LIBGIF
-		delayEntry = GTK_ENTRY(lookup_widget("entryGifDelay"));
-		args->gif_delay = atoi(gtk_entry_get_text(delayEntry));
-		loopsEntry = GTK_ENTRY(lookup_widget("entryGifLoops"));
-		args->gif_loops = atoi(gtk_entry_get_text(loopsEntry));
-		args->convflags = TYPEGIF;
-#else
-		siril_log_message(_("GIF support was not compiled, aborting.\n"));
-		return;
-#endif
-		break;
-	case 3:
 		fpsEntry = GTK_ENTRY(lookup_widget("entryAviFps"));
 		args->avi_fps = atoi(gtk_entry_get_text(fpsEntry));
 		widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
@@ -1549,13 +1511,11 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 }
 
 void on_comboExport_changed(GtkComboBox *box, gpointer user_data) {
-	GtkWidget *gif_options = lookup_widget("boxGifOptions");
 	GtkWidget *avi_options = lookup_widget("boxAviOptions");
 	GtkWidget *checkAviResize = lookup_widget("checkAviResize");
-	gtk_widget_set_visible(gif_options, 2 == gtk_combo_box_get_active(box));
-	gtk_widget_set_visible(avi_options, 3 == gtk_combo_box_get_active(box));
+	gtk_widget_set_visible(avi_options, 2 == gtk_combo_box_get_active(box));
 #ifdef HAVE_OPENCV
-	gtk_widget_set_sensitive(checkAviResize, TRUE); // not available yet because resizing image crashes
+	gtk_widget_set_sensitive(checkAviResize, TRUE);
 #else
 	gtk_widget_set_sensitive(checkAviResize, FALSE);
 #endif

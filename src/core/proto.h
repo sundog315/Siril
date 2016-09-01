@@ -16,10 +16,6 @@
 #undef int64
 #endif
 
-#ifdef HAVE_LIBGIF
-#include <gif_lib.h>
-#endif
-
 /****************** image_format_fits.h ******************/
 int computeRawFitsStats(fits *fit, int layer);
 int	readfits(const char *filename, fits *fit, char *realname);
@@ -98,11 +94,6 @@ int	readpng(const char* , fits *);
 int readraw(const char *, fits *);
 int readraw_in_cfa(const char *, fits *);
 int open_raw_files(const char *, fits *, int);
-#endif
-
-#ifdef HAVE_LIBGIF
-int savegif(const char *filename, fits *fit, int anim, GifFileType **gif, int delay, int loop_count);
-void closegif(GifFileType **gif);
 #endif
 
 /****************** utils.h ******************/
