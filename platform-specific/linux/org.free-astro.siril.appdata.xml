@@ -8,6 +8,7 @@
   <translation type="gettext">siril</translation>
   <description>
     <p>Siril is an image processing tool specially tailored for noise reduction and improving the signal/noise ratio of an image from multiple captures, as required in astronomy.</p>
+    <p xml:lang="ar_DZ">Siril هو برنامج معالجة الصور المصممة خصيصا للحد من الضوضاء وتحسين نسبة الإشارة / الضوضاء صورة من يلتقط متعددة، كما هو مطلوب في علم الفلك</p>
     <p xml:lang="es_ES">Siril es una herramienta de procesado de imágenes especialmente diseñada para la reducción de ruido y la mejora del ratio señal/ruido de una imagen de múltiples capturas, como las requeridas en astronomía.</p>
     <p xml:lang="fr">Siril est un outil de traitement d'image spécialement adapté pour la réduction du bruit et l'amélioration du rapport signal/bruit des images astronomiques.</p>
     <p xml:lang="el_GR">Το Siril είναι ένα εργαλείο επεξεργασίας εικόνων ειδικά κατασκευασμένο για τη μείωση θορύβου και τη βελτίωση του λόγου σήματος/θορύβου μιας εικόνας από πολλαπλές λήψεις, όπως απαιτείται στην αστρονομία.</p>
@@ -16,6 +17,7 @@
     <p xml:lang="ru_RU">Siril это инструмент обработки, специально разработанный для подавления шумов и улучшения отношения сигнал/шум с помощью сложения множества изображений.</p>
     <p xml:lang="zh_CN">Siril是一款特殊的图像处理软件，专为天文摄影所需求的噪声消除和提高信噪比（多帧叠加）而定制。</p>
     <p>Siril can align automatically or manually, stack and enhance pictures from various file formats, even images sequences (movies and SER files).</p>
+    <p xml:lang="ar_DZ">Siril يمكن محاذاة ,تلقائيا أو يدويا ، وتعزيز الصور من صيغ الملفات المختلفة ، وحتى الصور متواليات ( الأفلام وملفات SER ) .</p>
     <p xml:lang="es_ES">Siril puede alinearl automática o manualmente, apilar y mejorar imágenes de varios formatos de fichero, incluso secuencias (películas y ficheros SER).</p>
     <p xml:lang="fr">Siril peut aligner automatiquement ou manuellement, empiler et améliorer des images de différents formats aussi bien que des séquences d'images (films et fichiers SER).</p>
     <p xml:lang="el_GR">Το Siril μπορεί αυτόματα ή χειροκίνητα, να σωρεύσει και να ενισχύσει εικόνες από διάφορους τύπους αρχείων, ακόμα και από αλληλουχίες εικόνων (ταινίες και αρχεία SER).</p>
