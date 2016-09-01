@@ -121,6 +121,7 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
     <property name="title" translatable="yes">RGB image</property>
     <property name="default_width">660</property>
     <property name="default_height">500</property>
+    <property name="icon">pixmaps/siril_1.svg</property>
     <accel-groups>
       <group name="accelgroup1"/>
     </accel-groups>
@@ -959,9 +960,10 @@ enter a visible wavelength in nm</property>
   </object>
   <object class="GtkWindow" id="main_window">
     <property name="can_focus">False</property>
-    <property name="title">siril-0.9.0</property>
+    <property name="title">siril-0.9</property>
     <property name="default_width">700</property>
     <property name="default_height">600</property>
+    <property name="icon">pixmaps/siril_1.svg</property>
     <accel-groups>
       <group name="accelgroup1"/>
     </accel-groups>
