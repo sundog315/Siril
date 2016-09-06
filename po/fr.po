@@ -8,8 +8,8 @@ msgstr ""
 "Project-Id-Version: siril 0.9.4\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-08-18 15:07+0200\n"
-"PO-Revision-Date: 2016-08-18 15:08+0200\n"
-"Last-Translator: Cyril <cyril@free-astro.fr>\n"
+"PO-Revision-Date: 2016-09-05 14:47+0200\n"
+"Last-Translator: Cyril Richard <cyril@free-astro.fr>\n"
 "Language-Team: French <cyril@free-astro.fr>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -5822,7 +5822,7 @@ msgstr "Combinaison ............... aucune\n"
 
 #: ../src/stacking/stacking.c:1925 ../src/stacking/stacking.c:1954
 msgid "none"
-msgstr "aucun"
+msgstr "aucune"
 
 #: ../src/stacking/stacking.c:1928
 msgid "additive"
