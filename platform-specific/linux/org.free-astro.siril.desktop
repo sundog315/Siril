@@ -43,5 +43,5 @@ Icon=siril
 Terminal=false
 Type=Application
 StartupNotify=true
-Categories=Education;Science;Astronomy;
+Categories=Science;Astronomy;ImageProcessing
 MimeType=image/fits;image/bmp;image/pic;image/jpeg;image/png;image/tiff;image/x-portable-pixmap;video/ser;
