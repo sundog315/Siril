@@ -632,6 +632,9 @@ int register_star_alignment(struct registration_args *args) {
 				int nbpoints;
 
 				if (frame != ref_image) {
+					if (args->seq->type == SEQ_SER) {
+						siril_log_color_message(_("Frame %d:\n"), "bold", frame);
+					}
 					stars = peaker(&fit, args->layer, &sf, NULL);
 					if (sf.nb_stars < AT_MATCH_MINPAIRS) {
 						siril_log_message(
