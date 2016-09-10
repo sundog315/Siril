@@ -1134,6 +1134,10 @@ int new_fit_image(fits *fit, int width, int height, int nblayer) {
 			fit->pdata[GLAYER] = fit->data + npixels;
 			fit->pdata[BLAYER] = fit->data + npixels * 2;
 		}
+		else {
+			fit->pdata[GLAYER] = fit->data;
+			fit->pdata[BLAYER] = fit->data;
+		}
 		return 0;
 	} else
 		return 1;

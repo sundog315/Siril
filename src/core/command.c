@@ -118,7 +118,7 @@ command commande[] = {
 	{"mirrorx", 0, "mirrorx", process_mirrorx},
 	{"mirrory", 0, "mirrory", process_mirrory},
 	
-	{"new", 2, "new width height nb_layers", process_new},
+	{"new", 3, "new width height nb_layers", process_new},
 	{"nozero", 1, "nozero level (replaces null values by level)", process_nozero}, /* replaces null values by level */
 	
 	{"offset", 1, "offset value", process_offset},

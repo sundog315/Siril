@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Siril\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-07 16:41+0200\n"
+"POT-Creation-Date: 2016-09-08 16:07+0200\n"
 "PO-Revision-Date: 2016-07-08 16:10+0800\n"
 "Last-Translator: Bamm Gabriana <bamm@distroastro.org>\n"
 "Language-Team: \n"
@@ -2382,7 +2382,7 @@ msgid ""
 "sequences' tab, current sequence name is at the bottom of the window too)."
 msgstr ""
 
-#: ../src/gui/siril3.glade.h:578 ../src/registration/registration.c:941
+#: ../src/gui/siril3.glade.h:578 ../src/registration/registration.c:944
 msgid "Load a sequence first."
 msgstr ""
 
@@ -3036,7 +3036,7 @@ msgid "Error in layers alignment."
 msgstr ""
 
 #: ../src/compositing/align_rgb.c:118 ../src/compositing/compositing.c:602
-#: ../src/registration/registration.c:1167
+#: ../src/registration/registration.c:1170
 msgid "Registration complete."
 msgstr ""
 
@@ -3085,7 +3085,7 @@ msgstr ""
 #: ../src/gui/callbacks.c:5321 ../src/gui/callbacks.c:5420
 #: ../src/io/conversion.c:491 ../src/io/image_formats_libraries.c:97
 #: ../src/io/image_formats_libraries.c:154
-#: ../src/registration/registration.c:1054
+#: ../src/registration/registration.c:1057
 msgid "Warning"
 msgstr ""
 
@@ -3123,7 +3123,7 @@ msgstr ""
 #: ../src/gui/callbacks.c:4612 ../src/gui/callbacks.c:4949
 #: ../src/gui/callbacks.c:5085 ../src/gui/callbacks.c:5463
 #: ../src/gui/callbacks.c:5612 ../src/io/conversion.c:460
-#: ../src/registration/registration.c:1043 ../src/stacking/stacking.c:1854
+#: ../src/registration/registration.c:1046 ../src/stacking/stacking.c:1854
 #: ../src/stacking/stacking.c:1981
 msgid "Another task is already in progress, ignoring new request.\n"
 msgstr ""
@@ -4858,20 +4858,20 @@ msgid "Register: could not load first image to register, aborting.\n"
 msgstr ""
 
 #: ../src/registration/registration.c:289
-#: ../src/registration/registration.c:803
+#: ../src/registration/registration.c:806
 #, c-format
 msgid "Register: processing image %s\n"
 msgstr ""
 
 #: ../src/registration/registration.c:387
 #: ../src/registration/registration.c:474
-#: ../src/registration/registration.c:709
-#: ../src/registration/registration.c:854
+#: ../src/registration/registration.c:712
+#: ../src/registration/registration.c:857
 msgid "Registration finished.\n"
 msgstr ""
 
 #: ../src/registration/registration.c:388
-#: ../src/registration/registration.c:857
+#: ../src/registration/registration.c:860
 #, c-format
 msgid "Best frame: #%d.\n"
 msgstr ""
@@ -4931,7 +4931,7 @@ msgid "Not handled yet\n"
 msgstr ""
 
 #: ../src/registration/registration.c:552
-#: ../src/registration/registration.c:765
+#: ../src/registration/registration.c:768
 msgid "Could not load reference image\n"
 msgstr ""
 
@@ -4943,59 +4943,64 @@ msgstr ""
 msgid "There are not enough stars in reference image to perform alignment\n"
 msgstr ""
 
-#: ../src/registration/registration.c:638
+#: ../src/registration/registration.c:636
+#, c-format
+msgid "Frame %d:\n"
+msgstr ""
+
+#: ../src/registration/registration.c:641
 #, c-format
 msgid "Not enough stars. Image %d skipped\n"
 msgstr ""
 
-#: ../src/registration/registration.c:662
+#: ../src/registration/registration.c:665
 #, c-format
 msgid "Cannot perform star matching. Image %d skipped\n"
 msgstr ""
 
-#: ../src/registration/registration.c:710
+#: ../src/registration/registration.c:713
 #, c-format
 msgid "%d images processed.\n"
 msgstr ""
 
-#: ../src/registration/registration.c:712
+#: ../src/registration/registration.c:715
 #, c-format
 msgid "Total: %d failed, %d registered.\n"
 msgstr ""
 
-#: ../src/registration/registration.c:717
+#: ../src/registration/registration.c:720
 msgid "Registration aborted.\n"
 msgstr ""
 
-#: ../src/registration/registration.c:816
+#: ../src/registration/registration.c:819
 #, c-format
 msgid "Cannot perform ECC alignment for frame %d\n"
 msgstr ""
 
-#: ../src/registration/registration.c:856
+#: ../src/registration/registration.c:859
 #, c-format
 msgid "%d frames were excluded.\n"
 msgstr ""
 
-#: ../src/registration/registration.c:944
+#: ../src/registration/registration.c:947
 msgid "Select an area in image first, and select images in the sequence."
 msgstr ""
 
-#: ../src/registration/registration.c:946
+#: ../src/registration/registration.c:949
 msgid "Select images in the sequence."
 msgstr ""
 
-#: ../src/registration/registration.c:948
+#: ../src/registration/registration.c:951
 msgid "Select an area in image first."
 msgstr ""
 
-#: ../src/registration/registration.c:1053
+#: ../src/registration/registration.c:1056
 msgid ""
 "All prerequisites are not filled for registration. Select a rectangle "
 "first.\n"
 msgstr ""
 
-#: ../src/registration/registration.c:1083
+#: ../src/registration/registration.c:1086
 #, c-format
 msgid "Registration: processing using method: %s\n"
 msgstr ""
