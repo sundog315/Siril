@@ -48,6 +48,9 @@
 #ifdef HAVE_OPENCV
 #include "opencv/opencv.h"
 #endif
+#ifdef HAVE_FFMPEG
+#include "../io/mp4_output.h"
+#endif
 #include "io/avi_pipp/avi_writer.h"
 #include "io/single_image.h"
 #include "gui/histogram.h"
@@ -1198,7 +1201,7 @@ struct exportseq_args {
 	char *basename;
 	int convflags;
 	gboolean normalize;
-	int gif_delay, gif_loops;
+//	int gif_delay, gif_loops;
 	double avi_fps;
 	gboolean resize;
 	int32_t avi_width, avi_height;
@@ -1236,6 +1239,9 @@ gpointer export_sequence(gpointer ptr) {
 	fits fit, destfit;
 	char filename[256], dest[256];
 	struct ser_struct *ser_file = NULL;
+#ifdef HAVE_FFMPEG
+	struct mp4_struct *mp4_file = NULL;
+#endif
 	struct exportseq_args *args = (struct exportseq_args *)ptr;
 	memset(&fit, 0, sizeof(fits));
 	memset(&destfit, 0, sizeof(fits));
@@ -1244,36 +1250,57 @@ gpointer export_sequence(gpointer ptr) {
 	reglayer = get_registration_layer();
 	siril_log_message(_("Using registration information from layer %d to export sequence\n"), reglayer);
 
-	if (args->convflags == TYPESER) {
-		ser_file = malloc(sizeof(struct ser_struct));
-		snprintf(dest, 256, "%s.ser", args->basename);
-		if (ser_create_file(dest, ser_file, TRUE, NULL))
-			siril_log_message(_("Creating the SER file failed, aborting.\n"));
-	}
-	else if (args->convflags == TYPEAVI){
-		snprintf(dest, 256, "%s.avi", args->basename);
-		int32_t width;
-		int32_t height;
-		int32_t mode;
-
-		switch(args->seq->nb_layers) {
-		case 1:
-			mode = AVI_WRITER_INPUT_FORMAT_MONOCHROME;
+	switch (args->convflags) {
+		case TYPESER:
+			ser_file = malloc(sizeof(struct ser_struct));
+			snprintf(dest, 256, "%s.ser", args->basename);
+			if (ser_create_file(dest, ser_file, TRUE, NULL))
+				siril_log_message(_("Creating the SER file failed, aborting.\n"));
 			break;
-		default:
-			mode = AVI_WRITER_INPUT_FORMAT_COLOUR;
-		}
-		if (args->resize) {
-			width = args->avi_width;
-			height = args->avi_height;
-		}
-		else {
-			width  = (int32_t) args->seq->rx;
-			height = (int32_t) args->seq->ry;
-		}
 
-		avi_file_create(dest, width, height, mode, AVI_WRITER_CODEC_DIB, args->avi_fps);
-}
+		case TYPEAVI:
+			snprintf(dest, 256, "%s.avi", args->basename);
+			int32_t width;
+			int32_t height;
+			int32_t mode;
+
+			switch(args->seq->nb_layers) {
+				case 1:
+					mode = AVI_WRITER_INPUT_FORMAT_MONOCHROME;
+					break;
+				default:
+					mode = AVI_WRITER_INPUT_FORMAT_COLOUR;
+			}
+			if (args->resize) {
+				width = args->avi_width;
+				height = args->avi_height;
+			}
+			else {
+				width  = (int32_t) args->seq->rx;
+				height = (int32_t) args->seq->ry;
+			}
+
+			avi_file_create(dest, width, height, mode, AVI_WRITER_CODEC_DIB, args->avi_fps);
+			break;
+
+		case TYPEMP4:
+		case TYPEWEBM:
+#ifndef HAVE_FFMPEG
+			siril_log_message(_("MP4 output is not supported because siril was not compiled with ffmpeg support.\n"));
+			retval = -1;
+			goto free_and_reset_progress_bar;
+#else
+			snprintf(dest, 256, "%s.%s", args->basename,
+					args->convflags == TYPEMP4 ? "mp4" : "webm");
+			if (args->avi_fps <= 0) args->avi_fps = 25;
+			mp4_file = mp4_create(dest, args->seq->rx, args->seq->ry, args->avi_fps);
+			if (!mp4_file) {
+				retval = -1;
+				goto free_and_reset_progress_bar;
+			}
+#endif
+			break;
+	}
 
 	if (args->normalize) {
 		struct stacking_args stackargs;
@@ -1394,39 +1421,45 @@ gpointer export_sequence(gpointer ptr) {
 
 
 		switch (args->convflags) {
-		case TYPEFITS:
-			snprintf(dest, 255, "%s%05d%s", args->basename, i, com.ext);
-			if (savefits(dest, &destfit)) {
-				retval = -1;
-				goto free_and_reset_progress_bar;
-			}
-			break;
-		case TYPESER:
-			if (ser_write_frame_from_fit(ser_file, &destfit, i - skipped))
-				siril_log_message(
-						_("Error while converting to SER (no space left?)\n"));
-			break;
-		case TYPEAVI:
-			data = fits_to_uint8(&destfit);
+			case TYPEFITS:
+				snprintf(dest, 255, "%s%05d%s", args->basename, i, com.ext);
+				if (savefits(dest, &destfit)) {
+					retval = -1;
+					goto free_and_reset_progress_bar;
+				}
+				break;
+			case TYPESER:
+				if (ser_write_frame_from_fit(ser_file, &destfit, i - skipped))
+					siril_log_message(
+							_("Error while converting to SER (no space left?)\n"));
+				break;
+			case TYPEAVI:
+				data = fits_to_uint8(&destfit);
 
-			if (args->resize) {
+				if (args->resize) {
 #ifdef HAVE_OPENCV
-				uint8_t *newdata = malloc(
-						sizeof(uint8_t) * args->avi_width * args->avi_height
-								* destfit.naxes[2]);
-				cvResizeGaussian_data8(data, destfit.rx, destfit.ry, newdata,
-						args->avi_width, args->avi_height, destfit.naxes[2], OPENCV_LINEAR);
-				avi_file_write_frame(0, newdata);
-				free(newdata);
+					uint8_t *newdata = malloc(
+							sizeof(uint8_t) * args->avi_width * args->avi_height
+							* destfit.naxes[2]);
+					cvResizeGaussian_data8(data, destfit.rx, destfit.ry, newdata,
+							args->avi_width, args->avi_height, destfit.naxes[2], OPENCV_LINEAR);
+					avi_file_write_frame(0, newdata);
+					free(newdata);
 #else
-				siril_log_message(_("Siril needs opencv to resize images\n"));
-				avi_file_write_frame(0, data);
+					siril_log_message(_("Siril needs opencv to resize images\n"));
+					avi_file_write_frame(0, data);
 #endif
-			}
-			else
-				avi_file_write_frame(0, data);
-			free(data);
-			break;
+				}
+				else
+					avi_file_write_frame(0, data);
+				free(data);
+				break;
+#ifdef HAVE_FFMPEG
+			case TYPEMP4:
+			case TYPEWEBM:
+				mp4_add_frame(mp4_file, &destfit);
+				break;
+#endif
 		}
 		cur_nb += 1.f;
 		set_progress_bar_data(NULL, cur_nb / nb_frames);
@@ -1449,6 +1482,11 @@ free_and_reset_progress_bar:
 	else if (args->convflags == TYPEAVI) {
 		avi_file_close(0);
 	}
+#ifdef HAVE_FFMPEG
+	else if (args->convflags == TYPEMP4 || args->convflags == TYPEWEBM) {
+		mp4_close(mp4_file);
+	}
+#endif
 
 	if (retval) {
 		set_progress_bar_data(_("Sequence export failed. Check the log."), PROGRESS_RESET);
@@ -1505,6 +1543,17 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 		}
 		args->convflags = TYPEAVI;
 		break;
+#ifdef HAVE_FFMPEG
+	case 3:
+		args->convflags = TYPEMP4;
+		break;
+	case 4:
+		args->convflags = TYPEWEBM;
+		break;
+#endif
+	default:
+		free(args);
+		return;
 	}
 	set_cursor_waiting(TRUE);
 	start_in_new_thread(export_sequence, args);

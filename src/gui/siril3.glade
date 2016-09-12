@@ -10961,12 +10961,14 @@ If not set manually, the first image of the sequence is taken as reference.</pro
                       <object class="GtkComboBoxText" id="comboExport">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="tooltip_text" translatable="yes">Export sequence format</property>
+                        <property name="tooltip_text" translatable="yes">Export sequence format. MP4 and WEBM replaces GIF for modern Web publication, AVI is not compressed.</property>
                         <property name="active">0</property>
                         <items>
                           <item>FITS</item>
                           <item>SER</item>
                           <item>AVI</item>
+                          <item>MP4</item>
+                          <item>WEBM</item>
                         </items>
                         <signal name="changed" handler="on_comboExport_changed" swapped="no"/>
                       </object>

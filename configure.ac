@@ -113,6 +113,11 @@ PKG_CHECK_MODULES(FFMS2, [ffms2 < 2.21],
 		  AC_MSG_WARN([libffms2 not found. Not using AVI importer.]))
 		  ])
 
+dnl checking several ffmpeg libraries
+PKG_CHECK_MODULES(FFMPEG, [libavformat libavutil libavcodec libswscale libswresample],
+		  [AC_DEFINE([HAVE_FFMPEG], [1], [film export supported])],
+		  AC_MSG_WARN([ffmpeg libav libraries not found. Not using film export formats.]))
+
 dnl check opencv
 AC_PROG_CXX
 if test -n "$CXX" && ( test "X$CXX" != "Xno" &&
