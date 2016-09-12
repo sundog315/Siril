@@ -4,6 +4,8 @@
 #include "core/siril.h"
 
 #define NUMBER_OF_METHOD 5
+#define SUPER_SAMPLING 2
+
 struct registration_args;
 typedef int (*registration_function)(struct registration_args *);
 
@@ -21,6 +23,7 @@ struct registration_args {
 	gboolean follow_star;		// follow star position between frames
 	gboolean load_new_sequence; // load a new sequence if success
 	gboolean matchSelection;	// Match stars found in the seleciton of reference image
+	opencv_interpolation interpolation; // type of rotation interpolation
 };
 
 typedef enum {

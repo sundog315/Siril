@@ -678,7 +678,17 @@ int register_star_alignment(struct registration_args *args) {
 					current_regdata[frame].fwhm = FWHMx;
 
 					fits_flip_top_to_bottom(&fit);	// this is because in cvTransformImage, rotation center point is at (0, 0)
-					cvTransformImage(&fit, trans, OPENCV_CUBIC);
+
+					/* An alternative method for generating an improved rotation: Basically we apply the operation to an image
+					 * that is at least twice (or more) the size of the final image size wanted. After rotating the image,
+					 * the image is resized down to its final size so as to produce a very sharp lines,
+					 * edges, and much cleaner looking fonts. */
+					cvResizeGaussian(&fit, fit.rx * SUPER_SAMPLING, fit.ry * SUPER_SAMPLING, OPENCV_CUBIC);
+					trans.a *= SUPER_SAMPLING;
+					trans.d *= SUPER_SAMPLING;
+					cvTransformImage(&fit, trans, args->interpolation);
+					cvResizeGaussian(&fit, fit.rx / SUPER_SAMPLING, fit.ry / SUPER_SAMPLING, OPENCV_CUBIC);
+
 					fits_flip_top_to_bottom(&fit);
 
 					i = 0;
@@ -1040,6 +1050,7 @@ void on_seqregister_button_clicked(GtkButton *button, gpointer user_data) {
 	char *msg;
 	GtkToggleButton *regall, *follow, *matchSel;
 	GtkComboBox *cbbt_layers;
+	GtkComboBoxText *ComboBoxRegInter;
 
 	if (get_thread_run()) {
 		siril_log_message(
@@ -1077,6 +1088,9 @@ void on_seqregister_button_clicked(GtkButton *button, gpointer user_data) {
 	cbbt_layers = GTK_COMBO_BOX(
 			gtk_builder_get_object(builder, "comboboxreglayer"));
 	reg_args->layer = gtk_combo_box_get_active(cbbt_layers);
+	ComboBoxRegInter = GTK_COMBO_BOX_TEXT(
+			gtk_builder_get_object(builder, "ComboBoxRegInter"));
+	reg_args->interpolation = gtk_combo_box_get_active(GTK_COMBO_BOX(ComboBoxRegInter));
 	get_the_registration_area(reg_args, method);
 	reg_args->func = method->method_ptr;
 	reg_args->run_in_thread = TRUE;

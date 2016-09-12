@@ -11891,6 +11891,28 @@ When processing images, registration data is taken from the default layer if ava
                       </packing>
                     </child>
                     <child>
+                      <object class="GtkComboBoxText" id="ComboBoxRegInter">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Type of algorithm used for rotation</property>
+                        <property name="halign">end</property>
+                        <property name="valign">center</property>
+                        <property name="active">4</property>
+                        <items>
+                          <item translatable="yes">Nearest Neighbor</item>
+                          <item translatable="yes">Bilinear</item>
+                          <item translatable="yes">Pixel Area Relation</item>
+                          <item translatable="yes">Bicubic</item>
+                          <item translatable="yes">Lanczos-4</item>
+                        </items>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
                       <object class="GtkCheckButton" id="checkStarSelect">
                         <property name="label" translatable="yes">Match stars in selection</property>
                         <property name="visible">True</property>
@@ -11903,7 +11925,7 @@ WARNING: Make sure to draw a selection with a sufficient number of stars.</prope
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="position">2</property>
+                        <property name="position">3</property>
                       </packing>
                     </child>
                   </object>
