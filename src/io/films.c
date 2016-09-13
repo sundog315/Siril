@@ -182,8 +182,8 @@ int film_open_file(const char *sourcefile, struct film_struct *film) {
 
 	/* If you want to change the output colorspace or resize the output frame size,
 	now is the time to do it. IMPORTANT: This step is also required to prevent
-	resolution and colorspace changes midstream. You can you can always tell a frame's
-	original properties by examining the Encoded* properties in FFMS_Frame. */
+	resolution and colorspace changes midstream. You can always tell a frame's
+	original properties by examining the Encoded properties in FFMS_Frame. */
 	/* See libavutil/pixfmt.h for the list of pixel formats/colorspaces.
 	To get the name of a given pixel format, strip the leading PIX_FMT_
 	and convert to lowercase. For example, PIX_FMT_YUV420P becomes "yuv420p". */
@@ -216,7 +216,7 @@ static int *randomIndex(int n) {
 	int *index = malloc(n * sizeof (int));
 	int i = 0;
 	int x = 0;
-	int tmp =0;
+	int tmp = 0;
 
 	/* make index */
 	for (i = 0; i < n; i++) {

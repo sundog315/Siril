@@ -37,9 +37,9 @@
 #include <libswscale/swscale.h>
 #include <libswresample/swresample.h>
 
-#include "mp4_output.h"
-#include "../core/proto.h"	// computePente
-#include "../gui/callbacks.h"	// siril_log_message
+#include "io/mp4_output.h"
+#include "core/proto.h"	// computePente
+#include "gui/callbacks.h"	// siril_log_message
 
 #define STREAM_DURATION   10.0
 #define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
