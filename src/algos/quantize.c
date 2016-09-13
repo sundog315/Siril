@@ -78,7 +78,7 @@ int *status) /* error status */
  Compute statistics of the input ushort integer image.
  */
 {
-	long ngood;
+	long ngood = 0;
 	WORD minval = 0, maxval = 0;
 	double xmean = 0., xsigma = 0., xnoise = 0., xnoise2 = 0., xnoise3 = 0.,
 			xnoise5 = 0.;
