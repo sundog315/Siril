@@ -230,10 +230,8 @@ static int fill_rgb_image(AVFrame *pict, int frame_index,
 
 	BYTE map[USHRT_MAX + 1];
 	WORD tmp_pixel_value, hi, lo;
-	int i, nb_pixels;
+	int i;
 	float pente;
-
-	nb_pixels = fit->rx * fit->ry;
 
 	pente = computePente(&lo, &hi);
 	
@@ -283,21 +281,6 @@ static int fill_rgb_image(AVFrame *pict, int frame_index,
 			}
 		}
 	}
-
-#if 0
-	/* Y */
-	for (y = 0; y < height; y++)
-		for (x = 0; x < width; x++)
-			pict->data[0][y * pict->linesize[0] + x] = x + y + frame_index * 3;
-
-	/* Cb and Cr */
-	for (y = 0; y < height / 2; y++) {
-		for (x = 0; x < width / 2; x++) {
-			pict->data[1][y * pict->linesize[1] + x] = 128 + y + frame_index * 2;
-			pict->data[2][y * pict->linesize[2] + x] = 64 + x + frame_index * 5;
-		}
-	}
-#endif
 	return 0;
 }
 
@@ -305,17 +288,20 @@ static AVFrame *get_video_frame(struct mp4_struct *ost, fits *input_image)
 {
 	AVCodecContext *c = ost->enc;
 
-	/* check if we want to generate more frames 
-	 * STREAM_DURATION is invalid here, it should be long type */
-	/*if (av_compare_ts(ost->next_pts, c->time_base,
-				STREAM_DURATION, (AVRational){ 1, 1 }) >= 0)
-		return NULL;*/
+	/* check if we want to generate more frames -- why would we need that?
+	 * BTW, STREAM_DURATION is invalid here, it should be long type
+	 * if (av_compare_ts(ost->next_pts, c->time_base,
+	 *         STREAM_DURATION, (AVRational){ 1, 1 }) >= 0)
+	 *     return NULL;
+	 */
 
-	enum AVPixelFormat SrcFormat = (input_image->naxes[2] == 1) ? AV_PIX_FMT_GRAY8 : AV_PIX_FMT_RGB24;
+	enum AVPixelFormat src_format =
+		(input_image->naxes[2] == 1) ? AV_PIX_FMT_GRAY8 : AV_PIX_FMT_RGB24;
+
 	/* if (target != input_image format) */
 	if (c->pix_fmt != AV_PIX_FMT_RGB24) {
 		if (!ost->sws_ctx) {
-			ost->sws_ctx = sws_getContext(c->width, c->height, SrcFormat,
+			ost->sws_ctx = sws_getContext(c->width, c->height, src_format,
 					c->width, c->height, c->pix_fmt,
 					SCALE_FLAGS, NULL, NULL, NULL);
 			if (!ost->sws_ctx) {
@@ -346,7 +332,6 @@ static int write_video_frame(struct mp4_struct *ost, fits *input_image)
 {
 	int ret;
 	AVCodecContext *c;
-	//int got_packet = 0;
 	AVPacket pkt = { 0 };
 	fprintf(stdout, "writing video frame\n");
 
@@ -357,7 +342,6 @@ static int write_video_frame(struct mp4_struct *ost, fits *input_image)
 	av_init_packet(&pkt);
 
 	/* encode the image */
-	//ret = avcodec_encode_video2(c, &pkt, frame, &got_packet);
 	ret = avcodec_send_frame(c, ost->frame);
 	if (ret < 0) {
 		fprintf(stderr, "Error encoding video frame: %s\n", av_err2str(ret));
@@ -383,8 +367,6 @@ static int write_video_frame(struct mp4_struct *ost, fits *input_image)
 	else if (ret == AVERROR(EAGAIN))
 		return 0;
 	//else retry later
-
-	/*return (frame || got_packet) ? 0 : 1;*/
 	return 0;
 }
 
@@ -436,7 +418,7 @@ struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int n
 	int ret;
 	AVDictionary *opt = NULL;
 
-	if (filename == NULL || filename[0] == '\0' /*|| w%2 || h%2 || fps <= 0*/) {
+	if (filename == NULL || filename[0] == '\0' || w%2 || h%2 || fps <= 0) {
 		siril_log_message(_("Parameters for mp4 file creation were incorrect. Image dimension has to be a multiple of 2, fps and file name non nul."));
 		return NULL;
 	}
@@ -448,8 +430,8 @@ struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int n
 	/* allocate the output media context */
 	avformat_alloc_output_context2(&video_st->oc, NULL, NULL, filename);
 	if (!video_st->oc) {
-		fprintf(stdout, "Could not deduce output format from file extension: using MPEG.\n");
-		avformat_alloc_output_context2(&video_st->oc, NULL, "mpeg", filename);
+		fprintf(stdout, "Could not deduce output format from file extension: using mp4.\n");
+		avformat_alloc_output_context2(&video_st->oc, NULL, "mp4", filename);
 	}
 	if (!video_st->oc) {
 		free(video_st);
@@ -459,6 +441,10 @@ struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int n
 	video_st->fmt = video_st->oc->oformat;
 	/* disable unwanted features, is this the correct way? */
 	video_st->fmt->audio_codec = AV_CODEC_ID_NONE;
+	if (video_st->fmt->video_codec == AV_CODEC_ID_VP9) {
+		/* force VP8 codec for webm, VP9 is not supported by Opera 12 */
+		video_st->fmt->video_codec = AV_CODEC_ID_VP8;
+	}
 
 	/* Add the video stream using the default format codecs
 	 * and initialize the codecs. */
@@ -472,8 +458,8 @@ struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int n
 		return NULL;
 	}
 
-	/* Now that all the parameters are set, we can open the audio and
-	 * video codecs and allocate the necessary encode buffers. */
+	/* Now that all the parameters are set, we can open the video codec
+	 * and allocate the necessary encode buffers. */
 	if (open_video(video_codec, video_st, opt, nb_layers)) {
 		free(video_st);
 		return NULL;

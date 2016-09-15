@@ -1483,8 +1483,9 @@ free_and_reset_progress_bar:
 		avi_file_close(0);
 	}
 #ifdef HAVE_FFMPEG
-	else if (args->convflags == TYPEMP4 || args->convflags == TYPEWEBM) {
+	else if (mp4_file && (args->convflags == TYPEMP4 || args->convflags == TYPEWEBM)) {
 		mp4_close(mp4_file);
+		free(mp4_file);
 	}
 #endif
 
@@ -1528,6 +1529,10 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 		args->convflags = TYPESER;
 		break;
 	case 2:
+#ifdef HAVE_FFMPEG
+	case 3:
+	case 4:
+#endif
 		fpsEntry = GTK_ENTRY(lookup_widget("entryAviFps"));
 		args->avi_fps = atoi(gtk_entry_get_text(fpsEntry));
 		widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
@@ -1542,15 +1547,13 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 			args->resize = gtk_toggle_button_get_active(checkResize);
 		}
 		args->convflags = TYPEAVI;
-		break;
 #ifdef HAVE_FFMPEG
-	case 3:
-		args->convflags = TYPEMP4;
-		break;
-	case 4:
-		args->convflags = TYPEWEBM;
-		break;
+		if (selected == 3)
+			args->convflags = TYPEMP4;
+		else if (selected == 4)
+			args->convflags = TYPEWEBM;
 #endif
+		break;
 	default:
 		free(args);
 		return;
@@ -1562,7 +1565,7 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 void on_comboExport_changed(GtkComboBox *box, gpointer user_data) {
 	GtkWidget *avi_options = lookup_widget("boxAviOptions");
 	GtkWidget *checkAviResize = lookup_widget("checkAviResize");
-	gtk_widget_set_visible(avi_options, 2 == gtk_combo_box_get_active(box));
+	gtk_widget_set_visible(avi_options, gtk_combo_box_get_active(box) >= 2);
 #ifdef HAVE_OPENCV
 	gtk_widget_set_sensitive(checkAviResize, TRUE);
 #else

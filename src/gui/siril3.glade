@@ -11047,7 +11047,7 @@ A first computation pass will be done on all images before exporting, it may tak
                             <property name="valign">center</property>
                             <property name="max_length">7</property>
                             <property name="width_chars">7</property>
-                            <property name="text">10.000</property>
+                            <property name="text">25.000</property>
                             <property name="input_purpose">number</property>
                           </object>
                           <packing>

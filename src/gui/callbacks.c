@@ -5855,7 +5855,7 @@ void fillSeqAviExport() {
 		GtkEntry *entryAviFps = GTK_ENTRY(lookup_widget("entryAviFps"));
 
 		if (com.seq.ser_file && com.seq.ser_file->fps <= 0.0) {
-			g_snprintf(fps, sizeof(fps), "10.000");
+			g_snprintf(fps, sizeof(fps), "25.000");
 		} else {
 			g_snprintf(fps, sizeof(fps), "%2.3lf", com.seq.ser_file->fps);
 		}
