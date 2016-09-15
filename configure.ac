@@ -114,7 +114,7 @@ PKG_CHECK_MODULES(FFMS2, [ffms2 < 2.21],
 		  ])
 
 dnl checking several ffmpeg libraries
-PKG_CHECK_MODULES(FFMPEG, [libavformat libavutil libavcodec libswscale libswresample],
+PKG_CHECK_MODULES(FFMPEG, [libavformat libavutil >= 55 libavcodec libswscale libswresample],
 		  [AC_DEFINE([HAVE_FFMPEG], [1], [film export supported])],
 		  AC_MSG_WARN([ffmpeg libav libraries not found. Not using film export formats.]))
 

@@ -514,6 +514,10 @@ int mp4_close(struct mp4_struct *video_st) {
 
 	/* free the stream */
 	avformat_free_context(video_st->oc);
+	avcodec_free_context(&video_st->enc);
+	av_frame_free(&video_st->frame);
+	if (video_st->tmp_frame)
+		av_frame_free(&video_st->tmp_frame);
 
 	return 0;
 }

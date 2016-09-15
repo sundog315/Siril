@@ -11063,7 +11063,7 @@ A first computation pass will be done on all images before exporting, it may tak
                             <property name="visible">True</property>
                             <property name="can_focus">True</property>
                             <property name="receives_default">False</property>
-                            <property name="tooltip_text" translatable="yes">Check this box if you want to resize exported sequence</property>
+                            <property name="tooltip_text" translatable="yes">Check this box if you want to resize exported sequence. Note that this will degrade image quality.</property>
                             <property name="halign">center</property>
                             <property name="draw_indicator">True</property>
                             <signal name="toggled" handler="on_checkAviResize_toggled" swapped="no"/>
