@@ -168,7 +168,7 @@ static AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height)
 	return picture;
 }
 
-static int open_video(AVCodec *codec, struct mp4_struct *ost, AVDictionary *opt_arg)
+static int open_video(AVCodec *codec, struct mp4_struct *ost, AVDictionary *opt_arg, int nb_layers)
 {
 	int ret;
 	AVCodecContext *c = ost->enc;
@@ -195,7 +195,8 @@ static int open_video(AVCodec *codec, struct mp4_struct *ost, AVDictionary *opt_
 	 * needed too. It is then converted to the required output format. */
 	ost->tmp_frame = NULL;
 	if (c->pix_fmt != AV_PIX_FMT_RGB24) {
-		ost->tmp_frame = alloc_picture(AV_PIX_FMT_RGB24, c->width, c->height);
+		enum AVPixelFormat pix_fmt = (nb_layers == 1) ? AV_PIX_FMT_GRAY8 : AV_PIX_FMT_RGB24;
+		ost->tmp_frame = alloc_picture(pix_fmt, c->width, c->height);
 		if (!ost->tmp_frame) {
 			fprintf(stderr, "Could not allocate temporary picture\n");
 			return 1;
@@ -227,31 +228,12 @@ static int fill_rgb_image(AVFrame *pict, int frame_index,
 	if (av_frame_make_writable(pict) < 0)
 		return 1;
 
-	BYTE *rgb[3];
 	BYTE map[USHRT_MAX + 1];
 	WORD tmp_pixel_value, hi, lo;
 	int i, nb_pixels;
 	float pente;
 
 	nb_pixels = fit->rx * fit->ry;
-	if (fit->naxes[2] == 3) {
-		rgb[0] = malloc(nb_pixels);
-		if (rgb[0] == NULL) {
-			printf("Failed to allocate memory required, aborted.\n");
-			return 1;
-		}
-		rgb[1] = malloc(nb_pixels);
-		if (rgb[1] == NULL) {
-			printf("Failed to allocate memory required, aborted.\n");
-			return 1;
-		}
-		rgb[2] = malloc(nb_pixels);
-		if (rgb[2] == NULL) {
-			printf("Failed to allocate memory required, aborted.\n");
-			return 1;
-		}
-	}
-	// TODO: else
 
 	pente = computePente(&lo, &hi);
 	
@@ -269,7 +251,7 @@ static int fill_rgb_image(AVFrame *pict, int frame_index,
 	/* doing the WORD to BYTE conversion, bottom-up */
 	if (fit->naxes[2] == 1) {
 		int x, y;
-		WORD *src = fit->data;
+		WORD *src = fit->pdata[RLAYER];
 		BYTE *dst = pict->data[0];
 		for (y = 0; y < fit->ry; y++) {
 			int desty = fit->ry - y - 1;
@@ -288,7 +270,7 @@ static int fill_rgb_image(AVFrame *pict, int frame_index,
 			WORD *src = fit->pdata[channel];
 			BYTE *dst = pict->data[0];
 			for (y = 0; y < fit->ry; y++) {
-				int desty = fit->ry-y-1;
+				int desty = fit->ry - y - 1;
 				int srcpixel = y * fit->rx;
 				int dstpixel = (desty * fit->rx * 3) + channel;
 				for (x = 0; x < fit->rx; x++, srcpixel++, dstpixel+=3) {
@@ -329,16 +311,16 @@ static AVFrame *get_video_frame(struct mp4_struct *ost, fits *input_image)
 				STREAM_DURATION, (AVRational){ 1, 1 }) >= 0)
 		return NULL;*/
 
+	enum AVPixelFormat SrcFormat = (input_image->naxes[2] == 1) ? AV_PIX_FMT_GRAY8 : AV_PIX_FMT_RGB24;
 	/* if (target != input_image format) */
 	if (c->pix_fmt != AV_PIX_FMT_RGB24) {
 		if (!ost->sws_ctx) {
-			ost->sws_ctx = sws_getContext(c->width, c->height,
-					AV_PIX_FMT_RGB24,
-					c->width, c->height,
-					c->pix_fmt,
+			ost->sws_ctx = sws_getContext(c->width, c->height, SrcFormat,
+					c->width, c->height, c->pix_fmt,
 					SCALE_FLAGS, NULL, NULL, NULL);
 			if (!ost->sws_ctx) {
-				fprintf(stderr, "Could not initialize the conversion context\n");
+				fprintf(stderr,
+						"Could not initialize the conversion context\n");
 				return NULL;
 			}
 		}
@@ -447,7 +429,7 @@ static void close_stream(struct mp4_struct *ost)
 /**************************************************************/
 /* media file output */
 
-struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps)
+struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int nb_layers)
 {
 	struct mp4_struct *video_st;
 	AVCodec *video_codec;
@@ -492,7 +474,7 @@ struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps)
 
 	/* Now that all the parameters are set, we can open the audio and
 	 * video codecs and allocate the necessary encode buffers. */
-	if (open_video(video_codec, video_st, opt)) {
+	if (open_video(video_codec, video_st, opt, nb_layers)) {
 		free(video_st);
 		return NULL;
 	}

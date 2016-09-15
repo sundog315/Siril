@@ -25,7 +25,7 @@ struct mp4_struct {
 
 };
 
-struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps);
+struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int depth);
 int mp4_add_frame(struct mp4_struct *, fits *);
 int mp4_close(struct mp4_struct *);
 

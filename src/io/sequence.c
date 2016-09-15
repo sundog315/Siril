@@ -1293,7 +1293,7 @@ gpointer export_sequence(gpointer ptr) {
 			snprintf(dest, 256, "%s.%s", args->basename,
 					args->convflags == TYPEMP4 ? "mp4" : "webm");
 			if (args->avi_fps <= 0) args->avi_fps = 25;
-			mp4_file = mp4_create(dest, args->seq->rx, args->seq->ry, args->avi_fps);
+			mp4_file = mp4_create(dest, args->seq->rx, args->seq->ry, args->avi_fps, args->seq->nb_layers);
 			if (!mp4_file) {
 				retval = -1;
 				goto free_and_reset_progress_bar;
