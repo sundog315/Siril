@@ -244,6 +244,7 @@ gpointer crop_sequence(gpointer p);
 gboolean sequence_is_rgb(sequence *seq);
 imstats* seq_get_imstats(sequence *seq, int index, fits *the_image, int option);
 void	check_area_is_in_image(rectangle *area, sequence *seq);
+void	update_export_crop_label();
 
 /****************** seqfile.h ******************/
 sequence * readseqfile(const char *name);

@@ -292,6 +292,9 @@ int main(int argc, char *argv[]) {
 	/* initialize stacking methods */
 	initialize_stacking_methods();
 
+	/* register some callbacks */
+	register_selection_update_callback(update_export_crop_label);
+
 	/* initialization of the binning parameters */
 	GtkComboBox *binning = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combobinning"));
 	gtk_combo_box_set_active(binning, 0);

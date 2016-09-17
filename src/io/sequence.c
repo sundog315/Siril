@@ -1203,8 +1203,11 @@ struct exportseq_args {
 	gboolean normalize;
 //	int gif_delay, gif_loops;
 	double avi_fps;
+	int quality;	// [1, 5], for mp4 and webm
 	gboolean resize;
-	int32_t avi_width, avi_height;
+	int32_t dest_width, dest_height;
+	gboolean crop;
+	rectangle crop_area;
 };
 
 /* Used for avi exporter */
@@ -1234,7 +1237,7 @@ static uint8_t *fits_to_uint8(fits *fit) {
 gpointer export_sequence(gpointer ptr) {
 	int i, x, y, nx, ny, shiftx, shifty, layer, retval = 0, reglayer, nb_layers, skipped;
 	float cur_nb = 0.f, nb_frames;
-	unsigned int nbdata = 0;
+	unsigned int out_width, out_height, in_width, in_height, nbdata = 0;
 	uint8_t *data;
 	fits fit, destfit;
 	char filename[256], dest[256];
@@ -1249,9 +1252,27 @@ gpointer export_sequence(gpointer ptr) {
 
 	reglayer = get_registration_layer();
 	siril_log_message(_("Using registration information from layer %d to export sequence\n"), reglayer);
+	if (args->crop) {
+		in_width  = args->crop_area.w;
+		in_height = args->crop_area.h;
+	} else {
+		in_width  = args->seq->rx;
+		in_height = args->seq->ry;
+	}
+
+	if (args->resize) {
+		out_width = args->dest_width;
+		out_height = args->dest_height;
+		if (out_width == in_width && out_height == in_height)
+			args->resize = FALSE;
+	} else {
+		out_width = in_width;
+		out_height = in_height;
+	}
 
 	switch (args->convflags) {
 		case TYPESER:
+			/* image size is not known here, no problem for crop or resize */
 			ser_file = malloc(sizeof(struct ser_struct));
 			snprintf(dest, 256, "%s.ser", args->basename);
 			if (ser_create_file(dest, ser_file, TRUE, NULL))
@@ -1259,28 +1280,17 @@ gpointer export_sequence(gpointer ptr) {
 			break;
 
 		case TYPEAVI:
+			/* image size is set here, resize is managed by opencv when
+			 * writing frames, we don't need crop size here */
 			snprintf(dest, 256, "%s.avi", args->basename);
-			int32_t width;
-			int32_t height;
-			int32_t mode;
+			int32_t avi_format;
 
-			switch(args->seq->nb_layers) {
-				case 1:
-					mode = AVI_WRITER_INPUT_FORMAT_MONOCHROME;
-					break;
-				default:
-					mode = AVI_WRITER_INPUT_FORMAT_COLOUR;
-			}
-			if (args->resize) {
-				width = args->avi_width;
-				height = args->avi_height;
-			}
-			else {
-				width  = (int32_t) args->seq->rx;
-				height = (int32_t) args->seq->ry;
-			}
+			if (args->seq->nb_layers == 1)
+				avi_format = AVI_WRITER_INPUT_FORMAT_MONOCHROME;
+			else avi_format = AVI_WRITER_INPUT_FORMAT_COLOUR;
 
-			avi_file_create(dest, width, height, mode, AVI_WRITER_CODEC_DIB, args->avi_fps);
+			avi_file_create(dest, out_width, out_height, avi_format,
+					AVI_WRITER_CODEC_DIB, args->avi_fps);
 			break;
 
 		case TYPEMP4:
@@ -1290,10 +1300,47 @@ gpointer export_sequence(gpointer ptr) {
 			retval = -1;
 			goto free_and_reset_progress_bar;
 #else
+			/* image size is set here, resize is managed by ffmpeg so it also
+			 * needs to know the input image size after crop */
 			snprintf(dest, 256, "%s.%s", args->basename,
 					args->convflags == TYPEMP4 ? "mp4" : "webm");
 			if (args->avi_fps <= 0) args->avi_fps = 25;
-			mp4_file = mp4_create(dest, args->seq->rx, args->seq->ry, args->avi_fps, args->seq->nb_layers);
+
+			if (out_width % 2) {
+				siril_log_message(_("Film output is only supported for even sizes, one pixel will be truncated from the right.\n"));
+				out_width--;
+				if (args->crop) {
+					if (!args->resize)
+						args->crop_area.w--;
+				} else {
+					if (!args->resize) {
+						args->crop = TRUE;
+						args->crop_area.x = 0;
+						args->crop_area.y = 0;
+						args->crop_area.w = out_width;
+						args->crop_area.h = in_height;
+					}
+				}
+			}
+
+			if (out_height % 2) {
+				siril_log_message(_("Film output is only supported for even sizes, one pixel will be truncated from the bottom.\n"));
+				out_height--;
+				if (args->crop) {
+					if (!args->resize)
+						args->crop_area.h--;
+				} else {
+					if (!args->resize) {
+						args->crop = TRUE;
+						args->crop_area.x = 0;
+						args->crop_area.y = 0;
+						args->crop_area.w = in_width;
+						args->crop_area.h = out_height;
+					}
+				}
+			}
+
+			mp4_file = mp4_create(dest, out_width, out_height, args->avi_fps, args->seq->nb_layers, args->quality, in_width, in_height);
 			if (!mp4_file) {
 				retval = -1;
 				goto free_and_reset_progress_bar;
@@ -1360,18 +1407,19 @@ gpointer export_sequence(gpointer ptr) {
 		copy_header(&fit, &destfit);
 
 		if (!nbdata) {
+			/* destfit is allocated to the real size because of the possible
+			 * shifts and of the inplace cropping. FITS data is copied from
+			 * fit, image buffers are duplicated. */
 			memcpy(&destfit, &fit, sizeof(fits));
 			destfit.header = NULL;
 			destfit.fptr = NULL;
-			nbdata = fit.ry * fit.rx;
-			nb_layers = fit.naxes[2];
+			nbdata = fit.rx * fit.ry;
 			destfit.data = calloc(nbdata * fit.naxes[2], sizeof(WORD));
 			if (!destfit.data) {
-				printf("Could not allocate memory for the export, aborting\n");
+				fprintf(stderr, "Could not allocate memory for the export, aborting\n");
 				retval = -1;
 				goto free_and_reset_progress_bar;
 			}
-
 			destfit.pdata[0] = destfit.data;
 			if (fit.naxes[2] == 1) {
 				destfit.pdata[1] = destfit.data;
@@ -1380,14 +1428,24 @@ gpointer export_sequence(gpointer ptr) {
 				destfit.pdata[1] = destfit.data + nbdata;
 				destfit.pdata[2] = destfit.data + nbdata * 2;
 			}
+			nb_layers = fit.naxes[2];
 		}
 		else if (fit.ry * fit.rx != nbdata || nb_layers != fit.naxes[2]) {
-			printf("Export: image in args->sequence doesn't has the same dimensions\n");
+			fprintf(stderr, "An image of the sequence doesn't have the same dimensions\n");
 			retval = -3;
 			goto free_and_reset_progress_bar;
 		}
 		else {
 			memset(destfit.data, 0, nbdata * fit.naxes[2] * sizeof(WORD));
+			if (args->crop) {
+				/* reset destfit damaged by the crop function */
+				if (fit.naxes[2] == 3) {
+					destfit.pdata[1] = destfit.data + nbdata;
+					destfit.pdata[2] = destfit.data + nbdata * 2;
+				}
+				destfit.rx = destfit.naxes[0] = fit.rx;
+				destfit.ry = destfit.naxes[1] = fit.ry;
+			}
 		}
 
 		/* load registration data for current image */
@@ -1399,7 +1457,7 @@ gpointer export_sequence(gpointer ptr) {
 			shifty = 0;
 		}
 
-		/* fill the image with shift data */
+		/* fill the image with shift data and normalization */
 		for (layer=0; layer<fit.naxes[2]; ++layer) {
 			for (y=0; y < fit.ry; ++y){
 				for (x=0; x < fit.rx; ++x){
@@ -1419,6 +1477,9 @@ gpointer export_sequence(gpointer ptr) {
 			}
 		}
 
+		if (args->crop) {
+			crop(&destfit, &args->crop_area);
+		}
 
 		switch (args->convflags) {
 			case TYPEFITS:
@@ -1438,11 +1499,9 @@ gpointer export_sequence(gpointer ptr) {
 
 				if (args->resize) {
 #ifdef HAVE_OPENCV
-					uint8_t *newdata = malloc(
-							sizeof(uint8_t) * args->avi_width * args->avi_height
-							* destfit.naxes[2]);
+					uint8_t *newdata = malloc(out_width * out_height * destfit.naxes[2]);
 					cvResizeGaussian_data8(data, destfit.rx, destfit.ry, newdata,
-							args->avi_width, args->avi_height, destfit.naxes[2], OPENCV_LINEAR);
+							out_width, out_height, destfit.naxes[2], OPENCV_CUBIC);
 					avi_file_write_frame(0, newdata);
 					free(newdata);
 #else
@@ -1510,6 +1569,7 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 	struct exportseq_args *args;
 	GtkToggleButton *exportNormalize, *checkResize;
 	GtkEntry *fpsEntry, *widthEntry, *heightEntry;
+	GtkAdjustment *adjQual;
 
 	if (bname[0] == '\0') return;
 	if (selected == -1) return;
@@ -1536,13 +1596,23 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 		fpsEntry = GTK_ENTRY(lookup_widget("entryAviFps"));
 		args->avi_fps = atoi(gtk_entry_get_text(fpsEntry));
 		widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
-		args->avi_width = atof(gtk_entry_get_text(widthEntry));
+		args->dest_width = atof(gtk_entry_get_text(widthEntry));
 		heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
-		args->avi_height = atof(gtk_entry_get_text(heightEntry));
+		args->dest_height = atof(gtk_entry_get_text(heightEntry));
 		checkResize = GTK_TOGGLE_BUTTON(lookup_widget("checkAviResize"));
-		if (args->avi_height == 0 || args->avi_width == 0) {
+		args->crop = com.selection.w && com.selection.h;
+		if (args->crop)
+			memcpy(&args->crop_area, &com.selection, sizeof(rectangle));
+		adjQual = GTK_ADJUSTMENT(lookup_widget("adjustment3"));
+		args->quality = (int)gtk_adjustment_get_value(adjQual);
+
+		if (args->dest_height == 0 || args->dest_width == 0) {
 			siril_log_message(_("Width or height cannot be null. Not resizing.\n"));
 			args->resize = FALSE;
+			gtk_toggle_button_set_active(checkResize, FALSE);
+		} else if (args->dest_height == args->seq->ry && args->dest_width == args->seq->rx) {
+			args->resize = FALSE;
+			gtk_toggle_button_set_active(checkResize, FALSE);
 		} else {
 			args->resize = gtk_toggle_button_get_active(checkResize);
 		}
@@ -1565,7 +1635,9 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 void on_comboExport_changed(GtkComboBox *box, gpointer user_data) {
 	GtkWidget *avi_options = lookup_widget("boxAviOptions");
 	GtkWidget *checkAviResize = lookup_widget("checkAviResize");
+	GtkWidget *quality = lookup_widget("exportQualScale");
 	gtk_widget_set_visible(avi_options, gtk_combo_box_get_active(box) >= 2);
+	gtk_widget_set_visible(quality, gtk_combo_box_get_active(box) >= 3);
 #ifdef HAVE_OPENCV
 	gtk_widget_set_sensitive(checkAviResize, TRUE);
 #else
@@ -1578,5 +1650,14 @@ void on_checkAviResize_toggled(GtkToggleButton *togglebutton, gpointer user_data
 	GtkWidget *widthEntry = lookup_widget("entryAviWidth");
 	gtk_widget_set_sensitive(heightEntry, gtk_toggle_button_get_active(togglebutton));
 	gtk_widget_set_sensitive(widthEntry, gtk_toggle_button_get_active(togglebutton));
+}
+
+void update_export_crop_label() {
+	static GtkLabel *label = NULL;
+	if (!label) 
+		label = GTK_LABEL(lookup_widget("exportLabel"));
+	if (com.selection.w && com.selection.h)
+		gtk_label_set_text(label, "Cropping to selection");
+	else gtk_label_set_text(label, "Select area to crop");
 }
 

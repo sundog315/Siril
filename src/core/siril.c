@@ -423,14 +423,20 @@ int unsharp(fits *fit, double sigma, double mult, gboolean verbose) {
 }
 #endif
 
-// inplace cropping of the image in fit
+/* inplace cropping of the image in fit
+ * fit->data is not realloc, only fit->pdata points to a different area and
+ * data is correctly written to this new area, which makes this function
+ * quite dangerous to use when fit is used for something else afterwards.
+ */
 int crop(fits *fit, rectangle *bounds) {
 	int i, j, layer;
 	int newnbdata;
 	struct timeval t_start, t_end;
 
-	siril_log_color_message(_("Crop: processing...\n"), "red");
-	gettimeofday(&t_start, NULL);
+	if (fit == &gfit) {
+		siril_log_color_message(_("Crop: processing...\n"), "red");
+		gettimeofday(&t_start, NULL);
+	}
 
 	newnbdata = bounds->w * bounds->h;
 	for (layer = 0; layer < fit->naxes[2]; ++layer) {
@@ -450,10 +456,11 @@ int crop(fits *fit, rectangle *bounds) {
 	fit->rx = fit->naxes[0] = bounds->w;
 	fit->ry = fit->naxes[1] = bounds->h;
 
-	clear_stars_list();
-
-	gettimeofday(&t_end, NULL);
-	show_time(t_start, t_end);
+	if (fit == &gfit) {
+		clear_stars_list();
+		gettimeofday(&t_end, NULL);
+		show_time(t_start, t_end);
+	}
 
 	return 0;
 }

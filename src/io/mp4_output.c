@@ -41,8 +41,8 @@
 #include "core/proto.h"	// computePente
 #include "gui/callbacks.h"	// siril_log_message
 
-#define STREAM_DURATION   10.0
-#define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default pix_fmt */
+//#define STREAM_DURATION   10.0
+#define STREAM_PIX_FMT    AV_PIX_FMT_YUV420P /* default output pix_fmt */
 
 #define SCALE_FLAGS SWS_BICUBIC
 
@@ -105,7 +105,7 @@ static int add_stream(struct mp4_struct *ost, AVCodec **codec,
 		case AVMEDIA_TYPE_VIDEO:
 			c->codec_id = codec_id;
 
-			c->bit_rate = 600000;
+			c->bit_rate = ost->bitrate;
 			/* Resolution must be a multiple of two. */
 			c->width    = w;
 			c->height   = h;
@@ -118,16 +118,6 @@ static int add_stream(struct mp4_struct *ost, AVCodec **codec,
 
 			c->gop_size      = 12; /* emit one intra frame every twelve frames at most */
 			c->pix_fmt       = STREAM_PIX_FMT;
-			if (c->codec_id == AV_CODEC_ID_MPEG2VIDEO) {
-				/* just for testing, we also add B frames */
-				c->max_b_frames = 2;
-			}
-			if (c->codec_id == AV_CODEC_ID_MPEG1VIDEO) {
-				/* Needed to avoid using macroblocks in which some coeffs overflow.
-				 * This does not happen with normal video, it just happens here as
-				 * the motion of the chroma plane does not match the luma plane. */
-				c->mb_decision = 2;
-			}
 			break;
 
 		default:
@@ -196,7 +186,7 @@ static int open_video(AVCodec *codec, struct mp4_struct *ost, AVDictionary *opt_
 	ost->tmp_frame = NULL;
 	if (c->pix_fmt != AV_PIX_FMT_RGB24) {
 		enum AVPixelFormat pix_fmt = (nb_layers == 1) ? AV_PIX_FMT_GRAY8 : AV_PIX_FMT_RGB24;
-		ost->tmp_frame = alloc_picture(pix_fmt, c->width, c->height);
+		ost->tmp_frame = alloc_picture(pix_fmt, ost->src_w, ost->src_h);
 		if (!ost->tmp_frame) {
 			fprintf(stderr, "Could not allocate temporary picture\n");
 			return 1;
@@ -301,7 +291,7 @@ static AVFrame *get_video_frame(struct mp4_struct *ost, fits *input_image)
 	/* if (target != input_image format) */
 	if (c->pix_fmt != AV_PIX_FMT_RGB24) {
 		if (!ost->sws_ctx) {
-			ost->sws_ctx = sws_getContext(c->width, c->height, src_format,
+			ost->sws_ctx = sws_getContext(ost->src_w, ost->src_h, src_format,
 					c->width, c->height, c->pix_fmt,
 					SCALE_FLAGS, NULL, NULL, NULL);
 			if (!ost->sws_ctx) {
@@ -313,7 +303,7 @@ static AVFrame *get_video_frame(struct mp4_struct *ost, fits *input_image)
 		fill_rgb_image(ost->tmp_frame, ost->next_pts, c->width, c->height, input_image);
 		sws_scale(ost->sws_ctx,
 				(const uint8_t * const *)ost->tmp_frame->data, ost->tmp_frame->linesize,
-				0, c->height, ost->frame->data, ost->frame->linesize);
+				0, ost->src_h, ost->frame->data, ost->frame->linesize);
 	} else {
 		fill_rgb_image(ost->frame, ost->next_pts, c->width, c->height, input_image);
 	}
@@ -411,15 +401,16 @@ static void close_stream(struct mp4_struct *ost)
 /**************************************************************/
 /* media file output */
 
-struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int nb_layers)
+struct mp4_struct *mp4_create(const char *filename, int dst_w, int dst_h, int fps, int nb_layers, int quality, int src_w, int src_h)
 {
 	struct mp4_struct *video_st;
 	AVCodec *video_codec;
 	int ret;
 	AVDictionary *opt = NULL;
 
-	if (filename == NULL || filename[0] == '\0' || w%2 || h%2 || fps <= 0) {
-		siril_log_message(_("Parameters for mp4 file creation were incorrect. Image dimension has to be a multiple of 2, fps and file name non nul."));
+	if (filename == NULL || filename[0] == '\0' || dst_w%2 || dst_h%2 || fps <= 0 ||
+			quality < 1 || quality > 5) {
+		siril_log_message(_("Parameters for mp4 file creation were incorrect. Image dimension has to be a multiple of 2, fps and file name non nul, quality between 1 and 5."));
 		return NULL;
 	}
 
@@ -432,10 +423,11 @@ struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int n
 	if (!video_st->oc) {
 		fprintf(stdout, "Could not deduce output format from file extension: using mp4.\n");
 		avformat_alloc_output_context2(&video_st->oc, NULL, "mp4", filename);
-	}
-	if (!video_st->oc) {
-		free(video_st);
-		return NULL;
+		if (!video_st->oc) {
+			free(video_st);
+			fprintf(stderr, "FFMPEG does not seem to support mp4 format, aborting.\n");
+			return NULL;
+		}
 	}
 
 	video_st->fmt = video_st->oc->oformat;
@@ -445,15 +437,21 @@ struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int n
 		/* force VP8 codec for webm, VP9 is not supported by Opera 12 */
 		video_st->fmt->video_codec = AV_CODEC_ID_VP8;
 	}
+	video_st->src_w = src_w;
+	video_st->src_h = src_h;
+	video_st->bitrate = (quality + 1) * dst_w * dst_h / 2;
 
 	/* Add the video stream using the default format codecs
 	 * and initialize the codecs. */
 	if (video_st->fmt->video_codec != AV_CODEC_ID_NONE) {
-		if (add_stream(video_st, &video_codec, video_st->fmt->video_codec, w, h, fps)) {
+		if (add_stream(video_st, &video_codec, video_st->fmt->video_codec, dst_w, dst_h, fps)) {
+			avformat_free_context(video_st->oc);
 			free(video_st);
+			fprintf(stderr, "Could not add the video stream in the output film, aborting\n");
 			return NULL;
 		}
 	} else {
+		avformat_free_context(video_st->oc);
 		fprintf(stderr, "Error setting video codec for output file.");
 		return NULL;
 	}
@@ -461,6 +459,8 @@ struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int n
 	/* Now that all the parameters are set, we can open the video codec
 	 * and allocate the necessary encode buffers. */
 	if (open_video(video_codec, video_st, opt, nb_layers)) {
+		avformat_free_context(video_st->oc);
+		avcodec_free_context(&video_st->enc);
 		free(video_st);
 		return NULL;
 	}
@@ -471,6 +471,10 @@ struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int n
 	if (!(video_st->fmt->flags & AVFMT_NOFILE)) {
 		if ((ret = avio_open(&video_st->oc->pb, filename, AVIO_FLAG_WRITE)) < 0) {
 			fprintf(stderr, "Could not open '%s': %s\n", filename, av_err2str(ret));
+			avformat_free_context(video_st->oc);
+			avcodec_free_context(&video_st->enc);
+			av_frame_free(&video_st->frame);
+			if (video_st->tmp_frame) av_frame_free(&video_st->tmp_frame);
 			free(video_st);
 			return NULL;
 		}
@@ -479,6 +483,10 @@ struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int n
 	/* Write the stream header, if any. */
 	if ((ret = avformat_write_header(video_st->oc, &opt)) < 0) {
 		fprintf(stderr, "Error occurred when opening output file: %s\n", av_err2str(ret));
+		avformat_free_context(video_st->oc);
+		avcodec_free_context(&video_st->enc);
+		av_frame_free(&video_st->frame);
+		if (video_st->tmp_frame) av_frame_free(&video_st->tmp_frame);
 		free(video_st);
 		return NULL;
 	}
@@ -492,6 +500,8 @@ int mp4_add_frame(struct mp4_struct *video_st, fits *image) {
 				video_st->next_pts, video_st->enc->time_base) <= 0) {
 		return write_video_frame(video_st, image);
 	}
+
+	/* should never happen, because we don't limit it */
 	fprintf(stderr, "End of video stream\n");
 	return -1;
 }

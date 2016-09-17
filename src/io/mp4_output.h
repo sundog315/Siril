@@ -23,9 +23,12 @@ struct mp4_struct {
 	struct SwsContext *sws_ctx;
 	struct SwrContext *swr_ctx;
 
+	int bitrate;
+	int src_w, src_h;
+
 };
 
-struct mp4_struct *mp4_create(const char *filename, int w, int h, int fps, int depth);
+struct mp4_struct *mp4_create(const char *filename, int dst_w, int dst_h, int fps, int nb_layers, int quality, int src_w, int src_h);
 int mp4_add_frame(struct mp4_struct *, fits *);
 int mp4_close(struct mp4_struct *);
 
