@@ -1310,8 +1310,10 @@ gpointer export_sequence(gpointer ptr) {
 				siril_log_message(_("Film output is only supported for even sizes, one pixel will be truncated from the right.\n"));
 				out_width--;
 				if (args->crop) {
-					if (!args->resize)
+					if (!args->resize) {
 						args->crop_area.w--;
+						in_width--;
+					}
 				} else {
 					if (!args->resize) {
 						args->crop = TRUE;
@@ -1327,8 +1329,10 @@ gpointer export_sequence(gpointer ptr) {
 				siril_log_message(_("Film output is only supported for even sizes, one pixel will be truncated from the bottom.\n"));
 				out_height--;
 				if (args->crop) {
-					if (!args->resize)
+					if (!args->resize) {
 						args->crop_area.h--;
+						in_height--;
+					}
 				} else {
 					if (!args->resize) {
 						args->crop = TRUE;
@@ -1403,8 +1407,6 @@ gpointer export_sequence(gpointer ptr) {
 			retval = -3;
 			goto free_and_reset_progress_bar;
 		}
-		/* we want copy the header */
-		copy_header(&fit, &destfit);
 
 		if (!nbdata) {
 			/* destfit is allocated to the real size because of the possible
@@ -1436,6 +1438,8 @@ gpointer export_sequence(gpointer ptr) {
 			goto free_and_reset_progress_bar;
 		}
 		else {
+			/* we want copy the header */
+			copy_header(&fit, &destfit);
 			memset(destfit.data, 0, nbdata * fit.naxes[2] * sizeof(WORD));
 			if (args->crop) {
 				/* reset destfit damaged by the crop function */
