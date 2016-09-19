@@ -106,6 +106,7 @@ static int add_stream(struct mp4_struct *ost, AVCodec **codec,
 			c->codec_id = codec_id;
 
 			c->bit_rate = ost->bitrate;
+			c->bit_rate_tolerance = 50000;
 			/* Resolution must be a multiple of two. */
 			c->width    = w;
 			c->height   = h;
@@ -140,6 +141,7 @@ static AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height)
 	AVFrame *picture;
 	int ret;
 
+	fprintf(stdout, "alloc_picture: %d, %d\n", width, height);
 	picture = av_frame_alloc();
 	if (!picture)
 		return NULL;
@@ -321,11 +323,9 @@ static AVFrame *get_video_frame(struct mp4_struct *ost, fits *input_image)
 static int write_video_frame(struct mp4_struct *ost, fits *input_image)
 {
 	int ret;
-	AVCodecContext *c;
+	AVCodecContext *c = ost->enc;
 	AVPacket pkt = { 0 };
 	fprintf(stdout, "writing video frame\n");
-
-	c = ost->enc;
 
 	ost->frame = get_video_frame(ost, input_image);
 
@@ -441,8 +441,7 @@ struct mp4_struct *mp4_create(const char *filename, int dst_w, int dst_h, int fp
 	video_st->src_h = src_h;
 	video_st->bitrate = (quality + 1) * dst_w * dst_h / 2;
 
-	/* Add the video stream using the default format codecs
-	 * and initialize the codecs. */
+	/* Add the video stream and initialize the codecs. */
 	if (video_st->fmt->video_codec != AV_CODEC_ID_NONE) {
 		if (add_stream(video_st, &video_codec, video_st->fmt->video_codec, dst_w, dst_h, fps)) {
 			avformat_free_context(video_st->oc);

@@ -1321,6 +1321,7 @@ gpointer export_sequence(gpointer ptr) {
 						args->crop_area.y = 0;
 						args->crop_area.w = out_width;
 						args->crop_area.h = in_height;
+						in_width--;
 					}
 				}
 			}
@@ -1340,6 +1341,7 @@ gpointer export_sequence(gpointer ptr) {
 						args->crop_area.y = 0;
 						args->crop_area.w = in_width;
 						args->crop_area.h = out_height;
+						in_height--;
 					}
 				}
 			}
@@ -1607,7 +1609,7 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 		heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
 		args->dest_height = atof(gtk_entry_get_text(heightEntry));
 		checkResize = GTK_TOGGLE_BUTTON(lookup_widget("checkAviResize"));
-		adjQual = GTK_ADJUSTMENT(lookup_widget("adjustment3"));
+		adjQual = GTK_ADJUSTMENT(gtk_builder_get_object(builder,"adjustment3"));
 		args->quality = (int)gtk_adjustment_get_value(adjQual);
 
 		if (args->dest_height == 0 || args->dest_width == 0) {
