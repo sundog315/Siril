@@ -1583,6 +1583,9 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 	args->seq = &com.seq;
 	exportNormalize = GTK_TOGGLE_BUTTON(lookup_widget("exportNormalize"));
 	args->normalize = gtk_toggle_button_get_active(exportNormalize);
+	args->crop = com.selection.w && com.selection.h;
+	if (args->crop)
+		memcpy(&args->crop_area, &com.selection, sizeof(rectangle));
 
 	switch (selected) {
 	case 0:
@@ -1604,9 +1607,6 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 		heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
 		args->dest_height = atof(gtk_entry_get_text(heightEntry));
 		checkResize = GTK_TOGGLE_BUTTON(lookup_widget("checkAviResize"));
-		args->crop = com.selection.w && com.selection.h;
-		if (args->crop)
-			memcpy(&args->crop_area, &com.selection, sizeof(rectangle));
 		adjQual = GTK_ADJUSTMENT(lookup_widget("adjustment3"));
 		args->quality = (int)gtk_adjustment_get_value(adjQual);
 
