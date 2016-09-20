@@ -611,7 +611,11 @@ double contrast(fits* fit, int layer) {
 	int i;
 	WORD *buf = fit->pdata[layer];
 	double contrast = 0.0;
-	imstats *stat = statistics(fit, layer, &com.selection, STATS_BASIC);
+	imstats *stat = statistics(fit, layer, &com.selection, STATS_BASIC, STATS_ZERO_NULLCHECK);
+	if (!stat) {
+		siril_log_message(_("Error: no data computed.\n"));
+		return -1.0;
+	}
 	double mean = stat->mean;
 	free(stat);
 
@@ -891,7 +895,11 @@ static double evaluateNoiseOfCalibratedImage(fits *fit, fits *dark, double k) {
 
 	for (chan = 0; chan < fit->naxes[2]; chan++) {
 		imstats *stat = NULL;
-		stat = statistics(fit_tmp, chan, NULL, STATS_BASIC);
+		stat = statistics(fit_tmp, chan, NULL, STATS_BASIC, STATS_ZERO_NULLCHECK);
+		if (!stat) {
+			siril_log_message(_("Error: no data computed.\n"));
+			return 0.0;
+		}
 		noise += stat->bgnoise;
 		//printf("noise=%lf, k=%lf\n", noise, k);
 		free(stat);
@@ -991,7 +999,11 @@ gpointer seqpreprocess(gpointer p) {
 		if (args->autolevel) {
 			/* TODO: evaluate the layer to apply but generally RLAYER is a good choice.
 			 * Indeed, if it is image from APN, CFA picture are in black & white */
-			imstats *stat = statistics(flat, RLAYER, NULL, STATS_BASIC);
+			imstats *stat = statistics(flat, RLAYER, NULL, STATS_BASIC, STATS_ZERO_NULLCHECK);
+			if (!stat) {
+				siril_log_message(_("Error: no data computed.\n"));
+				return GINT_TO_POINTER(1);
+			}
 			args->normalisation = stat->mean;
 			siril_log_message(_("Normalisation value auto evaluated: %.2lf\n"),
 					args->normalisation);
@@ -1129,15 +1141,14 @@ double background(fits* fit, int reqlayer, rectangle *selection) {
 		layer = reqlayer;
 	else if (isrgb(&gfit))
 		layer = GLAYER;		//GLAYER is better to evaluate background
-	gsl_histogram* histo = computeHisto(fit, layer);// histogram in full image
 
-	bg = gsl_histogram_max_bin(histo);
+	imstats* stat = statistics(fit, layer, selection, STATS_BASIC, STATS_ZERO_NULLCHECK);
+	if (!stat) {
+		siril_log_message(_("Error: no data computed.\n"));
+		return 0.0;
+	}
+	bg = stat->median;
 
-	gsl_histogram_free(histo);
-	imstats* stat = statistics(fit, layer, selection, STATS_BASIC);
-	if (fabs(bg - stat->median) > (10))	//totaly arbitrary. Allow to see a background at 0 when a planet take plenty of room.
-		bg = stat->median;
-//	printf("layer = %d\n", layer);
 	free(stat);
 	stat = NULL;
 	return bg;
@@ -1508,7 +1519,11 @@ int BandingEngine(fits *fit, double sigma, double amount, gboolean protect_highl
 	new_fit_image(fiximage, fit->rx, fit->ry, fit->naxes[2]);
 
 	for (chan = 0; chan < fit->naxes[2]; chan++) {
-		imstats *stat = statistics(fit, chan, NULL, STATS_BASIC | STATS_MAD);
+		imstats *stat = statistics(fit, chan, NULL, STATS_BASIC | STATS_MAD, STATS_ZERO_NULLCHECK);
+		if (!stat) {
+			siril_log_message(_("Error: no data computed.\n"));
+			return 1;
+		}
 		double background = stat->median;
 		double *rowvalue = calloc(fit->ry, sizeof(double));
 		if (rowvalue == NULL) {
@@ -1596,7 +1611,11 @@ int backgroundnoise(fits* fit, double sigma[]) {
 #endif
 
 	for (layer = 0; layer < fit->naxes[2]; layer++) {
-		imstats *stat = statistics(waveimage, layer, NULL, STATS_BASIC);
+		imstats *stat = statistics(waveimage, layer, NULL, STATS_BASIC, STATS_ZERO_NULLCHECK);
+		if (!stat) {
+			siril_log_message(_("Error: no data computed.\n"));
+			return 1;
+		}
 		double sigma0 = stat->sigma;
 		double mean = stat->mean;
 		double epsilon = 0.0;
@@ -1701,7 +1720,12 @@ gpointer noise(gpointer p) {
 	}
 	*/
 	for (chan = 0; chan < args->fit->naxes[2]; chan++) {
-		imstats *stat = statistics(args->fit, chan, NULL, STATS_BASIC);
+		imstats *stat = statistics(args->fit, chan, NULL, STATS_BASIC, STATS_ZERO_NULLCHECK);
+		if (!stat) {
+			siril_log_message(_("Error: no data computed.\n"));
+			gdk_threads_add_idle(end_noise, args);
+			return GINT_TO_POINTER(1);
+		}
 		args->bgnoise[chan] = stat->bgnoise;
 		free(stat);
 	}

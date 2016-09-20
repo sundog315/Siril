@@ -1351,7 +1351,12 @@ int process_stat(int nb){
 	int layer;
 
 	for (layer = 0; layer < nplane; layer++) {
-		imstats* stat = statistics(&gfit, layer, &com.selection, STATS_MAIN);
+		imstats* stat = statistics(&gfit, layer, &com.selection, STATS_MAIN,
+		STATS_ZERO_NULLCHECK);
+		if (!stat) {
+			siril_log_message(_("Error: no data computed.\n"));
+			return 1;
+		}
 		siril_log_message(
 				_("%s layer: Mean: %0.1lf, Median: %0.1lf, Sigma: %0.1lf, "
 						"AvgDev: %0.1lf, Min: %0.1lf, Max: %0.1lf\n"),

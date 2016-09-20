@@ -71,6 +71,10 @@ typedef unsigned short WORD;		// default type for internal image data
 #define STATS_IKSS		(1 << 6)	// Iterative K-sigma Estimator of Location and Scale. Take time, needed only for stacking
 #define STATS_EXTRA		STATS_MAIN | STATS_IKSS
 
+#define	STATS_ZERO_NONE 0
+#define	STATS_ZERO_NULLCHECK (!STATS_ZERO_NONE)
+
+
 /* when requesting an image redraw, it can be asked to remap its data before redrawing it.
  * REMAP_NONE	doesn't remaps the data,
  * REMAP_ONLY	remaps only the current viewport (color channel) and the mixed (RGB) image
@@ -571,7 +575,7 @@ struct cominf {
 
 /* this structure is used to characterize the statistics of the image */
 struct image_stats {
-	long count;
+	long total, ngoodpix;
 	double mean, avgDev, median, sigma, bgnoise, min, max, normValue, mad, sqrtbwmv,
 			location, scale;
 	char layername[6];

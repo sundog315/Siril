@@ -681,7 +681,11 @@ double findMidtonesBalance(fits *fit, double *shadows, double *highlights) {
 	n = fit->naxes[2];
 
 	for (i = 0; i < n; ++i) {
-		stat[i] = statistics(fit, i, NULL, STATS_BASIC | STATS_MAD);
+		stat[i] = statistics(fit, i, NULL, STATS_BASIC | STATS_MAD, STATS_ZERO_NULLCHECK);
+		if (!stat[i]) {
+			siril_log_message(_("Error: no data computed.\n"));
+			return 0.0;
+		}
 
 		if (stat[i]->median / stat[i]->normValue > 0.5)
 			++invertedChannels;

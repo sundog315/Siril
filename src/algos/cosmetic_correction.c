@@ -137,7 +137,11 @@ deviant_pixel *find_deviant_pixels(fits *fit, double sig[2], long *icold, long *
 	deviant_pixel *dev;
 
 	/** statistics **/
-	stat = statistics(fit, RLAYER, NULL, STATS_BASIC);
+	stat = statistics(fit, RLAYER, NULL, STATS_BASIC, STATS_ZERO_NULLCHECK);
+	if (!stat) {
+		siril_log_message(_("Error: no data computed.\n"));
+		return NULL;
+	}
 	sigma = stat->sigma;
 	median = stat->median;
 
@@ -343,7 +347,11 @@ int autoDetect(fits *fit, int layer, double sig[2], long *icold, long *ihot, dou
 
 	/* XXX: if cfa, stats are irrelevant. We should compute them taking
 	 * into account the Bayer pattern */
-	stat = statistics(fit, layer, NULL, STATS_BASIC | STATS_AVGDEV);
+	stat = statistics(fit, layer, NULL, STATS_BASIC | STATS_AVGDEV, STATS_ZERO_NULLCHECK);
+	if (!stat) {
+		siril_log_message(_("Error: no data computed.\n"));
+		return 1;
+	}
 	bkg = stat->median;
 	avgDev = stat->avgDev;
 	free(stat);

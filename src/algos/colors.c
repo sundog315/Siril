@@ -414,10 +414,17 @@ gpointer enhance_saturation(gpointer p) {
 	args->h_min /= 360.0;
 	args->h_max /= 360.0;
 	if (args->preserve) {
-		imstats *stat = statistics(args->fit, GLAYER, NULL, STATS_BASIC);
+		imstats *stat = statistics(args->fit, GLAYER, NULL, STATS_BASIC,
+				STATS_ZERO_NULLCHECK);
+		if (!stat) {
+			siril_log_message(_("Error: no data computed.\n"));
+			gdk_threads_add_idle(end_enhance_saturation, args);
+			return GINT_TO_POINTER(1);
+		}
 		bg = stat->median + stat->sigma;
 		bg /= stat->normValue;
 		free(stat);
+
 	}
 
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
@@ -612,7 +619,12 @@ static void background_neutralize(fits* fit, rectangle black_selection) {
 
 	stats = malloc(3 * sizeof(imstats *));
 	for (chan = 0; chan < 3; chan++) {
-		stats[chan] = statistics(fit, chan, &black_selection, STATS_BASIC);
+		stats[chan] = statistics(fit, chan, &black_selection, STATS_BASIC,
+				STATS_ZERO_NULLCHECK);
+		if (!stats[chan]) {
+			siril_log_message(_("Error: no data computed.\n"));
+			return;
+		}
 		ref += stats[chan]->median;
 	}
 	ref /= 3;
@@ -731,10 +743,15 @@ static void get_coeff_for_wb(fits *fit, rectangle white, rectangle black,
 
 	siril_log_message(_("Background reference:\n"));
 	for (chan = 0; chan < 3; chan++) {
-		imstats *stat = statistics(fit, chan, &black, STATS_BASIC);
+		imstats *stat = statistics(fit, chan, &black, STATS_BASIC, STATS_ZERO_NULLCHECK);
+		if (!stat) {
+			siril_log_message(_("Error: no data computed.\n"));
+			return;
+		}
 		bg[chan] = stat->median / stat->normValue;
 		siril_log_message("B%d : %.5e\n", chan, bg[chan]);
 		free(stat);
+
 	}
 
 	siril_log_message(_("White reference:\n"));

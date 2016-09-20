@@ -1178,7 +1178,11 @@ gboolean sequence_is_rgb(sequence *seq) {
 imstats* seq_get_imstats(sequence *seq, int index, fits *the_image, int option) {
 	assert(seq->imgparam);
 	if (!seq->imgparam[index].stats && the_image) {
-		seq->imgparam[index].stats = statistics(the_image, 0, NULL, option);
+		seq->imgparam[index].stats = statistics(the_image, 0, NULL, option, STATS_ZERO_NULLCHECK);
+		if (!seq->imgparam[index].stats) {
+			siril_log_message(_("Error: no data computed.\n"));
+			return NULL;
+		}
 		seq->needs_saving = TRUE;
 	}
 	return seq->imgparam[index].stats;
