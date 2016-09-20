@@ -2378,6 +2378,8 @@ void unregister_selection_update_callback(selection_update_callback f) {
 // send the events
 void new_selection_zone() {
 	int i;
+	fprintf(stdout, "selection: %d,%d,\t%dx%d\n", com.selection.x, com.selection.y,
+			com.selection.w, com.selection.h);
 	for (i = 0; i < _nb_registered_callbacks; ++i) {
 		_registered_callbacks[i]();
 	}
@@ -5871,6 +5873,7 @@ void on_entryAviWidth_changed(GtkEditable *editable, gpointer user_data) {
 	char c_height[6];
 	GtkEntry *heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
 
+	if (com.selection.w && com.selection.h) return;
 	ratio = (double) com.seq.ry / (double) com.seq.rx;
 	width = atof(gtk_entry_get_text(GTK_ENTRY(editable)));
 	height = ratio * width;
@@ -5886,6 +5889,7 @@ void on_entryAviHeight_changed(GtkEditable *editable, gpointer user_data) {
 	char c_width[6];
 	GtkEntry *widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
 
+	if (com.selection.w && com.selection.h) return;
 	ratio = (double) com.seq.rx / (double) com.seq.ry;
 	height = atof(gtk_entry_get_text(GTK_ENTRY(editable)));
 	width = ratio * height;

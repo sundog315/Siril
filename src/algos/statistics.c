@@ -216,9 +216,9 @@ imstats* statistics(fits *fit, int layer, rectangle *selection, int option, int 
 	double location = 0.0, scale = 0.0;
 	int status = 0;
 	int nx, ny;
-	WORD min = 0, max = 0, *data, *ndata;
+	WORD min = 0, max = 0, *data;
 	gsl_histogram* histo;
-	size_t i, j, hist_size;
+	size_t i, hist_size;
 	imstats* stat = NULL;
 
 	if (selection && selection->h > 0 && selection->w > 0) {

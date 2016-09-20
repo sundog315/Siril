@@ -1310,43 +1310,41 @@ gpointer export_sequence(gpointer ptr) {
 					args->convflags == TYPEMP4 ? "mp4" : "webm");
 			if (args->avi_fps <= 0) args->avi_fps = 25;
 
-			if (out_width % 2) {
-				siril_log_message(_("Film output is only supported for even sizes, one pixel will be truncated from the right.\n"));
-				out_width--;
-				if (args->crop) {
-					if (!args->resize) {
-						args->crop_area.w--;
-						in_width--;
-					}
-				} else {
-					if (!args->resize) {
+			if (out_width % 32) {
+				siril_log_message(_("Film output needs to have a width that is a multiple of 32 and an even height, resizing selection.\n"));
+				out_width = (out_width / 32) * 32 + 32;
+				if (out_height % 2)
+					out_height++;
+				if (!args->resize) {
+					if (args->crop) {
+						args->crop_area.w = out_width;
+						args->crop_area.h = out_height;
+						in_width = out_width;
+						in_height = out_height;
+					} else {
 						args->crop = TRUE;
 						args->crop_area.x = 0;
 						args->crop_area.y = 0;
 						args->crop_area.w = out_width;
-						args->crop_area.h = in_height;
-						in_width--;
+						args->crop_area.h = out_height;
+						in_width = out_width;
+						in_height = out_height;
 					}
 				}
 			}
 
-			if (out_height % 2) {
-				siril_log_message(_("Film output is only supported for even sizes, one pixel will be truncated from the bottom.\n"));
-				out_height--;
-				if (args->crop) {
-					if (!args->resize) {
-						args->crop_area.h--;
-						in_height--;
-					}
-				} else {
-					if (!args->resize) {
-						args->crop = TRUE;
-						args->crop_area.x = 0;
-						args->crop_area.y = 0;
-						args->crop_area.w = in_width;
-						args->crop_area.h = out_height;
-						in_height--;
-					}
+			if (args->crop) {
+				compute_fitting_selection(&args->crop_area, 32, 2, 0);
+				MEMCPY(&COM.SELECTion, &args->crop_area, sizeof(rectangle));
+				fprintf(stdout, "final area: %d,%d,\t%dx%d\n",
+						args->crop_area.x, args->crop_area.y,
+						args->crop_area.w, args->crop_area.h);
+
+				in_width = args->crop_area.w;
+				in_height = args->crop_area.h;
+				if (!args->resize) {
+					out_width = args->crop_area.w;
+					out_height = args->crop_area.h;
 				}
 			}
 

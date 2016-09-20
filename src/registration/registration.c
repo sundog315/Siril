@@ -962,8 +962,10 @@ void update_reg_interface(gboolean dont_change_reg_radio) {
 	}
 }
 
-/* try to maximize the area within the image size (based on gfit) */
-void compute_squared_selection(rectangle *area) {
+/* try to maximize the area within the image size (based on gfit)
+ * hsteps and vsteps are used to resize the selection zone when it is larger than the image
+ * they must be at least 2 */
+void compute_fitting_selection(rectangle *area, int hsteps, int vsteps, int preserve_square) {
 	//fprintf(stdout, "function entry: %d,%d,\t%dx%d\n", area->x, area->y, area->w, area->h);
 	if (area->x >= 0 && area->x + area->w <= gfit.rx && area->y >= 0
 			&& area->y + area->h <= gfit.ry)
@@ -973,18 +975,22 @@ void compute_squared_selection(rectangle *area) {
 		area->x++;
 		if (area->x + area->w > gfit.rx) {
 			/* reduce area */
-			area->w -= 2;
-			area->h -= 2;
-			area->y++;
+			area->w -= hsteps;
+			if (preserve_square) {
+				area->h -= vsteps;
+				area->y++;
+			}
 		}
 	} else if (area->x + area->w > gfit.rx) {
 		area->x--;
 		if (area->x < 0) {
 			/* reduce area */
 			area->x++;
-			area->w -= 2;
-			area->h -= 2;
-			area->y++;
+			area->w -= hsteps;
+			if (preserve_square) {
+				area->h -= vsteps;
+				area->y++;
+			}
 		}
 	}
 
@@ -992,22 +998,26 @@ void compute_squared_selection(rectangle *area) {
 		area->y++;
 		if (area->y + area->h > gfit.ry) {
 			/* reduce area */
-			area->h -= 2;
-			area->w -= 2;
-			area->x++;
+			area->h -= hsteps;
+			if (preserve_square) {
+				area->w -= vsteps;
+				area->x++;
+			}
 		}
 	} else if (area->y + area->h > gfit.ry) {
 		area->y--;
 		if (area->y < 0) {
 			/* reduce area */
-			area->x++;
-			area->w -= 2;
-			area->h -= 2;
 			area->y++;
+			area->h -= vsteps;
+			if (preserve_square) {
+				area->w -= hsteps;
+				area->x++;
+			}
 		}
 	}
 
-	return compute_squared_selection(area);
+	return compute_fitting_selection(area, hsteps, vsteps, preserve_square);
 }
 
 void get_the_registration_area(struct registration_args *reg_args,
@@ -1031,7 +1041,7 @@ void get_the_registration_area(struct registration_args *reg_args,
 		reg_args->selection.w = max;
 		reg_args->selection.y = com.selection.y + com.selection.h / 2 - max / 2;
 		reg_args->selection.h = max;
-		compute_squared_selection(&reg_args->selection);
+		compute_fitting_selection(&reg_args->selection, 2, 2, 1);
 
 		/* save it back to com.selection do display it properly */
 		memcpy(&com.selection, &reg_args->selection, sizeof(rectangle));
