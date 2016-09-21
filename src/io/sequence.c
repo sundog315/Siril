@@ -1335,7 +1335,7 @@ gpointer export_sequence(gpointer ptr) {
 
 			if (args->crop) {
 				compute_fitting_selection(&args->crop_area, 32, 2, 0);
-				MEMCPY(&COM.SELECTion, &args->crop_area, sizeof(rectangle));
+				memcpy(&com.selection, &args->crop_area, sizeof(rectangle));
 				fprintf(stdout, "final area: %d,%d,\t%dx%d\n",
 						args->crop_area.x, args->crop_area.y,
 						args->crop_area.w, args->crop_area.h);
@@ -1665,7 +1665,7 @@ void update_export_crop_label() {
 	if (!label) 
 		label = GTK_LABEL(lookup_widget("exportLabel"));
 	if (com.selection.w && com.selection.h)
-		gtk_label_set_text(label, "Cropping to selection");
-	else gtk_label_set_text(label, "Select area to crop");
+		gtk_label_set_text(label, _("Cropping to selection"));
+	else gtk_label_set_text(label, _("Select area to crop"));
 }
 
