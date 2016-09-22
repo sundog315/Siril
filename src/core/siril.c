@@ -1048,7 +1048,7 @@ gpointer seqpreprocess(gpointer p) {
 		g_free(filename);
 		free(filename_noext);
 	} else {	// sequence
-		struct ser_struct *new_ser_file;
+		struct ser_struct *new_ser_file = NULL;
 		char source_filename[256];
 		int i;
 		long icold, ihot;

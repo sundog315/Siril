@@ -514,7 +514,7 @@ int register_star_alignment(struct registration_args *args) {
 	regdata *current_regdata;
 	starFinder sf;
 	fits fit;
-	struct ser_struct *new_ser;
+	struct ser_struct *new_ser = NULL;
 
 	memset(&fit, 0, sizeof(fits));
 	memset(&sf, 0, sizeof(starFinder));
