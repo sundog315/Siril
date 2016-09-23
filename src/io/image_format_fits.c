@@ -675,6 +675,7 @@ int savefits(const char *name, fits *f) {
 void save_fits_header(fits *fit) {
 	int i, status = 0;
 	int zero;
+	unsigned int offset = 0;
 	char comment[FLEN_COMMENT];
 
 	if (fit->hi) { /* may not be initialized */
@@ -779,11 +780,11 @@ void save_fits_header(fits *fit) {
 				"Bayer color pattern", &status);
 
 	status = 0;
-	fits_update_key(fit->fptr, TUINT, "XBAYROFF", 0, "X offset of Bayer array",
+	fits_update_key(fit->fptr, TUINT, "XBAYROFF", &(offset), "X offset of Bayer array",
 			&status);
 
 	status = 0;
-	fits_update_key(fit->fptr, TUINT, "YBAYROFF", 0, "Y offset of Bayer array",
+	fits_update_key(fit->fptr, TUINT, "YBAYROFF", &(offset), "Y offset of Bayer array",
 			&status);
 
 	/*******************************************************************
