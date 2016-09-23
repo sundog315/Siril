@@ -176,12 +176,6 @@ MANS		= man/kdata_array_alloc.3 \
 all: libkplot.a
 
 install: all
-	mkdir -p $(DESTDIR)$(PREFIX)/lib
-	mkdir -p $(DESTDIR)$(PREFIX)/include
-	mkdir -p $(DESTDIR)$(PREFIX)/share/man/man3
-	install -m 0444 libkplot.a $(DESTDIR)$(PREFIX)/lib
-	install -m 0444 kplot.h $(DESTDIR)$(PREFIX)/include
-	install -m 0444 $(MANS) $(DESTDIR)$(PREFIX)/share/man/man3
 
 www: $(HTMLS) $(PNGS) kplot.tgz kplot.tgz.sha512
 
