@@ -775,17 +775,18 @@ void save_fits_header(fits *fit) {
 				"ISO camera setting", &status);
 
 	status = 0;
-	if (fit->bayer_pattern[0] != '\0')
+	if (fit->bayer_pattern[0] != '\0') {
 		fits_update_key(fit->fptr, TSTRING, "BAYERPAT", &(fit->bayer_pattern),
 				"Bayer color pattern", &status);
 
-	status = 0;
-	fits_update_key(fit->fptr, TUINT, "XBAYROFF", &(offset), "X offset of Bayer array",
-			&status);
+		status = 0;
+		fits_update_key(fit->fptr, TUINT, "XBAYROFF", &(offset),
+				"X offset of Bayer array", &status);
 
-	status = 0;
-	fits_update_key(fit->fptr, TUINT, "YBAYROFF", &(offset), "Y offset of Bayer array",
-			&status);
+		status = 0;
+		fits_update_key(fit->fptr, TUINT, "YBAYROFF", &(offset),
+				"Y offset of Bayer array", &status);
+	}
 
 	/*******************************************************************
 	 * ******************** PROGRAMM KEYWORDS **************************
