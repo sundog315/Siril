@@ -415,6 +415,7 @@ struct ffit {
 	char instrume[FLEN_VALUE];		// INSTRUME key
 	char telescop[FLEN_VALUE];		// TELESCOP key
 	char observer[FLEN_VALUE];		// OBSERVER key
+	char bayer_pattern[FLEN_VALUE];	// BAYERPAT key Bayer Pattern if available
 	/* data obtained from FITS or RAW files */
 	double focal_length, iso_speed, exposure, aperture, ccd_temp;
 
@@ -449,7 +450,7 @@ struct libraw_config {
 
 struct debayer_config {
 	gboolean open_debayer;			// debayer images being opened
-	gboolean ser_use_bayer_header;		// use the pattern given in the SER header
+	gboolean use_bayer_header;		// use the pattern given in the file header
 	sensor_pattern bayer_pattern;		// user-defined Bayer pattern
 	interpolation_method bayer_inter;	// interpolation method for non-libraw debayer
 };
@@ -607,6 +608,7 @@ extern cominfo com;		// the main data struct
 extern fits gfit;		// currently loaded image
 extern fits wfit[5];		// used for temp files, can probably be replaced by local variables
 extern char **supported_extensions;
+extern char *filter_pattern[];
 #endif
 
 #endif /*SIRIL */

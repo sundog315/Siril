@@ -50,6 +50,107 @@ static char *Exposure[] = { "EXPTIME", "EXPOSURE", NULL };
 	} while ((keyword[__iter__]) && (__status__ > 0)); \
 }
 
+/* reading the FITS header to get useful information */
+static void read_fits_header(fits *fit) {
+	/* about the status argument: http://heasarc.gsfc.nasa.gov/fitsio/c/c_user/node28.html */
+	int status = 0;
+	int zero;
+
+	__tryToFindKeywords(fit->fptr, TUSHORT, MIPSHI, &fit->hi);
+	__tryToFindKeywords(fit->fptr, TUSHORT, MIPSLO, &fit->lo);
+
+	status = 0;
+	fits_read_key(fit->fptr, TINT, "BSCALE", &zero, NULL, &status);
+	if (!status && 1 != zero)
+		siril_log_message(
+				_("Loaded FITS file has a BSCALE different than 1 (%d)\n"), zero);
+	status = 0;
+	fits_read_key(fit->fptr, TINT, "BZERO", &zero, NULL, &status);
+
+	if (fit->bitpix == SHORT_IMG && zero == 32768)
+		fit->bitpix = USHORT_IMG;
+
+	/*******************************************************************
+	 * ************* CAMERA AND INSTRUMENT KEYWORDS ********************
+	 * ****************************************************************/
+
+	__tryToFindKeywords(fit->fptr, TFLOAT, PixSizeX, &fit->pixel_size_x);
+	__tryToFindKeywords(fit->fptr, TFLOAT, PixSizeY, &fit->pixel_size_y);
+	__tryToFindKeywords(fit->fptr, TUINT, BinX, &fit->binning_x);
+	__tryToFindKeywords(fit->fptr, TUINT, BinY, &fit->binning_y);
+
+	status = 0;
+	fits_read_key(fit->fptr, TSTRING, "INSTRUME", &(fit->instrume), NULL,
+			&status);
+
+	status = 0;
+	fits_read_key(fit->fptr, TSTRING, "TELESCOP", &(fit->telescop), NULL,
+			&status);
+
+	status = 0;
+	fits_read_key(fit->fptr, TSTRING, "OBSERVER", &(fit->observer), NULL,
+			&status);
+
+	status = 0;
+	fits_read_key(fit->fptr, TSTRING, "BAYERPAT", &(fit->bayer_pattern), NULL,
+			&status);
+
+	status = 0;
+	fits_read_key(fit->fptr, TSTRING, "DATE-OBS", &(fit->date_obs), NULL,
+			&status);
+
+	status = 0;
+	fits_read_key(fit->fptr, TSTRING, "DATE", &(fit->date), NULL,
+			&status);
+
+	__tryToFindKeywords(fit->fptr, TDOUBLE, Focal, &fit->focal_length);
+	if (!sequence_is_loaded() || com.seq.current == 0)
+		fprintf(stdout,
+				"Read from FITS header: pix size %gx%g, binning %ux%u, focal %g\n",
+				fit->pixel_size_x, fit->pixel_size_y, fit->binning_x,
+				fit->binning_y, fit->focal_length);
+
+	status = 0;
+	fits_read_key(fit->fptr, TDOUBLE, "CCD-TEMP", &(fit->ccd_temp), NULL,
+			&status);	// Non-standard keywords used in MaxIm DL
+
+	__tryToFindKeywords(fit->fptr, TDOUBLE, Exposure, &fit->exposure);
+
+	status = 0;
+	fits_read_key(fit->fptr, TDOUBLE, "APERTURE", &(fit->aperture), NULL,
+			&status);
+
+	status = 0;
+	fits_read_key(fit->fptr, TDOUBLE, "ISOSPEED", &(fit->iso_speed), NULL,
+			&status);	// Non-standard keywords used in MaxIm DL
+
+	/*******************************************************************
+	 * ************************* DFT KEYWORDS **************************
+	 * ****************************************************************/
+
+	status = 0;
+	fits_read_key(fit->fptr, TDOUBLE, "DFT_NOR0", &(fit->dft_norm[0]), NULL,
+			&status);
+	status = 0;
+	fits_read_key(fit->fptr, TDOUBLE, "DFT_NOR1", &(fit->dft_norm[1]), NULL,
+			&status);
+	status = 0;
+	fits_read_key(fit->fptr, TDOUBLE, "DFT_NOR2", &(fit->dft_norm[2]), NULL,
+			&status);
+
+	status = 0;
+	fits_read_key(fit->fptr, TSTRING, "DFT_ORD", &(fit->dft_ord), NULL,
+			&status);
+
+	status = 0;
+	fits_read_key(fit->fptr, TSTRING, "DFT_TYPE", &(fit->dft_type), NULL,
+			&status);
+
+	status = 0;
+	fits_read_key(fit->fptr, TUSHORT, "DFT_RX", &(fit->dft_rx), NULL, &status);
+	fits_read_key(fit->fptr, TUSHORT, "DFT_RY", &(fit->dft_ry), NULL, &status);
+}
+
 // return 0 on success, fills realname if not NULL with the opened file's name
 int readfits(const char *filename, fits *fit, char *realname) {
 	int status;
@@ -254,103 +355,6 @@ int readfits(const char *filename, fits *fit, char *realname) {
 			basename, fit->naxes[2], fit->rx, fit->ry);
 	g_free(basename);
 	return 0;
-}
-
-/* reading the FITS header to get useful information */
-void read_fits_header(fits *fit) {
-	/* about the status argument: http://heasarc.gsfc.nasa.gov/fitsio/c/c_user/node28.html */
-	int status = 0;
-	int zero;
-
-	__tryToFindKeywords(fit->fptr, TUSHORT, MIPSHI, &fit->hi);
-	__tryToFindKeywords(fit->fptr, TUSHORT, MIPSLO, &fit->lo);
-
-	status = 0;
-	fits_read_key(fit->fptr, TINT, "BSCALE", &zero, NULL, &status);
-	if (!status && 1 != zero)
-		siril_log_message(
-				_("Loaded FITS file has a BSCALE different than 1 (%d)\n"), zero);
-	status = 0;
-	fits_read_key(fit->fptr, TINT, "BZERO", &zero, NULL, &status);
-
-	if (fit->bitpix == SHORT_IMG && zero == 32768)
-		fit->bitpix = USHORT_IMG;
-
-	/*******************************************************************
-	 * ************* CAMERA AND INSTRUMENT KEYWORDS ********************
-	 * ****************************************************************/
-
-	__tryToFindKeywords(fit->fptr, TFLOAT, PixSizeX, &fit->pixel_size_x);
-	__tryToFindKeywords(fit->fptr, TFLOAT, PixSizeY, &fit->pixel_size_y);
-	__tryToFindKeywords(fit->fptr, TUINT, BinX, &fit->binning_x);
-	__tryToFindKeywords(fit->fptr, TUINT, BinY, &fit->binning_y);
-
-	status = 0;
-	fits_read_key(fit->fptr, TSTRING, "INSTRUME", &(fit->instrume), NULL,
-			&status);
-
-	status = 0;
-	fits_read_key(fit->fptr, TSTRING, "TELESCOP", &(fit->telescop), NULL,
-			&status);
-
-	status = 0;
-	fits_read_key(fit->fptr, TSTRING, "OBSERVER", &(fit->observer), NULL,
-			&status);
-
-	status = 0;
-	fits_read_key(fit->fptr, TSTRING, "DATE-OBS", &(fit->date_obs), NULL,
-			&status);
-
-	status = 0;
-	fits_read_key(fit->fptr, TSTRING, "DATE", &(fit->date), NULL,
-			&status);
-
-	__tryToFindKeywords(fit->fptr, TDOUBLE, Focal, &fit->focal_length);
-	if (!sequence_is_loaded() || com.seq.current == 0)
-		fprintf(stdout,
-				"Read from FITS header: pix size %gx%g, binning %ux%u, focal %g\n",
-				fit->pixel_size_x, fit->pixel_size_y, fit->binning_x,
-				fit->binning_y, fit->focal_length);
-
-	status = 0;
-	fits_read_key(fit->fptr, TDOUBLE, "CCD-TEMP", &(fit->ccd_temp), NULL,
-			&status);	// Non-standard keywords used in MaxIm DL
-
-	__tryToFindKeywords(fit->fptr, TDOUBLE, Exposure, &fit->exposure);
-
-	status = 0;
-	fits_read_key(fit->fptr, TDOUBLE, "APERTURE", &(fit->aperture), NULL,
-			&status);
-
-	status = 0;
-	fits_read_key(fit->fptr, TDOUBLE, "ISOSPEED", &(fit->iso_speed), NULL,
-			&status);	// Non-standard keywords used in MaxIm DL
-
-	/*******************************************************************
-	 * ************************* DFT KEYWORDS **************************
-	 * ****************************************************************/
-
-	status = 0;
-	fits_read_key(fit->fptr, TDOUBLE, "DFT_NOR0", &(fit->dft_norm[0]), NULL,
-			&status);
-	status = 0;
-	fits_read_key(fit->fptr, TDOUBLE, "DFT_NOR1", &(fit->dft_norm[1]), NULL,
-			&status);
-	status = 0;
-	fits_read_key(fit->fptr, TDOUBLE, "DFT_NOR2", &(fit->dft_norm[2]), NULL,
-			&status);
-
-	status = 0;
-	fits_read_key(fit->fptr, TSTRING, "DFT_ORD", &(fit->dft_ord), NULL,
-			&status);
-
-	status = 0;
-	fits_read_key(fit->fptr, TSTRING, "DFT_TYPE", &(fit->dft_type), NULL,
-			&status);
-
-	status = 0;
-	fits_read_key(fit->fptr, TUSHORT, "DFT_RX", &(fit->dft_rx), NULL, &status);
-	fits_read_key(fit->fptr, TUSHORT, "DFT_RY", &(fit->dft_ry), NULL, &status);
 }
 
 char *list_header(fits *fit) {
@@ -770,9 +774,17 @@ void save_fits_header(fits *fit) {
 				"ISO camera setting", &status);
 
 	status = 0;
-	if (fit->instrume[0] != '\0')
-		fits_update_key(fit->fptr, TSTRING, "INSTRUME", &(fit->instrume),
-				"instrument name", &status);
+	if (fit->bayer_pattern[0] != '\0')
+		fits_update_key(fit->fptr, TSTRING, "BAYERPAT", &(fit->bayer_pattern),
+				"Bayer color pattern", &status);
+
+	status = 0;
+	fits_update_key(fit->fptr, TUINT, "XBAYROFF", 0, "X offset of Bayer array",
+			&status);
+
+	status = 0;
+	fits_update_key(fit->fptr, TUINT, "YBAYROFF", 0, "Y offset of Bayer array",
+			&status);
 
 	/*******************************************************************
 	 * ******************** PROGRAMM KEYWORDS **************************

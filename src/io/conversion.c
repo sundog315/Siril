@@ -246,7 +246,7 @@ void initialize_libraw_settings() {
 
 void initialize_ser_debayer_settings() {
 	com.debayer.open_debayer = FALSE;
-	com.debayer.ser_use_bayer_header = TRUE;
+	com.debayer.use_bayer_header = TRUE;
 	com.debayer.bayer_pattern = BAYER_FILTER_RGGB;
 	com.debayer.bayer_inter = BAYER_VNG;
 }
@@ -716,26 +716,56 @@ int save_to_target_fits(fits *fit, const char *dest_filename) {
 	return 0;
 }
 
+static int retrieveBayerPattern(char *bayer) {
+	int i;
+
+	for (i = BAYER_FILTER_MIN; i < BAYER_FILTER_MAX; i++) {
+		if (strcmp(bayer, filter_pattern[i]) == 0) {
+			return i;
+		}
+	}
+	return BAYER_FILTER_NONE;
+}
+
 int debayer_if_needed(image_type imagetype, fits *fit) {
 	int retval = 0;
+	sensor_pattern tmp;
 	/* What the hell?
 	 * Siril's FITS are stored bottom to top, debayering will throw 
 	 * wrong results. So before demosacaing we need to transforme the image
 	 * with fits_flip_top_to_bottom() function */
 	if (imagetype == TYPEFITS && (convflags & CONVDEBAYER)) {
+		tmp = com.debayer.bayer_pattern;
 		if (fit->naxes[2] != 1) {
 			siril_log_message(_("Cannot perform debayering on image with more than one channel\n"));
 			return retval;
 		}
 		fits_flip_top_to_bottom(fit);
-		siril_log_message(_("Filter Pattern: %s\n"),
-				filter_pattern[com.debayer.bayer_pattern]);
+		/* Get Bayer informations from header if available */
+		if (com.debayer.use_bayer_header) {
+			sensor_pattern bayer;
+			bayer = retrieveBayerPattern(fit->bayer_pattern);
+			if (bayer != com.debayer.bayer_pattern) {
+				if (bayer == BAYER_FILTER_NONE) {
+					siril_log_color_message(_("No Bayer pattern found in the header file.\n"), "red");
+				}
+				else {
+					siril_log_color_message(_("Bayer pattern found in header (%s) is different"
+							" from Bayer pattern in settings (%s). Overriding settings.\n"),
+							"red", filter_pattern[bayer], filter_pattern[com.debayer.bayer_pattern]);
+					com.debayer.bayer_pattern = bayer;
+				}
+			}
+		}
+		siril_log_message(_("Filter Pattern: %s\n"), filter_pattern[com.debayer.bayer_pattern]);
+
 		if (debayer(fit, com.debayer.bayer_inter)) {
 			siril_log_message(_("Cannot perform debayering\n"));
 			retval = -1;
 		} else {
 			fits_flip_top_to_bottom(fit);
 		}
+		com.debayer.bayer_pattern = tmp;
 	}
 	return retval;
 }

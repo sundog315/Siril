@@ -83,7 +83,7 @@ static int readinitfile() {
 	config_setting_t *debayer_setting = config_lookup(&config, keywords[BAY]);
 	if (debayer_setting) {
 		config_setting_lookup_bool(debayer_setting, "ser_use_bayer_header",
-				&com.debayer.ser_use_bayer_header);
+				&com.debayer.use_bayer_header);
 		config_setting_lookup_int(debayer_setting, "pattern",
 				&com.debayer.bayer_pattern);
 		int inter;
@@ -198,7 +198,7 @@ static void _save_debayer(config_t *config, config_setting_t *root) {
 
 	debayer_setting = config_setting_add(debayer_group, "ser_use_bayer_header",
 	CONFIG_TYPE_BOOL);
-	config_setting_set_bool(debayer_setting, com.debayer.ser_use_bayer_header);
+	config_setting_set_bool(debayer_setting, com.debayer.use_bayer_header);
 
 	debayer_setting = config_setting_add(debayer_group, "pattern",
 			CONFIG_TYPE_INT);

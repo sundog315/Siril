@@ -2045,7 +2045,7 @@ void set_GUI_LIBRAW() {
 	gtk_combo_box_set_active(inter, com.debayer.bayer_inter);
 	gtk_toggle_button_set_active(
 			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_SER_use_header")),
-			com.debayer.ser_use_bayer_header);
+			com.debayer.use_bayer_header);
 	gtk_toggle_button_set_active(
 			GTK_TOGGLE_BUTTON(lookup_widget("demosaicingButton")),
 			com.debayer.open_debayer);
@@ -2125,7 +2125,7 @@ void update_libraw_interface() {
 	}
 	/* We write in config file */
 	/*************SER**********************/
-	com.debayer.ser_use_bayer_header = gtk_toggle_button_get_active(
+	com.debayer.use_bayer_header = gtk_toggle_button_get_active(
 			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_SER_use_header")));
 	writeinitfile();
 }

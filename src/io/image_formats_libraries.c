@@ -805,6 +805,49 @@ int readraw(const char *name, fits *fit) {
 	return nbplanes;
 }
 
+static int get_rawBayerPattern(libraw_data_t *raw, fits *fit) {
+	int code;
+
+	code = libraw_COLOR(raw, 0, 0) * 1000 +
+			libraw_COLOR(raw, 0, 1) * 100 +
+			libraw_COLOR(raw, 1, 0) * 10 +
+			libraw_COLOR(raw, 1, 1);
+	printf("Bayer Pattern code: %d\n", code);
+
+	switch(code) {
+	/* RGGB: 0132 */
+	case 312:
+	case 132:
+		g_snprintf(fit->bayer_pattern, FLEN_VALUE, filter_pattern[0]);
+		com.debayer.bayer_pattern = BAYER_FILTER_RGGB;
+		break;
+	/* BGGR */
+	case 2130:
+	case 2310:
+		g_snprintf(fit->bayer_pattern, FLEN_VALUE, filter_pattern[1]);
+		com.debayer.bayer_pattern = BAYER_FILTER_BGGR;
+		break;
+	/* GBRG */
+	case 3201:
+	case 1203:
+		g_snprintf(fit->bayer_pattern, FLEN_VALUE, filter_pattern[2]);
+		com.debayer.bayer_pattern = BAYER_FILTER_GBRG;
+		break;
+	/* GRBG */
+	case 3023:
+	case 1023:
+		g_snprintf(fit->bayer_pattern, FLEN_VALUE, filter_pattern[3]);
+		com.debayer.bayer_pattern = BAYER_FILTER_GRBG;
+		break;
+	default:
+		code = -1;
+		memset(fit->bayer_pattern, 0, FLEN_VALUE);
+		com.debayer.bayer_pattern = BAYER_FILTER_NONE;
+	}
+
+	return code;
+}
+
 int readraw_in_cfa(const char *name, fits *fit) {
 	libraw_data_t *raw = libraw_init(0);
 	unsigned int i, col, row;
@@ -872,15 +915,22 @@ int readraw_in_cfa(const char *name, fits *fit) {
 		fit->naxes[2] = 1;
 		fit->naxis = 2;
 		fit->data = data;
-		fit->pdata[RLAYER]=fit->data;
-		fit->pdata[GLAYER]=fit->data;
-		fit->pdata[BLAYER]=fit->data;
+		fit->pdata[RLAYER] = fit->data;
+		fit->pdata[GLAYER] = fit->data;
+		fit->pdata[BLAYER] = fit->data;
 		fit->binning_x=fit->binning_y=1;
-		if (raw->other.focal_len>0.) fit->focal_length=raw->other.focal_len;
-		if (raw->other.iso_speed>0.) fit->iso_speed=raw->other.iso_speed;
-		if (raw->other.shutter>0.) fit->exposure=raw->other.shutter;
-		if (raw->other.aperture>0.) fit->aperture=raw->other.aperture;
+		if (raw->other.focal_len > 0.)
+			fit->focal_length = raw->other.focal_len;
+		if (raw->other.iso_speed > 0.)
+			fit->iso_speed = raw->other.iso_speed;
+		if (raw->other.shutter > 0.)
+			fit->exposure = raw->other.shutter;
+		if (raw->other.aperture > 0.)
+			fit->aperture=raw->other.aperture;
 		snprintf(fit->instrume, FLEN_VALUE, "%s %s", raw->idata.make, raw->idata.model);
+		if (get_rawBayerPattern(raw, fit) != -1) {
+			siril_log_message(_("Bayer pattern: %s\n"), fit->bayer_pattern);
+		}
 	}
 
 	libraw_recycle(raw);

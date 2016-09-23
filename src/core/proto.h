@@ -19,7 +19,6 @@
 /****************** image_format_fits.h ******************/
 int computeRawFitsStats(fits *fit, int layer);
 int	readfits(const char *filename, fits *fit, char *realname);
-void	read_fits_header(fits *fit);
 char*	list_header(fits *fit);
 void	clearfits(fits *);
 void	report_fits_error(int status);

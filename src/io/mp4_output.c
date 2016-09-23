@@ -141,7 +141,6 @@ static AVFrame *alloc_picture(enum AVPixelFormat pix_fmt, int width, int height)
 	AVFrame *picture;
 	int ret;
 
-	fprintf(stdout, "alloc_picture: %d, %d\n", width, height);
 	picture = av_frame_alloc();
 	if (!picture)
 		return NULL;
