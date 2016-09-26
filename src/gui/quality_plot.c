@@ -30,7 +30,7 @@
 #include "kplot.h"
 
 static GtkWidget *drawingPlot = NULL;
-struct kpair *quality = NULL;
+struct kpair *dataploted = NULL;
 struct kpair ref;
 gboolean is_fwhm = FALSE, export_to_PNG = FALSE;
 int nb_point = 0;
@@ -39,10 +39,35 @@ static void remove_point(struct kpair *arr, int i, int N) {
 	memmove(&arr[i], &arr[i + 1], (N - i - 1) * sizeof(*arr));
 }
 
+static void build_quality(sequence *seq, int layer, int ref_image) {
+	int i;
+
+	for (i = 0; i < nb_point; i++) {
+		if (!seq->imgparam[i].incl) continue;
+		dataploted[i].x = i;
+		dataploted[i].y = (is_fwhm == TRUE) ?
+						seq->regparam[layer][i].fwhm :
+						seq->regparam[layer][i].quality;
+	}
+	/* removing non selected points */
+	for (i = 0; i < nb_point; i++) {
+		if (dataploted[i].x == 0.0 && dataploted[i].y == 0.0) {
+			remove_point(dataploted, i, nb_point);
+			nb_point--;
+			i--;
+		}
+	}
+
+	ref.y = (is_fwhm == TRUE) ?
+			seq->regparam[layer][ref_image].fwhm :
+			seq->regparam[layer][ref_image].quality;
+
+}
+
 void free_drawPlot() {
-	if (quality) {
-		free(quality);
-		quality = NULL;
+	if (dataploted) {
+		free(dataploted);
+		dataploted = NULL;
 	}
 }
 
@@ -76,6 +101,7 @@ void drawPlot() {
 	else
 		ref_image = seq->reference_image;
 
+
 	if (seq->regparam[layer][ref_image].fwhm > 0.0f) {
 		is_fwhm = TRUE;
 	} else if (seq->regparam[layer][ref_image].quality >= 0.0) {
@@ -84,32 +110,16 @@ void drawPlot() {
 		return;
 
 	nb_point = seq->number;
+	ref.x = (double) ref_image;
 
-	/* building quality data array */
-	if (quality) {
+	/* building dataploted data array */
+	if (dataploted) {
 		free_drawPlot();
 	}
-	quality = calloc(nb_point, sizeof(struct kpair));
-	for (i = 0; i < nb_point; i++) {
-		if (!seq->imgparam[i].incl) continue;
-		quality[i].x = i;
-		quality[i].y = (is_fwhm == TRUE) ?
-						seq->regparam[layer][i].fwhm :
-						seq->regparam[layer][i].quality;
-	}
-	/* removing non selected points */
-	for (i = 0; i < nb_point; i++) {
-		if (quality[i].x == 0.0 && quality[i].y == 0.0) {
-			remove_point(quality, i, nb_point);
-			nb_point--;
-			i--;
-		}
-	}
+	dataploted = calloc(nb_point, sizeof(struct kpair));
 
-	ref.x = ref_image;
-	ref.y = (is_fwhm == TRUE) ?
-			seq->regparam[layer][ref_image].fwhm :
-			seq->regparam[layer][ref_image].quality;
+	ref.x = (double) ref_image;
+	build_quality(seq, layer, ref_image);
 
 	gtk_widget_queue_draw(drawingPlot);
 }
@@ -124,36 +134,33 @@ void on_ButtonSavePNG_clicked(GtkButton *button, gpointer user_data) {
 
 gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	guint width, height;
-	struct kplotcfg	 cfg;
+	struct kplotcfg	 cfgplot;
 	struct kdatacfg	 cfgdata;
 	struct kdata *d1, *d2;
 	struct kplot *p;
 
-	if (quality) {
-		if (drawingPlot == NULL) {
-			drawingPlot = lookup_widget("DrawingPlot");
-		}
+	if (dataploted) {
 
 		d1 = d2 = NULL;
 		p = NULL;
 
-		kplotcfg_defaults(&cfg);
+		kplotcfg_defaults(&cfgplot);
 		kdatacfg_defaults(&cfgdata);
-		cfg.xaxislabel = _("Frames");
-		cfg.yaxislabel = (is_fwhm == TRUE) ? _("FWHM") : _("Quality");
-		cfg.yaxislabelrot = M_PI_2 * 3.0;
+		cfgplot.xaxislabel = _("Frames");
+		cfgplot.yaxislabel = (is_fwhm == TRUE) ? _("FWHM") : _("Quality");
+		cfgplot.yaxislabelrot = M_PI_2 * 3.0;
 		cfgdata.point.radius = 10;
 
-		d1 = kdata_array_alloc(quality, nb_point);
+		d1 = kdata_array_alloc(dataploted, nb_point);
 		d2 = kdata_array_alloc(&ref, 1);
 
-		p = kplot_alloc(&cfg);
+		p = kplot_alloc(&cfgplot);
 
-		kplot_attach_data(p, d1, KPLOT_LINES, NULL);	// quality plots
+		kplot_attach_data(p, d1, ((nb_point <= 100) ? KPLOT_LINESPOINTS : KPLOT_LINES), NULL);	// data plots
 		kplot_attach_data(p, d2, KPLOT_POINTS, &cfgdata);	// ref image dot
 
-		width = gtk_widget_get_allocated_width(drawingPlot);
-		height = gtk_widget_get_allocated_height(drawingPlot);
+		width = gtk_widget_get_allocated_width(widget);
+		height = gtk_widget_get_allocated_height(widget);
 
 		cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
 		cairo_rectangle(cr, 0.0, 0.0, width, height);
