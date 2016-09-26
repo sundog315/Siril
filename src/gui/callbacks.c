@@ -38,6 +38,7 @@
 #include "core/initfile.h"
 #include "core/undo.h"
 #include "gui/callbacks.h"
+#include "gui/quality_plot.h"
 #include "gui/PSF_list.h"
 #include "gui/histogram.h"
 #include "algos/colors.h"
@@ -524,6 +525,7 @@ void adjust_exclude(int n, gboolean changed) {
 
 	if (changed) {
 		redraw(com.cvport, REMAP_NONE);
+		drawPlot();
 		adjust_sellabel();
 	}
 }
@@ -3407,6 +3409,7 @@ void on_ref_frame_toggled(GtkToggleButton *togglebutton, gpointer user_data) {
 	sequence_list_change_reference();
 	adjust_sellabel();	// reference image is named in the label
 	writeseqfile(&com.seq);
+	drawPlot();		// update plots
 }
 
 // from registration window
@@ -3862,7 +3865,7 @@ void zoomcombo_update_display_for_zoom() {
 	}
 	msg = siril_log_message(
 			_("Unknown zoom_value value, what is the current zoom?\n"));
-	show_dialog(msg, "Error", "gtk-dialog-error");
+	show_dialog(msg, _("Error"), "gtk-dialog-error");
 }
 
 void adjust_vport_size_to_image() {

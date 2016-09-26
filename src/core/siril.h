@@ -276,6 +276,7 @@ typedef enum {
 	IMAGE_SEQ,
 	PRE_PROC,
 	REGISTRATION,
+	PLOT,
 	STACKING,
 	OUTPUT_LOGS
 } main_tabs;

@@ -432,7 +432,7 @@ void read_and_show_textfile(char *path, char *title) {
 
 	FILE *f = fopen(path, "r");
 	if (!f) {
-		show_dialog("File not found", "Error", "gtk-dialog-error");
+		show_dialog(_("File not found"), _("Error"), "gtk-dialog-error");
 		return;
 	}
 	while (fgets(line, sizeof(line), f) != NULL)

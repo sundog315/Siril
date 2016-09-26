@@ -30,6 +30,7 @@
 
 #include "core/siril.h"
 #include "gui/callbacks.h"
+#include "gui/quality_plot.h"
 #include "core/proto.h"
 #include "core/initfile.h"
 #include "registration/registration.h"
@@ -1192,6 +1193,7 @@ static gboolean end_register_idle(gpointer p) {
 #endif
 	}
 	set_progress_bar_data(_("Registration complete."), PROGRESS_DONE);
+	drawPlot();
 	update_stack_interface();
 	set_cursor_waiting(FALSE);
 	gettimeofday(&t_end, NULL);

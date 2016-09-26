@@ -41,6 +41,7 @@
 #include "core/initfile.h"
 #include "core/undo.h"
 #include "gui/callbacks.h"
+#include "gui/quality_plot.h"
 #include "io/ser.h"
 #if defined(HAVE_FFMS2_1) || defined(HAVE_FFMS2_2)
 #include "io/films.h"
@@ -393,6 +394,7 @@ int set_seq(const char *name){
 	close_tab();	//close Green and Blue Tab if a 1-layer sequence is loaded
 	adjust_vport_size_to_image();	// resize viewports to the displayed image size
 	redraw(com.cvport, REMAP_ALL);
+	drawPlot();
 
 	update_used_memory();
 	return 0;
@@ -869,6 +871,7 @@ void free_sequence(sequence *seq, gboolean free_seq_too) {
 	 */
 	if (seq->type != SEQ_INTERNAL)
 		undo_flush();
+	free_drawPlot();
 	if (free_seq_too)	free(seq);
 }
 
