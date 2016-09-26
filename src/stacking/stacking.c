@@ -1644,6 +1644,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 					for (frame = 0; frame < N; frame++) {
 						if (data->rejected[frame] != 0) {
 							remove_pixel(data->stack, frame, N);
+							frame--;
 							N--;
 						}
 					}
@@ -1661,6 +1662,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 							if (data->rejected[frame] != 0) {
 								remove_pixel(data->stack, frame, N - n);
 								n++;
+								frame--;
 								if (N - n < 4) break;
 							}
 						}
@@ -1710,6 +1712,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 						for (frame = 0; frame < N - n; frame++) {
 							if (data->rejected[frame] != 0) {
 								remove_pixel(data->stack, frame, N - n);
+								frame--;
 								n++;
 								if (N - n < 4)
 									break;
@@ -1740,6 +1743,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 						for (frame = 0; frame < N - n; frame++) {
 							if (data->rejected[frame] != 0) {
 								remove_pixel(data->stack, frame, N - n);
+								frame--;
 								n++;
 								if (N - n < 4) break;
 							}
