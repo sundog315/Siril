@@ -166,22 +166,22 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 		/* if reference plot is in the graph, we take it as maximum if it is */
 		max = (dataploted[nb_point- 1].x > ref.x) ? dataploted[nb_point - 1].x + 1: ref.x + 1;
 
-		avg = calloc(max, sizeof(struct kpair));
+		avg = calloc(max - min, sizeof(struct kpair));
 
 		j = min;
-		for (i = 0; i < max; i++) {
+		for (i = 0; i < max - min; i++) {
 			avg[i].x = (double) j;
 			avg[i].y = mean;
 			++j;
 		}
 
-		m = kdata_array_alloc(avg, max);
+		m = kdata_array_alloc(avg, max - min);
 
 		p = kplot_alloc(&cfgplot);
 
-		kplot_attach_data(p, d1, ((nb_point <= 100) ? KPLOT_LINESPOINTS : KPLOT_LINES), NULL);	// data plots
+		kplot_attach_data(p, d1, ((nb_point <= 100) ? KPLOT_LINESPOINTS : KPLOT_LINES), NULL);	// data plot
 		kplot_attach_data(p, d2, KPLOT_POINTS, &cfgdata);	// ref image dot
-		kplot_attach_data(p, m, KPLOT_LINES, NULL);			// mean plots
+		kplot_attach_data(p, m, KPLOT_LINES, NULL);			// mean plot
 
 		width = gtk_widget_get_allocated_width(widget);
 		height = gtk_widget_get_allocated_height(widget);
