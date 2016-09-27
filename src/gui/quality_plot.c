@@ -133,7 +133,7 @@ void on_ButtonSavePNG_clicked(GtkButton *button, gpointer user_data) {
 }
 
 gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
-	guint width, height, i;
+	guint width, height, i, j;
 	double mean/*, sigma*/;
 	int min, max;
 	struct kpair *avg;
@@ -168,9 +168,11 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 
 		avg = calloc(max, sizeof(struct kpair));
 
+		j = min;
 		for (i = 0; i < max; i++) {
-			avg[i].x = (double) i + min;
+			avg[i].x = (double) j;
 			avg[i].y = mean;
+			++j;
 		}
 
 		m = kdata_array_alloc(avg, max);
@@ -179,7 +181,7 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 
 		kplot_attach_data(p, d1, ((nb_point <= 100) ? KPLOT_LINESPOINTS : KPLOT_LINES), NULL);	// data plots
 		kplot_attach_data(p, d2, KPLOT_POINTS, &cfgdata);	// ref image dot
-		kplot_attach_data(p, m, KPLOT_LINES, NULL);
+		kplot_attach_data(p, m, KPLOT_LINES, NULL);			// mean plots
 
 		width = gtk_widget_get_allocated_width(widget);
 		height = gtk_widget_get_allocated_height(widget);
