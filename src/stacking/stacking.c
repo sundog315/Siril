@@ -71,8 +71,8 @@ void initialize_stacking_methods() {
 	gtk_combo_box_set_active(GTK_COMBO_BOX(rejectioncombo), com.stack.rej_method);
 }
 
-/* scale0, mul0 and offset0 are output arguments when i = 0, input arguments otherwise */
-static int _compute_normalization_for_image(struct stacking_args *args, int i,
+/* scale0, mul0 and offset0 are output arguments when i = ref_image, input arguments otherwise */
+static int _compute_normalization_for_image(struct stacking_args *args, int i, int ref_image,
 		double *offset, double *mul, double *scale, normalization mode, double *scale0,
 		double *mul0, double *offset0) {
 	imstats *stat = NULL;
@@ -92,26 +92,26 @@ static int _compute_normalization_for_image(struct stacking_args *args, int i,
 	default:
 	case ADDITIVE_SCALING:
 		scale[i] = stat->scale;
-		if (i == 0)
-			*scale0 = scale[0];
+		if (i == ref_image)
+			*scale0 = scale[ref_image];
 		scale[i] = *scale0 / scale[i];
 		/* no break */
 	case ADDITIVE:
 		offset[i] = stat->location;
-		if (i == 0)
-			*offset0 = offset[0];
+		if (i == ref_image)
+			*offset0 = offset[ref_image];
 		offset[i] = scale[i] * offset[i] - *offset0;
 		break;
 	case MULTIPLICATIVE_SCALING:
 		scale[i] = stat->scale;
-		if (i == 0)
-			*scale0 = scale[0];
+		if (i == ref_image)
+			*scale0 = scale[ref_image];
 		scale[i] = *scale0 / scale[i];
 		/* no break */
 	case MULTIPLICATIVE:
 		mul[i] = stat->location;
-		if (i == 0)
-			*mul0 = mul[0];
+		if (i == ref_image)
+			*mul0 = mul[ref_image];
 		mul[i] = *mul0 / mul[i];
 		break;
 	}
@@ -119,12 +119,10 @@ static int _compute_normalization_for_image(struct stacking_args *args, int i,
 }
 
 int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normalization mode) {
-	int i, retval = 0, cur_nb = 1;
-	double scale0, mul0, offset0;
+	int i, ref_image, retval = 0, cur_nb = 1;
+	double scale0, mul0, offset0;	// for reference frame
 	char *tmpmsg;
 
-	// should initial values be taken from statistics of the reference
-	// image instead of the first image?
 	for (i = 0; i < args->nb_images_to_stack; i++) {
 		coeff->offset[i] = 0.0;
 		coeff->mul[i] = 1.0;
@@ -138,6 +136,10 @@ int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normali
 	tmpmsg[strlen(tmpmsg) - 1] = '\0';
 	set_progress_bar_data(tmpmsg, PROGRESS_RESET);
 
+	if (args->seq->reference_image == -1)
+		ref_image = 0;
+	else ref_image = args->seq->reference_image;
+
 	/* We empty the cache if needed (force to recompute) */
 	if (args->force_norm) {
 		for (i = 0; i < args->seq->number; i++) {
@@ -149,7 +151,7 @@ int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normali
 	}
 
 	// compute for the first image to have scale0 mul0 and offset0
-	if (_compute_normalization_for_image(args, 0, coeff->offset, coeff->mul, coeff->scale, mode,
+	if (_compute_normalization_for_image(args, ref_image, ref_image, coeff->offset, coeff->mul, coeff->scale, mode,
 			&scale0, &mul0, &offset0)) {
 		set_progress_bar_data(_("Normalization failed."), PROGRESS_NONE);
 		return 1;
@@ -158,13 +160,13 @@ int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normali
 	set_progress_bar_data(NULL, 1.0 / (double)args->nb_images_to_stack);
 
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static) if (args->seq->type == SEQ_SER || fits_is_reentrant())
-	for (i = 1; i < args->nb_images_to_stack; ++i) {
-		if (!retval) {
+	for (i = 0; i < args->nb_images_to_stack; ++i) {
+		if (!retval && i != ref_image) {
 			if (!get_thread_run()) {
 				retval = 1;
 				continue;
 			}
-			if (_compute_normalization_for_image(args, i, coeff->offset, coeff->mul, coeff->scale,
+			if (_compute_normalization_for_image(args, i, ref_image, coeff->offset, coeff->mul, coeff->scale,
 					mode, &scale0, &mul0, &offset0)) {
 				retval = 1;
 				continue;
