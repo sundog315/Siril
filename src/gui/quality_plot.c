@@ -162,7 +162,7 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 		mean = kdata_ymean(d1);
 		//sigma = kdata_ystddev(d1);
 		min = dataploted[0].x;
-		/* if reference plot is in the graph, we take it as maximum if it is */
+		/* if reference is ploted, we take it as maximum if it is */
 		max = (dataploted[nb_point- 1].x > ref.x) ? dataploted[nb_point - 1].x + 1: ref.x + 1;
 
 		avg = calloc(max - min, sizeof(struct kpair));

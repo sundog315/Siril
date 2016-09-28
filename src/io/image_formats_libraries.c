@@ -818,25 +818,25 @@ static int get_rawBayerPattern(libraw_data_t *raw, fits *fit) {
 	/* RGGB: 0132 */
 	case 312:
 	case 132:
-		g_snprintf(fit->bayer_pattern, FLEN_VALUE, filter_pattern[0]);
+		g_snprintf(fit->bayer_pattern, FLEN_VALUE, "%s", filter_pattern[0]);
 		com.debayer.bayer_pattern = BAYER_FILTER_RGGB;
 		break;
 	/* BGGR */
 	case 2130:
 	case 2310:
-		g_snprintf(fit->bayer_pattern, FLEN_VALUE, filter_pattern[1]);
+		g_snprintf(fit->bayer_pattern, FLEN_VALUE, "%s", filter_pattern[1]);
 		com.debayer.bayer_pattern = BAYER_FILTER_BGGR;
 		break;
 	/* GBRG */
 	case 3201:
 	case 1203:
-		g_snprintf(fit->bayer_pattern, FLEN_VALUE, filter_pattern[2]);
+		g_snprintf(fit->bayer_pattern, FLEN_VALUE, "%s", filter_pattern[2]);
 		com.debayer.bayer_pattern = BAYER_FILTER_GBRG;
 		break;
 	/* GRBG */
 	case 3023:
 	case 1023:
-		g_snprintf(fit->bayer_pattern, FLEN_VALUE, filter_pattern[3]);
+		g_snprintf(fit->bayer_pattern, FLEN_VALUE, "%s", filter_pattern[3]);
 		com.debayer.bayer_pattern = BAYER_FILTER_GRBG;
 		break;
 	default:

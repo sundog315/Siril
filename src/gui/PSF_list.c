@@ -72,11 +72,11 @@ void add_star_to_list(fitted_PSF *star) {
 	g_snprintf(A, sizeof(A), "%.6lf", star->A);
 	g_snprintf(xpos, sizeof(xpos), "%.2lf", star->xpos);
 	g_snprintf(ypos, sizeof(ypos), "%.2lf", star->ypos);
-	g_snprintf(fwhmx, sizeof(fwhmx), "%.2lf%s",  star->fwhmx,star->units);
-	g_snprintf(fwhmy, sizeof(fwhmy), "%.2lf%s",  star->fwhmy,star->units);
-	g_snprintf(roundness, sizeof(roundness), "%8.3lf",  star->fwhmy/star->fwhmx);		//ALWAYS FWHMX > FWHMY
-	g_snprintf(angle, sizeof(angle), "%.2lf",  star->angle);
-	g_snprintf(rmse, sizeof(rmse), "%.3e",  star->rmse);
+	g_snprintf(fwhmx, sizeof(fwhmx), "%.2lf%s", star->fwhmx, star->units);
+	g_snprintf(fwhmy, sizeof(fwhmy), "%.2lf%s", star->fwhmy, star->units);
+	g_snprintf(roundness, sizeof(roundness), "%8.3lf", star->fwhmy/star->fwhmx);		//ALWAYS FWHMX > FWHMY
+	g_snprintf(angle, sizeof(angle), "%.2lf", star->angle);
+	g_snprintf(rmse, sizeof(rmse), "%.3e", star->rmse);
 	gtk_list_store_append (liststore_stars, &iter);
 	gtk_list_store_set (liststore_stars, &iter,
 			COLUMN_CHANNEL, star->layer,
