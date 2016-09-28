@@ -21,9 +21,14 @@ struct registration_args {
 	gboolean run_in_thread;		// true if the registration was run in a thread
 	const gchar *prefix;		// prefix of the created sequence if any
 	gboolean follow_star;		// follow star position between frames
-	gboolean load_new_sequence; // load a new sequence if success
+	gboolean load_new_sequence;	// load a new sequence if success
 	gboolean matchSelection;	// Match stars found in the seleciton of reference image
 	opencv_interpolation interpolation; // type of rotation interpolation
+
+	/* data for generated sequence, for star alignment registration */
+	int new_total;
+	imgdata *imgparam;
+	regdata *regparam;
 };
 
 typedef enum {

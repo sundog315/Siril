@@ -73,7 +73,6 @@ void free_drawPlot() {
 
 void drawPlot() {
 	int i, ref_image, layer = 0;
-	double *qsort;
 	sequence *seq;
 
 	if (drawingPlot == NULL) {

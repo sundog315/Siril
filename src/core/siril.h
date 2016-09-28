@@ -340,11 +340,6 @@ struct sequ {
 	int beg;		// imgparam[0]->filenum
 	int end;		// imgparam[number-1]->filenum
 
-	/* Data used when a new sequence is builded
-	 * --> in global star registration for example
-	 */
-	int new_total;
-
 	/* registration previsualisation and manual alignment data */
 	int previewX[PREVIEW_NB], previewY[PREVIEW_NB];	// center, -1 is uninitialized value
 	int previewW[PREVIEW_NB], previewH[PREVIEW_NB];	// 0 is uninitialized value
