@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-09-25 14:13+0200\n"
-"PO-Revision-Date: 2016-09-24 13:33+0200\n"
+"PO-Revision-Date: 2016-09-28 13:42+0200\n"
 "Last-Translator: Cyril Richard <cyril@free-astro.fr>\n"
 "Language-Team: \n"
 "Language: el\n"
@@ -849,6 +849,7 @@ msgid "Name of the phase file: "
 msgstr "Όνομα του αρχείου φάσης:"
 
 # order, as in order of the files or order of a degree of a polyonimical function?
+# Ans: Exactly, this is for the type of Fast Fourier Transform used. Choice is Centered or Normal
 #: ../src/gui/siril3.glade.h:183
 msgid "Order: "
 msgstr "Σειρά:"
@@ -1174,6 +1175,7 @@ msgid "Preserve background"
 msgstr "Διατήρηση υποβάθρου"
 
 # can i use the greek word for destianation in order to replace dest?
+# Ans: Sure, you do.
 #: ../src/gui/siril3.glade.h:263
 msgid "root name of the converted images (the &apos;dest&apos; in dest1.fit)"
 msgstr ""
@@ -1275,6 +1277,7 @@ msgstr ""
 "το να αποεπιλέξετε αυτό το κουτί."
 
 # raw, i assume it's the raw file of a dslr, right?
+# Ans: yes. This is settings for raw images.
 #: ../src/gui/siril3.glade.h:286
 msgid ""
 "Specify your own raw white balance. The value for the Red scale is relative "
@@ -1561,6 +1564,7 @@ msgid "Directory: "
 msgstr "Κατάλογος:"
 
 # space as in MB?
+# Ans: Yes
 #: ../src/gui/siril3.glade.h:343
 msgid ""
 "Select an existing directory. Make sure you have write permissions and "
@@ -1771,8 +1775,8 @@ msgid "Type:"
 msgstr "Τύπος: "
 
 # plan. How is it implemented in the software?
-#
 # Also Nb as in number?
+# Ans: Yes, this is the number of wavelet plans, or wavelet layers.
 #: ../src/gui/siril3.glade.h:391
 msgid "Nb of plans:"
 msgstr "Αρ. σχεδίων:"
@@ -2199,6 +2203,7 @@ msgstr ""
 "όχι την τρέχουσα εικόνα."
 
 # singular or plural?
+# Ans: singular
 #: ../src/gui/siril3.glade.h:489
 msgid "excluded"
 msgstr "εξαιρέθηκε"
@@ -2268,6 +2273,7 @@ msgstr "Κανονικοποίηση εικόνων"
 
 # it may take time only at the first time of export of the sequence?
 # ξανα
+# Ans: Yes because it computes normalisation
 #: ../src/gui/siril3.glade.h:505
 msgid ""
 "Activate image normalisation for the export. This will make all images the "
@@ -2438,6 +2444,7 @@ msgstr "Αυτόματη αξιολόγηση της τιμής ομαλοποί
 
 # what will it occur? (maybe you mean, If this gives overflows you must choose a value manually)
 # ξανα
+# Ans: Damn, last sentence should not exist. I will remove it.
 #: ../src/gui/siril3.glade.h:540
 msgid ""
 "If this box is checked, Siril will auto-evaluate the normalisation value.\n"
@@ -2451,6 +2458,7 @@ msgstr ""
 "offset."
 
 # is it dark frame calibration?
+# Ans: No. Opitmisation is the process where Siril try to find the best coefficient to apply to the master-dark before calibration. To do that, Siril minimizes the background noise calibration.
 #: ../src/gui/siril3.glade.h:543
 msgid "Dark optimization"
 msgstr "Βελτιστοποίηση dark"
@@ -2889,6 +2897,7 @@ msgid "Overwrite file without notice if it already exists."
 msgstr "Να γίνει αντικατάσταση του αρχείου χωρίς προειδοποίηση αν υπάρχει ήδη."
 
 # weighing images, is it similar to compare images?
+# Ans: No, this is the fact to apply a coeffecient in function of some criteria
 #: ../src/gui/siril3.glade.h:667
 msgid ""
 "If one of these items is selected, a normalisation process will be applied "
@@ -2983,6 +2992,7 @@ msgid "Output logs"
 msgstr "Αρχεία καταγραφής εξόδου"
 
 # input, verb?
+# Ans: No. This is the text field where user can type commands.
 #: ../src/gui/siril3.glade.h:689
 msgid ""
 "Input command. Typing `help&apos; here will bring the list of supported "
@@ -2993,6 +3003,7 @@ msgstr ""
 
 # input, verb?
 # ιδιο με το προηγουμενο;
+# Ans: No. This is the text field where user can type commands.
 #: ../src/gui/siril3.glade.h:690
 msgid ""
 "Input command. Typing `help' here will bring the list of supported commands."
@@ -3227,6 +3238,7 @@ msgstr ""
 "είναι σε χρωματική λειτουργία RGB.\n"
 
 # is the %s corresponds to red green blue? if so thn the greek translation goes Εξαγωγή καναλιού %s: γίνεται επεξργασία\n
+# Ans: No this is the name you will give to the channels. For example you have a RGB image. You want to extract R G B channes, so you can give the name R G and B. BUT, you also can extract HSL, HSV, CIELAB. This fireld is freeform for user.
 #: ../src/algos/colors.c:318
 #, c-format
 msgid "%s channel extraction: processing...\n"
@@ -3316,6 +3328,9 @@ msgid "Insufficient background samples.\n"
 msgstr "Ανεπαρκή δείγματα υποβάθρου.\n"
 
 # fit as in FITS file? Also instad of PSF fit result  can i use PSF Statistics?
+# Ans: No; fit is used in physics to model something with formula.
+# https://en.wikipedia.org/wiki/Curve_fitting
+# You can use PSF statistics but word statistics is not so true in this case. This is not statistic, this is results from equations.
 #: ../src/algos/PSF.c:606
 #, c-format
 msgid ""
@@ -3338,6 +3353,7 @@ msgstr ""
 "RMSE=%.3e\n"
 
 # Findstar, Siril's proccess?
+# Ans: yes
 #: ../src/algos/star_finder.c:133
 msgid "Findstar: processing...\n"
 msgstr "Findstar: γίνεται επεξεργασία...\n"
@@ -3357,6 +3373,7 @@ msgid "Peaker"
 msgstr ""
 
 # wavelet_transform_data does it need translation?
+# Ans: no
 #: ../src/algos/transform.c:199
 msgid "wavelet_transform_data: bad plane number\n"
 msgstr "wavelet_transform_data: κακός αριθμός επιπέδου\n"
@@ -3516,6 +3533,7 @@ msgid "Siril cannot open the directory.\n"
 msgstr "Το Siril δεν μπορεί να ανοίξει τον κατάλογο.\n"
 
 # link as in a web page link?
+# Ans: no like a symlink: https://en.wikipedia.org/wiki/Symbolic_link
 #: ../src/core/command.c:581
 #, c-format
 msgid "Link: %s\n"
@@ -3591,6 +3609,7 @@ msgid "Background value: %d\n"
 msgstr "Τιμή υποβάθρου: %d\n"
 
 # will the fullstop after %s at the end of the sentence cause any problems?
+# Ans: No. But the order of %s must be preserved.
 #: ../src/core/command.c:830
 #, c-format
 msgid "The file %s has been created for the %s layer.\n"
@@ -3610,11 +3629,13 @@ msgid "Values must be positive and less than %d.\n"
 msgstr "Οι τιμές πρέπει να είναι θετικές και μικρότερες του %d.\n"
 
 # fill2 is it a process of the software?
+# Ans: Yes it is a command
 #: ../src/core/command.c:939
 msgid "Fill2: select a region or provide x, y, width, height\n"
 msgstr "Fill2: επιλέξτε μια περιοχή ή δώστε τα x, y, πλάτος, ύψος\n"
 
 # find_hot, does it take any value? is it Siril's process?
+# Ans: This is a Siril command for finding hot pixels.
 #: ../src/core/command.c:973
 msgid "find_hot must be applied on an one-channel master-dark frame"
 msgstr "το find_hot πρέπει να εφαρμοστεί σε κυρίως dark καρέ ενός καναλιού"
@@ -3717,6 +3738,8 @@ msgid "Could not save the stacking result %s\n"
 msgstr "Το αποτέλεσμα της σώρευσης δεν μπορούσε να αποθηκευτεί %s\n"
 
 # can i have an example with the values for proper translation?
+# Ans: Stacked 5 sequences with errors
+# or Stacked 10 sequences sucessfully
 #: ../src/core/command.c:1412
 #, c-format
 msgid "Stacked %d sequences %s.\n"
@@ -3824,6 +3847,7 @@ msgid "Process aborted by user\n"
 msgstr "Η διαδικασία ακυρώθηκε από τον χρήστη\n"
 
 # what is imoper
+# Ans: Siril command
 #: ../src/core/siril.c:150
 #, c-format
 msgid "imoper: images don't have the same size (w = %u|%u, h = %u|%u)\n"
@@ -3869,6 +3893,7 @@ msgid "Error"
 msgstr "Σφάλμα"
 
 # addmax, i assume it's a siril command?
+# Ans: Yes
 #: ../src/core/siril.c:231
 #, c-format
 msgid ""
@@ -3910,6 +3935,7 @@ msgid "Pre-processing image %s"
 msgstr "Γίνεται προ-επεξεργασία της εικόνας %s"
 
 # Darkmap  siril's process?
+# Ans: Darkmap is the fact to build a map of deviant pixels from the master-dark frame.
 #: ../src/core/siril.c:1036 ../src/core/siril.c:1071
 msgid ""
 "Darkmap cosmetic correction is only supported with single channel images\n"
@@ -3982,6 +4008,7 @@ msgid "Siril cannot evaluate the noise in the image\n"
 msgstr "Το Siril δεν μπορεί να εκτιμήσει τον θόρυβο της εικόνας\n"
 
 # backgroundnoise, siril's command?
+# Ans: Siril function, debuging purposes.
 #: ../src/core/siril.c:1664
 msgid "backgroundnoise: Error, no data computed\n"
 msgstr "backgroundnoise: Σφάλμα, δεν υπολογίστηκαν δεδομένα\n"
@@ -4118,6 +4145,7 @@ msgid "Mem: N/A"
 msgstr "Μνήμη: N/A"
 
 # redraw, siril's process?
+# Ans: Yes: for debuging purposes.
 #: ../src/gui/callbacks.c:1355
 #, c-format
 msgid ""
@@ -4317,6 +4345,7 @@ msgid "new zoom value: %f\n"
 msgstr "νέα τιμή μεγέθυνσης: %f\n"
 
 # zoom_value does it take a value?
+# Ans: no.
 #: ../src/gui/callbacks.c:3866
 msgid "Unknown zoom_value value, what is the current zoom?\n"
 msgstr "Άγνωστ τιμή zoom_value, ποια είναι η τρέχουσα μεγέθυνση;\n"
@@ -4687,6 +4716,7 @@ msgid "Converting %s..."
 msgstr "Γίνεται μετατροπή %s..."
 
 # FILETYPE is it one word?
+# Ans: This is old sentences, from old version. So you can use it as "File type".
 #: ../src/io/conversion.c:556
 #, c-format
 msgid "FILETYPE IS NOT SUPPORTED, CANNOT CONVERT: %s\n"
@@ -4793,6 +4823,7 @@ msgid "Loaded FITS file has a BSCALE different than 1 (%d)\n"
 msgstr "Το αρχείο FITS που φορτώθηκε έχει διαφορετικό BSCALE από 1 (%d)\n"
 
 # %s.[any_allowed_extension] does this need translation?
+# Ans: I don't think so. Be free to do what do you think the best.
 #: ../src/io/image_format_fits.c:172
 #, c-format
 msgid "%s.[any_allowed_extension] not found.\n"
@@ -4966,6 +4997,8 @@ msgid "Time (of observation): %s\n"
 msgstr "Ώρα (παρατήρησης): %s\n"
 
 # is the %s value ok where it is? this way it will make more sense in greek
+# Sure, the most important is to keep order if you have
+# %d %s %d in this order then you must keep it.
 #: ../src/io/image_formats_libraries.c:67
 #, c-format
 msgid "Could not open the TIFF file %s\n"
@@ -5045,13 +5078,15 @@ msgid "Error in libraw %s\n"
 msgstr "Σφάλμα στο libraw %s\n"
 
 # eg. Decoding 30% DSC001 file (ISO=800, Exposure=30) correct example?
+# No.
+# Decoding Canon EOS 500D file (ISO=800, Exposure=10s)
 #: ../src/io/image_formats_libraries.c:673
 #: ../src/io/image_formats_libraries.c:888
 #, c-format
 msgid "Decoding %s %s file (ISO=%g, Exposure=%gs)\n"
 msgstr "Αποκωδικοποίηση του αρχείου %s %s (ISO=%g, Έκθεση=%gs)\n"
 
-# same example as 954 entry
+# Decoding Canon EOS 500D file (ISO=800, Exposure=10s)
 #: ../src/io/image_formats_libraries.c:676
 #: ../src/io/image_formats_libraries.c:891
 #, c-format

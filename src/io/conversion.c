@@ -240,7 +240,7 @@ void initialize_libraw_settings() {
 	com.raw_set.use_camera_wb = 0;	// if possible, use the white balance from the camera. 
 	com.raw_set.use_auto_wb = 0;		// use automatic white balance obtained after averaging over the entire image
 	com.raw_set.user_qual = 1;		// type of interpolation. AHD by default
-	com.raw_set.gamm[0] = 1.0;		// gamm curve: linear by default
+	com.raw_set.gamm[0] = 1.0;		// gamma curve: linear by default
 	com.raw_set.gamm[1] = 1.0;
 }
 
@@ -757,7 +757,8 @@ int debayer_if_needed(image_type imagetype, fits *fit) {
 				}
 			}
 		}
-		siril_log_message(_("Filter Pattern: %s\n"), filter_pattern[com.debayer.bayer_pattern]);
+		if (com.debayer.bayer_pattern >= 0)
+			siril_log_message(_("Filter Pattern: %s\n"), filter_pattern[com.debayer.bayer_pattern]);
 
 		if (debayer(fit, com.debayer.bayer_inter)) {
 			siril_log_message(_("Cannot perform debayering\n"));

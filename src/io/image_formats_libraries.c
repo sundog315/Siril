@@ -724,9 +724,11 @@ int readraw(const char *name, fits *fit) {
 			siril_log_message(_("AHD interpolation...\n"));
 			break;
 	}
+
 	
 	width = raw->sizes.iwidth;
 	height = raw->sizes.iheight;
+
 	npixels = width * height;
 	
 	data = malloc(npixels * sizeof(WORD) * 3);
@@ -775,33 +777,43 @@ int readraw(const char *name, fits *fit) {
 		*buf[BLAYER]++ = (image->data[i+4]) + (image->data[i+5] << 8);
 	}
 
-	libraw_dcraw_clear_mem(image);
-	libraw_recycle(raw);
-	libraw_close(raw);	
+	/*  Here we compute the correct size of the output image (imgdata.sizes.iwidth and imgdata.sizes.iheight) for the following cases:
+    	- Files from Fuji cameras (with a 45-degree rotation)
+    	- Files from cameras with non-square pixels
+    	- Images shot by a rotated camera.
+	 */
+	libraw_adjust_sizes_info_only(raw);
+	width = raw->sizes.iwidth;
+	height = raw->sizes.iheight;
 	
 	if (data != NULL) {
 		clearfits(fit);
 		fit->bitpix = USHORT_IMG;
-		fit->rx = width;
-		fit->ry = height;
-		fit->naxes[0] = width;
-		fit->naxes[1] = height;
+		fit->rx = (unsigned int) width;
+		fit->ry = (unsigned int) height;
+		fit->naxes[0] = (long) width;
+		fit->naxes[1] = (long) height;
 		fit->naxes[2] = nbplanes;
-		if (nbplanes==1)
+		if (nbplanes == 1)
 			fit->naxis = 2;
 		else
 			fit->naxis = 3;	
 		fit->data = data;
-		fit->pdata[RLAYER]=fit->data;
-		fit->pdata[GLAYER]=fit->data + npixels;
-		fit->pdata[BLAYER]=fit->data + npixels * 2;
-		fit->binning_x=fit->binning_y=1;
-		if (raw->other.focal_len>0.) fit->focal_length=raw->other.focal_len;
-		if (raw->other.iso_speed>0.) fit->iso_speed=raw->other.iso_speed;
-		if (raw->other.shutter>0.) fit->exposure=raw->other.shutter;
-		if (raw->other.aperture>0.) fit->aperture=raw->other.aperture;
-		snprintf(fit->instrume, FLEN_VALUE, "%s %s", raw->idata.make, raw->idata.model);
+		fit->pdata[RLAYER] = fit->data;
+		fit->pdata[GLAYER] = fit->data + npixels;
+		fit->pdata[BLAYER] = fit->data + npixels * 2;
+		fit->binning_x = fit->binning_y = 1;
+		if (raw->other.focal_len > 0.) fit->focal_length = raw->other.focal_len;
+		if (raw->other.iso_speed > 0.) fit->iso_speed = raw->other.iso_speed;
+		if (raw->other.shutter > 0.) fit->exposure = raw->other.shutter;
+		if (raw->other.aperture > 0.) fit->aperture = raw->other.aperture;
+		g_snprintf(fit->instrume, FLEN_VALUE, "%s %s", raw->idata.make, raw->idata.model);
 	}
+
+	libraw_dcraw_clear_mem(image);
+	libraw_recycle(raw);
+	libraw_close(raw);
+
 	return nbplanes;
 }
 
@@ -853,7 +865,7 @@ int readraw_in_cfa(const char *name, fits *fit) {
 	unsigned int i, col, row;
 	ushort raw_width, width, height, left_margin, top_margin;
 	int npixels;
-	WORD *data=NULL;
+	WORD *data = NULL;
 	int ret = libraw_open_file(raw, name);
 	
 	if (ret) {

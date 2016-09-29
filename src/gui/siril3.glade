@@ -11390,8 +11390,7 @@ The bias/offset master image will be removed from all images in the sequence.</p
                         <property name="can_focus">True</property>
                         <property name="receives_default">False</property>
                         <property name="tooltip_text" translatable="yes">If this box is checked, Siril will auto-evaluate the normalisation value.
-This value is the mean of the master flat calibrated with the master offset.
-If this occurs gives overflows you must choose manually.</property>
+This value is the mean of the master flat calibrated with the master offset.</property>
                         <property name="halign">end</property>
                         <property name="active">True</property>
                         <property name="draw_indicator">True</property>
