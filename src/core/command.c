@@ -1434,7 +1434,9 @@ int process_set_cpu(int nb){
 	}
 	omp_set_num_threads(proc_in);
 
+#ifdef _OPENMP
 #pragma omp parallel
+#endif
 	{
 		proc_out = omp_get_num_threads();
 	}

@@ -929,7 +929,9 @@ int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolea
 
 	/* this loops could be run in parallel, but now the area depends on the previous star
 	 * detection, which makes it a bit hard to keep track of the star movement... */
+#ifdef _OPENMP
 #pragma omp parallel for firstprivate(fit) schedule(static) if(run_in_parallel && ((seq->type == SEQ_REGULAR && fits_is_reentrant()) || seq->type == SEQ_SER))
+#endif
 	for (i=0; i<seq->number; ++i) {
 		if (!abort) {
 			if (run_in_thread && !get_thread_run()) {
@@ -950,7 +952,9 @@ int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolea
 				abort = 1;
 				continue;
 			}
+#ifdef _OPENMP
 #pragma omp atomic
+#endif
 			cur_nb += 1.f;
 			set_progress_bar_data(NULL, cur_nb/nb_frames);
 		}

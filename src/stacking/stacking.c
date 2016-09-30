@@ -159,7 +159,9 @@ int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normali
 
 	set_progress_bar_data(NULL, 1.0 / (double)args->nb_images_to_stack);
 
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static) if (args->seq->type == SEQ_SER || fits_is_reentrant())
+#endif
 	for (i = 0; i < args->nb_images_to_stack; ++i) {
 		if (!retval && i != ref_image) {
 			if (!get_thread_run()) {
@@ -171,7 +173,9 @@ int compute_normalization(struct stacking_args *args, norm_coeff *coeff, normali
 				retval = 1;
 				continue;
 			}
+#ifdef _OPENMP
 #pragma omp atomic
+#endif
 			cur_nb++;	// only used for progress bar
 			set_progress_bar_data(NULL,
 					(double)cur_nb / ((double)args->nb_images_to_stack));
@@ -668,7 +672,9 @@ int stack_median(struct stacking_args *args) {
 	siril_log_message(_("Starting stacking...\n"));
 	set_progress_bar_data(_("Median stacking in progress..."), PROGRESS_RESET);
 
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static) if (args->seq->type == SEQ_SER || fits_is_reentrant())
+#endif
 	for (i = 0; i < nb_parallel_stacks; i++)
 	{
 		/**** Step 1: get allocated memory for the current thread ****/
@@ -720,7 +726,9 @@ int stack_median(struct stacking_args *args) {
 			if (retval) break;
 
 			// update progress bar
+#ifdef _OPENMP
 #pragma omp atomic
+#endif
 			cur_nb++;
 
 			if (!get_thread_run()) {
@@ -1494,7 +1502,9 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 	siril_log_message(_("Starting stacking...\n"));
 	set_progress_bar_data(_("Rejection stacking in progress..."), PROGRESS_RESET);
 
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static) if (args->seq->type == SEQ_SER || fits_is_reentrant())
+#endif
 	for (i = 0; i < nb_parallel_stacks; i++)
 	{
 		/**** Step 1: get allocated memory for the current thread ****/
@@ -1585,7 +1595,9 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 			if (retval) break;
 
 			// update progress bar
+#ifdef _OPENMP
 #pragma omp atomic
+#endif
 			cur_nb++;
 
 			if (!get_thread_run()) {
@@ -1766,7 +1778,9 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 				}
 				fit->pdata[my_block->channel][pdata_idx++] = round_to_WORD(sum/(double)N);
 			} // end of for x
+#ifdef _OPENMP
 #pragma omp critical
+#endif
 			{
 				irej[my_block->channel][0] += crej[0];
 				irej[my_block->channel][1] += crej[1];

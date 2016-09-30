@@ -546,7 +546,9 @@ void apply_mtf_to_fits(fits *fit, double m, double lo, double hi) {
 			"(mid=%.3lf, low=%.3lf, high=%.3lf)", m, lo, hi);
 
 	for (chan = 0; chan < nb_chan; chan++) {
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
+#endif
 		for (i = 0; i < ndata; i++) {
 			double pxl = ((double) buf[chan][i] / (double) norm);
 			pxl = (pxl - lo < 0.0) ? 0.0 : pxl - lo;
@@ -627,7 +629,9 @@ void apply_mtf_to_histo(gsl_histogram *histo, double norm, double m, double lo,
 		pxl *= pente;
 		mtf = round_to_WORD(MTF(pxl, m) * norm);
 		gsl_histogram_accumulate(mtf_histo, mtf, binval);
+#ifdef _OPENMP
 #pragma omp critical
+#endif
 		{
 			clipped[0] += clip[0];
 			clipped[1] += clip[1];

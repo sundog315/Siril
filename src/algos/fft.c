@@ -36,7 +36,9 @@ void fft_to_spectra(fits* fit, fftw_complex *frequency_repr, double *as,
 		double *ps) {
 	unsigned int i;
 	int nbdata = fit->rx * fit->ry;
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static) if(nbdata > 3000)
+#endif
 	for (i = 0; i < nbdata; i++) {
 		as[i] = hypot(creal(frequency_repr[i]), cimag(frequency_repr[i]));
 		ps[i] = atan2(cimag(frequency_repr[i]), creal(frequency_repr[i]));
@@ -46,7 +48,9 @@ void fft_to_spectra(fits* fit, fftw_complex *frequency_repr, double *as,
 void fft_to_fr(fits* fit, fftw_complex *frequency_repr, double *as, double *ps) {
 	unsigned int i;
 	int nbdata = fit->rx * fit->ry;
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static) if(nbdata > 3000)
+#endif
 	for (i = 0; i < nbdata; i++) {
 		frequency_repr[i] = as[i] * (cos(ps[i]) + I * sin(ps[i]));
 	}
@@ -127,7 +131,9 @@ void FFTD(fits *fit, fits *x, fits *y, int type_order, int layer) {
 			sizeof(fftw_complex) * nbdata);
 
 	/* copying image selection into the fftw data */
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static) if(nbdata > 15000)
+#endif
 	for (i = 0; i < nbdata; i++)
 		spatial_repr[i] = (double) gbuf[i];
 

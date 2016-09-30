@@ -325,7 +325,9 @@ gpointer extract_channels(gpointer p) {
 		break;
 		/* HSL space */
 	case 1:
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
+#endif
 		for (i = 0; i < args->fit->rx * args->fit->ry; i++) {
 			double h, s, l;
 			double r = (double) buf[RLAYER][i] / USHRT_MAX_DOUBLE;
@@ -339,7 +341,9 @@ gpointer extract_channels(gpointer p) {
 		break;
 		/* HSV space */
 	case 2:
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
+#endif
 		for (i = 0; i < args->fit->rx * args->fit->ry; i++) {
 			double h, s, v;
 			double r = (double) buf[RLAYER][i] / USHRT_MAX_DOUBLE;
@@ -353,7 +357,9 @@ gpointer extract_channels(gpointer p) {
 		break;
 		/* CIE L*a*b */
 	case 3:
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
+#endif
 		for (i = 0; i < args->fit->rx * args->fit->ry; i++) {
 			double x, y, z, L, a, b;
 			double red = (double) buf[RLAYER][i] / USHRT_MAX_DOUBLE;
@@ -427,7 +433,9 @@ gpointer enhance_saturation(gpointer p) {
 
 	}
 
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
+#endif
 	for (i = 0; i < args->fit->rx * args->fit->ry; i++) {
 		double h, s, l;
 		double r = (double) buf[RLAYER][i] / USHRT_MAX_DOUBLE;
@@ -490,7 +498,9 @@ gpointer scnr(gpointer p) {
 	gettimeofday(&t_start, NULL);
 
 	WORD norm = get_normalized_value(args->fit);
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
+#endif
 	for (i = 0; i < nbdata; i++) {
 		double red = (double) buf[RLAYER][i] / norm;
 		double green = (double) buf[GLAYER][i] / norm;
@@ -819,7 +829,9 @@ static void white_balance(fits *fit, gboolean is_manual, rectangle white_selecti
 		high = gtk_range_get_value(scaleLimit[1]);
 		get_coeff_for_wb(fit, white_selection, black_selection, kw, bg, &norm, low, high);
 	}
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(chan) schedule(static)
+#endif
 	for (chan = 0; chan < 3; chan++) {
 		if (kw[chan] == 1.0) continue;
 		calibrate(fit, chan, kw[chan], bg[chan], norm);

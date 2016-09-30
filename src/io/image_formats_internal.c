@@ -593,7 +593,9 @@ int pictofit(WORD *buf, fits *fit) {
 		return -1;
 	}
 	data = fit->pdata[BW_LAYER] = fit->data;
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
+#endif
 	for (i = 0; i < nbdata; i++)
 		data[i] = buf[i];
 	fit->bitpix = SHORT_IMG;
@@ -618,15 +620,21 @@ int pictofitrgb(WORD *buf, fits *fit) {
 	data[RLAYER] = fit->pdata[RLAYER] = fit->data;
 	data[GLAYER] = fit->pdata[GLAYER] = fit->data + nbdata;
 	data[BLAYER] = fit->pdata[BLAYER] = fit->data + 2 * nbdata;
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
+#endif
 	for (i = 0; i < nbdata; i++)
 		data[RLAYER][i] = buf[i + (nbdata * RLAYER)];
 
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
+#endif
 	for (i = 0; i < nbdata; i++)
 		data[GLAYER][i] = buf[i + (nbdata * GLAYER)];
 
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)
+#endif
 	for (i = 0; i < nbdata; i++)
 		data[BLAYER][i] = buf[i + (nbdata * BLAYER)];
 

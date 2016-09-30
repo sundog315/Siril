@@ -271,8 +271,10 @@ int register_shift_dft(struct registration_args *args) {
 	cur_nb = 0.f;
 
 	memset(&fit, 0, sizeof(fits));
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) firstprivate(fit) schedule(static) \
 	if((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER)
+#endif
 	for (frame = 0; frame < args->seq->number; ++frame) {
 		if (!abort) {
 			if (args->run_in_thread && !get_thread_run()) {
@@ -307,7 +309,9 @@ int register_shift_dft(struct registration_args *args) {
 
 				clearfits(&fit);
 
+#ifdef _OPENMP
 #pragma omp critical
+#endif
 				{
 					double qual = current_regdata[frame].quality;
 					if (qual > q_max) {
@@ -359,7 +363,9 @@ int register_shift_dft(struct registration_args *args) {
 						current_regdata[frame].shiftx, current_regdata[frame].shifty,
 						current_regdata[frame].quality);
 #endif
+#ifdef _OPENMP
 #pragma omp atomic
+#endif
 				cur_nb += 1.f;
 				set_progress_bar_data(NULL, cur_nb / nb_frames);
 				fftw_free(img);
@@ -803,8 +809,10 @@ int register_ecc(struct registration_args *args) {
 	cur_nb = 0.f;
 
 	memset(&im, 0, sizeof(fits));
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) firstprivate(im) schedule(static) \
 	if((args->seq->type == SEQ_REGULAR && fits_is_reentrant()) || args->seq->type == SEQ_SER)
+#endif
 	for (frame = 0; frame < args->seq->number; frame++) {
 		if (!abort) {
 			if (args->run_in_thread && !get_thread_run()) {
@@ -836,7 +844,9 @@ int register_ecc(struct registration_args *args) {
 								frame);
 						/* We exclude this frame */
 						com.seq.imgparam[frame].incl = FALSE;
+#ifdef _OPENMP
 #pragma omp atomic
+#endif
 						++failed;
 						clearfits(&im);
 						continue;
@@ -845,7 +855,9 @@ int register_ecc(struct registration_args *args) {
 					current_regdata[frame].quality = QualityEstimate(&im,
 							args->layer, QUALTYPE_NORMAL);
 
+#ifdef _OPENMP
 #pragma omp critical
+#endif
 					{
 						double qual = current_regdata[frame].quality;
 						if (qual > q_max) {
@@ -858,7 +870,9 @@ int register_ecc(struct registration_args *args) {
 					current_regdata[frame].shiftx = -round_to_int(reg_param.dx);
 					current_regdata[frame].shifty = -round_to_int(reg_param.dy);
 
+#ifdef _OPENMP
 #pragma omp atomic
+#endif
 					cur_nb += 1.f;
 					set_progress_bar_data(NULL, cur_nb / nb_frames);
 					clearfits(&im);

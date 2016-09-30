@@ -1106,7 +1106,9 @@ void remap(int vport) {
 		make_index_for_rainbow(rainbow_index);
 	index = remap_index[vport];
 
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(y,x) schedule(static)
+#endif
 	for (y = 0; y < gfit.ry; y++) {
 		for (x = 0; x < gfit.rx; x++) {
 			guint src_index = y * gfit.rx + x;
@@ -3727,7 +3729,9 @@ static void progress_bar_set_percent(double percent) {
 		pbar = GTK_PROGRESS_BAR(
 				gtk_builder_get_object(builder, "progressbar1"));
 	if (percent == PROGRESS_PULSATE) {
+#ifdef _OPENMP
 #pragma omp critical
+#endif
 		gtk_progress_bar_pulse(pbar);
 	}
 	else {

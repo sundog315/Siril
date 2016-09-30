@@ -765,7 +765,9 @@ void luminance_and_colors_align_and_compose() {
 
 	double norm = (double)(layers[0]->the_fit.maxi);
 
+#ifdef _OPENMP
 #pragma omp parallel for num_threads(com.max_thread) private(y,x) schedule(static)
+#endif
 	for (y = 0; y < gfit.ry; y++) {
 		for (x = 0; x < gfit.rx; x++) {
 			int layer;
