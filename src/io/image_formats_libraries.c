@@ -825,6 +825,7 @@ int readraw_in_cfa(const char *name, fits *fit) {
 	unsigned int i, j, c, col, row;
 	char pattern[FLEN_VALUE];
 	ushort raw_width, raw_height, left_margin, right_margin, top_margin;
+	ushort width, height;
 	int npixels;
 	WORD *data = NULL;
 	int ret = libraw_open_file(raw, name);
@@ -853,12 +854,21 @@ int readraw_in_cfa(const char *name, fits *fit) {
 	raw_width = raw->sizes.raw_width;
 	raw_height = raw->sizes.raw_height;
 
-
 	left_margin = raw->rawdata.sizes.left_margin;
 	top_margin = raw->rawdata.sizes.top_margin;
 	right_margin = (raw->rawdata.ioparams.fuji_width) ?
-					right_margin = raw_width - raw->rawdata.ioparams.fuji_width - left_margin: 0;
-	npixels = (raw_width - left_margin - right_margin) * (raw_height - top_margin);
+						right_margin = raw_width - raw->rawdata.ioparams.fuji_width - left_margin: 0;
+
+	if (raw->rawdata.ioparams.fuji_width) {
+		width = raw_width - right_margin;
+		height = raw_height;
+	}
+	else {
+		width = raw->sizes.iwidth;
+		height = raw->sizes.iheight;
+	}
+
+	npixels = width * height;
 	
 	if (raw->other.shutter > 0 && raw->other.shutter < 1)
 		siril_log_message(_("Decoding %s %s file (ISO=%g, Exposure=1/%gs)\n"),
@@ -900,20 +910,22 @@ int readraw_in_cfa(const char *name, fits *fit) {
 
 	WORD *buf = data;
 
+	int offset = raw_width * top_margin + left_margin;
+
 	i = 0;
-	for (row = top_margin; row < raw_height; row++) {
-		for (col = left_margin; col < raw_width - right_margin; col++) {
-			buf[i++] = raw->rawdata.raw_image[col + (raw_width * row)];
+	for (row = 0; row < height; row++) {
+		for (col = 0; col < width; col++) {
+			buf[i++] = raw->rawdata.raw_image[offset + col + (raw_width * row)];
 		}
 	}
 	
 	if (data != NULL) {
 		clearfits(fit);
 		fit->bitpix = USHORT_IMG;
-		fit->rx = (unsigned int) (raw_width - left_margin - right_margin);
-		fit->ry = (unsigned int) (raw_height - top_margin);
-		fit->naxes[0] = (long) (raw_width - left_margin);
-		fit->naxes[1] = (long) (raw_height - top_margin);
+		fit->rx = (unsigned int) (width);
+		fit->ry = (unsigned int) (height);
+		fit->naxes[0] = (long) (width);
+		fit->naxes[1] = (long) (height);
 		fit->naxes[2] = 1;
 		fit->naxis = 2;
 		fit->data = data;
