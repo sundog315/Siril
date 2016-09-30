@@ -817,53 +817,14 @@ int readraw(const char *name, fits *fit) {
 	return nbplanes;
 }
 
-static int get_rawBayerPattern(libraw_data_t *raw, fits *fit) {
-	int code;
-
-	code = libraw_COLOR(raw, 0, 0) * 1000 +
-			libraw_COLOR(raw, 0, 1) * 100 +
-			libraw_COLOR(raw, 1, 0) * 10 +
-			libraw_COLOR(raw, 1, 1);
-	printf("Bayer Pattern code: %d\n", code);
-
-	switch(code) {
-	/* RGGB: 0132 */
-	case 312:
-	case 132:
-		g_snprintf(fit->bayer_pattern, FLEN_VALUE, "%s", filter_pattern[0]);
-		com.debayer.bayer_pattern = BAYER_FILTER_RGGB;
-		break;
-	/* BGGR */
-	case 2130:
-	case 2310:
-		g_snprintf(fit->bayer_pattern, FLEN_VALUE, "%s", filter_pattern[1]);
-		com.debayer.bayer_pattern = BAYER_FILTER_BGGR;
-		break;
-	/* GBRG */
-	case 3201:
-	case 1203:
-		g_snprintf(fit->bayer_pattern, FLEN_VALUE, "%s", filter_pattern[2]);
-		com.debayer.bayer_pattern = BAYER_FILTER_GBRG;
-		break;
-	/* GRBG */
-	case 3023:
-	case 1023:
-		g_snprintf(fit->bayer_pattern, FLEN_VALUE, "%s", filter_pattern[3]);
-		com.debayer.bayer_pattern = BAYER_FILTER_GRBG;
-		break;
-	default:
-		code = -1;
-		memset(fit->bayer_pattern, 0, FLEN_VALUE);
-		com.debayer.bayer_pattern = BAYER_FILTER_NONE;
-	}
-
-	return code;
-}
+#define FC(filters, row,col) \
+	(filters >> ((((row) << 1 & 14) + ((col) & 1)) << 1) & 3)
 
 int readraw_in_cfa(const char *name, fits *fit) {
 	libraw_data_t *raw = libraw_init(0);
-	unsigned int i, col, row;
-	ushort raw_width, width, height, left_margin, top_margin;
+	unsigned int i, j, c, col, row;
+	char pattern[FLEN_VALUE];
+	ushort raw_width, raw_height, left_margin, right_margin, top_margin;
 	int npixels;
 	WORD *data = NULL;
 	int ret = libraw_open_file(raw, name);
@@ -878,59 +839,88 @@ int readraw_in_cfa(const char *name, fits *fit) {
 		printf("Error in libraw %s\n", libraw_strerror(ret));
 		return -1;
 	}
-	
+
 	/* This test checks if raw data exist. Sometimes it doesn't. This is
 	 * the case for DNG built from lightroom for example */
-	if ((void*)raw->rawdata.raw_image != raw->rawdata.raw_alloc || raw->rawdata.raw_alloc == 0x00){
+	if ((void*)raw->rawdata.raw_image == 0x00 && raw->rawdata.color3_image){
 		siril_log_message(_("Siril cannot open this file in CFA mode (no data available). Try to switch into RGB.\n"));
 		return -1;
 	}
-		
+
 	raw->params.user_flip = 0;				/* no flip                                 */
 	raw->params.output_color = 0;			/* output colorspace, 0=raw, 1=sRGB, 2=Adobe, 3=Wide, 4=ProPhoto, 5=XYZ*/
 
 	raw_width = raw->sizes.raw_width;
-	width = raw->sizes.width;
-	height = raw->sizes.height;
-	npixels = width * height;	
+	raw_height = raw->sizes.raw_height;
+
+
 	left_margin = raw->rawdata.sizes.left_margin;
 	top_margin = raw->rawdata.sizes.top_margin;
+	right_margin = (raw->rawdata.ioparams.fuji_width) ?
+					right_margin = raw_width - raw->rawdata.ioparams.fuji_width - left_margin: 0;
+	npixels = (raw_width - left_margin - right_margin) * (raw_height - top_margin);
 	
-	if (raw->other.shutter > 1.0)
-		siril_log_message(_("Decoding %s %s file (ISO=%g, Exposure=%gs)\n"),
-				raw->idata.make, raw->idata.model, raw->other.iso_speed, raw->other.shutter);
-	else
+	if (raw->other.shutter > 0 && raw->other.shutter < 1)
 		siril_log_message(_("Decoding %s %s file (ISO=%g, Exposure=1/%gs)\n"),
-				raw->idata.make, raw->idata.model, raw->other.iso_speed, 1/raw->other.shutter);
+						raw->idata.make, raw->idata.model, raw->other.iso_speed, 1/raw->other.shutter);
+	else
+		siril_log_message(_("Decoding %s %s file (ISO=%g, Exposure=%gs)\n"),
+						raw->idata.make, raw->idata.model, raw->other.iso_speed, raw->other.shutter);
+
+	unsigned filters = raw->idata.filters;
+
+	if (filters) {
+		int fhigh = 2, fwide = 2;
+		if ((filters ^ (filters >> 8)) & 0xff)
+			fhigh = 4;
+		if ((filters ^ (filters >> 16)) & 0xffff)
+			fhigh = 8;
+		if ((filters == 1) /* Leaf Catchlight with 16x16 bayer matrix */
+				|| (filters == 9)) /* Fuji X-Trans (6x6 matrix) */{	//
+			siril_log_message(_("This kind of RAW picture is not supported.\n"));
+			libraw_recycle(raw);
+			libraw_close(raw);
+			return -1;
+		}
+
+		j = 0;
+		for (i = 0; i < fhigh; i++) {
+			for (c = i && 0; c < fwide; c++) {
+				pattern[j++] = raw->idata.cdesc[FC(filters, i, c)];
+				pattern[j+1] = '\0';
+			}
+		}
+		siril_log_message(_("Bayer pattern: %s\n"), pattern);
+	}
 
 	data = (WORD*) calloc(1, npixels * sizeof(WORD));
 	if (!data) {
 		return -1;
 	}
+
 	WORD *buf = data;
-	
-	int offset = raw_width * top_margin + left_margin;	
+
 	i = 0;
-	for (row = 0; row < height; row++){
-		for (col = 0; col < width; col++){
-			buf[i++] = (WORD)raw->rawdata.raw_image[offset + col + (raw_width * row)] ;
+	for (row = top_margin; row < raw_height; row++) {
+		for (col = left_margin; col < raw_width - right_margin; col++) {
+			buf[i++] = raw->rawdata.raw_image[col + (raw_width * row)];
 		}
 	}
-
+	
 	if (data != NULL) {
 		clearfits(fit);
 		fit->bitpix = USHORT_IMG;
-		fit->rx = (unsigned int) width;
-		fit->ry = (unsigned int) height;
-		fit->naxes[0] = (long) width;
-		fit->naxes[1] = (long) height;
+		fit->rx = (unsigned int) (raw_width - left_margin - right_margin);
+		fit->ry = (unsigned int) (raw_height - top_margin);
+		fit->naxes[0] = (long) (raw_width - left_margin);
+		fit->naxes[1] = (long) (raw_height - top_margin);
 		fit->naxes[2] = 1;
 		fit->naxis = 2;
 		fit->data = data;
 		fit->pdata[RLAYER] = fit->data;
 		fit->pdata[GLAYER] = fit->data;
 		fit->pdata[BLAYER] = fit->data;
-		fit->binning_x=fit->binning_y=1;
+		fit->binning_x = fit->binning_y = 1;
 		if (raw->other.focal_len > 0.)
 			fit->focal_length = raw->other.focal_len;
 		if (raw->other.iso_speed > 0.)
@@ -938,11 +928,11 @@ int readraw_in_cfa(const char *name, fits *fit) {
 		if (raw->other.shutter > 0.)
 			fit->exposure = raw->other.shutter;
 		if (raw->other.aperture > 0.)
-			fit->aperture=raw->other.aperture;
-		snprintf(fit->instrume, FLEN_VALUE, "%s %s", raw->idata.make, raw->idata.model);
-		if (get_rawBayerPattern(raw, fit) != -1) {
-			siril_log_message(_("Bayer pattern: %s\n"), fit->bayer_pattern);
-		}
+			fit->aperture = raw->other.aperture;
+		g_snprintf(fit->instrume, FLEN_VALUE, "%s %s", raw->idata.make,
+				raw->idata.model);
+		if (filters)
+			g_snprintf(fit->bayer_pattern, FLEN_VALUE, "%s", pattern);
 	}
 
 	libraw_recycle(raw);
@@ -962,11 +952,14 @@ int open_raw_files(const char *name, fits *fit, int type) {
 			retvalue = readraw_in_cfa(name, fit);
 			break;
 	}
-	mirrorx(fit, FALSE);
-	char *basename = g_path_get_basename(name);
-	siril_log_message(_("Reading RAW: file %s, %ld layer(s), %ux%u pixels\n"),
-						basename, fit->naxes[2], fit->rx, fit->ry);
-	g_free(basename);
+	if (retvalue >= 0) {
+		mirrorx(fit, FALSE);
+		char *basename = g_path_get_basename(name);
+		siril_log_message(
+				_("Reading RAW: file %s, %ld layer(s), %ux%u pixels\n"),
+				basename, fit->naxes[2], fit->rx, fit->ry);
+		g_free(basename);
+	}
 
 	return retvalue;
 }
