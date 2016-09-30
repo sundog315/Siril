@@ -1197,7 +1197,9 @@ static gboolean end_register_idle(gpointer p) {
 	}
 	set_progress_bar_data(_("Registration complete."), PROGRESS_DONE);
 	drawPlot();
+#ifdef HAVE_OPENCV
 failed_end:
+#endif
 	update_stack_interface();
 	set_cursor_waiting(FALSE);
 	gettimeofday(&t_end, NULL);

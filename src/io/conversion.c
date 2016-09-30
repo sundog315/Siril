@@ -55,7 +55,7 @@ supported_raw_list supported_raw[] = {
 	{"crw",	"Canon", BAYER_FILTER_RGGB},
 	{"bay",	"Casio", BAYER_FILTER_NONE},		// Not tested
 	{"erf",	"Epson", BAYER_FILTER_RGGB},
-	{"raf",	"Fuji", BAYER_FILTER_RGGB},		// Bugged with some files
+	{"raf",	"Fuji", BAYER_FILTER_GBRG},		// Not really supported, specially XTRANS
 	{"3fr",	"Hasselblad", BAYER_FILTER_GRBG},	// GRBG, RGGB		
 	{"kdc",	"Kodak", BAYER_FILTER_GRBG},
 	{"dcr",	"Kodak", BAYER_FILTER_GRBG},
@@ -68,7 +68,7 @@ supported_raw_list supported_raw[] = {
 	{"rw2",	"Panasonic", BAYER_FILTER_BGGR},
 	{"pef",	"Pentax", BAYER_FILTER_BGGR},
 	{"ptx",	"Pentax", BAYER_FILTER_NONE},		// Not tested
-	{"x3f",	"Sigma", BAYER_FILTER_NONE},		// No Bayer-Pattern
+	{"x3f",	"Sigma", BAYER_FILTER_NONE},		// Not supported yet
 	{"srw",	"Samsung", BAYER_FILTER_BGGR},
 	{"arw",	"Sony", BAYER_FILTER_RGGB}
 };
