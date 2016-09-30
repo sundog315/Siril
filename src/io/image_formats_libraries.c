@@ -843,8 +843,10 @@ int readraw_in_cfa(const char *name, fits *fit) {
 
 	/* This test checks if raw data exist. Sometimes it doesn't. This is
 	 * the case for DNG built from lightroom for example */
-	if ((void*)raw->rawdata.raw_image == 0x00 && raw->rawdata.color3_image){
-		siril_log_message(_("Siril cannot open this file in CFA mode (no data available). Try to switch into RGB.\n"));
+	if ((void*) raw->rawdata.raw_image == 0x00
+			&& (raw->rawdata.color3_image || raw->rawdata.color4_image)) {
+		siril_log_message(_("Siril cannot open this file in CFA mode (no data available). "
+				"Try to switch into RGB.\n"));
 		return -1;
 	}
 
@@ -886,8 +888,8 @@ int readraw_in_cfa(const char *name, fits *fit) {
 		if ((filters ^ (filters >> 16)) & 0xffff)
 			fhigh = 8;
 		if ((filters == 1) /* Leaf Catchlight with 16x16 bayer matrix */
-				|| (filters == 9)) /* Fuji X-Trans (6x6 matrix) */{	//
-			siril_log_message(_("This kind of RAW picture is not supported.\n"));
+				|| (filters == 9)) /* Fuji X-Trans (6x6 matrix) */ {
+			siril_log_message(_("This kind of RAW pictures is not supported.\n"));
 			libraw_recycle(raw);
 			libraw_close(raw);
 			return -1;
@@ -905,6 +907,8 @@ int readraw_in_cfa(const char *name, fits *fit) {
 
 	data = (WORD*) calloc(1, npixels * sizeof(WORD));
 	if (!data) {
+		libraw_recycle(raw);
+		libraw_close(raw);
 		return -1;
 	}
 
