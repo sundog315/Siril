@@ -217,7 +217,9 @@ sequence * readseqfile(const char *name){
 							/* reinitialize seqfilename if no match: need to do it because of extensions with length of 4 */
 							strcpy(seqfilename, backup_name);
 							/* test for extension in uppercase */
-							strncpy(seqfilename + strlen(seqfilename)-3, convtoupper(supported_film[i].extension), len_ext);
+						strncpy(seqfilename + strlen(seqfilename) - 3,
+								g_ascii_strup(supported_film[i].extension,
+										len_ext), len_ext);
 							if (access(seqfilename, F_OK) != -1) break;
 							/* reinitialize seqfilename if no match: need to do it because of extensions with length of 4 */
 							strcpy(seqfilename, backup_name);

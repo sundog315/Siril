@@ -172,7 +172,7 @@ int stat_file(const char *filename, image_type *type, char *realname) {
 			char *str;
 			if (k == 0)
 				str = strdup(supported_extensions[i]);
-			else str = convtoupper(supported_extensions[i]);
+			else str = g_ascii_strup(supported_extensions[i], strlen(supported_extensions[i]));
 			snprintf(test_name, 255, "%s%s", filename, str);
 			free(str);
 			if (is_readable_file(test_name)) {
@@ -530,18 +530,6 @@ double get_standard_deviation(WORD *data, int size) {
 	sigma /= (size - 1);
 	sigma = sqrt(sigma);
 	return sigma;
-}
-
-/* returns a new string in uppercase */
-char *convtoupper(char *str) {
-	char *newstr, *p;
-	p = newstr = strdup(str);
-	while (*p) {
-		*p = toupper(*p);
-		++p;
-	}
-
-	return newstr;
 }
 
 char *remove_ext_from_filename(const char *filename) {

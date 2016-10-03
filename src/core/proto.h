@@ -119,7 +119,6 @@ void	quicksort_d (double *a, int n);
 void	quicksort_s (WORD *a, int n);
 double	get_median_value_from_sorted_word_data(WORD *data, int size);
 double	get_standard_deviation(WORD *data, int size);
-char*	convtoupper(char *filename);
 char*	remove_ext_from_filename(const char *basename);
 char*	replace_spaces_from_filename(const char *filename);
 char*	str_append(char** data, const char* newdata);

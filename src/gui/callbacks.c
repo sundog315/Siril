@@ -1742,7 +1742,7 @@ void set_filters_dialog(GtkFileChooser *chooser) {
 			char ext[20];
 			g_snprintf(ext, sizeof(ext), "*.%s;*.%s;",
 					supported_raw[i].extension,
-					convtoupper(supported_raw[i].extension));
+					g_ascii_strup(supported_raw[i].extension, strlen(supported_raw[i].extension)));
 			strcat(raw, ext);
 		}
 		gtk_filter_add(chooser, _("RAW DSLR Camera Files"), raw,
@@ -1795,7 +1795,7 @@ void set_filters_dialog(GtkFileChooser *chooser) {
 			char ext[20];
 			g_snprintf(ext, sizeof(ext), "*.%s;*.%s;",
 					supported_film[j].extension,
-					convtoupper(supported_film[j].extension));
+					g_ascii_strup(supported_film[j].extension, strlen(supported_film[j].extension)));
 			strcat(film, ext);
 		}
 		gtk_filter_add(chooser, _("Film Files (*.avi, *.mpg, ...)"), film,
