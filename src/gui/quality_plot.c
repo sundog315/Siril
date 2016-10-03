@@ -127,7 +127,6 @@ void on_ButtonSavePNG_clicked(GtkButton *button, gpointer user_data) {
 	set_cursor_waiting(TRUE);
 	export_to_PNG = TRUE;
 	drawPlot();
-	show_dialog(_("Plot.png has been saved"), _("Information"), "gtk-dialog-info");
 	set_cursor_waiting(FALSE);
 }
 
@@ -191,8 +190,21 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 		kplot_draw(p, width, height, cr);
 
 		if (export_to_PNG) {
+			const gchar *file;
+			gchar *filename, *msg;
+			GtkEntry *EntryPng;
+
+			EntryPng = GTK_ENTRY(lookup_widget("GtkEntryPng"));
+			file = gtk_entry_get_text(EntryPng);
+			if (file && file[0] != '\0') {
+				msg = siril_log_message("%s.png has been saved.\n", file);
+				show_dialog(msg, _("Information"), "gtk-dialog-info");
+				filename = g_strndup(file, strlen(file) + 5);
+				g_strlcat(filename, ".png", strlen(file) + 5);
+				cairo_surface_write_to_png(cairo_get_target(cr), filename);
+				g_free(filename);
+			}
 			export_to_PNG = FALSE;
-			cairo_surface_write_to_png(cairo_get_target(cr), "plot.png");
 		}
 
 		free(avg);
@@ -202,4 +214,15 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 		kdata_destroy(m);
 	}
 	return FALSE;
+}
+
+void on_GtkEntryPng_changed(GtkEditable *editable, gpointer user_data) {
+	const gchar *txt;
+
+	txt = gtk_entry_get_text(GTK_ENTRY(editable));
+	if (txt[0] == '\0') {
+		gtk_widget_set_sensitive(lookup_widget("ButtonSavePNG"), FALSE);
+	}
+	else
+		gtk_widget_set_sensitive(lookup_widget("ButtonSavePNG"), TRUE);
 }
