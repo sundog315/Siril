@@ -1393,9 +1393,7 @@ gpointer median_filter(gpointer p) {
 						}
 					}
 					quicksort_s(data, args->ksize * args->ksize);
-					WORD median = round_to_WORD(
-							get_median_value_from_sorted_word_data(data,
-									args->ksize * args->ksize));
+					WORD median = round_to_WORD(gsl_stats_ushort_median_from_sorted_data(data, 1, args->ksize * args->ksize));
 					double pixel = args->amount * (median / norm);
 					pixel += (1.0 - args->amount)
 							* ((double) image[y][x] / norm);
@@ -1556,7 +1554,7 @@ int BandingEngine(fits *fit, double sigma, double amount, gboolean protect_highl
 				}
 			}
 
-			double median = get_median_value_from_sorted_word_data(cpyline, n);
+			double median = gsl_stats_ushort_median_from_sorted_data(cpyline, 1, n);
 			rowvalue[row] = background - median;
 			minimum = min(minimum, rowvalue[row]);
 			free(cpyline);

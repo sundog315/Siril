@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <gsl/gsl_statistics_ushort.h>
 
 #include "core/siril.h"
 #include "core/proto.h"
@@ -60,7 +61,7 @@ static WORD getMedian5x5(WORD *buf, const int xx, const int yy, const int w,
 	}
 	start = 24 - n - 1;
 	quicksort_s(value, 24);
-	median = round_to_WORD(get_median_value_from_sorted_word_data(value + start, n));
+	median = round_to_WORD(gsl_stats_ushort_median_from_sorted_data(value + start, 1, n));
 	free(value);
 	return median;
 }

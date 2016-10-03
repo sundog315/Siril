@@ -498,20 +498,6 @@ void quicksort_s(WORD *a, int n) {
 	quicksort_s(l, a + n - l);
 }
 
-double get_median_value_from_sorted_word_data(WORD *data, int size) {
-	double median = 0;
-
-	switch (size % 2) {
-	case 0:
-		median = 0.5 * (data[(size / 2) - 1] + data[size / 2]);
-		break;
-	default:
-		median = data[(size - 1) / 2];
-		break;
-	}
-	return median;
-}
-
 char *remove_ext_from_filename(const char *filename) {
 	size_t filelen;
 	const char *p;

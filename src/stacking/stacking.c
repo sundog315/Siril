@@ -759,7 +759,7 @@ int stack_median(struct stacking_args *args) {
 				}
 				quicksort_s(data->stack, nb_frames);
 				fit->pdata[my_block->channel][pixel_idx] =
-					get_median_value_from_sorted_word_data(data->stack, nb_frames);
+						gsl_stats_ushort_median_from_sorted_data(data->stack, 1, nb_frames);
 				pixel_idx++;
 			}
 		}
@@ -1652,7 +1652,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 				switch (args->type_of_rejection) {
 				case PERCENTILE:
 					quicksort_s(data->stack, N);
-					median = get_median_value_from_sorted_word_data(data->stack, N);
+					median = gsl_stats_ushort_median_from_sorted_data(data->stack, 1, N);
 					for (frame = 0; frame < N; frame++)
 						data->rejected[frame] =
 								percentile_clipping(data->stack[frame], args->sig, median, crej);
@@ -1668,7 +1668,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 					do {
 						sigma = gsl_stats_ushort_sd(data->stack, 1, N);
 						quicksort_s(data->stack, N);
-						median = get_median_value_from_sorted_word_data(data->stack, N);
+						median = gsl_stats_ushort_median_from_sorted_data(data->stack, 1, N);
 						n = 0;
 						for (frame = 0; frame < N; frame++)
 							data->rejected[frame] =
@@ -1688,7 +1688,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 					do {
 						sigma = gsl_stats_ushort_sd(data->stack, 1, N);
 						quicksort_s(data->stack, N);
-						median = get_median_value_from_sorted_word_data(data->stack, N);
+						median = gsl_stats_ushort_median_from_sorted_data(data->stack, 1, N);
 						n = 0;
 						for (frame = 0; frame < N; frame++) {
 							if (sigma_clipping(data->stack[frame], args->sig, sigma, median, crej)) {
@@ -1703,7 +1703,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 						double sigma0;
 						sigma = gsl_stats_ushort_sd(data->stack, 1, N);
 						quicksort_s(data->stack, N);
-						median = get_median_value_from_sorted_word_data(data->stack, N);
+						median = gsl_stats_ushort_median_from_sorted_data(data->stack, 1, N);
 						WORD *w_stack = malloc(N * sizeof(WORD));
 						memcpy(w_stack, data->stack, N * sizeof(WORD));
 						do {
@@ -1713,8 +1713,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 							for (jj = 0; jj < N; jj++)
 								Winsorized(&w_stack[jj], m0, m1);
 							quicksort_s(w_stack, N);
-							median = get_median_value_from_sorted_word_data(
-									w_stack, N);
+							median = gsl_stats_ushort_median_from_sorted_data(w_stack, 1, N);
 							sigma0 = sigma;
 							sigma = 1.134 * gsl_stats_ushort_sd(w_stack, 1, N);
 						} while ((fabs(sigma - sigma0) / sigma0) > 0.0005);
