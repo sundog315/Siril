@@ -512,26 +512,6 @@ double get_median_value_from_sorted_word_data(WORD *data, int size) {
 	return median;
 }
 
-/* return the sigma of a set of data. In the same time it computes
- * the mean value */
-double get_standard_deviation(WORD *data, int size) {
-	int i;
-	double sigma, mean;
-
-	mean = sigma = 0.0;
-	if (size < 2)
-		return 0.0;
-	for (i = 0; i < size; ++i) {
-		mean += (double) data[i];
-	}
-	mean /= size;
-	for (i = 0; i < size; ++i)
-		sigma += pow((double) data[i] - mean, 2);
-	sigma /= (size - 1);
-	sigma = sqrt(sigma);
-	return sigma;
-}
-
 char *remove_ext_from_filename(const char *filename) {
 	size_t filelen;
 	const char *p;
@@ -551,20 +531,6 @@ char *remove_ext_from_filename(const char *filename) {
 	file[filelen] = '\0';
 
 	return file;
-}
-
-char *replace_spaces_from_filename(const char *filename) {
-	GString *string = g_string_new(filename);
-	size_t shift = 0;
-	int i;
-
-	for (i = 0; filename[i]; i++) {
-		if (filename[i] == ' ') {
-			string = g_string_insert_c(string, i + shift, '\\');
-			shift++;
-		}
-	}
-	return g_string_free(string, FALSE);
 }
 
 // append a string to the end of an existing string
