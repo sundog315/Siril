@@ -1740,10 +1740,14 @@ void set_filters_dialog(GtkFileChooser *chooser) {
 		raw = calloc(sizeof(char), nb_raw * 12 + 1);// we assume the extension size of 3 char "*.xxx;*.XXX;" = 12
 		for (i = 0; i < nb_raw; i++) {
 			char ext[20];
+			gchar *upcase;
+
+			upcase = g_ascii_strup(supported_raw[i].extension, strlen(supported_raw[i].extension));
 			g_snprintf(ext, sizeof(ext), "*.%s;*.%s;",
-					supported_raw[i].extension,
-					g_ascii_strup(supported_raw[i].extension, strlen(supported_raw[i].extension)));
+					supported_raw[i].extension, upcase);
 			strcat(raw, ext);
+
+			g_free(upcase);
 		}
 		gtk_filter_add(chooser, _("RAW DSLR Camera Files"), raw,
 				com.filter == TYPERAW);
@@ -1793,10 +1797,15 @@ void set_filters_dialog(GtkFileChooser *chooser) {
 		film = calloc(sizeof(char), nb_film * 14 + 1);// we assume the extension size of 4 char "*.xxxx;*.XXXX;" = 14
 		for (j = 0; j < nb_film; j++) {
 			char ext[20];
+			gchar *upcase;
+
+			upcase = g_ascii_strup(supported_film[j].extension,
+					strlen(supported_film[j].extension));
 			g_snprintf(ext, sizeof(ext), "*.%s;*.%s;",
-					supported_film[j].extension,
-					g_ascii_strup(supported_film[j].extension, strlen(supported_film[j].extension)));
+					supported_film[j].extension, upcase);
 			strcat(film, ext);
+
+			g_free(upcase);
 		}
 		gtk_filter_add(chooser, _("Film Files (*.avi, *.mpg, ...)"), film,
 				com.filter == TYPEAVI);

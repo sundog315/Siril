@@ -824,7 +824,7 @@ int readraw_in_cfa(const char *name, fits *fit) {
 	libraw_data_t *raw = libraw_init(0);
 	unsigned int i, j, c, col, row;
 	char pattern[FLEN_VALUE];
-	ushort raw_width, raw_height, left_margin, right_margin, top_margin;
+	ushort raw_width, raw_height, left_margin, top_margin;
 	ushort width, height;
 	int npixels;
 	WORD *data = NULL;
@@ -858,10 +858,10 @@ int readraw_in_cfa(const char *name, fits *fit) {
 
 	left_margin = raw->rawdata.sizes.left_margin;
 	top_margin = raw->rawdata.sizes.top_margin;
-	right_margin = (raw->rawdata.ioparams.fuji_width) ?
-						right_margin = raw_width - raw->rawdata.ioparams.fuji_width - left_margin: 0;
 
 	if (raw->rawdata.ioparams.fuji_width) {
+		ushort right_margin = raw_width - raw->rawdata.ioparams.fuji_width
+				- left_margin;
 		width = raw_width - right_margin;
 		height = raw_height;
 	}

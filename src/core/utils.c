@@ -169,12 +169,12 @@ int stat_file(const char *filename, image_type *type, char *realname) {
 	for (k = 0; k < 2; k++) {
 		int i = 0;
 		while (supported_extensions[i]) {
-			char *str;
+			gchar *str;
 			if (k == 0)
 				str = strdup(supported_extensions[i]);
 			else str = g_ascii_strup(supported_extensions[i], strlen(supported_extensions[i]));
 			snprintf(test_name, 255, "%s%s", filename, str);
-			free(str);
+			g_free(str);
 			if (is_readable_file(test_name)) {
 				*type = get_type_for_extension(supported_extensions[i]+1);
 				assert(*type != TYPEUNDEF);
