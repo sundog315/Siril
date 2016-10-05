@@ -54,7 +54,7 @@ int check_for_film_extensions(const char *extension) {
 
 	nb_film = get_nb_film_ext_supported();
 	for (i = 0; i < nb_film; i++) {
-		if (!strcasecmp(extension, supported_film[i].extension)) return 0;
+		if (!g_ascii_strcasecmp(extension, supported_film[i].extension)) return 0;
 	}
 	return 1;
 }
