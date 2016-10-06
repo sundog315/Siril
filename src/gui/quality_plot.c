@@ -27,6 +27,7 @@
 #include "core/siril.h"
 #include "core/proto.h"
 #include "gui/callbacks.h"
+#include "gui/quality_plot.h"
 #include "kplot.h"
 
 static GtkWidget *drawingPlot = NULL;
@@ -204,7 +205,6 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 				cairo_surface_write_to_png(cairo_get_target(cr), filename);
 				g_free(filename);
 			}
-			export_to_PNG = FALSE;
 		}
 
 		free(avg);
@@ -213,6 +213,7 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 		kdata_destroy(d2);
 		kdata_destroy(m);
 	}
+	export_to_PNG = FALSE;
 	return FALSE;
 }
 

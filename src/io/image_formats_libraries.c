@@ -873,10 +873,10 @@ int readraw_in_cfa(const char *name, fits *fit) {
 	npixels = width * height;
 	
 	if (raw->other.shutter > 0 && raw->other.shutter < 1)
-		siril_log_message(_("Decoding %s %s file (ISO=%g, Exposure=1/%gs)\n"),
+		siril_log_message(_("Decoding %s %s file (ISO=%g, Exposure=1/%0.1f sec)\n"),
 						raw->idata.make, raw->idata.model, raw->other.iso_speed, 1/raw->other.shutter);
 	else
-		siril_log_message(_("Decoding %s %s file (ISO=%g, Exposure=%gs)\n"),
+		siril_log_message(_("Decoding %s %s file (ISO=%g, Exposure=%0.1f sec)\n"),
 						raw->idata.make, raw->idata.model, raw->other.iso_speed, raw->other.shutter);
 
 	unsigned filters = raw->idata.filters;
@@ -899,7 +899,7 @@ int readraw_in_cfa(const char *name, fits *fit) {
 		for (i = 0; i < fhigh; i++) {
 			for (c = i && 0; c < fwide; c++) {
 				pattern[j++] = raw->idata.cdesc[FC(filters, i, c)];
-				pattern[j+1] = '\0';
+				pattern[j++] = '\0';
 			}
 		}
 		siril_log_message(_("Bayer pattern: %s\n"), pattern);
