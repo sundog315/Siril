@@ -17,7 +17,6 @@
 #endif
 
 /****************** image_format_fits.h ******************/
-int computeRawFitsStats(fits *fit, int layer);
 int	readfits(const char *filename, fits *fit, char *realname);
 char*	list_header(fits *fit);
 void	clearfits(fits *);
@@ -29,7 +28,6 @@ void 	save_fits_header(fits *);
 int	copyfits(fits *from, fits *to, unsigned char oper, int layer);
 int copy_header(fits *from, fits *to);
 int	save1fits16(const char *filename, fits *fit, int layer);
-int	fits48to3fits16(fits *rgb, fits *r, fits *g, fits *b);
 
 void	rgb24bit_to_fits48bit(unsigned char *rgbbuf, fits *fit, gboolean inverted);
 void	rgb8bit_to_fits16bit(unsigned char *graybuf, fits *fit);

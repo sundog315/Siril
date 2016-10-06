@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Siril 0.9.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-10-03 11:21+0200\n"
+"POT-Creation-Date: 2016-10-06 09:52+0200\n"
 "PO-Revision-Date: 2016-08-29 10:04+0200\n"
 "Last-Translator: Cyril Richard <cyril@free-astro.fr>\n"
 "Language-Team: astronomy.com.cn <yecloud@me.com>\n"
@@ -147,7 +147,7 @@ msgstr "红色"
 msgid "current red file"
 msgstr "当前红色文件"
 
-#: ../src/gui/siril3.glade.h:30 ../src/gui/callbacks.c:4296
+#: ../src/gui/siril3.glade.h:30 ../src/gui/callbacks.c:4305
 msgid "Red channel"
 msgstr "红色通道"
 
@@ -3123,11 +3123,11 @@ msgid "Saturation enhancement: processing...\n"
 msgstr "Saturation enhancement: processing...\n"
 
 #: ../src/algos/colors.c:426 ../src/algos/colors.c:635
-#: ../src/algos/colors.c:758 ../src/algos/cosmetic_correction.c:142
-#: ../src/algos/cosmetic_correction.c:352 ../src/algos/star_finder.c:47
+#: ../src/algos/colors.c:758 ../src/algos/cosmetic_correction.c:143
+#: ../src/algos/cosmetic_correction.c:353 ../src/algos/star_finder.c:47
 #: ../src/core/command.c:1357 ../src/core/siril.c:616 ../src/core/siril.c:900
-#: ../src/core/siril.c:1004 ../src/core/siril.c:1147 ../src/core/siril.c:1524
-#: ../src/core/siril.c:1616 ../src/core/siril.c:1725 ../src/gui/histogram.c:690
+#: ../src/core/siril.c:1004 ../src/core/siril.c:1147 ../src/core/siril.c:1522
+#: ../src/core/siril.c:1614 ../src/core/siril.c:1723 ../src/gui/histogram.c:690
 #: ../src/gui/statistics_list.c:306 ../src/io/sequence.c:1190
 msgid "Error: no data computed.\n"
 msgstr ""
@@ -3159,19 +3159,19 @@ msgstr "色彩校准因子:\n"
 msgid "Color Calibration: processing...\n"
 msgstr "色彩校准：处理中...\n"
 
-#: ../src/algos/cosmetic_correction.c:266
+#: ../src/algos/cosmetic_correction.c:267
 #, c-format
 msgid "Image %d: %ld pixels corrected (%ld + %ld)\n"
 msgstr "Image %d: %ld pixels corrected (%ld + %ld)\n"
 
 #. can it be done here in case there is no thread?
-#: ../src/algos/cosmetic_correction.c:299 ../src/core/siril.c:1029
+#: ../src/algos/cosmetic_correction.c:300 ../src/core/siril.c:1029
 #: ../src/core/siril.c:1068
 #, c-format
 msgid "%ld pixels corrected (%ld + %ld)\n"
 msgstr "%ld pixels corrected (%ld + %ld)\n"
 
-#: ../src/algos/cosmetic_correction.c:317
+#: ../src/algos/cosmetic_correction.c:318
 msgid "Cosmetic Correction: processing...\n"
 msgstr "降噪：处理中...\n"
 
@@ -3287,10 +3287,10 @@ msgstr "未保存的合成结果"
 msgid "You must at least load two layers before!\n"
 msgstr "必须先期载入至少两个通道！\n"
 
-#: ../src/compositing/compositing.c:548 ../src/gui/callbacks.c:5008
-#: ../src/gui/callbacks.c:5048 ../src/gui/callbacks.c:5321
-#: ../src/gui/callbacks.c:5330 ../src/gui/callbacks.c:5429
-#: ../src/io/conversion.c:491 ../src/io/image_formats_libraries.c:97
+#: ../src/compositing/compositing.c:548 ../src/gui/callbacks.c:5017
+#: ../src/gui/callbacks.c:5057 ../src/gui/callbacks.c:5330
+#: ../src/gui/callbacks.c:5339 ../src/gui/callbacks.c:5438
+#: ../src/io/conversion.c:483 ../src/io/image_formats_libraries.c:97
 #: ../src/io/image_formats_libraries.c:154
 #: ../src/registration/registration.c:1098
 msgid "Warning"
@@ -3326,10 +3326,10 @@ msgstr "Readjusting layer %d to %g times bright\n"
 #: ../src/core/command.c:764 ../src/core/command.c:791
 #: ../src/core/command.c:1102 ../src/core/command.c:1204
 #: ../src/core/command.c:1225 ../src/core/command.c:1244
-#: ../src/gui/callbacks.c:3177 ../src/gui/callbacks.c:4421
-#: ../src/gui/callbacks.c:4621 ../src/gui/callbacks.c:4958
-#: ../src/gui/callbacks.c:5094 ../src/gui/callbacks.c:5472
-#: ../src/gui/callbacks.c:5621 ../src/io/conversion.c:460
+#: ../src/gui/callbacks.c:3186 ../src/gui/callbacks.c:4430
+#: ../src/gui/callbacks.c:4630 ../src/gui/callbacks.c:4967
+#: ../src/gui/callbacks.c:5103 ../src/gui/callbacks.c:5481
+#: ../src/gui/callbacks.c:5630 ../src/io/conversion.c:452
 #: ../src/registration/registration.c:1087 ../src/stacking/stacking.c:1874
 #: ../src/stacking/stacking.c:2001
 msgid "Another task is already in progress, ignoring new request.\n"
@@ -3362,12 +3362,12 @@ msgid "Crop: select a region or provide x, y, width, height\n"
 msgstr "Crop: select a region or provide x, y, width, height\n"
 
 #: ../src/core/command.c:485 ../src/core/command.c:1475
-#: ../src/gui/callbacks.c:5319 ../src/gui/callbacks.c:5427
+#: ../src/gui/callbacks.c:5328 ../src/gui/callbacks.c:5436
 #, c-format
 msgid "Wavelet: maximum number of plans for this image size is %d\n"
 msgstr "Wavelet: maximum number of plans for this image size is %d\n"
 
-#: ../src/core/command.c:491 ../src/gui/callbacks.c:5328
+#: ../src/core/command.c:491 ../src/gui/callbacks.c:5337
 #, c-format
 msgid "Wavelet: type must be %d or %d\n"
 msgstr "Wavelet: type must be %d or %d\n"
@@ -3678,11 +3678,11 @@ msgstr ""
 msgid "Images don't have the same size (w = %d|%d, h = %d|%d)\n"
 msgstr ""
 
-#: ../src/core/siril.c:197 ../src/core/utils.c:435 ../src/gui/callbacks.c:3872
-#: ../src/gui/callbacks.c:4673 ../src/gui/callbacks.c:4694
-#: ../src/gui/callbacks.c:5110 ../src/gui/callbacks.c:5116
-#: ../src/gui/callbacks.c:5141 ../src/gui/PSF_list.c:150
-#: ../src/io/conversion.c:497 ../src/io/conversion.c:564
+#: ../src/core/siril.c:197 ../src/core/utils.c:435 ../src/gui/callbacks.c:3881
+#: ../src/gui/callbacks.c:4682 ../src/gui/callbacks.c:4703
+#: ../src/gui/callbacks.c:5119 ../src/gui/callbacks.c:5125
+#: ../src/gui/callbacks.c:5150 ../src/gui/PSF_list.c:150
+#: ../src/io/conversion.c:489 ../src/io/conversion.c:556
 #: ../src/io/image_format_fits.c:174 ../src/io/image_format_fits.c:181
 #: ../src/io/image_format_fits.c:200 ../src/io/image_format_fits.c:214
 #: ../src/io/image_format_fits.c:229 ../src/io/image_format_fits.c:331
@@ -3708,7 +3708,7 @@ msgstr ""
 #: ../src/io/image_formats_libraries.c:446
 #: ../src/io/image_formats_libraries.c:532 ../src/io/single_image.c:111
 #: ../src/io/single_image.c:152 ../src/io/single_image.c:156
-#: ../src/stacking/stacking.c:378 ../src/stacking/stacking.c:1207
+#: ../src/stacking/stacking.c:379 ../src/stacking/stacking.c:1208
 msgid "Error"
 msgstr "错误"
 
@@ -3801,33 +3801,33 @@ msgstr "中位数滤镜：处理中...\n"
 msgid "Iteration #%d...\n"
 msgstr "迭代 #%d...\n"
 
-#: ../src/core/siril.c:1484
+#: ../src/core/siril.c:1482
 msgid "Banding Reducing: processing...\n"
 msgstr "Banding Reducing: processing...\n"
 
-#: ../src/core/siril.c:1513
+#: ../src/core/siril.c:1511
 msgid ""
 "Rotation is only possible when Siril has been compiled with OpenCV support.\n"
 msgstr ""
 
-#: ../src/core/siril.c:1607
+#: ../src/core/siril.c:1605
 msgid "Siril cannot evaluate the noise in the image\n"
 msgstr "Siril无法估算图像的噪声\n"
 
-#: ../src/core/siril.c:1664
+#: ../src/core/siril.c:1662
 msgid "backgroundnoise: Error, no data computed\n"
 msgstr ""
 
-#: ../src/core/siril.c:1674
+#: ../src/core/siril.c:1672
 msgid "backgroundnoise: does not converge\n"
 msgstr "backgroundnoise: does not converge\n"
 
-#: ../src/core/siril.c:1695
+#: ../src/core/siril.c:1693
 #, c-format
 msgid "Background noise value (channel: #%d): %0.3lf (%.3e)\n"
 msgstr ""
 
-#: ../src/core/siril.c:1712
+#: ../src/core/siril.c:1710
 msgid "Noise standard deviation: calculating...\n"
 msgstr ""
 
@@ -3952,7 +3952,7 @@ msgstr "打开文件"
 
 #: ../src/gui/callbacks.c:1589 ../src/gui/callbacks.c:1599
 #: ../src/gui/callbacks.c:1608 ../src/gui/callbacks.c:1618
-#: ../src/gui/callbacks.c:4021
+#: ../src/gui/callbacks.c:4030
 msgid "_Cancel"
 msgstr "取消"
 
@@ -3965,93 +3965,93 @@ msgstr "打开"
 msgid "FITS Files (*.fit, *.fits, *.fts)"
 msgstr "FITS文件 (*.fit, *.fits, *.fts)"
 
-#: ../src/gui/callbacks.c:1748
+#: ../src/gui/callbacks.c:1752
 msgid "RAW DSLR Camera Files"
 msgstr "RAW DSLR相机文件"
 
-#: ../src/gui/callbacks.c:1755
+#: ../src/gui/callbacks.c:1759
 #, c-format
 msgid "Graphics Files (*.bmp"
 msgstr "图像文件 (*.bmp"
 
 #. NETPBM FILES
-#: ../src/gui/callbacks.c:1777
+#: ../src/gui/callbacks.c:1781
 msgid "Netpbm Files (*.ppm, *.pnm, *.pgm)"
 msgstr "Netpbm文件 (*.ppm, *.pnm, *.pgm)"
 
 #. IRIS FILES
-#: ../src/gui/callbacks.c:1780
+#: ../src/gui/callbacks.c:1784
 msgid "IRIS PIC Files (*.pic)"
 msgstr "IRIS PIC 文件 (*.pic)"
 
 #. SER FILES
-#: ../src/gui/callbacks.c:1783
+#: ../src/gui/callbacks.c:1787
 msgid "SER files (*.ser)"
 msgstr "SER文件 (*.ser)"
 
-#: ../src/gui/callbacks.c:1801
+#: ../src/gui/callbacks.c:1810
 msgid "Film Files (*.avi, *.mpg, ...)"
 msgstr "视频文件 (*.avi, *.mpg, ...)"
 
-#: ../src/gui/callbacks.c:1994
+#: ../src/gui/callbacks.c:2003
 msgid "This binning is not handled yet\n"
 msgstr "该合并模式不被支持\n"
 
-#: ../src/gui/callbacks.c:2250
+#: ../src/gui/callbacks.c:2259
 msgid "Are you sure you want to quit ?"
 msgstr "真的要退出"
 
-#: ../src/gui/callbacks.c:2658
+#: ../src/gui/callbacks.c:2667
 #, c-format
 msgid "fwhm: selection is too large"
 msgstr "fwhm: 选择区域太大"
 
-#: ../src/gui/callbacks.c:2660
+#: ../src/gui/callbacks.c:2669
 #, c-format
 msgid "fwhm: no selection"
 msgstr "fwhm: 无选择"
 
-#: ../src/gui/callbacks.c:2864
+#: ../src/gui/callbacks.c:2873
 #, c-format
 msgid "Image %d has been unselected from sequence\n"
 msgstr "图像 %d 已被除去\n"
 
-#: ../src/gui/callbacks.c:2869
+#: ../src/gui/callbacks.c:2878
 #, c-format
 msgid "Image %d has been selected from sequence\n"
 msgstr "图像 %d 已被选择\n"
 
-#: ../src/gui/callbacks.c:2902
+#: ../src/gui/callbacks.c:2911
 #, c-format
 msgid "%s (channel 0)"
 msgstr "%s (通道 0)"
 
-#: ../src/gui/callbacks.c:2907
+#: ../src/gui/callbacks.c:2916
 #, c-format
 msgid "%s (channel 1)"
 msgstr "%s (通道 1)"
 
-#: ../src/gui/callbacks.c:2911
+#: ../src/gui/callbacks.c:2920
 #, c-format
 msgid "%s (channel 2)"
 msgstr "%s (通道 2)"
 
-#: ../src/gui/callbacks.c:2960
+#: ../src/gui/callbacks.c:2969
 #, c-format
 msgid "%d: not affected yet"
 msgstr "%d: 未生效"
 
-#: ../src/gui/callbacks.c:3012
+#: ../src/gui/callbacks.c:3021
 #, c-format
 msgid "%g nm"
 msgstr "%g nm"
 
-#: ../src/gui/callbacks.c:3014
+#: ../src/gui/callbacks.c:3023
 #, c-format
 msgid "undefined"
 msgstr "未定义的"
 
-#: ../src/gui/callbacks.c:3128
+#: ../src/gui/callbacks.c:3137
 msgid ""
 "Exclude all images ?\n"
 " (this erases previous image selection\n"
@@ -4060,7 +4060,7 @@ msgstr ""
 "排除所有图像？\n"
 "（这将抹去之前的图像选择，并且无法撤销）"
 
-#: ../src/gui/callbacks.c:3138
+#: ../src/gui/callbacks.c:3147
 msgid ""
 "Include all images ?\n"
 " (this erases previous image selection\n"
@@ -4069,157 +4069,157 @@ msgstr ""
 "包含所有图像？\n"
 "（这将抹去之前的图像选择，并且无法撤销）"
 
-#: ../src/gui/callbacks.c:3157
+#: ../src/gui/callbacks.c:3166
 msgid "Selected all images from sequence\n"
 msgstr "已选择队列中所有的图像\n"
 
-#: ../src/gui/callbacks.c:3160
+#: ../src/gui/callbacks.c:3169
 msgid "Unselected all images from sequence\n"
 msgstr "已除去队列中所有的图像\n"
 
-#: ../src/gui/callbacks.c:3192
+#: ../src/gui/callbacks.c:3201
 msgid "Opening dark image..."
 msgstr "打开暗场帧…"
 
-#: ../src/gui/callbacks.c:3195
+#: ../src/gui/callbacks.c:3204
 msgid "NOT USING DARK: cannot open the file\n"
 msgstr "未使用暗场：无法打开文件\n"
 
-#: ../src/gui/callbacks.c:3200
+#: ../src/gui/callbacks.c:3209
 msgid "NOT USING DARK: number of channels is different"
 msgstr "未使用暗场：通道数目不一致"
 
-#: ../src/gui/callbacks.c:3241
+#: ../src/gui/callbacks.c:3250
 msgid "Opening flat image..."
 msgstr "打开平场帧..."
 
-#: ../src/gui/callbacks.c:3244
+#: ../src/gui/callbacks.c:3253
 msgid "NOT USING FLAT: cannot open the file\n"
 msgstr "未使用平场：无法打开文件\n"
 
-#: ../src/gui/callbacks.c:3249
+#: ../src/gui/callbacks.c:3258
 msgid "NOT USING FLAT: number of channels is different"
 msgstr "未使用平场：通道数目不一致"
 
-#: ../src/gui/callbacks.c:3277
+#: ../src/gui/callbacks.c:3286
 msgid "Opening offset image..."
 msgstr "打开偏置帧..."
 
-#: ../src/gui/callbacks.c:3280
+#: ../src/gui/callbacks.c:3289
 msgid "NOT USING OFFSET: cannot open the file\n"
 msgstr "未使用偏置：无法打开文件\n"
 
-#: ../src/gui/callbacks.c:3285
+#: ../src/gui/callbacks.c:3294
 msgid "NOT USING OFFSET: number of channels is different"
 msgstr "未使用偏置：通道数目不一致"
 
-#: ../src/gui/callbacks.c:3308
+#: ../src/gui/callbacks.c:3317
 msgid "Preprocessing...\n"
 msgstr "预处理...\n"
 
-#: ../src/gui/callbacks.c:3446
+#: ../src/gui/callbacks.c:3455
 #, c-format
 msgid "Selected %s sequence %s..."
 msgstr "已选择 %s 队列 %s..."
 
-#: ../src/gui/callbacks.c:3477
+#: ../src/gui/callbacks.c:3486
 msgid "Searching for sequences in the current working directory..."
 msgstr "在当前工作目录中搜索队列..."
 
-#: ../src/gui/callbacks.c:3565
+#: ../src/gui/callbacks.c:3574
 #, c-format
 msgid "new zoom value: %f\n"
 msgstr ""
 
-#: ../src/gui/callbacks.c:3871
+#: ../src/gui/callbacks.c:3880
 msgid "Unknown zoom_value value, what is the current zoom?\n"
 msgstr ""
 
-#: ../src/gui/callbacks.c:4020
+#: ../src/gui/callbacks.c:4029
 msgid "Save File"
 msgstr "保存文件"
 
-#: ../src/gui/callbacks.c:4021
+#: ../src/gui/callbacks.c:4030
 msgid "_Save"
 msgstr "_保存"
 
-#: ../src/gui/callbacks.c:4077
+#: ../src/gui/callbacks.c:4086
 msgid "BMP Files"
 msgstr "BMP文件"
 
-#: ../src/gui/callbacks.c:4083
+#: ../src/gui/callbacks.c:4092
 msgid "JPEG Files"
 msgstr "JPEG文件"
 
-#: ../src/gui/callbacks.c:4090
+#: ../src/gui/callbacks.c:4099
 msgid "TIFF Files"
 msgstr "TIFF文件"
 
-#: ../src/gui/callbacks.c:4126
+#: ../src/gui/callbacks.c:4135
 msgid "FITS Files"
 msgstr "FITS文件"
 
-#: ../src/gui/callbacks.c:4134 ../src/gui/callbacks.c:4138
+#: ../src/gui/callbacks.c:4143 ../src/gui/callbacks.c:4147
 msgid "NetPBM Files"
 msgstr "NetPBM文件"
 
-#: ../src/gui/callbacks.c:4145
+#: ../src/gui/callbacks.c:4154
 msgid "This type of file is not handled. Should not happen"
 msgstr "该文件类型无法被识别"
 
 #. Write "Siril Version X.Y in Copyright_Txt
-#: ../src/gui/callbacks.c:4196
+#: ../src/gui/callbacks.c:4205
 msgid "Saving TIFF"
 msgstr "保存TIFF"
 
-#: ../src/gui/callbacks.c:4214
+#: ../src/gui/callbacks.c:4223
 msgid "Saving Netpbm"
 msgstr "保存Netpbm"
 
-#: ../src/gui/callbacks.c:4232
+#: ../src/gui/callbacks.c:4241
 msgid "Saving BMP"
 msgstr "保存BMP"
 
-#: ../src/gui/callbacks.c:4250
+#: ../src/gui/callbacks.c:4259
 msgid "Saving JPG"
 msgstr "保存JPG"
 
-#: ../src/gui/callbacks.c:4293
+#: ../src/gui/callbacks.c:4302
 msgid "B&W channel"
 msgstr "黑白通道"
 
-#: ../src/gui/callbacks.c:4671
+#: ../src/gui/callbacks.c:4680
 msgid ""
 "Background cannot be extracted from itself. Please, click on Show Image\n"
 msgstr "背景无法自己提取自己，请点击显示图像\n"
 
-#: ../src/gui/callbacks.c:4693
+#: ../src/gui/callbacks.c:4702
 msgid "Please, apply correction on the image by clicking on Show Image\n"
 msgstr "请点击显示图像按钮以应用修正\n"
 
-#: ../src/gui/callbacks.c:4715
+#: ../src/gui/callbacks.c:4724
 msgid "Subtraction done ...\n"
 msgstr "减法完成...\n"
 
-#: ../src/gui/callbacks.c:4722
+#: ../src/gui/callbacks.c:4731
 msgid "Division done ...\n"
 msgstr "除法完成...\n"
 
-#: ../src/gui/callbacks.c:4907
+#: ../src/gui/callbacks.c:4916
 msgid "Load an image first, aborted.\n"
 msgstr "请先载入图像，异常中止。\n"
 
-#: ../src/gui/callbacks.c:4936
+#: ../src/gui/callbacks.c:4945
 msgid "The file stars.lst has been created.\n"
 msgstr "文件stars.lst已被创建。\n"
 
-#: ../src/gui/callbacks.c:5006 ../src/gui/callbacks.c:5047
+#: ../src/gui/callbacks.c:5015 ../src/gui/callbacks.c:5056
 msgid ""
 "Current selection is too large.\n"
 "To determine the PSF, please make a selection around a star.\n"
 msgstr "当前选择区域太大。若要计算PSF，请选择一个星点周围的区域。\n"
 
-#: ../src/gui/callbacks.c:5020
+#: ../src/gui/callbacks.c:5029
 #, c-format
 msgid ""
 "Centroid Coordinates:\n"
@@ -4268,19 +4268,19 @@ msgstr ""
 "RMSE:\n"
 "\t\tRMSE=%.3e"
 
-#: ../src/gui/callbacks.c:5109
+#: ../src/gui/callbacks.c:5118
 msgid "FFT does not work with sequences !\n"
 msgstr "傅立叶变换不可用于队列！\n"
 
-#: ../src/gui/callbacks.c:5115
+#: ../src/gui/callbacks.c:5124
 msgid "Open an image first !\n"
 msgstr "先要打开一幅图像！\n"
 
-#: ../src/gui/callbacks.c:5140
+#: ../src/gui/callbacks.c:5149
 msgid "Select magnitude and phase before !\n"
 msgstr "请先选择好幅值和相位！\n"
 
-#: ../src/gui/callbacks.c:5689
+#: ../src/gui/callbacks.c:5698
 #, c-format
 msgid "%d files loaded"
 msgstr "%d个文件已载入"
@@ -4319,22 +4319,22 @@ msgstr ""
 msgid "Star %d of %d"
 msgstr "星点 %d 之于 %d"
 
-#: ../src/gui/quality_plot.c:148
+#: ../src/gui/quality_plot.c:150
 #, fuzzy
 msgid "Frames"
 msgstr "帧率"
 
-#: ../src/gui/quality_plot.c:149
+#: ../src/gui/quality_plot.c:151
 #, fuzzy
 msgid "FWHM"
 msgstr "FWHMx"
 
-#: ../src/gui/quality_plot.c:149
+#: ../src/gui/quality_plot.c:151
 #, fuzzy
 msgid "Quality"
 msgstr "品质: "
 
-#: ../src/gui/quality_plot.c:199
+#: ../src/gui/quality_plot.c:201
 #, fuzzy
 msgid "Information"
 msgstr "无归一化"
@@ -4439,79 +4439,74 @@ msgstr "PIC图像(IRIS)， "
 msgid "PGM and PPM binary images"
 msgstr "PGM和PPM二进制图像"
 
-#: ../src/io/conversion.c:295
+#: ../src/io/conversion.c:294
 msgid "RAW images"
 msgstr "RAW图像"
 
-#: ../src/io/conversion.c:312
+#: ../src/io/conversion.c:309
 msgid "FITS-CFA images"
 msgstr "FITS-CFA图像"
 
-#: ../src/io/conversion.c:318
+#: ../src/io/conversion.c:314
 msgid "Films"
 msgstr "视频"
 
-#: ../src/io/conversion.c:324
+#: ../src/io/conversion.c:319
 msgid "SER sequences"
 msgstr "SER队列"
 
-#: ../src/io/conversion.c:331
+#: ../src/io/conversion.c:325
 msgid "TIFF images"
 msgstr "TIFF图像"
 
-#: ../src/io/conversion.c:339
+#: ../src/io/conversion.c:333
 msgid "JPG images"
 msgstr "JPG图像"
 
-#: ../src/io/conversion.c:347
+#: ../src/io/conversion.c:341
 msgid "PNG images"
 msgstr "PNG图像"
 
-#: ../src/io/conversion.c:354
-#, c-format
-msgid "ERROR: no input file type supported for conversion."
-msgstr "错误：不支持的输入文件类型。"
-
-#: ../src/io/conversion.c:358
+#: ../src/io/conversion.c:350
 #, c-format
 msgid "Supported file types: %s\n"
 msgstr "支持的文件类型: %s\n"
 
-#: ../src/io/conversion.c:479
+#: ../src/io/conversion.c:471
 msgid "Conversion: processing...\n"
 msgstr "Conversion: processing...\n"
 
-#: ../src/io/conversion.c:490
+#: ../src/io/conversion.c:482
 msgid "Conversion: no working directory set.\n"
 msgstr "转化：工作目录未设置。\n"
 
-#: ../src/io/conversion.c:496
+#: ../src/io/conversion.c:488
 #, c-format
 msgid "Conversion: error opening working directory %s.\n"
 msgstr ""
 
-#: ../src/io/conversion.c:527
+#: ../src/io/conversion.c:519
 msgid ""
 "SER output will take precedence over the one-channel per image creation "
 "option.\n"
 msgstr "SER输出将获得超过新建单通道图像的优先权。\n"
 
-#: ../src/io/conversion.c:533 ../src/io/conversion.c:582
+#: ../src/io/conversion.c:525 ../src/io/conversion.c:574
 #: ../src/io/sequence.c:1119 ../src/io/sequence.c:1290
 msgid "Creating the SER file failed, aborting.\n"
 msgstr "创建SER文件失败，异常终止。\n"
 
-#: ../src/io/conversion.c:550 ../src/io/conversion.c:551
+#: ../src/io/conversion.c:542 ../src/io/conversion.c:543
 #, c-format
 msgid "Converting %s..."
 msgstr "转化 %s..."
 
-#: ../src/io/conversion.c:556
+#: ../src/io/conversion.c:548
 #, c-format
 msgid "FILETYPE IS NOT SUPPORTED, CANNOT CONVERT: %s\n"
 msgstr ""
 
-#: ../src/io/conversion.c:557
+#: ../src/io/conversion.c:549
 #, c-format
 msgid ""
 "File extension '%s' is not supported.\n"
@@ -4526,73 +4521,73 @@ msgstr ""
 "如果确认无错，那么你需要安装第三方软件来激活这种文件类型，详见README\n"
 "如果你所试图载入的文件类型在支持列表内，那么可以向开发团队提交一个缺陷报告。"
 
-#: ../src/io/conversion.c:576
+#: ../src/io/conversion.c:568
 #, c-format
 msgid "Error while opening film %s, aborting.\n"
 msgstr ""
 
-#: ../src/io/conversion.c:589
+#: ../src/io/conversion.c:581
 #, c-format
 msgid "Error while reading frame %d from %s, aborting.\n"
 msgstr ""
 
-#: ../src/io/conversion.c:599 ../src/io/conversion.c:627
+#: ../src/io/conversion.c:591 ../src/io/conversion.c:619
 #: ../src/io/sequence.c:1146 ../src/io/sequence.c:1502
 msgid "Error while converting to SER (no space left?)\n"
 msgstr ""
 
-#: ../src/io/conversion.c:605 ../src/io/conversion.c:633
+#: ../src/io/conversion.c:597 ../src/io/conversion.c:625
 msgid "Error while converting to FITS (no space left?)\n"
 msgstr ""
 
-#: ../src/io/conversion.c:618
+#: ../src/io/conversion.c:610
 msgid "Converting from SER is not yet supported\n"
 msgstr ""
 
-#: ../src/io/conversion.c:687
+#: ../src/io/conversion.c:680
 msgid ""
 "Saving to 3 FITS files cannot be done because the source image does not have "
 "three channels\n"
 msgstr "保存为3个FITS文件无法执行，因为源图像没有包含三个通道\n"
 
-#: ../src/io/conversion.c:740
+#: ../src/io/conversion.c:733
 msgid "Cannot perform debayering on image with more than one channel\n"
 msgstr "在超过一个通道的图像上无法执行debayer\n"
 
-#: ../src/io/conversion.c:750 ../src/io/ser.c:687 ../src/io/ser.c:797
+#: ../src/io/conversion.c:743 ../src/io/ser.c:687 ../src/io/ser.c:797
 #, fuzzy
 msgid "No Bayer pattern found in the header file.\n"
 msgstr "使用文件头中的Bayer滤镜排列模式"
 
-#: ../src/io/conversion.c:753 ../src/io/ser.c:690 ../src/io/ser.c:800
+#: ../src/io/conversion.c:746 ../src/io/ser.c:690 ../src/io/ser.c:800
 #, c-format
 msgid ""
 "Bayer pattern found in header (%s) is different from Bayer pattern in "
 "settings (%s). Overriding settings.\n"
 msgstr ""
 
-#: ../src/io/conversion.c:761
+#: ../src/io/conversion.c:754
 #, c-format
 msgid "Filter Pattern: %s\n"
 msgstr "Filter Pattern: %s\n"
 
-#: ../src/io/conversion.c:764
+#: ../src/io/conversion.c:757
 msgid "Cannot perform debayering\n"
 msgstr "无法执行debayer\n"
 
-#: ../src/io/conversion.c:833
+#: ../src/io/conversion.c:825
 msgid ""
 "Requested converting a sequence file to single FITS image, should not "
 "happen\n"
 msgstr "将一个队列文件转化为单个FITS文件的请求是违法的\n"
 
 #. when the ifdefs are not compiled, default happens!
-#: ../src/io/conversion.c:838
+#: ../src/io/conversion.c:830
 #, c-format
 msgid "Error opening %s: file type not supported.\n"
 msgstr "文件打开错误 %s: 文件类型不支持。\n"
 
-#: ../src/io/films.c:240
+#: ../src/io/films.c:244
 msgid "FILM ERROR: incompatible format\n"
 msgstr "视频错误：不兼容的格式\n"
 
@@ -4894,22 +4889,22 @@ msgstr "Filter Pattern: %s\n"
 msgid "Reading RAW: file %s, %ld layer(s), %ux%u pixels\n"
 msgstr ""
 
-#: ../src/io/seqfile.c:244
+#: ../src/io/seqfile.c:248
 msgid "The file seems to be corrupted\n"
 msgstr "文件似乎已损坏\n"
 
-#: ../src/io/seqfile.c:254
+#: ../src/io/seqfile.c:258
 #, c-format
 msgid ""
 "Fixing the selection number in the .seq file (%d) to the actual value (%d) "
 "(not saved)\n"
 msgstr ""
 
-#: ../src/io/seqfile.c:265
+#: ../src/io/seqfile.c:269
 msgid "Could not load sequence\n"
 msgstr "无法载入队列\n"
 
-#: ../src/io/seqfile.c:386
+#: ../src/io/seqfile.c:390
 #, c-format
 msgid ""
 "The sequence %s doesn't start at the frame number %d with the specified "
@@ -5019,8 +5014,8 @@ msgid ""
 "height, resizing selection.\n"
 msgstr ""
 
-#: ../src/io/sequence.c:1402 ../src/stacking/stacking.c:232
-#: ../src/stacking/stacking.c:856 ../src/stacking/stacking.c:1013
+#: ../src/io/sequence.c:1402 ../src/stacking/stacking.c:233
+#: ../src/stacking/stacking.c:857 ../src/stacking/stacking.c:1014
 msgid "Processing image "
 msgstr "处理图像 "
 
@@ -5116,46 +5111,46 @@ msgstr ""
 msgid "Closing sequence %s\n"
 msgstr "Closing sequence %s\n"
 
-#: ../src/main.c:145
+#: ../src/main.c:144
 #, c-format
 msgid "unknown command line parameter '%c'\n"
 msgstr ""
 
-#: ../src/main.c:182
+#: ../src/main.c:181
 #, c-format
 msgid "Successfully loaded '%s%s'\n"
 msgstr "Successfully loaded '%s%s'\n"
 
-#: ../src/main.c:186
+#: ../src/main.c:185
 #, c-format
 msgid "Unable to read file: %s\n"
 msgstr "无法读取文件：%s\n"
 
-#: ../src/main.c:192
+#: ../src/main.c:191
 #, c-format
 msgid "%s was not found or contains errors, cannot render GUI. Exiting.\n"
 msgstr ""
 
-#: ../src/main.c:212
+#: ../src/main.c:211
 #, c-format
 msgid "Welcome to %s v%s\n"
 msgstr "Welcome to %s v%s\n"
 
-#: ../src/main.c:279
+#: ../src/main.c:278
 msgid "Could not load or create settings file in ~/.siril, exiting.\n"
 msgstr "无法读取或创建设置文件于目录 ~/.siril，程序退出。\n"
 
 #. Get CPU number and set the number of threads
-#: ../src/main.c:321
+#: ../src/main.c:320
 #, c-format
 msgid "Parallel processing %s: Using %d logical processor%s"
 msgstr ""
 
-#: ../src/main.c:323
+#: ../src/main.c:322
 msgid "enabled"
 msgstr "enabled"
 
-#: ../src/main.c:325
+#: ../src/main.c:324
 msgid "disabled"
 msgstr "disabled"
 
@@ -5386,150 +5381,150 @@ msgstr "所有的先决条件不适合对齐，请先选择一个矩形。\n"
 msgid "Registration: processing using method: %s\n"
 msgstr "Registration: processing using method: %s\n"
 
-#: ../src/stacking/stacking.c:135
+#: ../src/stacking/stacking.c:136
 msgid "Computing normalization...\n"
 msgstr "计算归一化...\n"
 
-#: ../src/stacking/stacking.c:156
+#: ../src/stacking/stacking.c:157
 msgid "Normalization failed."
 msgstr "归一化失败。"
 
-#: ../src/stacking/stacking.c:211 ../src/stacking/stacking.c:835
-#: ../src/stacking/stacking.c:992
+#: ../src/stacking/stacking.c:212 ../src/stacking/stacking.c:836
+#: ../src/stacking/stacking.c:993
 msgid "No frame selected for stacking (select at least 2). Aborting.\n"
 msgstr "没有图像被选中用于叠加（至少2），异常中止。\n"
 
-#: ../src/stacking/stacking.c:240 ../src/stacking/stacking.c:864
-#: ../src/stacking/stacking.c:1021
+#: ../src/stacking/stacking.c:241 ../src/stacking/stacking.c:865
+#: ../src/stacking/stacking.c:1022
 msgid "Stacking: could not read frame, aborting\n"
 msgstr "叠加：无法读取帧，异常中止\n"
 
-#: ../src/stacking/stacking.c:271 ../src/stacking/stacking.c:888
-#: ../src/stacking/stacking.c:1044
+#: ../src/stacking/stacking.c:272 ../src/stacking/stacking.c:889
+#: ../src/stacking/stacking.c:1045
 msgid "Stacking: image in sequence doesn't has the same dimensions\n"
 msgstr ""
 
-#: ../src/stacking/stacking.c:317 ../src/stacking/stacking.c:770
-#: ../src/stacking/stacking.c:939 ../src/stacking/stacking.c:1095
+#: ../src/stacking/stacking.c:318 ../src/stacking/stacking.c:771
+#: ../src/stacking/stacking.c:940 ../src/stacking/stacking.c:1096
 #: ../src/stacking/stacking.c:1795
 msgid "Finalizing stacking..."
 msgstr "叠加最终定稿..."
 
-#: ../src/stacking/stacking.c:344 ../src/stacking/stacking.c:960
-#: ../src/stacking/stacking.c:1116
+#: ../src/stacking/stacking.c:345 ../src/stacking/stacking.c:961
+#: ../src/stacking/stacking.c:1117
 msgid "Stacking failed. Check the log."
 msgstr "Stacking failed. Check the log."
 
-#: ../src/stacking/stacking.c:345 ../src/stacking/stacking.c:802
-#: ../src/stacking/stacking.c:961 ../src/stacking/stacking.c:1117
+#: ../src/stacking/stacking.c:346 ../src/stacking/stacking.c:803
+#: ../src/stacking/stacking.c:962 ../src/stacking/stacking.c:1118
 #: ../src/stacking/stacking.c:1836
 msgid "Stacking failed.\n"
 msgstr "叠加失败。\n"
 
-#: ../src/stacking/stacking.c:347 ../src/stacking/stacking.c:963
-#: ../src/stacking/stacking.c:1119
+#: ../src/stacking/stacking.c:348 ../src/stacking/stacking.c:964
+#: ../src/stacking/stacking.c:1120
 msgid "Stacking complete."
 msgstr "叠加完成。"
 
-#: ../src/stacking/stacking.c:377
+#: ../src/stacking/stacking.c:378
 msgid "Median stacking is only supported for FITS images and SER sequences.\n"
 msgstr ""
 
-#: ../src/stacking/stacking.c:382 ../src/stacking/stacking.c:1211
+#: ../src/stacking/stacking.c:383 ../src/stacking/stacking.c:1212
 msgid "Select at least two frames for stacking. Aborting.\n"
 msgstr "至少选择两幅图像用于叠加，异常中止。\n"
 
-#: ../src/stacking/stacking.c:404
+#: ../src/stacking/stacking.c:405
 #, c-format
 msgid "Median stack: opening image %s"
 msgstr ""
 
-#: ../src/stacking/stacking.c:425
+#: ../src/stacking/stacking.c:426
 msgid "Median stack error: images with > 3 dimensions are not supported\n"
 msgstr ""
 
-#: ../src/stacking/stacking.c:436
+#: ../src/stacking/stacking.c:437
 msgid "Median stack error: input images have different sizes\n"
 msgstr ""
 
-#: ../src/stacking/stacking.c:486 ../src/stacking/stacking.c:1315
+#: ../src/stacking/stacking.c:487 ../src/stacking/stacking.c:1316
 msgid "Super-pixel is not handled yet for on the fly SER stacking\n"
 msgstr ""
 
 #. no image has been loaded
-#: ../src/stacking/stacking.c:493
+#: ../src/stacking/stacking.c:494
 msgid "Median stack error: uninitialized sequence\n"
 msgstr ""
 
-#: ../src/stacking/stacking.c:550 ../src/stacking/stacking.c:1379
+#: ../src/stacking/stacking.c:551 ../src/stacking/stacking.c:1380
 msgid "Your version of cfitsio does not support multi-threading\n"
 msgstr ""
 
-#: ../src/stacking/stacking.c:558 ../src/stacking/stacking.c:1387
+#: ../src/stacking/stacking.c:559 ../src/stacking/stacking.c:1388
 msgid "Processing the sequence as RGB\n"
 msgstr "Processing the sequence as RGB\n"
 
-#: ../src/stacking/stacking.c:595 ../src/stacking/stacking.c:1424
+#: ../src/stacking/stacking.c:596 ../src/stacking/stacking.c:1425
 #, c-format
 msgid "We have %d parallel blocks of size %d (+%d) for stacking.\n"
 msgstr ""
 
-#: ../src/stacking/stacking.c:606 ../src/stacking/stacking.c:1435
+#: ../src/stacking/stacking.c:607 ../src/stacking/stacking.c:1436
 msgid ""
 "A bug has been found. Unable to split the image area into the correct "
 "processing blocks.\n"
 msgstr "发现一个Bug，无法将图像区域拆分成正确的待处理块。\n"
 
-#: ../src/stacking/stacking.c:672 ../src/stacking/stacking.c:1502
+#: ../src/stacking/stacking.c:673 ../src/stacking/stacking.c:1503
 msgid "Starting stacking...\n"
 msgstr "开始叠加...\n"
 
-#: ../src/stacking/stacking.c:673
+#: ../src/stacking/stacking.c:674
 msgid "Median stacking in progress..."
 msgstr "中位数叠加处理中..."
 
-#: ../src/stacking/stacking.c:713 ../src/stacking/stacking.c:1579
+#: ../src/stacking/stacking.c:714 ../src/stacking/stacking.c:1580
 msgid "Error reading one of the image areas\n"
 msgstr "图像区域读取错误\n"
 
-#: ../src/stacking/stacking.c:801
+#: ../src/stacking/stacking.c:802
 msgid "Median stacking failed. Check the log."
 msgstr "Median stacking failed. Check the log."
 
-#: ../src/stacking/stacking.c:804
+#: ../src/stacking/stacking.c:805
 msgid "Median stacking complete."
 msgstr "中位数叠加完成。"
 
-#: ../src/stacking/stacking.c:805
+#: ../src/stacking/stacking.c:806
 #, c-format
 msgid "Median stacking complete. %d have been stacked.\n"
 msgstr ""
 
-#: ../src/stacking/stacking.c:1206
+#: ../src/stacking/stacking.c:1207
 msgid ""
 "Rejection stacking is only supported for FITS images and SER sequences.\n"
 "Use \"Sum Stacking\" instead.\n"
 msgstr ""
 
-#: ../src/stacking/stacking.c:1233
+#: ../src/stacking/stacking.c:1234
 #, c-format
 msgid "Rejection stack: opening image %s"
 msgstr ""
 
-#: ../src/stacking/stacking.c:1254
+#: ../src/stacking/stacking.c:1255
 msgid "Rejection stack error: images with > 3 dimensions are not supported\n"
 msgstr ""
 
-#: ../src/stacking/stacking.c:1265
+#: ../src/stacking/stacking.c:1266
 msgid "Rejection stack error: input images have different sizes\n"
 msgstr ""
 
 #. no image has been loaded
-#: ../src/stacking/stacking.c:1322
+#: ../src/stacking/stacking.c:1323
 msgid "Rejection stack error: uninitialized sequence\n"
 msgstr ""
 
-#: ../src/stacking/stacking.c:1503
+#: ../src/stacking/stacking.c:1504
 msgid "Rejection stacking in progress..."
 msgstr "Rejection stacking in progress..."
 
@@ -5700,6 +5695,9 @@ msgstr "基于品质 > %.2f (%d 图像)"
 #, c-format
 msgid "Based on quality"
 msgstr "基于品质"
+
+#~ msgid "ERROR: no input file type supported for conversion."
+#~ msgstr "错误：不支持的输入文件类型。"
 
 #~ msgid "Image sequences"
 #~ msgstr "图像队列"

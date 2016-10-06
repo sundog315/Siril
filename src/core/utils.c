@@ -541,11 +541,11 @@ char *format_basename(char *root) {
 		root[120] = '\0';
 		len = 120;
 	}
-	if (root[len-1] == '-' || root[len-1] == '_') {
+	if (root[len - 1] == '-' || root[len - 1] == '_') {
 		return root;
 	}
 
-	char *appended = malloc(len+2);
+	char *appended = malloc(len + 2);
 	sprintf(appended, "%s_", root);
 	free(root);
 	return appended;

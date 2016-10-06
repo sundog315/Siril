@@ -13,7 +13,6 @@ int get_nb_raw_supported();
 void list_format_available();
 void check_for_conversion_form_completeness();
 image_type get_type_for_extension(const char *extension);
-void update_raw_cfa_tooltip();
 void initialize_converters();
 int count_selected_files();
 int save_to_target_fits(fits *fit, const char *dest_filename);

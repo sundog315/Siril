@@ -77,7 +77,6 @@ void signal_handled(int s) {
 	//printf("Caught signal %d\n", s);
 	undo_flush();
 	exit(EXIT_FAILURE);
-
 }
 
 int main(int argc, char *argv[]) {

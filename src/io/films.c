@@ -47,6 +47,10 @@ int get_nb_film_ext_supported() {
 	return sizeof(supported_film) / sizeof(supported_film_list);
 }
 
+static void film_init_struct(struct film_struct *film) {
+	memset(film, 0, sizeof(struct film_struct));
+}
+
 /* Check different film extensions supported in supported_film[].
  * The function return 0 if an extension is found, 1 else */
 int check_for_film_extensions(const char *extension) {
@@ -348,10 +352,6 @@ int film_read_frame(struct film_struct *film, int frame_no, fits *fit) {
 void film_close_file(struct film_struct *film) {
 	/* now it's time to clean up */
 	FFMS_DestroyVideoSource(film->videosource);
-}
-
-void film_init_struct(struct film_struct *film) {
-	memset(film, 0, sizeof(struct film_struct));
 }
 
 void film_display_info(struct film_struct *film) {
