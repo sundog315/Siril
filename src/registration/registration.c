@@ -531,6 +531,8 @@ int register_star_alignment(struct registration_args *args) {
 		return -1;
 	}
 	if (args->seq->regparam[args->layer]) {
+		siril_log_message(
+				_("Recomputing already existing registration for this layer\n"));
 		current_regdata = args->seq->regparam[args->layer];
 		/* we reset all values as we built another sequence */
 		memset(current_regdata, 0, args->seq->number * sizeof(regdata));
@@ -685,19 +687,21 @@ int register_star_alignment(struct registration_args *args) {
 					_print_result(&trans, FWHMx, FWHMy);
 					current_regdata[frame].fwhm = FWHMx;
 
-					fits_flip_top_to_bottom(&fit);	// this is because in cvTransformImage, rotation center point is at (0, 0)
+					if (!args->translation_only) {
+						fits_flip_top_to_bottom(&fit);	// this is because in cvTransformImage, rotation center point is at (0, 0)
 
-					/* An alternative method for generating an improved rotation: Basically we apply the operation to an image
-					 * that is at least twice (or more) the size of the final image size wanted. After rotating the image,
-					 * the image is resized down to its final size so as to produce a very sharp lines,
-					 * edges, and much cleaner looking fonts. */
-					cvResizeGaussian(&fit, fit.rx * SUPER_SAMPLING, fit.ry * SUPER_SAMPLING, OPENCV_CUBIC);
-					trans.a *= SUPER_SAMPLING;
-					trans.d *= SUPER_SAMPLING;
-					cvTransformImage(&fit, trans, args->interpolation);
-					cvResizeGaussian(&fit, fit.rx / SUPER_SAMPLING, fit.ry / SUPER_SAMPLING, OPENCV_CUBIC);
+						/* An alternative method for generating an improved rotation: Basically we apply the operation to an image
+						 * that is at least twice (or more) the size of the final image size wanted. After rotating the image,
+						 * the image is resized down to its final size so as to produce a very sharp lines,
+						 * edges, and much cleaner looking fonts. */
+						cvResizeGaussian(&fit, fit.rx * SUPER_SAMPLING, fit.ry * SUPER_SAMPLING, OPENCV_CUBIC);
+						trans.a *= SUPER_SAMPLING;
+						trans.d *= SUPER_SAMPLING;
+						cvTransformImage(&fit, trans, args->interpolation);
+						cvResizeGaussian(&fit, fit.rx / SUPER_SAMPLING, fit.ry / SUPER_SAMPLING, OPENCV_CUBIC);
 
-					fits_flip_top_to_bottom(&fit);
+						fits_flip_top_to_bottom(&fit);
+					}
 
 					i = 0;
 					while (i < MAX_STARS && stars[i])
@@ -705,19 +709,24 @@ int register_star_alignment(struct registration_args *args) {
 					free(stars);
 				}
 
-				if (args->seq->type == SEQ_SER) {
-					ser_write_frame_from_fit(new_ser, &fit,
-							frame - failed - skipped);
-					args->imgparam[frame - failed - skipped].filenum =
-						frame - failed - skipped;
+				if (!args->translation_only) {
+					if (args->seq->type == SEQ_SER) {
+						ser_write_frame_from_fit(new_ser, &fit,
+								frame - failed - skipped);
+						args->imgparam[frame - failed - skipped].filenum =
+							frame - failed - skipped;
+					} else {
+						fit_sequence_get_image_filename(args->seq, frame, filename, TRUE);
+						snprintf(dest, 256, "%s%s", args->prefix, filename);
+						savefits(dest, &fit);
+						args->imgparam[frame - failed - skipped].filenum = args->seq->imgparam[frame].filenum;
+					}
+					args->imgparam[frame - failed - skipped].incl = SEQUENCE_DEFAULT_INCLUDE;
+					args->regparam[frame - failed - skipped].fwhm = current_regdata[frame].fwhm;	// not FWHMx because of the ref frame
 				} else {
-					fit_sequence_get_image_filename(args->seq, frame, filename, TRUE);
-					snprintf(dest, 256, "%s%s", args->prefix, filename);
-					savefits(dest, &fit);
-					args->imgparam[frame - failed - skipped].filenum = args->seq->imgparam[frame].filenum;
+					current_regdata[frame].shiftx = trans.a;
+					current_regdata[frame].shifty = -trans.d;
 				}
-				args->imgparam[frame - failed - skipped].incl = SEQUENCE_DEFAULT_INCLUDE;
-				args->regparam[frame - failed - skipped].fwhm = current_regdata[frame].fwhm;	// not FWHMx because of the ref frame
 
 				cur_nb += 1.f;
 				set_progress_bar_data(NULL, cur_nb / nb_frames);
@@ -736,7 +745,9 @@ int register_star_alignment(struct registration_args *args) {
 				args->new_total + failed);
 		siril_log_color_message(_("Total: %d failed, %d registered.\n"), "green",
 				failed, args->new_total);
-		args->load_new_sequence = TRUE;
+
+		args->load_new_sequence = !args->translation_only;
+
 	}
 	else {
 		siril_log_message(_("Registration aborted.\n"));
@@ -1078,7 +1089,7 @@ void on_seqregister_button_clicked(GtkButton *button, gpointer user_data) {
 	struct registration_args *reg_args;
 	struct registration_method *method;
 	char *msg;
-	GtkToggleButton *regall, *follow, *matchSel;
+	GtkToggleButton *regall, *follow, *matchSel, *no_translate;
 	GtkComboBox *cbbt_layers;
 	GtkComboBoxText *ComboBoxRegInter;
 
@@ -1109,9 +1120,11 @@ void on_seqregister_button_clicked(GtkButton *button, gpointer user_data) {
 	regall = GTK_TOGGLE_BUTTON(lookup_widget("regallbutton"));
 	follow = GTK_TOGGLE_BUTTON(lookup_widget("followStarCheckButton"));
 	matchSel = GTK_TOGGLE_BUTTON(lookup_widget("checkStarSelect"));
+	no_translate = GTK_TOGGLE_BUTTON(lookup_widget("regTranslationOnly"));
 	reg_args->process_all_frames = gtk_toggle_button_get_active(regall);
 	reg_args->follow_star = gtk_toggle_button_get_active(follow);
 	reg_args->matchSelection = gtk_toggle_button_get_active(matchSel);
+	reg_args->translation_only = gtk_toggle_button_get_active(no_translate);
 	/* getting the selected registration layer from the combo box. The value is the index
 	 * of the selected line, and they are in the same order than layers so there should be
 	 * an exact matching between the two */

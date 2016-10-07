@@ -24,6 +24,7 @@ struct registration_args {
 	gboolean load_new_sequence;	// load a new sequence if success
 	gboolean matchSelection;	// Match stars found in the seleciton of reference image
 	opencv_interpolation interpolation; // type of rotation interpolation
+	gboolean translation_only;	// don't rotate images
 
 	/* data for generated sequence, for star alignment registration */
 	int new_total;

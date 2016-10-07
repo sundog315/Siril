@@ -11803,7 +11803,7 @@ The next action for DSLR images would be to debayer the preprocessed images, go 
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="padding">16</property>
+                        <property name="padding">12</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -11839,6 +11839,7 @@ The next action for DSLR images would be to debayer the preprocessed images, go 
                         <property name="tooltip_text" translatable="yes">Layer on which the registration is done. It can only be done on one layer at a time, so on monochrome images.
 The (*) sign appearing after the layer's name means that registration data is already available for this layer.
 When processing images, registration data is taken from the default layer if available (for RGB images: Green, else fallback to Blue then Red).</property>
+                        <property name="margin_right">4</property>
                         <signal name="changed" handler="on_comboboxreglayer_changed" swapped="no"/>
                       </object>
                       <packing>
@@ -11868,7 +11869,7 @@ When processing images, registration data is taken from the default layer if ava
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="padding">16</property>
+                        <property name="padding">12</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -11883,9 +11884,8 @@ When processing images, registration data is taken from the default layer if ava
                         <property name="caps_lock_warning">False</property>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
+                        <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="padding">16</property>
                         <property name="position">1</property>
                       </packing>
                     </child>
@@ -11908,6 +11908,7 @@ When processing images, registration data is taken from the default layer if ava
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
+                        <property name="padding">8</property>
                         <property name="position">2</property>
                       </packing>
                     </child>
@@ -11924,7 +11925,25 @@ WARNING: Make sure to draw a selection with a sufficient number of stars.</prope
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
+                        <property name="padding">4</property>
                         <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkCheckButton" id="regTranslationOnly">
+                        <property name="label" translatable="yes">Translation only</property>
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="receives_default">False</property>
+                        <property name="tooltip_text" translatable="yes">This is the only registration that can detect and apply rotations on images. However, rotating images will degrade them to a certain extent. Activating this will use the same image alignment algorithm but only apply translations.</property>
+                        <property name="margin_right">4</property>
+                        <property name="draw_indicator">True</property>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="padding">4</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                   </object>
@@ -11981,6 +12000,7 @@ WARNING: Make sure to draw a selection with a sufficient number of stars.</prope
                         <property name="tooltip_text" translatable="yes">Use this option to use the position of the star found in the previous image as new centre for the current image registration. This allows the selection area to be smaller, registration faster, and accounts for drift or images with a large number of stars.
 WARNING: enabling this option requires the registration to not be parallelized, it will run on one CPU core only.</property>
                         <property name="halign">end</property>
+                        <property name="margin_right">4</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>
