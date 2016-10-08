@@ -1942,15 +1942,10 @@ void on_button_clear_sample_clicked(GtkButton *button, gpointer user_data) {
 }
 
 void set_libraw_settings_menu_available(gboolean activate) {
-	GtkWidget *frame[4];
-	int i;
+	GtkNotebook *notebook = GTK_NOTEBOOK(lookup_widget("notebook3"));
+	GtkWidget *widget = gtk_notebook_get_nth_page (notebook, 0);
 
-	frame[0] = lookup_widget("frame2");
-	frame[1] = lookup_widget("frame3");
-	frame[2] = lookup_widget("frame19");
-	frame[3] = lookup_widget("frame4");
-	for (i = 0; i < 4; i++)
-		gtk_widget_set_visible(frame[i], activate);
+	gtk_widget_set_visible(widget, activate);
 }
 
 void on_comboBayer_pattern_changed(GtkComboBox* box, gpointer user_data) {
