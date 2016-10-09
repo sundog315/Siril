@@ -77,7 +77,9 @@ static void read_fits_header(fits *fit) {
 	__tryToFindKeywords(fit->fptr, TFLOAT, PixSizeX, &fit->pixel_size_x);
 	__tryToFindKeywords(fit->fptr, TFLOAT, PixSizeY, &fit->pixel_size_y);
 	__tryToFindKeywords(fit->fptr, TUINT, BinX, &fit->binning_x);
+	if (fit->binning_x <= 0) fit->binning_x = 1;
 	__tryToFindKeywords(fit->fptr, TUINT, BinY, &fit->binning_y);
+	if (fit->binning_y <= 0) fit->binning_y = 1;
 
 	status = 0;
 	fits_read_key(fit->fptr, TSTRING, "INSTRUME", &(fit->instrume), NULL,

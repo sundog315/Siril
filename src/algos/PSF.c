@@ -621,7 +621,9 @@ void psf_display_result(fitted_PSF *result, rectangle *area) {
  * the FWHM value with the sampling value */
 void psf_update_units(fits* fit, fitted_PSF **result) {
 
-	if (!fit->focal_length || !fit->pixel_size_x || !fit->pixel_size_y)
+	if (fit->focal_length <= 0.0 || fit->pixel_size_x <= 0.0
+			|| fit->pixel_size_y <= 0.0 || fit->binning_x <= 0
+			|| fit->binning_y <= 0)
 		return;
 
 	(*result)->fwhmx *= (radian_conversion * fit->pixel_size_x
