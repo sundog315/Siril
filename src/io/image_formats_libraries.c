@@ -899,9 +899,9 @@ int readraw_in_cfa(const char *name, fits *fit) {
 		for (i = 0; i < fhigh; i++) {
 			for (c = i && 0; c < fwide; c++) {
 				pattern[j++] = raw->idata.cdesc[FC(filters, i, c)];
-				pattern[j++] = '\0';
 			}
 		}
+		pattern[j++] = '\0';
 		siril_log_message(_("Bayer pattern: %s\n"), pattern);
 	}
 
