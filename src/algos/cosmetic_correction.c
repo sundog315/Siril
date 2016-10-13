@@ -125,6 +125,49 @@ static WORD getAverage3x3(WORD *buf, const int xx, const int yy, const int w,
 	return round_to_WORD(value / n);
 }
 
+long count_deviant_pixels(fits *fit, double sig[2], long *icold, long *ihot) {
+	int i;
+	WORD *buf = fit->pdata[RLAYER];
+	imstats *stat;
+	double sigma, median, thresHot, thresCold;
+
+	/** statistics **/
+	stat = statistics(fit, RLAYER, NULL, STATS_BASIC, STATS_ZERO_NULLCHECK);
+	if (!stat) {
+		siril_log_message(_("Error: no data computed.\n"));
+		return 0L;
+	}
+	sigma = stat->sigma;
+	median = stat->median;
+
+	if (sig[0] == -1.0) {	// flag for no cold detection
+		thresCold = -1.0;
+	}
+	else {
+		double val = median - (sig[0] * sigma);
+		thresCold = (val > 0) ? val : 0.0;
+	}
+	if (sig[1] == -1.0) {	// flag for no hot detection
+		thresHot = USHRT_MAX_DOUBLE + 1;
+	}
+	else {
+		double val = median + (sig[1] * sigma);
+		thresHot = (val > USHRT_MAX_DOUBLE) ? USHRT_MAX_DOUBLE : val;
+	}
+
+	free(stat);
+
+	/** We count deviant pixels **/
+	*icold = 0;
+	*ihot = 0;
+	for (i = 0; i < fit->rx * fit->ry; i++) {
+		if (buf[i] >= thresHot) (*ihot)++;
+		else if (buf[i] <= thresCold) (*icold)++;
+	}
+
+	return (*icold + *ihot);
+}
+
 
 /* Gives a list of point p containing deviant pixel coordinates
  * p MUST be freed after the call

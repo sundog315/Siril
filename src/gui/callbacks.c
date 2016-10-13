@@ -1863,7 +1863,7 @@ void set_prepro_button_sensitiveness() {
 }
 
 void on_cosmEnabledCheck_toggled(GtkToggleButton *button, gpointer user_data) {
-	GtkWidget *CFA, *SigHot, *SigCold, *checkHot, *checkCold;
+	GtkWidget *CFA, *SigHot, *SigCold, *checkHot, *checkCold, *evaluateButton;
 	gboolean is_active;
 
 	CFA = lookup_widget("cosmCFACheck");
@@ -1871,6 +1871,7 @@ void on_cosmEnabledCheck_toggled(GtkToggleButton *button, gpointer user_data) {
 	SigCold = lookup_widget("spinSigCosmeCold");
 	checkHot = lookup_widget("checkSigHot");
 	checkCold = lookup_widget("checkSigCold");
+	evaluateButton = lookup_widget("GtkButtonEvaluateCC");
 
 	is_active = gtk_toggle_button_get_active(button);
 
@@ -1879,11 +1880,60 @@ void on_cosmEnabledCheck_toggled(GtkToggleButton *button, gpointer user_data) {
 	gtk_widget_set_sensitive(SigCold, is_active);
 	gtk_widget_set_sensitive(checkHot, is_active);
 	gtk_widget_set_sensitive(checkCold, is_active);
+	gtk_widget_set_sensitive(evaluateButton, is_active);
 }
 
 void on_cosmCFACheck_toggled(GtkToggleButton *button, gpointer user_data) {
 	com.prepro_cfa = gtk_toggle_button_get_active(button);
 	writeinitfile();
+}
+
+void on_GtkButtonEvaluateCC_clicked(GtkButton *button, gpointer user_data) {
+	GtkEntry *entry;
+	GtkLabel *label[2];
+	GtkWidget *widget[2];
+	const char *filename;
+	char *str[2];
+	double sig[2];
+	long icold = 0L, ihot = 0L;
+
+	set_cursor_waiting(TRUE);
+	sig[0] = gtk_spin_button_get_value(GTK_SPIN_BUTTON(lookup_widget("spinSigCosmeColdBox")));
+	sig[1] = gtk_spin_button_get_value(GTK_SPIN_BUTTON(lookup_widget("spinSigCosmeHotBox")));
+	widget[0] = lookup_widget("GtkLabelColdCC");
+	widget[1] = lookup_widget("GtkLabelHotCC");
+	label[0] = GTK_LABEL(lookup_widget("GtkLabelColdCC"));
+	label[1] = GTK_LABEL(lookup_widget("GtkLabelHotCC"));
+	entry = GTK_ENTRY(lookup_widget("darkname_entry"));
+	filename = gtk_entry_get_text(entry);
+	if (filename) {
+		int ret = readfits(filename, &(wfit[4]), NULL);
+		if (!ret) {
+			count_deviant_pixels(&(wfit[4]), sig, &icold, &ihot);
+		}
+	}
+	if (icold > 10000) {
+		str[0] = g_markup_printf_escaped(_("<span foreground=\"red\">Cold: %ld px</span>"), icold);
+		gtk_widget_set_tooltip_text(widget[0], _("This value may be to high. Please, consider to change sigma value or uncheck the box."));
+	}
+	else {
+		str[0] = g_markup_printf_escaped(_("Cold: %ld px"), icold);
+		gtk_widget_set_tooltip_text(widget[0], "");
+	}
+	gtk_label_set_markup(label[0], str[0]);
+
+	if (ihot > 10000) {
+		str[1] = g_markup_printf_escaped(_("<span foreground=\"red\">Hot: %ld px</span>"), ihot);
+		gtk_widget_set_tooltip_text(widget[1], _("This value may be to high. Please, consider to change sigma value or uncheck the box."));
+	}
+	else {
+		str[1] = g_markup_printf_escaped(_("Hot: %ld px"), ihot);
+		gtk_widget_set_tooltip_text(widget[1], "");
+	}
+	gtk_label_set_markup(label[1], str[1]);
+	g_free(str[0]);
+	g_free(str[1]);
+	set_cursor_waiting(FALSE);
 }
 
 void on_settings_activate(GtkMenuItem *menuitem, gpointer user_data) {
