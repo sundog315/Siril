@@ -60,7 +60,7 @@ struct _data_block {
 	WORD **pix;	// buffer for a block on all images
 	WORD *tmp;	// the actual single buffer for pix
 	WORD *stack;	// the reordered stack for one pixel in all images
-	int *rejected;  // 0 if pixel ok, 1 if rejected
+	int *rejected;  // 0 if pixel ok, 1 or -1 if rejected
 };
 
 void initialize_stacking_methods() {
@@ -655,9 +655,9 @@ int stack_median(struct stacking_args *args) {
 	data_pool = malloc(pool_size * sizeof(struct _data_block));
 	for (i = 0; i < pool_size; i++) {
 		int j;
-		data_pool[i].pix = malloc(nb_frames * sizeof(WORD *));
-		data_pool[i].tmp = malloc(nb_frames * npixels_in_block * sizeof(WORD));
-		data_pool[i].stack = malloc(nb_frames * sizeof(WORD));
+		data_pool[i].pix = calloc(nb_frames, sizeof(WORD *));
+		data_pool[i].tmp = calloc(nb_frames, npixels_in_block * sizeof(WORD));
+		data_pool[i].stack = calloc(nb_frames, sizeof(WORD));
 		if (!data_pool[i].pix || !data_pool[i].tmp || !data_pool[i].stack) {
 			fprintf(stderr, "Memory allocation error on pix.\n");
 			fprintf(stderr, "CHANGE MEMORY SETTINGS if stacking takes too much.\n");
@@ -1487,7 +1487,7 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 		data_pool[i].pix = malloc(nb_frames * sizeof(WORD *));
 		data_pool[i].tmp = malloc(nb_frames * npixels_in_block * sizeof(WORD));
 		data_pool[i].stack = malloc(nb_frames * sizeof(WORD));
-		data_pool[i].rejected = malloc(nb_frames * sizeof(int));
+		data_pool[i].rejected = calloc(nb_frames, sizeof(int));
 		if (!data_pool[i].pix || !data_pool[i].tmp || !data_pool[i].stack || !data_pool[i].rejected) {
 			fprintf(stderr, "Memory allocation error on pix.\n");
 			fprintf(stderr, "CHANGE MEMORY SETTINGS if stacking takes too much.\n");
@@ -1648,16 +1648,16 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 
 				int N = nb_frames;// N is the number of pixels kept from the current stack
 				double median;
-				int n;
+				int n, j, r = 0;
 				switch (args->type_of_rejection) {
 				case PERCENTILE:
 					quicksort_s(data->stack, N);
 					median = gsl_stats_ushort_median_from_sorted_data(data->stack, 1, N);
-					for (frame = 0; frame < N; frame++)
-						data->rejected[frame] =
-								percentile_clipping(data->stack[frame], args->sig, median, crej);
 					for (frame = 0; frame < N; frame++) {
-						if (data->rejected[frame] != 0) {
+						data->rejected[frame] =	percentile_clipping(data->stack[frame], args->sig, median, crej);
+					}
+					for (frame = 0, j = 0; frame < N; frame++, j++) {
+						if (data->rejected[j] != 0 && N > 1) {
 							remove_pixel(data->stack, frame, N);
 							frame--;
 							N--;
@@ -1670,15 +1670,17 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 						quicksort_s(data->stack, N);
 						median = gsl_stats_ushort_median_from_sorted_data(data->stack, 1, N);
 						n = 0;
-						for (frame = 0; frame < N; frame++)
-							data->rejected[frame] =
-									sigma_clipping(data->stack[frame], args->sig, sigma, median, crej);
-						for (frame = 0; frame < N - n; frame++) {
-							if (data->rejected[frame] != 0) {
+						for (frame = 0; frame < N; frame++) {
+							data->rejected[frame] =	sigma_clipping(data->stack[frame], args->sig, sigma, median, crej);
+							if (data->rejected[frame])
+								r++;
+							if (N - r <= 4) break;
+						}
+						for (frame = 0, j = 0; frame < N - n; frame++, j++) {
+							if (data->rejected[j] != 0) {
 								remove_pixel(data->stack, frame, N - n);
 								n++;
 								frame--;
-								if (N - n < 4) break;
 							}
 						}
 						N = N - n;
@@ -1719,17 +1721,20 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 						} while ((fabs(sigma - sigma0) / sigma0) > 0.0005);
 						free(w_stack);
 						n = 0;
-						for (frame = 0; frame < N; frame++)
+						for (frame = 0; frame < N; frame++) {
 							data->rejected[frame] = sigma_clipping(
 									data->stack[frame], args->sig, sigma,
 									median, crej);
-						for (frame = 0; frame < N - n; frame++) {
-							if (data->rejected[frame] != 0) {
+							if (data->rejected[frame] != 0)
+								r++;
+							if (N - r <= 4) break;
+
+						}
+						for (frame = 0, j = 0; frame < N - n; frame++, j++) {
+							if (data->rejected[j] != 0) {
 								remove_pixel(data->stack, frame, N - n);
 								frame--;
 								n++;
-								if (N - n < 4)
-									break;
 							}
 						}
 						N = N - n;
@@ -1751,15 +1756,18 @@ int stack_mean_with_rejection(struct stacking_args *args) {
 							sigma += (fabs((double)data->stack[frame] - (a*(double)frame + b)));
 						sigma /= (double)N;
 						n = 0;
-						for (frame = 0; frame < N; frame++)
+						for (frame = 0; frame < N; frame++) {
 							data->rejected[frame] =
 									line_clipping(data->stack[frame], args->sig, sigma, frame, a, b, crej);
-						for (frame = 0; frame < N - n; frame++) {
-							if (data->rejected[frame] != 0) {
+							if (data->rejected[frame] != 0)
+								r++;
+							if (N - r <= 4) break;
+						}
+						for (frame = 0, j = 0; frame < N - n; frame++, j++) {
+							if (data->rejected[j] != 0) {
 								remove_pixel(data->stack, frame, N - n);
 								frame--;
 								n++;
-								if (N - n < 4) break;
 							}
 						}
 						N = N - n;
