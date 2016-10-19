@@ -129,6 +129,37 @@ void load_css_style_sheet (char *path) {
 	g_free(CSSFile);
 }
 
+static GdkModifierType get_default_modifier() {
+	GdkDisplay *display = gdk_display_get_default();
+	GdkKeymap *keymap = gdk_keymap_get_for_display(display);
+	GdkModifierType primary, real;
+
+	g_return_val_if_fail(GDK_IS_KEYMAP (keymap), 0);
+
+	/* Retrieve the real modifier mask */
+	real = gdk_keymap_get_modifier_mask(keymap,
+			GDK_MODIFIER_INTENT_PRIMARY_ACCELERATOR);
+
+	primary = real;
+
+	/* We need to translate the real modifiers into a virtual modifier
+	 (like Super, Meta, etc.).
+	 The following call adds the virtual modifiers for each real modifier
+	 defined in primary.
+	 */
+	gdk_keymap_add_virtual_modifiers(keymap, &primary);
+
+	if (primary != real) {
+		/* In case the virtual and real modifiers are different, we need to
+		 remove the real modifier from the result, and keep only the
+		 virtual one.
+		 */
+		primary &= ~real;
+	}
+	return primary;
+}
+
+
 void initialize_shortcuts() {
 	/* activate accelerators (keyboard shortcut in GTK language) */
 	static GtkAccelGroup *accel = NULL;
@@ -138,27 +169,27 @@ void initialize_shortcuts() {
 	}
 	/* EXIT */
 	gtk_widget_add_accelerator(lookup_widget("exit"), "activate", accel,
-	GDK_KEY_q, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	GDK_KEY_q, get_default_modifier(), GTK_ACCEL_VISIBLE);
 	/* UNDO */
 	gtk_widget_add_accelerator(lookup_widget("undo_item"), "activate", accel,
-	GDK_KEY_z, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	GDK_KEY_z, get_default_modifier(), GTK_ACCEL_VISIBLE);
 	/* REDO */
 	gtk_widget_add_accelerator(lookup_widget("redo_item"), "activate", accel,
-	GDK_KEY_z, GDK_CONTROL_MASK | GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
+	GDK_KEY_z, get_default_modifier() | GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
 	/* OPEN */
 	gtk_widget_add_accelerator(lookup_widget("open1"), "activate", accel,
-	GDK_KEY_o, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	GDK_KEY_o, get_default_modifier(), GTK_ACCEL_VISIBLE);
 	/* SAVE */
 	gtk_widget_add_accelerator(lookup_widget("menu_save_fits"), "activate", accel,
-	GDK_KEY_s, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	GDK_KEY_s, get_default_modifier(), GTK_ACCEL_VISIBLE);
 	gtk_widget_add_accelerator(lookup_widget("menu_save_tiff"), "activate", accel,
-	GDK_KEY_t, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	GDK_KEY_t, get_default_modifier(), GTK_ACCEL_VISIBLE);
 	gtk_widget_add_accelerator(lookup_widget("menu_save_bmp"), "activate", accel,
-	GDK_KEY_b, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	GDK_KEY_b, get_default_modifier(), GTK_ACCEL_VISIBLE);
 	gtk_widget_add_accelerator(lookup_widget("menu_save_jpg"), "activate", accel,
-	GDK_KEY_j, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	GDK_KEY_j, get_default_modifier(), GTK_ACCEL_VISIBLE);
 	gtk_widget_add_accelerator(lookup_widget("menu_save_pbm"), "activate", accel,
-	GDK_KEY_p, GDK_CONTROL_MASK, GTK_ACCEL_VISIBLE);
+	GDK_KEY_p, get_default_modifier(), GTK_ACCEL_VISIBLE);
 }
 
 void fill_about_dialog() {

@@ -9600,7 +9600,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                         <property name="use_underline">True</property>
                         <property name="use_stock">True</property>
                         <signal name="activate" handler="on_open1_activate" swapped="no"/>
-                        <accelerator key="o" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -9621,7 +9620,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                                 <property name="label" translatable="yes">FITS...</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_menu_rgb_savefits_activate" swapped="no"/>
-                                <accelerator key="s" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </object>
                             </child>
                             <child>
@@ -9631,7 +9629,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                                 <property name="label" translatable="yes">TIFF...</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_menu_rgb_savetiff_activate" swapped="no"/>
-                                <accelerator key="t" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </object>
                             </child>
                             <child>
@@ -9641,7 +9638,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                                 <property name="label" translatable="yes">BMP...</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_menu_rgb_savebmp_activate" swapped="no"/>
-                                <accelerator key="b" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </object>
                             </child>
                             <child>
@@ -9651,7 +9647,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                                 <property name="label" translatable="yes">JPG...</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_menu_rgb_savejpg_activate" swapped="no"/>
-                                <accelerator key="j" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </object>
                             </child>
                             <child>
@@ -9661,7 +9656,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                                 <property name="label" translatable="yes">NetPBM...</property>
                                 <property name="use_underline">True</property>
                                 <signal name="activate" handler="on_menu_rgb_save8ppm_activate" swapped="no"/>
-                                <accelerator key="p" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                               </object>
                             </child>
                           </object>
@@ -9738,7 +9732,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                         <property name="use_stock">True</property>
                         <property name="accel_group">accelgroup1</property>
                         <signal name="activate" handler="on_undo_item_activate" swapped="no"/>
-                        <accelerator key="z" signal="activate" modifiers="GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                     <child>
@@ -9750,7 +9743,6 @@ WARNING: ensure you have a good reason to change this value because it may degra
                         <property name="use_stock">True</property>
                         <property name="accel_group">accelgroup1</property>
                         <signal name="activate" handler="on_redo_item_activate" swapped="no"/>
-                        <accelerator key="z" signal="activate" modifiers="GDK_SHIFT_MASK | GDK_CONTROL_MASK"/>
                       </object>
                     </child>
                   </object>
