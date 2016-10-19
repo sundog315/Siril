@@ -2114,6 +2114,9 @@ enter a visible wavelength in nm</property>
     <property name="resizable">False</property>
     <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
+    <accel-groups>
+      <group name="accelgroup1"/>
+    </accel-groups>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <signal name="hide" handler="on_Bkg_extract_window_hide" swapped="no"/>
     <child internal-child="vbox">
@@ -3132,6 +3135,9 @@ Division: it is mainly used to correct multiplicative phenomena, such as vignett
     <property name="window_position">center</property>
     <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
+    <accel-groups>
+      <group name="accelgroup1"/>
+    </accel-groups>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox27">
@@ -3333,6 +3339,9 @@ This is useful when modulation parameter is different to 1 helping the whole pro
     <property name="window_position">center</property>
     <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
+    <accel-groups>
+      <group name="accelgroup1"/>
+    </accel-groups>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <signal name="show" handler="on_SCNR_dialog_show" swapped="no"/>
     <child internal-child="vbox">
@@ -3665,6 +3674,9 @@ This is useful when modulation parameter is different to 1 helping the whole pro
     <property name="type_hint">normal</property>
     <property name="urgency_hint">True</property>
     <property name="transient_for">main_window</property>
+    <accel-groups>
+      <group name="accelgroup1"/>
+    </accel-groups>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox31">
@@ -4283,6 +4295,9 @@ Modifying parameters in this windows afterward will void the colour balance, and
     <property name="window_position">center</property>
     <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
+    <accel-groups>
+      <group name="accelgroup1"/>
+    </accel-groups>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox36">
@@ -4838,6 +4853,9 @@ Uncheck if images come from a monochrome sensor.</property>
     <property name="resizable">False</property>
     <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
+    <accel-groups>
+      <group name="accelgroup1"/>
+    </accel-groups>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox20">
@@ -5467,6 +5485,9 @@ Uncheck if images come from a monochrome sensor.</property>
     <property name="title" translatable="yes">Histograms</property>
     <property name="destroy_with_parent">True</property>
     <property name="transient_for">main_window</property>
+    <accel-groups>
+      <group name="accelgroup1"/>
+    </accel-groups>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <signal name="hide" handler="on_histogram_window_hide" swapped="no"/>
     <signal name="show" handler="on_histogram_window_show" swapped="no"/>
@@ -6011,6 +6032,9 @@ Uncheck if images come from a monochrome sensor.</property>
     <property name="window_position">center</property>
     <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
+    <accel-groups>
+      <group name="accelgroup1"/>
+    </accel-groups>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox15">
@@ -6212,6 +6236,9 @@ Uncheck if images come from a monochrome sensor.</property>
     <property name="window_position">center</property>
     <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
+    <accel-groups>
+      <group name="accelgroup1"/>
+    </accel-groups>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox24">
@@ -9375,6 +9402,9 @@ WARNING: ensure you have a good reason to change this value because it may degra
     <property name="window_position">center</property>
     <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
+    <accel-groups>
+      <group name="accelgroup1"/>
+    </accel-groups>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox22">
@@ -13594,6 +13624,9 @@ and the Siril Development Team</property>
     <property name="resizable">False</property>
     <property name="type_hint">normal</property>
     <property name="transient_for">main_window</property>
+    <accel-groups>
+      <group name="accelgroup1"/>
+    </accel-groups>
     <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
     <child internal-child="vbox">
       <object class="GtkBox" id="dialog-vbox23">

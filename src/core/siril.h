@@ -170,7 +170,7 @@ typedef enum {
 				// when the result of a processing is displayed
 #define UNRELATED_IMAGE -2	// image loaded while a sequence was loaded too
 
-#define MAX_STARS 20000
+#define MAX_STARS 50000
 
 /* constants for loglut function */
 #define LOG 1
