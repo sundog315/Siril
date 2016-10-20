@@ -224,9 +224,11 @@ fitted_PSF **peaker(fits *fit, int layer, starFinder *sf, rectangle *area) {
 #pragma omp critical
 #endif
 							{
-								results[nbstars] = cur_star;
-								results[nbstars + 1] = NULL;
-								nbstars++;
+								if (nbstars < MAX_STARS) {
+									results[nbstars] = cur_star;
+									results[nbstars + 1] = NULL;
+									nbstars++;
+								}
 							}
 						}
 					}
