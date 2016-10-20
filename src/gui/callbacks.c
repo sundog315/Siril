@@ -79,9 +79,9 @@ static BYTE *remap_index[MAXGRAYVPORT];
 static float last_pente[MAXGRAYVPORT];
 static display_mode last_mode[MAXGRAYVPORT];
 
-GtkWidget* lookup_widget(const gchar *widget_name) {
-	return GTK_WIDGET(gtk_builder_get_object(builder, widget_name));
-}
+/*****************************************************************************
+ *                    S T A T I C      F U N C T I O N S                     *
+ ****************************************************************************/
 
 /* this function calculates the "fit to window" zoom values, given the window
  * size in argument and the image size in gfit.
@@ -104,6 +104,10 @@ static double get_zoom_val() {
 	//fprintf(stdout, "computed fit to window zooms: %f, %f\n", wtmp, htmp);
 	return min(wtmp, htmp);
 }
+
+/*
+ * Progress bar static functions
+ */
 
 static void progress_bar_set_text(const char *text) {
 	static GtkProgressBar *pbar = NULL;
@@ -157,6 +161,11 @@ static gboolean progress_bar_idle_callback(gpointer p) {
 	return FALSE;	// only run once
 }
 
+/*
+ * Returns the modifier mask. For Linux it is Control key, but for Apple - OS X
+ * it should be Apple Key -> Mod2
+ */
+
 static GdkModifierType get_default_modifier() {
 	GdkDisplay *display = gdk_display_get_default();
 	GdkKeymap *keymap = gdk_keymap_get_for_display(display);
@@ -186,6 +195,10 @@ static GdkModifierType get_default_modifier() {
 	}
 	return primary;
 }
+
+/*
+ * Siril log message static functions
+ */
 
 struct log_message {
 	char *timestamp;
@@ -284,280 +297,99 @@ static char* siril_log_internal(const char* format, const char* color, va_list a
 	return msg;
 }
 
-char* siril_log_message(const char* format, ...) {
-	va_list args;
-	va_start(args, format);
-	g_mutex_lock(&com.mutex);
-	char *msg = siril_log_internal(format, NULL, args);
-	g_mutex_unlock(&com.mutex);
-	va_end(args);
-	return msg;
-}
-
-char* siril_log_color_message(const char* format, const char* color, ...) {
-	va_list args;
-	va_start(args, color);
-	g_mutex_lock(&com.mutex);
-	char *msg = siril_log_internal(format, color, args);
-	g_mutex_unlock(&com.mutex);
-	va_end(args);
-	return msg;
-}
-
-void show_time(struct timeval t_start, struct timeval t_end) {
-	float time = (float) (((t_end.tv_sec - t_start.tv_sec) * 1000000L
-			+ t_end.tv_usec) - t_start.tv_usec) / 1000000.0;
-
-	if (time > 60.f) {
-		int min = (int) time / 60;
-		int sec = (int) time % 60 + 1;
-		siril_log_color_message(_("Execution time: %d min %.2d s.\n"), "green",
-				min, sec);
-	} else if (time < 1.f) {
-		float ms = time * 1000.f;
-		siril_log_color_message(_("Execution time: %.2f ms.\n"), "green", ms);
-	} else {
-		siril_log_color_message(_("Execution time: %.2f s.\n"), "green", time);
-	}
-}
-
-static gboolean inimage(GdkEvent *event) {
-	double zoom = get_zoom_val();
-	return ((GdkEventButton*) event)->x > 0
-			&& ((GdkEventButton*) event)->x < gfit.rx * zoom
-			&& ((GdkEventButton*) event)->y > 0
-			&& ((GdkEventButton*) event)->y < gfit.ry * zoom;
-}
-
-void set_sliders_value_to_gfit() {
-	static GtkAdjustment *adj1 = NULL, *adj2 = NULL;
-
-	if (adj1 == NULL) {
-		adj1 = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "adjustment1"));// scalemax
-		adj2 = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "adjustment2"));// scalemin
-	}
-
-	gfit.hi = gtk_adjustment_get_value(adj1);
-	gfit.lo = gtk_adjustment_get_value(adj2);
-}
-
-/* Sets maximum value for contrast scales. Minimum is always 0.
- * Should be done on first image load of a sequence and when single images are loaded.
- * Max value is taken from gfit.maxi, recomputed if not present.
- *
+/*
+ * Dialog window text static functions
  */
-void set_cutoff_sliders_max_values() {
-	static GtkAdjustment *adj1 = NULL, *adj2 = NULL;
-	gdouble max_val;
-	if (adj1 == NULL) {
-		adj1 = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "adjustment1"));// scalemax
-		adj2 = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "adjustment2"));// scalemin
+
+struct _dialog_data {
+	const char *text;
+	const char *title;
+	const char *icon;
+};
+
+static gboolean show_dialog_idle(gpointer p) {
+	static GtkLabel *label = NULL;
+	struct _dialog_data *args = (struct _dialog_data *) p;
+	GtkImage *image = GTK_IMAGE(GTK_WIDGET(lookup_widget("image1")));
+	if (label == NULL) {
+		label = GTK_LABEL(gtk_builder_get_object(builder, "labeldialog1"));
 	}
-	fprintf(stdout, _("Setting MAX value for cutoff sliders adjustments\n"));
-	/* set max value for range according to number of bits of original image
-	 * We should use gfit.bitpix for this, but it's currently always USHORT_IMG */
-	/*if (gfit.bitpix == BYTE_IMG)
-	 max_val = UCHAR_MAX_DOUBLE;
-	 else max_val = USHRT_MAX_DOUBLE;*/
-	if (gfit.maxi == 0)
-		image_find_minmax(&gfit, 0);
-	if (gfit.maxi <= UCHAR_MAX)
-		max_val = UCHAR_MAX_DOUBLE;
-	else
-		max_val = USHRT_MAX_DOUBLE;
-
-	gtk_adjustment_set_upper(adj1, max_val);
-	gtk_adjustment_set_upper(adj2, max_val);
+	gtk_window_set_title(GTK_WINDOW(lookup_widget("dialog1")), args->title);
+	gtk_image_set_from_icon_name(image, args->icon, GTK_ICON_SIZE_DIALOG);
+	gtk_label_set_text(label, args->text);
+	gtk_widget_show(lookup_widget("dialog1"));
+	free(args);
+	return FALSE;
 }
 
-/* Sets the value scalemin and scalemax sliders so that they match the hi and
- * lo values stored for the current viewport.
- * It also sets the 'cut' checkbox status.
- * The function should be called on every tab change and file opening */
-void set_cutoff_sliders_values() {
-	gchar buffer[10];
-	static GtkAdjustment *adjmin = NULL, *adjmax = NULL;
-	static GtkEntry *maxentry = NULL, *minentry = NULL;
-	static GtkToggleButton *cutmax = NULL;
-	WORD hi, lo;
-	gboolean cut_over;
-	if (adjmin == NULL) {
-		adjmax = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "adjustment1")); // scalemax
-		adjmin = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "adjustment2")); // scalemin
-		maxentry = GTK_ENTRY(gtk_builder_get_object(builder, "max_entry"));
-		minentry = GTK_ENTRY(gtk_builder_get_object(builder, "min_entry"));
-		cutmax = GTK_TOGGLE_BUTTON(
-				gtk_builder_get_object(builder, "checkcut_max"));
-	}
-	if (single_image_is_loaded() && com.cvport < com.uniq->nb_layers &&
-			com.uniq->layers && com.seq.current != RESULT_IMAGE) {
-		hi = com.uniq->layers[com.cvport].hi;
-		lo = com.uniq->layers[com.cvport].lo;
-		cut_over = com.uniq->layers[com.cvport].cut_over;
-	}
-	/* When com.seq.current == RESULT_IMAGE we take sequence values */
-	else if (sequence_is_loaded() && com.cvport < com.seq.nb_layers
-			&& com.seq.layers) {
-		hi = com.seq.layers[com.cvport].hi;
-		lo = com.seq.layers[com.cvport].lo;
-		cut_over = com.seq.layers[com.cvport].cut_over;
-	} else
-		return;	// there should be no other normal cases
-	fprintf(stdout, _("setting ranges scalemin=%d, scalemax=%d\n"), lo, hi);
-	WORD maxvalue = get_normalized_value(&gfit);
-	gtk_adjustment_set_lower(adjmin, 0.0);
-	gtk_adjustment_set_lower(adjmax, 0.0);
-	gtk_adjustment_set_upper(adjmin, (double) maxvalue);
-	gtk_adjustment_set_upper(adjmax, (double) maxvalue);
-	gtk_adjustment_set_value(adjmin, (gdouble) lo);
-	gtk_adjustment_set_value(adjmax, (gdouble) hi);
-	g_snprintf(buffer, 6, "%u", hi);
-	g_signal_handlers_block_by_func(maxentry, on_max_entry_changed, NULL);
-	gtk_entry_set_text(maxentry, buffer);
-	g_signal_handlers_unblock_by_func(maxentry, on_max_entry_changed, NULL);
-	g_snprintf(buffer, 6, "%u", lo);
-	g_signal_handlers_block_by_func(minentry, on_min_entry_changed, NULL);
-	gtk_entry_set_text(minentry, buffer);
-	g_signal_handlers_unblock_by_func(minentry, on_min_entry_changed, NULL);
-	gtk_toggle_button_set_active(cutmax, cut_over);
-}
-
-/* sets the maximum value for the spin button and display the initial file name */
-int seqsetnum(int image_number) {
-	GtkSpinButton *spin;
-	GtkAdjustment *adj;
-	if (com.seq.number <= 0 || image_number >= com.seq.number)
-		return 1;
-	spin = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "imagenumber_spin"));
-	adj = gtk_spin_button_get_adjustment(spin);
-
-	gtk_adjustment_set_upper(adj, (gdouble) com.seq.number - 1);
-	gtk_adjustment_set_value(adj, (gdouble) image_number);	// 0 is default
-	display_image_number(image_number);
-	//on_imagenumberspin_output(GTK_SPIN_BUTTON(spin), NULL);	// redraw the real file number instead of 0
-	return 0;
-}
-
-/* Sets the display mode combo box to the value stored in the relevant struct.
- * The operation is purely graphical. */
-void set_display_mode() {
-	static GtkComboBox *modecombo = NULL;
-	display_mode mode;
-
-	if (!modecombo)
-		modecombo = GTK_COMBO_BOX(lookup_widget("combodisplay"));
-
-	if (single_image_is_loaded() && com.cvport < com.uniq->nb_layers && com.uniq->layers
-	&& com.seq.current != RESULT_IMAGE)
-		mode = com.uniq->layers[com.cvport].rendering_mode;
-	else if (sequence_is_loaded() && com.cvport < com.seq.nb_layers
-			&& com.seq.layers)
-		mode = com.seq.layers[com.cvport].rendering_mode;
-	else
-		return;
-
-	g_signal_handlers_block_by_func(modecombo, on_combodisplay_changed, NULL);
-	gtk_combo_box_set_active(modecombo, mode);
-	g_signal_handlers_unblock_by_func(modecombo, on_combodisplay_changed, NULL);
-}
-
-/* called when an image is included or excluded from the sequence.
- * it sets the toggle button "exclude_button" so it matches the inclusion state.
- * n is the image number in the sequence
- * changed indicates if a value was changed and if the display needs to be refreshed.
+/*
+ * Wavelet static functions
  */
-void adjust_exclude(int n, gboolean changed) {
-	static GtkWidget *excl_butt = NULL;
-	if (!com.seq.imgparam || n < 0 || n >= com.seq.number)
-		return;
-	if (excl_butt == NULL)
-		excl_butt = lookup_widget("exclude_button");
 
-	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(excl_butt))
-			== com.seq.imgparam[n].incl) {
-		g_signal_handlers_block_by_func(excl_butt, on_excludebutton_toggled,
-				NULL);
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(excl_butt),
-				!com.seq.imgparam[n].incl);
-		g_signal_handlers_unblock_by_func(excl_butt, on_excludebutton_toggled,
-				NULL);
+static void reset_scale_w() {
+	static GtkSpinButton *spin_w[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
+	int i;
+
+	if (spin_w[0] == NULL) {
+		spin_w[0] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w0"));
+		spin_w[1] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w1"));
+		spin_w[2] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w2"));
+		spin_w[3] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w3"));
+		spin_w[4] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w4"));
+		spin_w[5] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w5"));
 	}
 
-	if (changed) {
-		redraw(com.cvport, REMAP_NONE);
-		drawPlot();
-		adjust_sellabel();
+	for (i = 0; i < 6; i++) {
+		g_signal_handlers_block_by_func(spin_w[i], on_spin_w_changed, NULL);
+		gtk_spin_button_set_value(spin_w[i], 1.f);
+		g_signal_handlers_unblock_by_func(spin_w[i], on_spin_w_changed, NULL);
 	}
+
+	gtk_widget_set_sensitive(lookup_widget("button_apply_w"), FALSE);
 }
 
-void adjust_refimage(int n) {
-	static GtkWidget *ref_butt = NULL;
-	if (ref_butt == NULL)
-		ref_butt = lookup_widget("refframe");
+static void update_wavelets() {
+	float scale[6];
+	static GtkSpinButton *spin_w[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
+	int i;
+	char *File_Name_Transform[3] = { "r_rawdata.wave", "g_rawdata.wave",
+			"b_rawdata.wave" }, *dir[3];
+	const char *tmpdir;
 
-	//fprintf(stdout, "adjust refimage: %d (ref is %d)\n", n, com.seq.reference_image); 
-	g_signal_handlers_block_by_func(ref_butt, on_ref_frame_toggled, NULL);
-	if (com.seq.reference_image == n) {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ref_butt), TRUE);
-	} else {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ref_butt), FALSE);
-	}
-	g_signal_handlers_unblock_by_func(ref_butt, on_ref_frame_toggled, NULL);
-}
+	tmpdir = g_get_tmp_dir();
 
-static void draw_empty_image(cairo_t *cr, guint width, guint height) {
-	// black image with red square
-	cairo_set_source_rgb(cr, 0, 0, 0);
-	cairo_rectangle(cr, 0, 0, width, height);
-	cairo_fill(cr);
-	cairo_set_source_rgb(cr, 0.3, 0, 0);
-	cairo_rectangle(cr, 100, 70, 50, 50);
-	cairo_fill(cr);
-}
-
-
-/* fill the label indicating how many images are selected in the gray and
- * which one is the reference image, at the bottom of the main window */
-int adjust_sellabel() {
-	static GtkLabel *local_label = NULL, *global_label = NULL;
-	char bufferlocal[256], bufferglobal[256];
-	if (local_label == NULL) {
-		local_label = GTK_LABEL(lookup_widget("imagesel_label"));
-		global_label = GTK_LABEL(lookup_widget("labelseq"));
-	}
-	if (sequence_is_loaded()) {
-		if (com.seq.reference_image != -1) {
-			char format[150];
-			if (com.seq.fixed <= 1) {
-				g_snprintf(format, sizeof(format),
-						_("<%%s.seq>: %%d images selected out of %%d, reference image is %%d"));
-			} else {
-				g_snprintf(format, sizeof(format),
-						_("<%%s.seq>: %%d images selected out of %%d, reference image is %%.%dd"),
-						com.seq.fixed);
-			}
-			g_snprintf(bufferlocal, sizeof(bufferlocal), format,
-					com.seq.seqname, com.seq.selnum, com.seq.number,
-					com.seq.imgparam[com.seq.reference_image].filenum);
-
-		} else {
-			g_snprintf(bufferlocal, sizeof(bufferlocal),
-					_("<%s.seq>: %d images selected out of %d, no reference image set"),
-					com.seq.seqname, com.seq.selnum, com.seq.number);
-		}
-		g_snprintf(bufferglobal, sizeof(bufferglobal), _("%s, %d images selected"),
-				com.seq.seqname, com.seq.selnum);
-		//gtk_widget_set_sensitive(lookup_widget("goregister_button"), com.seq.selnum>0?TRUE:FALSE);
-	} else {
-		g_snprintf(bufferlocal, sizeof(bufferlocal), _("No sequence"));
-		g_snprintf(bufferglobal, sizeof(bufferglobal), _("- none -"));
-		gtk_widget_set_sensitive(lookup_widget("goregister_button"), FALSE);
+	if (spin_w[0] == NULL) {
+		spin_w[0] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w0"));
+		spin_w[1] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w1"));
+		spin_w[2] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w2"));
+		spin_w[3] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w3"));
+		spin_w[4] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w4"));
+		spin_w[5] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w5"));
 	}
 
-	gtk_label_set_text(local_label, bufferlocal);
-	gtk_label_set_text(global_label, bufferglobal);
-	return 0;
+	for (i = 0; i < 6; i++)
+		scale[i] = (float) gtk_spin_button_get_value(spin_w[i]);
+
+	set_cursor_waiting(TRUE);
+
+	for (i = 0; i < gfit.naxes[2]; i++) {
+		dir[i] = malloc(strlen(tmpdir) + strlen(File_Name_Transform[i]) + 2);
+		strcpy(dir[i], tmpdir);
+		strcat(dir[i], "/");
+		strcat(dir[i], File_Name_Transform[i]);
+		wavelet_reconstruct_file(dir[i], scale, gfit.pdata[i]);
+		free(dir[i]);
+	}
+
+	adjust_cutoff_from_updated_gfit();
+	redraw(com.cvport, REMAP_ALL);
+	redraw_previews();
+	set_cursor_waiting(FALSE);
 }
+
+/*
+ * Memory label static functions
+ */
 
 struct _label_data {
 	const char *label_name;
@@ -574,12 +406,35 @@ static gboolean set_label_text_idle(gpointer p) {
 	return FALSE;
 }
 
-void set_label_text_from_main_thread(const char *label_name, const char *text) {
+static void set_label_text_from_main_thread(const char *label_name, const char *text) {
 	struct _label_data *data = malloc(sizeof(struct _label_data));
 	data->label_name = label_name;
 	data->text = strdup(text);
 	gdk_threads_add_idle(set_label_text_idle, data);
 }
+
+/*
+ * Image display static functions
+ */
+
+static gboolean inimage(GdkEvent *event) {
+	double zoom = get_zoom_val();
+	return ((GdkEventButton*) event)->x > 0
+			&& ((GdkEventButton*) event)->x < gfit.rx * zoom
+			&& ((GdkEventButton*) event)->y > 0
+			&& ((GdkEventButton*) event)->y < gfit.ry * zoom;
+}
+
+static void draw_empty_image(cairo_t *cr, guint width, guint height) {
+	// black image with red square
+	cairo_set_source_rgb(cr, 0, 0, 0);
+	cairo_rectangle(cr, 0, 0, width, height);
+	cairo_fill(cr);
+	cairo_set_source_rgb(cr, 0.3, 0, 0);
+	cairo_rectangle(cr, 100, 70, 50, 50);
+	cairo_fill(cr);
+}
+
 
 static void remaprgb(void) {
 	guchar *dst;
@@ -673,65 +528,6 @@ static void set_viewer_mode_widgets_sensitive(gboolean sensitive) {
 	gtk_widget_set_sensitive(minmax, sensitive);
 	gtk_widget_set_sensitive(hilo, sensitive);
 	gtk_widget_set_sensitive(user, sensitive);
-}
-
-void update_MenuItem() {
-	gboolean is_a_single_image_loaded;		/* An image is loaded. Not a sequence or only the result of stacking process */
-	gboolean is_a_singleRGB_image_loaded;	/* A RGB image is laoded. Not a sequence or only the result of stacking process */
-	gboolean any_image_is_loaded;			/* Something is loaded. Single image or Sequence */
-	gboolean any_RGB_image_is_loaded;		/* Some RGB data are loaded. Single image or Sequence */
-
-	is_a_singleRGB_image_loaded = isrgb(&gfit) && (!sequence_is_loaded()
-			|| (sequence_is_loaded() && com.seq.current == RESULT_IMAGE));
-
-	is_a_single_image_loaded = single_image_is_loaded()	&& (!sequence_is_loaded()
-			|| (sequence_is_loaded() && com.seq.current == RESULT_IMAGE));
-
-	any_image_is_loaded = single_image_is_loaded() || sequence_is_loaded();
-
-	any_RGB_image_is_loaded = isrgb(&gfit) && (single_image_is_loaded() || sequence_is_loaded());
-
-	/* File Menu */
-	gtk_widget_set_sensitive(lookup_widget("save1"), any_image_is_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menu_FITS_header"), any_image_is_loaded && gfit.header != NULL);
-
-	/* Edit Menu */
-	gtk_widget_set_sensitive(lookup_widget("undo_item"), is_undo_available());
-	gtk_widget_set_sensitive(lookup_widget("redo_item"), is_redo_available());
-
-	/* Image processing Menu */
-	gtk_widget_set_sensitive(lookup_widget("removegreen"), is_a_singleRGB_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_satu"), is_a_singleRGB_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitemcalibration"), is_a_singleRGB_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menu_channel_separation"), is_a_singleRGB_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_histo"), any_image_is_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"), any_image_is_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_cosmetic"), any_image_is_loaded);
-#ifdef HAVE_OPENCV
-	gtk_widget_set_sensitive(lookup_widget("menuitem_resample"), is_a_single_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation"), is_a_single_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation90"), is_a_single_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation270"), is_a_single_image_loaded);
-#else
-	gtk_widget_set_sensitive(lookup_widget("menuitem_resample"), FALSE);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation"), FALSE);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation90"), FALSE);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation270"), FALSE);
-#endif
-	gtk_widget_set_sensitive(lookup_widget("menuitem_mirrorx"), is_a_single_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_mirrory"), is_a_single_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_bkg_extraction"), is_a_single_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_wavelets"), is_a_single_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menu_wavelet_separation"), is_a_single_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_medianfilter"), is_a_single_image_loaded);
-
-	/* Analysis Menu */
-	gtk_widget_set_sensitive(lookup_widget("menuitem_noise"), any_image_is_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitem_stat"), any_image_is_loaded);
-
-	/* Windows Menu */
-	gtk_widget_set_sensitive(lookup_widget("menuitemgray"), any_image_is_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menuitemcolor"), any_RGB_image_is_loaded);
 }
 
 static int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
@@ -1115,6 +911,10 @@ static int make_index_for_rainbow(BYTE index[][3]) {
 	return 0;
 }
 
+/*
+ * Free reference image
+ */
+
 static void free_reference_image() {
 	fprintf(stdout, "Purging previously saved reference frame data.\n");
 	if (com.refimage_regbuffer) {
@@ -1128,139 +928,9 @@ static void free_reference_image() {
 	enable_view_reference_checkbox(FALSE);
 }
 
-gboolean redraw(int vport, int doremap) {
-	GtkWidget *widget;
-
-	if (vport >= MAXVPORT) {
-		fprintf(stderr, _("redraw: maximum number of layers supported is %d"
-				" (current image has %d).\n"), MAXVPORT, vport);
-		return FALSE;
-	}
-	widget = com.vport[vport];
-
-	switch (vport) {
-	case RED_VPORT:
-	case BLUE_VPORT:
-	case GREEN_VPORT:
-		if (doremap == REMAP_ONLY) {
-			remap(vport);
-		} else if (doremap == REMAP_ALL) {
-			int i;
-//#pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)		//probably causes crashes in HESTEQ_MODE
-			for (i = 0; i < gfit.naxes[2]; i++) {
-				remap(i);
-			}
-		}
-		gtk_widget_queue_draw(widget);
-		if (gfit.naxes[2] == 1)
-			break;
-		/* no break */
-	case RGB_VPORT:
-		if (gfit.naxis == 3) {
-			if (doremap != REMAP_NONE) {
-				remaprgb();
-			}
-			widget = com.vport[RGB_VPORT];
-			gtk_widget_queue_draw(widget);
-		}
-		break;
-	default:
-		fprintf(stderr, "redraw: unknown viewport number %d\n", vport);
-		break;
-	}
-	//fprintf(stdout, "end of redraw\n");
-	com.drawn = FALSE;
-	return FALSE;
-}
-
-void sliders_mode_set_state(sliders_mode sliders) {
-	GtkToggleButton *radiobutton;	// Must not be static
-	char *str[] =
-			{ "radiobutton_hilo", "radiobutton_minmax", "radiobutton_user" };
-	void *func[] = { on_radiobutton_hilo_toggled, on_radiobutton_minmax_toggled,
-			on_radiobutton_user_toggled };
-
-	radiobutton = GTK_TOGGLE_BUTTON(
-			gtk_builder_get_object(builder, str[sliders]));
-
-	g_signal_handlers_block_by_func(radiobutton, func[sliders], NULL);
-	gtk_toggle_button_set_active(radiobutton, TRUE);
-	g_signal_handlers_unblock_by_func(radiobutton, func[sliders], NULL);
-}
-
-/* When rendering settings are chained, they need to be copied to other layers
- * when modified on the current layer. This procedure does that. It can be
- * called whenever a value has changed, or when the chaning has been enabled,
- * to synchronize all data.
- * Current view port is com.cvport, and data is stored in layer_info structs
- * Synchronized data: hi and lo cursors, cut over box, rendering mode.
- * DOES NOT REMAP/REDRAW.
- *
- * from_GUI: TRUE if get values from the GUI, FALSE if get the values from structs.
- * Returns 1 if chained, 0 if not.
+/*
+ * Main conversion list static functions
  */
-int copy_rendering_settings_when_chained(gboolean from_GUI) {
-	static GtkToggleButton *chainedbutton = NULL;
-	static GtkRange *range_lo = NULL, *range_hi = NULL;
-	static GtkComboBox *modecombo = NULL;
-	static GtkToggleButton *cutmax = NULL;
-
-	gboolean is_chained;
-	display_mode mode;
-	WORD lo, hi;
-	gboolean cut_over;
-	int i, nb_layers;
-	layer_info *layers = NULL;
-
-	if (!chainedbutton) {	// init widgets
-		chainedbutton = GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_chain"));
-		modecombo = GTK_COMBO_BOX(lookup_widget("combodisplay"));
-		range_lo = GTK_RANGE(gtk_builder_get_object(builder, "scalemin"));
-		range_hi = GTK_RANGE(gtk_builder_get_object(builder, "scalemax"));
-		cutmax = GTK_TOGGLE_BUTTON(
-				gtk_builder_get_object(builder, "checkcut_max"));
-	}
-
-	is_chained = gtk_toggle_button_get_active(chainedbutton);
-	if (single_image_is_loaded() &&
-			com.cvport < com.uniq->nb_layers && com.uniq->layers &&
-			com.seq.current != RESULT_IMAGE) {
-		layers = com.uniq->layers;
-		nb_layers = com.uniq->nb_layers;
-	} else if (sequence_is_loaded() && com.cvport < com.seq.nb_layers
-			&& com.seq.layers) {
-		layers = com.seq.layers;
-		nb_layers = com.seq.nb_layers;
-	} else
-		return 0;
-
-	if (from_GUI) {
-		int raw_mode = gtk_combo_box_get_active(modecombo);
-		/* update values in the layer_info for cvport */
-		layers[com.cvport].rendering_mode =
-				raw_mode >= 0 ? raw_mode : NORMAL_DISPLAY;
-		layers[com.cvport].lo = round_to_WORD(gtk_range_get_value(range_lo));
-		layers[com.cvport].hi = round_to_WORD(gtk_range_get_value(range_hi));
-		layers[com.cvport].cut_over = gtk_toggle_button_get_active(cutmax);
-	}
-	if (!is_chained)
-		return 0;
-	mode = layers[com.cvport].rendering_mode;
-	lo = layers[com.cvport].lo;
-	hi = layers[com.cvport].hi;
-	cut_over = layers[com.cvport].cut_over;
-
-	for (i = 0; i < nb_layers; i++) {
-		if (i == com.cvport)
-			continue;
-		layers[i].rendering_mode = mode;
-		layers[i].lo = lo;
-		layers[i].hi = hi;
-		layers[i].cut_over = cut_over;
-	}
-
-	return 1;
-}
 
 static GtkListStore *liststore_convert = NULL;
 
@@ -1299,6 +969,10 @@ static void fill_convert_list(GSList *list) {
 	}
 	check_for_conversion_form_completeness();
 }
+
+/*
+ * GTK File Chooser static functions
+ */
 
 static int whichdial;
 
@@ -1543,618 +1217,6 @@ static void opendial(void) {
 	gtk_widget_destroy(widgetdialog);
 }
 
-void set_prepro_button_sensitiveness() {
-	static GtkToggleButton *udark = NULL, *uoffset = NULL, *uflat = NULL,
-			*checkAutoEvaluate = NULL;
-	if (udark == NULL) {
-		udark = GTK_TOGGLE_BUTTON(
-				gtk_builder_get_object(builder, "usedark_button"));
-		uoffset = GTK_TOGGLE_BUTTON(
-				gtk_builder_get_object(builder, "useoffset_button"));
-		uflat = GTK_TOGGLE_BUTTON(
-				gtk_builder_get_object(builder, "useflat_button"));
-		checkAutoEvaluate = GTK_TOGGLE_BUTTON(
-				gtk_builder_get_object(builder, "checkbutton_auto_evaluate"));
-	}
-
-	gtk_widget_set_sensitive(lookup_widget("prepro_button"),
-			(sequence_is_loaded() || single_image_is_loaded())
-					&& (gtk_toggle_button_get_active(udark)
-							|| gtk_toggle_button_get_active(uoffset)
-							|| gtk_toggle_button_get_active(uflat)));
-	gtk_widget_set_sensitive(lookup_widget("grid24"),
-			gtk_toggle_button_get_active(udark));
-	gtk_widget_set_sensitive(lookup_widget("checkDarkOptimize"),
-			gtk_toggle_button_get_active(udark));
-	gtk_widget_set_sensitive(lookup_widget("checkbutton_auto_evaluate"),
-			gtk_toggle_button_get_active(uflat));
-	gtk_widget_set_sensitive(lookup_widget("entry_flat_norm"),
-			gtk_toggle_button_get_active(uflat)
-					&& !gtk_toggle_button_get_active(checkAutoEvaluate));
-}
-
-static void update_fwhm_units_ok() {
-	GtkWidget *label_ok = GTK_WIDGET(lookup_widget("label_ok"));
-
-	gtk_widget_set_visible(label_ok,
-			gfit.focal_length > 0.0 && gfit.pixel_size_x > 0.0f
-					&& gfit.pixel_size_y > 0.0f);
-}
-
-void clear_sampling_setting_box() {
-	GtkComboBox *binning = GTK_COMBO_BOX(
-			gtk_builder_get_object(builder, "combobinning"));
-	GtkEntry* focal_entry = GTK_ENTRY(lookup_widget("focal_entry"));
-	GtkEntry* pitchX_entry = GTK_ENTRY(lookup_widget("pitchX_entry"));
-	GtkEntry* pitchY_entry = GTK_ENTRY(lookup_widget("pitchY_entry"));
-
-	gtk_entry_set_text(focal_entry, "");
-	gtk_entry_set_text(pitchX_entry, "");
-	gtk_entry_set_text(pitchY_entry, "");
-	gtk_combo_box_set_active(binning, 0);
-}
-
-void update_libraw_interface() {
-	/**********COLOR ADJUSTEMENT**************/
-	com.raw_set.bright = gtk_spin_button_get_value(
-			GTK_SPIN_BUTTON(lookup_widget("Brightness_spinbutton")));
-	com.raw_set.mul[0] = gtk_spin_button_get_value(
-			GTK_SPIN_BUTTON(lookup_widget("Red_spinbutton")));
-	com.raw_set.mul[2] = gtk_spin_button_get_value(
-			GTK_SPIN_BUTTON(lookup_widget("Blue_spinbutton")));
-
-	com.raw_set.auto_mul = gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_multipliers")));
-	com.raw_set.user_black = gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_blackpoint")));
-
-	/**************WHITE BALANCE**************/
-	com.raw_set.use_camera_wb = (int) gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_cam")));
-	com.raw_set.use_auto_wb = (int) gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_auto")));
-
-	/********MATRIX INTERPOLATION**************/
-	com.raw_set.user_qual = gtk_combo_box_get_active(
-			GTK_COMBO_BOX(lookup_widget("combo_dcraw_inter")));
-
-	/********GAMMA CORRECTION**************/
-	if (gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_gamm0"))) == TRUE) {
-		/* Linear Gamma Curve */
-		com.raw_set.gamm[0] = 1.0;
-		com.raw_set.gamm[1] = 1.0;
-	} else if (gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_gamm1"))) == TRUE) {
-		/* BT.709 Gamma curve */
-		com.raw_set.gamm[0] = 2.222;
-		com.raw_set.gamm[1] = 4.5;
-	} else {
-		/* sRGB Gamma curve */
-		com.raw_set.gamm[0] = 2.40;
-		com.raw_set.gamm[1] = 12.92;
-	}
-	/* We write in config file */
-	/*************SER**********************/
-	com.debayer.use_bayer_header = gtk_toggle_button_get_active(
-			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_SER_use_header")));
-	writeinitfile();
-}
-
-static void reset_swapdir() {
-	GtkFileChooser *swap_dir = GTK_FILE_CHOOSER(lookup_widget("filechooser_swap"));
-	GtkLabel *label = GTK_LABEL(lookup_widget("label_swap_dir"));
-	const char *dir;
-
-	dir = g_get_tmp_dir();
-
-	if (strcmp(dir, com.swap_dir)) {
-		if (com.swap_dir)
-			free(com.swap_dir);
-		com.swap_dir = strdup(dir);
-		gtk_file_chooser_set_filename(swap_dir, dir);
-		gtk_label_set_text(label, dir);
-		writeinitfile();
-	}
-}
-
-static void history_add_line(char *line) {
-	if (!com.cmd_history) {
-		com.cmd_hist_size = CMD_HISTORY_SIZE;
-		com.cmd_history = calloc(com.cmd_hist_size, sizeof(const char*));
-		com.cmd_hist_current = 0;
-		com.cmd_hist_display = 0;
-	}
-	com.cmd_history[com.cmd_hist_current] = line;
-	com.cmd_hist_current++;
-	// circle at the end
-	if (com.cmd_hist_current == com.cmd_hist_size)
-		com.cmd_hist_current = 0;
-	if (com.cmd_history[com.cmd_hist_current]) {
-		free(com.cmd_history[com.cmd_hist_current]);
-		com.cmd_history[com.cmd_hist_current] = NULL;
-	}
-	com.cmd_hist_display = com.cmd_hist_current;
-}
-
-/* selection zone event management */
-#define MAX_CALLBACKS_PER_EVENT 10
-static selection_update_callback _registered_callbacks[MAX_CALLBACKS_PER_EVENT];
-static int _nb_registered_callbacks = 0;
-
-void register_selection_update_callback(selection_update_callback f) {
-	if (_nb_registered_callbacks < MAX_CALLBACKS_PER_EVENT) {
-		_registered_callbacks[_nb_registered_callbacks] = f;
-		_nb_registered_callbacks++;
-	}
-}
-
-void unregister_selection_update_callback(selection_update_callback f) {
-	int i;
-	for (i = 0; i < _nb_registered_callbacks; ++i) {
-		if (_registered_callbacks[i] == f) {
-			_registered_callbacks[i] =
-					_registered_callbacks[_nb_registered_callbacks];
-			_registered_callbacks[_nb_registered_callbacks] = NULL;
-			_nb_registered_callbacks--;
-			return;
-		}
-	}
-}
-
-// send the events
-static void new_selection_zone() {
-	int i;
-	fprintf(stdout, "selection: %d,%d,\t%dx%d\n", com.selection.x, com.selection.y,
-			com.selection.w, com.selection.h);
-	for (i = 0; i < _nb_registered_callbacks; ++i) {
-		_registered_callbacks[i]();
-	}
-}
-
-void delete_selected_area() {
-	memset(&com.selection, 0, sizeof(rectangle));
-	new_selection_zone();
-}
-
-char *vport_number_to_name(int vport) {
-	switch (vport) {
-	case RED_VPORT:
-		return strdup("red");
-	case GREEN_VPORT:
-		return strdup("green");
-	case BLUE_VPORT:
-		return strdup("blue");
-	case RGB_VPORT:
-		return strdup("rgb");
-	}
-	return NULL;
-}
-
-int match_drawing_area_widget(GtkWidget *drawing_area, gboolean allow_rgb) {
-	/* could be done with a for i=0 loop, to get rid of these defines */
-	if (drawing_area == com.vport[RED_VPORT])
-		return RED_VPORT;
-	if (drawing_area == com.vport[GREEN_VPORT])
-		return GREEN_VPORT;
-	else if (drawing_area == com.vport[BLUE_VPORT])
-		return BLUE_VPORT;
-	else if (allow_rgb && drawing_area == com.vport[RGB_VPORT])
-		return RGB_VPORT;
-	return -1;
-}
-
-void calculate_fwhm(GtkWidget *widget) {
-	/* calculate and display FWHM */
-	int layer = match_drawing_area_widget(widget, FALSE);
-	if (layer != -1) {
-		char buf[64], label_name[16];
-		char *layer_name = vport_number_to_name(layer);
-		GtkLabel *label;
-		if (com.selection.w && com.selection.h) {// Now we don't care about the size of the sample. Minimization checks that
-			if (com.selection.w < 300 && com.selection.h < 300) {
-				double roundness;
-				double fwhm_val;
-
-				fwhm_val = psf_get_fwhm(&gfit, layer, &roundness);
-				g_snprintf(buf, sizeof(buf), "fwhm = %.2f, r = %.2f", fwhm_val,
-						roundness);
-			} else
-				g_snprintf(buf, sizeof(buf), _("fwhm: selection is too large"));
-		} else {
-			g_snprintf(buf, sizeof(buf), _("fwhm: no selection"));
-		}
-		g_snprintf(label_name, sizeof(label_name), "labelfwhm%s", layer_name);
-		free(layer_name);
-		label = GTK_LABEL(gtk_builder_get_object(builder, label_name));
-		gtk_label_set_text(label, buf);
-	}
-}
-
-static void toggle_image_selection(int image_num) {
-	char msg[60];
-	if (com.seq.imgparam[image_num].incl) {
-		com.seq.imgparam[image_num].incl = FALSE;
-		--com.seq.selnum;
-		g_snprintf(msg, sizeof(msg),
-				_("Image %d has been unselected from sequence\n"), image_num);
-	} else {
-		com.seq.imgparam[image_num].incl = TRUE;
-		++com.seq.selnum;
-		g_snprintf(msg, sizeof(msg),
-				_("Image %d has been selected from sequence\n"), image_num);
-	}
-	siril_log_message(msg);
-	sequence_list_change_selection_index(image_num);
-	update_reg_interface(FALSE);
-	adjust_exclude(image_num, TRUE);
-	writeseqfile(&com.seq);
-}
-
-/* displays the opened image file name in the layers window.
- * if a unique file is loaded, its details are used instead of any sequence data
- */
-void display_filename() {
-	GtkLabel *fn_label;
-	int nb_layers;
-	char str[64], *filename;
-	if (com.uniq) {	// unique image
-		filename = com.uniq->filename;
-		nb_layers = com.uniq->nb_layers;
-	} else {	// sequence
-		filename = malloc(256);
-		seq_get_image_filename(&com.seq, com.seq.current, filename);
-		nb_layers = com.seq.nb_layers;
-	}
-	fn_label = GTK_LABEL(gtk_builder_get_object(builder, "labelfilename_red"));
-	gchar *name = g_path_get_basename(filename);
-	g_snprintf(str, sizeof(str), _("%s (channel 0)"), name);
-	gtk_label_set_text(fn_label, str);
-	if (nb_layers == 3) {	//take in charge both sequence and single image
-		fn_label = GTK_LABEL(
-				gtk_builder_get_object(builder, "labelfilename_green"));
-		g_snprintf(str, sizeof(str), _("%s (channel 1)"), name);
-		gtk_label_set_text(fn_label, str);
-		fn_label = GTK_LABEL(
-				gtk_builder_get_object(builder, "labelfilename_blue"));
-		g_snprintf(str, sizeof(str), _("%s (channel 2)"), name);
-		gtk_label_set_text(fn_label, str);
-	}
-	g_free(name);
-}
-
-/* set available layers in the layer list of registration */
-void set_layers_for_assign() {
-	int i;
-	if (!com.seq.layers)
-		return;
-	for (i = 0; i < com.seq.nb_layers; i++) {
-		char layer[100];
-		if (!com.seq.layers[i].name) {
-			if (com.seq.nb_layers == 1) {
-				com.seq.layers[i].name = strdup(
-						predefined_layers_colors[i].name);
-				com.seq.layers[i].wavelength =
-						predefined_layers_colors[i].wavelength;
-			} else if (com.seq.nb_layers == 3) {
-				com.seq.layers[i].name = strdup(
-						predefined_layers_colors[i + 1].name);
-				com.seq.layers[i].wavelength =
-						predefined_layers_colors[i + 1].wavelength;
-			} else {
-				com.seq.layers[i].name = strdup("Unassigned");
-				com.seq.layers[i].wavelength = -1.0;
-			}
-		}
-		g_snprintf(layer, sizeof(layer), "%d: %s", i, com.seq.layers[i].name);
-	}
-}
-
-void set_layers_for_registration() {
-	static GtkComboBoxText *cbbt_layers = NULL;
-	int i;
-	int reminder;
-
-	if (cbbt_layers == NULL)
-		cbbt_layers = GTK_COMBO_BOX_TEXT(
-				gtk_builder_get_object(builder, "comboboxreglayer"));
-	reminder = gtk_combo_box_get_active(GTK_COMBO_BOX(cbbt_layers));
-	gtk_combo_box_text_remove_all(cbbt_layers);
-	for (i = 0; i < com.seq.nb_layers; i++) {
-		char layer[100];
-		if (com.seq.layers[i].name)
-			g_snprintf(layer, sizeof(layer), "%d: %s", i,
-					com.seq.layers[i].name);
-		else
-			g_snprintf(layer, sizeof(layer), _("%d: not affected yet"), i);
-		if (com.seq.regparam[i]) {
-			// calculate average quality for this layer
-			strcat(layer, " (*)");
-		}
-		gtk_combo_box_text_append_text(cbbt_layers, layer);
-	}
-	/* First initialization */
-	if (reminder == -1) {
-		if (com.seq.nb_layers == 3)
-			gtk_combo_box_set_active(GTK_COMBO_BOX(cbbt_layers), 1);
-		else
-			gtk_combo_box_set_active(GTK_COMBO_BOX(cbbt_layers), 0);
-	}
-	/* Already initialized */
-	else
-		gtk_combo_box_set_active(GTK_COMBO_BOX(cbbt_layers), reminder);
-}
-
-static int get_index_in_predefined_colors_for_wavelength(double wl) {
-	int i;
-	for (i = 0; i < sizeof(predefined_layers_colors) / sizeof(layer_info);
-			i++) {
-		if (predefined_layers_colors[i].wavelength == wl)
-			return i;
-	}
-	return -1;
-}
-
-void display_image_number(int index) {
-	static GtkSpinButton *spin = NULL;
-	if (!spin)
-		spin = GTK_SPIN_BUTTON(
-				gtk_builder_get_object(builder, "imagenumber_spin"));
-	char text[16];
-	char format[10];
-	if (com.seq.fixed <= 1)
-		g_snprintf(format, sizeof(format), "%%d");
-	else
-		g_snprintf(format, sizeof(format), "%%.%dd", com.seq.fixed);
-	g_snprintf(text, sizeof(text), format, com.seq.imgparam[index].filenum);
-	gtk_entry_set_text(GTK_ENTRY(spin), text);
-}
-
-/* method handling all include or all exclude from a sequence */
-static void sequence_setselect_all(gboolean include_all) {
-	int i;
-
-	if (!com.seq.imgparam)
-		return;
-	for (i = 0; i <= com.seq.number; ++i) {
-		if (com.seq.imgparam[i].incl != include_all) {
-			com.seq.imgparam[i].incl = include_all;
-			sequence_list_change_selection_index(i);
-		}
-	}
-	if (include_all) {
-		com.seq.selnum = com.seq.number;
-		siril_log_message(_("Selected all images from sequence\n"));
-	} else {
-		com.seq.selnum = 0;
-		siril_log_message(_("Unselected all images from sequence\n"));
-	}
-	adjust_exclude(com.seq.current, TRUE);
-	update_reg_interface(FALSE);
-	writeseqfile(&com.seq);
-}
-
-struct _dialog_data {
-	const char *text;
-	const char *title;
-	const char *icon;
-};
-
-static gboolean show_dialog_idle(gpointer p) {
-	static GtkLabel *label = NULL;
-	struct _dialog_data *args = (struct _dialog_data *) p;
-	GtkImage *image = GTK_IMAGE(GTK_WIDGET(lookup_widget("image1")));
-	if (label == NULL) {
-		label = GTK_LABEL(gtk_builder_get_object(builder, "labeldialog1"));
-	}
-	gtk_window_set_title(GTK_WINDOW(lookup_widget("dialog1")), args->title);
-	gtk_image_set_from_icon_name(image, args->icon, GTK_ICON_SIZE_DIALOG);
-	gtk_label_set_text(label, args->text);
-	gtk_widget_show(lookup_widget("dialog1"));
-	free(args);
-	return FALSE;
-}
-
-/* sets text in the label and displays the dialog window 1 */
-void show_dialog(const char *text, const char *title, const char *icon) {
-	struct _dialog_data *args = malloc(sizeof(struct _dialog_data));
-	args->text = text;
-	args->title = title;
-	args->icon = icon;
-	gdk_threads_add_idle(show_dialog_idle, args);
-}
-
-void show_data_dialog(char *text, char *title) {
-	GtkTextView *tv = GTK_TEXT_VIEW(lookup_widget("data_txt"));
-	GtkTextBuffer *tbuf = gtk_text_view_get_buffer(tv);
-	GtkTextIter itDebut;
-	GtkTextIter itFin;
-
-	gtk_text_buffer_get_bounds(tbuf, &itDebut, &itFin);
-	gtk_text_buffer_delete(tbuf, &itDebut, &itFin);
-	gtk_text_buffer_set_text(tbuf, text, strlen(text));
-	gtk_window_set_title(GTK_WINDOW(lookup_widget("data_dialog")), title);
-
-	gtk_widget_show_all(lookup_widget("data_dialog"));
-}
-
-void show_main_gray_window() {
-	GtkCheckMenuItem *graycheck = GTK_CHECK_MENU_ITEM(
-			gtk_builder_get_object(builder, "menuitemgray"));
-	gtk_check_menu_item_set_active(graycheck, TRUE);
-	gtk_widget_show_all(lookup_widget("main_window"));
-	gtk_window_present(GTK_WINDOW(lookup_widget("main_window")));
-}
-
-void show_rgb_window() {
-	GtkCheckMenuItem *rgbcheck = GTK_CHECK_MENU_ITEM(
-			gtk_builder_get_object(builder, "menuitemcolor"));
-	gtk_check_menu_item_set_active(rgbcheck, TRUE);
-	gtk_widget_show_all(lookup_widget("rgb_window"));
-}
-
-void hide_rgb_window() {
-	/* unchecking the menu item is done in the window destruction callback */
-	/*GtkCheckMenuItem *rgbcheck =
-	 GTK_CHECK_MENU_ITEM(gtk_builder_get_object(builder, "menuitemcolor"));
-	 gtk_check_menu_item_set_active(rgbcheck, FALSE);*/
-	gtk_widget_hide(lookup_widget("rgb_window"));
-}
-
-void set_cursor_waiting(gboolean waiting) {
-	GdkCursor *cursor;
-	static GdkCursor *clock = NULL;
-	GdkDisplay *display;
-	GdkScreen *screen;
-	GList *list;
-
-	display = gdk_display_get_default ();
-
-	if (clock == NULL)
-		clock = gdk_cursor_new_for_display(display, GDK_WATCH);
-
-	screen = gdk_screen_get_default();
-	list = gdk_screen_get_toplevel_windows(screen);
-
-	if (waiting) {
-		cursor = clock;
-	} else {
-		cursor = NULL;
-	}
-	while (list) {
-		GdkWindow *window = GDK_WINDOW(list->data);
-		gdk_window_set_cursor(window, cursor);
-		gdk_display_sync(gdk_window_get_display(window));
-		gdk_flush();
-		list = g_list_next(list);
-	}
-	g_free(list);
-}
-
-// Thread-safe progress bar update.
-// text can be NULL, percent can be -1 for pulsating, -2 for nothing, or between 0 and 1 for percent
-void set_progress_bar_data(const char *text, double percent) {
-	struct progress_bar_idle_data *data;
-	g_mutex_lock(&com.mutex);
-	//fprintf(stdout, "progress: %s, %g\n", text ? text : "NULL", percent);
-	data = malloc(sizeof(struct progress_bar_idle_data));
-	data->progress_bar_text = text ? strdup(text) : NULL;
-	data->progress_bar_percent = percent;
-	assert(percent == PROGRESS_PULSATE || percent == PROGRESS_NONE ||
-			(percent >= 0.0 && percent <= 1.0));
-	gdk_threads_add_idle(progress_bar_idle_callback, data);
-	g_mutex_unlock(&com.mutex);
-}
-
-void zoomcombo_update_display_for_zoom() {
-	static GtkComboBox *zoomcombo = NULL;
-	static double indexes[] = { 16., 8., 4., 2., 1., .5, .25, .125, /*.0625, */
-	-1. };
-	int i;
-	char *msg;
-
-	if (zoomcombo == NULL)
-		zoomcombo = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combozoom"));
-	for (i = 0; i < sizeof(indexes) / sizeof(double); i++) {
-		if (indexes[i] == com.zoom_value) {
-			g_signal_handlers_block_by_func(zoomcombo, on_combozoom_changed,
-					NULL);
-			gtk_combo_box_set_active(zoomcombo, i);
-			g_signal_handlers_unblock_by_func(zoomcombo, on_combozoom_changed,
-					NULL);
-			return;
-		}
-	}
-	msg = siril_log_message(
-			_("Unknown zoom_value value, what is the current zoom?\n"));
-	show_dialog(msg, _("Error"), "gtk-dialog-error");
-}
-
-void adjust_vport_size_to_image() {
-	int vport;
-	// make GtkDrawingArea the same size than the image
-	// http://developer.gnome.org/gtk3/3.4/GtkWidget.html#gtk-widget-set-size-request
-	double zoom = get_zoom_val();
-	int w, h;
-	if (zoom <= 0)
-		return;
-	w = (int) (((double) gfit.rx) * zoom);
-	h = (int) (((double) gfit.ry) * zoom);
-	for (vport = 0; vport < MAXVPORT; vport++)
-		gtk_widget_set_size_request(com.vport[vport], w, h);
-	fprintf(stdout, "set new vport size (%d, %d)\n", w, h);
-}
-
-/* when a sequence is loaded, the processing (stacking) output file name is
- * modified to include the name of the sequence */
-void set_output_filename_to_sequence_name() {
-	static GtkEntry *output_file = NULL;
-	gchar msg[256];
-	if (!output_file)
-		output_file = GTK_ENTRY(
-				gtk_builder_get_object(builder, "entryresultfile"));
-	if (!com.seq.seqname || *com.seq.seqname == '\0')
-		return;
-	g_snprintf(msg, sizeof(msg), "%s%sstacked.fit", com.seq.seqname,
-			ends_with(com.seq.seqname, "_") ? "" : "_");
-	gtk_entry_set_text(output_file, msg);
-}
-
-/* RGB popup menu */
-
-static void do_popup_rgbmenu(GtkWidget *my_widget, GdkEventButton *event) {
-	static GtkMenu *menu = NULL;
-	int button, event_time;
-
-	if (!menu) {
-		menu = GTK_MENU(gtk_builder_get_object(builder, "menurgb"));
-		gtk_menu_attach_to_widget(GTK_MENU(menu), my_widget, NULL);
-	}
-
-	if (event) {
-		button = event->button;
-		event_time = event->time;
-	} else {
-		button = 0;
-		event_time = gtk_get_current_event_time();
-	}
-
-	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, button, event_time);
-}
-
-/* Gray popup menu */
-
-static void do_popup_graymenu(GtkWidget *my_widget, GdkEventButton *event) {
-	static GtkMenu *menu = NULL;
-	int button, event_time;
-	gboolean selected;
-	gboolean is_a_single_image_loaded = single_image_is_loaded() && (!sequence_is_loaded()
-				|| (sequence_is_loaded() && com.seq.current == RESULT_IMAGE));
-
-	if (!menu) {
-		menu = GTK_MENU(gtk_builder_get_object(builder, "menugray"));
-		gtk_menu_attach_to_widget(GTK_MENU(menu), my_widget, NULL);
-	}
-
-	if (event) {
-		button = event->button;
-		event_time = event->time;
-	} else {
-		button = 0;
-		event_time = gtk_get_current_event_time();
-	}
-
-	selected = com.selection.w && com.selection.h;
-	gtk_widget_set_sensitive(lookup_widget("undo_item1"), is_undo_available());
-	gtk_widget_set_sensitive(lookup_widget("redo_item1"), is_redo_available());
-	gtk_widget_set_sensitive(lookup_widget("menu_gray_psf"), selected);
-	gtk_widget_set_sensitive(lookup_widget("menu_gray_pick_star"), selected);
-	gtk_widget_set_sensitive(lookup_widget("menu_gray_crop"), selected && is_a_single_image_loaded);
-	gtk_widget_set_sensitive(lookup_widget("menu_gray_crop_seq"), selected && sequence_is_loaded());
-
-	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, button, event_time);
-}
-
 static void Set_Programm_name_in_TIFF() {
 	static GtkTextView *TIFF_txt = NULL;
 	GtkTextBuffer *tbuf;
@@ -2315,6 +1377,1074 @@ static void minisavedial(void) {
 	}
 }
 
+/*
+ * Update FWHMP static function
+ */
+
+static void update_fwhm_units_ok() {
+	GtkWidget *label_ok = GTK_WIDGET(lookup_widget("label_ok"));
+
+	gtk_widget_set_visible(label_ok,
+			gfit.focal_length > 0.0 && gfit.pixel_size_x > 0.0f
+					&& gfit.pixel_size_y > 0.0f);
+}
+
+/*
+ * Set swap dir to default
+ */
+
+static void reset_swapdir() {
+	GtkFileChooser *swap_dir = GTK_FILE_CHOOSER(lookup_widget("filechooser_swap"));
+	GtkLabel *label = GTK_LABEL(lookup_widget("label_swap_dir"));
+	const char *dir;
+
+	dir = g_get_tmp_dir();
+
+	if (strcmp(dir, com.swap_dir)) {
+		if (com.swap_dir)
+			free(com.swap_dir);
+		com.swap_dir = strdup(dir);
+		gtk_file_chooser_set_filename(swap_dir, dir);
+		gtk_label_set_text(label, dir);
+		writeinitfile();
+	}
+}
+
+/*
+ * Command line history static function
+ */
+
+static void history_add_line(char *line) {
+	if (!com.cmd_history) {
+		com.cmd_hist_size = CMD_HISTORY_SIZE;
+		com.cmd_history = calloc(com.cmd_hist_size, sizeof(const char*));
+		com.cmd_hist_current = 0;
+		com.cmd_hist_display = 0;
+	}
+	com.cmd_history[com.cmd_hist_current] = line;
+	com.cmd_hist_current++;
+	// circle at the end
+	if (com.cmd_hist_current == com.cmd_hist_size)
+		com.cmd_hist_current = 0;
+	if (com.cmd_history[com.cmd_hist_current]) {
+		free(com.cmd_history[com.cmd_hist_current]);
+		com.cmd_history[com.cmd_hist_current] = NULL;
+	}
+	com.cmd_hist_display = com.cmd_hist_current;
+}
+
+/*
+ * Selection static functions
+ */
+
+/* selection zone event management */
+#define MAX_CALLBACKS_PER_EVENT 10
+static selection_update_callback _registered_callbacks[MAX_CALLBACKS_PER_EVENT];
+static int _nb_registered_callbacks = 0;
+
+void register_selection_update_callback(selection_update_callback f) {
+	if (_nb_registered_callbacks < MAX_CALLBACKS_PER_EVENT) {
+		_registered_callbacks[_nb_registered_callbacks] = f;
+		_nb_registered_callbacks++;
+	}
+}
+
+void unregister_selection_update_callback(selection_update_callback f) {
+	int i;
+	for (i = 0; i < _nb_registered_callbacks; ++i) {
+		if (_registered_callbacks[i] == f) {
+			_registered_callbacks[i] =
+					_registered_callbacks[_nb_registered_callbacks];
+			_registered_callbacks[_nb_registered_callbacks] = NULL;
+			_nb_registered_callbacks--;
+			return;
+		}
+	}
+}
+
+// send the events
+static void new_selection_zone() {
+	int i;
+	fprintf(stdout, "selection: %d,%d,\t%dx%d\n", com.selection.x, com.selection.y,
+			com.selection.w, com.selection.h);
+	for (i = 0; i < _nb_registered_callbacks; ++i) {
+		_registered_callbacks[i]();
+	}
+}
+
+void delete_selected_area() {
+	memset(&com.selection, 0, sizeof(rectangle));
+	new_selection_zone();
+}
+
+/*
+ * MISC static functions
+ */
+
+static void toggle_image_selection(int image_num) {
+	char msg[60];
+	if (com.seq.imgparam[image_num].incl) {
+		com.seq.imgparam[image_num].incl = FALSE;
+		--com.seq.selnum;
+		g_snprintf(msg, sizeof(msg),
+				_("Image %d has been unselected from sequence\n"), image_num);
+	} else {
+		com.seq.imgparam[image_num].incl = TRUE;
+		++com.seq.selnum;
+		g_snprintf(msg, sizeof(msg),
+				_("Image %d has been selected from sequence\n"), image_num);
+	}
+	siril_log_message(msg);
+	sequence_list_change_selection_index(image_num);
+	update_reg_interface(FALSE);
+	adjust_exclude(image_num, TRUE);
+	writeseqfile(&com.seq);
+}
+
+static int get_index_in_predefined_colors_for_wavelength(double wl) {
+	int i;
+	for (i = 0; i < sizeof(predefined_layers_colors) / sizeof(layer_info);
+			i++) {
+		if (predefined_layers_colors[i].wavelength == wl)
+			return i;
+	}
+	return -1;
+}
+
+/* method handling all include or all exclude from a sequence */
+static void sequence_setselect_all(gboolean include_all) {
+	int i;
+
+	if (!com.seq.imgparam)
+		return;
+	for (i = 0; i <= com.seq.number; ++i) {
+		if (com.seq.imgparam[i].incl != include_all) {
+			com.seq.imgparam[i].incl = include_all;
+			sequence_list_change_selection_index(i);
+		}
+	}
+	if (include_all) {
+		com.seq.selnum = com.seq.number;
+		siril_log_message(_("Selected all images from sequence\n"));
+	} else {
+		com.seq.selnum = 0;
+		siril_log_message(_("Unselected all images from sequence\n"));
+	}
+	adjust_exclude(com.seq.current, TRUE);
+	update_reg_interface(FALSE);
+	writeseqfile(&com.seq);
+}
+
+/* RGB popup menu */
+
+static void do_popup_rgbmenu(GtkWidget *my_widget, GdkEventButton *event) {
+	static GtkMenu *menu = NULL;
+	int button, event_time;
+
+	if (!menu) {
+		menu = GTK_MENU(gtk_builder_get_object(builder, "menurgb"));
+		gtk_menu_attach_to_widget(GTK_MENU(menu), my_widget, NULL);
+	}
+
+	if (event) {
+		button = event->button;
+		event_time = event->time;
+	} else {
+		button = 0;
+		event_time = gtk_get_current_event_time();
+	}
+
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, button, event_time);
+}
+
+/* Gray popup menu */
+
+static void do_popup_graymenu(GtkWidget *my_widget, GdkEventButton *event) {
+	static GtkMenu *menu = NULL;
+	int button, event_time;
+	gboolean selected;
+	gboolean is_a_single_image_loaded = single_image_is_loaded() && (!sequence_is_loaded()
+				|| (sequence_is_loaded() && com.seq.current == RESULT_IMAGE));
+
+	if (!menu) {
+		menu = GTK_MENU(gtk_builder_get_object(builder, "menugray"));
+		gtk_menu_attach_to_widget(GTK_MENU(menu), my_widget, NULL);
+	}
+
+	if (event) {
+		button = event->button;
+		event_time = event->time;
+	} else {
+		button = 0;
+		event_time = gtk_get_current_event_time();
+	}
+
+	selected = com.selection.w && com.selection.h;
+	gtk_widget_set_sensitive(lookup_widget("undo_item1"), is_undo_available());
+	gtk_widget_set_sensitive(lookup_widget("redo_item1"), is_redo_available());
+	gtk_widget_set_sensitive(lookup_widget("menu_gray_psf"), selected);
+	gtk_widget_set_sensitive(lookup_widget("menu_gray_pick_star"), selected);
+	gtk_widget_set_sensitive(lookup_widget("menu_gray_crop"), selected && is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menu_gray_crop_seq"), selected && sequence_is_loaded());
+
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, button, event_time);
+}
+
+/*****************************************************************************
+ *                    P U B L I C      F U N C T I O N S                     *
+ ****************************************************************************/
+
+GtkWidget* lookup_widget(const gchar *widget_name) {
+	return GTK_WIDGET(gtk_builder_get_object(builder, widget_name));
+}
+
+void set_sliders_value_to_gfit() {
+	static GtkAdjustment *adj1 = NULL, *adj2 = NULL;
+
+	if (adj1 == NULL) {
+		adj1 = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "adjustment1"));// scalemax
+		adj2 = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "adjustment2"));// scalemin
+	}
+
+	gfit.hi = gtk_adjustment_get_value(adj1);
+	gfit.lo = gtk_adjustment_get_value(adj2);
+}
+
+/* Sets maximum value for contrast scales. Minimum is always 0.
+ * Should be done on first image load of a sequence and when single images are loaded.
+ * Max value is taken from gfit.maxi, recomputed if not present.
+ *
+ */
+void set_cutoff_sliders_max_values() {
+	static GtkAdjustment *adj1 = NULL, *adj2 = NULL;
+	gdouble max_val;
+	if (adj1 == NULL) {
+		adj1 = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "adjustment1"));// scalemax
+		adj2 = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "adjustment2"));// scalemin
+	}
+	fprintf(stdout, _("Setting MAX value for cutoff sliders adjustments\n"));
+	/* set max value for range according to number of bits of original image
+	 * We should use gfit.bitpix for this, but it's currently always USHORT_IMG */
+	/*if (gfit.bitpix == BYTE_IMG)
+	 max_val = UCHAR_MAX_DOUBLE;
+	 else max_val = USHRT_MAX_DOUBLE;*/
+	if (gfit.maxi == 0)
+		image_find_minmax(&gfit, 0);
+	if (gfit.maxi <= UCHAR_MAX)
+		max_val = UCHAR_MAX_DOUBLE;
+	else
+		max_val = USHRT_MAX_DOUBLE;
+
+	gtk_adjustment_set_upper(adj1, max_val);
+	gtk_adjustment_set_upper(adj2, max_val);
+}
+
+/* Sets the value scalemin and scalemax sliders so that they match the hi and
+ * lo values stored for the current viewport.
+ * It also sets the 'cut' checkbox status.
+ * The function should be called on every tab change and file opening */
+void set_cutoff_sliders_values() {
+	gchar buffer[10];
+	static GtkAdjustment *adjmin = NULL, *adjmax = NULL;
+	static GtkEntry *maxentry = NULL, *minentry = NULL;
+	static GtkToggleButton *cutmax = NULL;
+	WORD hi, lo;
+	gboolean cut_over;
+	if (adjmin == NULL) {
+		adjmax = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "adjustment1")); // scalemax
+		adjmin = GTK_ADJUSTMENT(gtk_builder_get_object(builder, "adjustment2")); // scalemin
+		maxentry = GTK_ENTRY(gtk_builder_get_object(builder, "max_entry"));
+		minentry = GTK_ENTRY(gtk_builder_get_object(builder, "min_entry"));
+		cutmax = GTK_TOGGLE_BUTTON(
+				gtk_builder_get_object(builder, "checkcut_max"));
+	}
+	if (single_image_is_loaded() && com.cvport < com.uniq->nb_layers &&
+			com.uniq->layers && com.seq.current != RESULT_IMAGE) {
+		hi = com.uniq->layers[com.cvport].hi;
+		lo = com.uniq->layers[com.cvport].lo;
+		cut_over = com.uniq->layers[com.cvport].cut_over;
+	}
+	/* When com.seq.current == RESULT_IMAGE we take sequence values */
+	else if (sequence_is_loaded() && com.cvport < com.seq.nb_layers
+			&& com.seq.layers) {
+		hi = com.seq.layers[com.cvport].hi;
+		lo = com.seq.layers[com.cvport].lo;
+		cut_over = com.seq.layers[com.cvport].cut_over;
+	} else
+		return;	// there should be no other normal cases
+	fprintf(stdout, _("setting ranges scalemin=%d, scalemax=%d\n"), lo, hi);
+	WORD maxvalue = get_normalized_value(&gfit);
+	gtk_adjustment_set_lower(adjmin, 0.0);
+	gtk_adjustment_set_lower(adjmax, 0.0);
+	gtk_adjustment_set_upper(adjmin, (double) maxvalue);
+	gtk_adjustment_set_upper(adjmax, (double) maxvalue);
+	gtk_adjustment_set_value(adjmin, (gdouble) lo);
+	gtk_adjustment_set_value(adjmax, (gdouble) hi);
+	g_snprintf(buffer, 6, "%u", hi);
+	g_signal_handlers_block_by_func(maxentry, on_max_entry_changed, NULL);
+	gtk_entry_set_text(maxentry, buffer);
+	g_signal_handlers_unblock_by_func(maxentry, on_max_entry_changed, NULL);
+	g_snprintf(buffer, 6, "%u", lo);
+	g_signal_handlers_block_by_func(minentry, on_min_entry_changed, NULL);
+	gtk_entry_set_text(minentry, buffer);
+	g_signal_handlers_unblock_by_func(minentry, on_min_entry_changed, NULL);
+	gtk_toggle_button_set_active(cutmax, cut_over);
+}
+
+/* sets the maximum value for the spin button and display the initial file name */
+int seqsetnum(int image_number) {
+	GtkSpinButton *spin;
+	GtkAdjustment *adj;
+	if (com.seq.number <= 0 || image_number >= com.seq.number)
+		return 1;
+	spin = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "imagenumber_spin"));
+	adj = gtk_spin_button_get_adjustment(spin);
+
+	gtk_adjustment_set_upper(adj, (gdouble) com.seq.number - 1);
+	gtk_adjustment_set_value(adj, (gdouble) image_number);	// 0 is default
+	display_image_number(image_number);
+	//on_imagenumberspin_output(GTK_SPIN_BUTTON(spin), NULL);	// redraw the real file number instead of 0
+	return 0;
+}
+
+/* Sets the display mode combo box to the value stored in the relevant struct.
+ * The operation is purely graphical. */
+void set_display_mode() {
+	static GtkComboBox *modecombo = NULL;
+	display_mode mode;
+
+	if (!modecombo)
+		modecombo = GTK_COMBO_BOX(lookup_widget("combodisplay"));
+
+	if (single_image_is_loaded() && com.cvport < com.uniq->nb_layers && com.uniq->layers
+	&& com.seq.current != RESULT_IMAGE)
+		mode = com.uniq->layers[com.cvport].rendering_mode;
+	else if (sequence_is_loaded() && com.cvport < com.seq.nb_layers
+			&& com.seq.layers)
+		mode = com.seq.layers[com.cvport].rendering_mode;
+	else
+		return;
+
+	g_signal_handlers_block_by_func(modecombo, on_combodisplay_changed, NULL);
+	gtk_combo_box_set_active(modecombo, mode);
+	g_signal_handlers_unblock_by_func(modecombo, on_combodisplay_changed, NULL);
+}
+
+/* called when an image is included or excluded from the sequence.
+ * it sets the toggle button "exclude_button" so it matches the inclusion state.
+ * n is the image number in the sequence
+ * changed indicates if a value was changed and if the display needs to be refreshed.
+ */
+void adjust_exclude(int n, gboolean changed) {
+	static GtkWidget *excl_butt = NULL;
+	if (!com.seq.imgparam || n < 0 || n >= com.seq.number)
+		return;
+	if (excl_butt == NULL)
+		excl_butt = lookup_widget("exclude_button");
+
+	if (gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(excl_butt))
+			== com.seq.imgparam[n].incl) {
+		g_signal_handlers_block_by_func(excl_butt, on_excludebutton_toggled,
+				NULL);
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(excl_butt),
+				!com.seq.imgparam[n].incl);
+		g_signal_handlers_unblock_by_func(excl_butt, on_excludebutton_toggled,
+				NULL);
+	}
+
+	if (changed) {
+		redraw(com.cvport, REMAP_NONE);
+		drawPlot();
+		adjust_sellabel();
+	}
+}
+
+/* fill the label indicating how many images are selected in the gray and
+ * which one is the reference image, at the bottom of the main window */
+int adjust_sellabel() {
+	static GtkLabel *local_label = NULL, *global_label = NULL;
+	char bufferlocal[256], bufferglobal[256];
+	if (local_label == NULL) {
+		local_label = GTK_LABEL(lookup_widget("imagesel_label"));
+		global_label = GTK_LABEL(lookup_widget("labelseq"));
+	}
+	if (sequence_is_loaded()) {
+		if (com.seq.reference_image != -1) {
+			char format[150];
+			if (com.seq.fixed <= 1) {
+				g_snprintf(format, sizeof(format),
+						_("<%%s.seq>: %%d images selected out of %%d, reference image is %%d"));
+			} else {
+				g_snprintf(format, sizeof(format),
+						_("<%%s.seq>: %%d images selected out of %%d, reference image is %%.%dd"),
+						com.seq.fixed);
+			}
+			g_snprintf(bufferlocal, sizeof(bufferlocal), format,
+					com.seq.seqname, com.seq.selnum, com.seq.number,
+					com.seq.imgparam[com.seq.reference_image].filenum);
+
+		} else {
+			g_snprintf(bufferlocal, sizeof(bufferlocal),
+					_("<%s.seq>: %d images selected out of %d, no reference image set"),
+					com.seq.seqname, com.seq.selnum, com.seq.number);
+		}
+		g_snprintf(bufferglobal, sizeof(bufferglobal), _("%s, %d images selected"),
+				com.seq.seqname, com.seq.selnum);
+		//gtk_widget_set_sensitive(lookup_widget("goregister_button"), com.seq.selnum>0?TRUE:FALSE);
+	} else {
+		g_snprintf(bufferlocal, sizeof(bufferlocal), _("No sequence"));
+		g_snprintf(bufferglobal, sizeof(bufferglobal), _("- none -"));
+		gtk_widget_set_sensitive(lookup_widget("goregister_button"), FALSE);
+	}
+
+	gtk_label_set_text(local_label, bufferlocal);
+	gtk_label_set_text(global_label, bufferglobal);
+	return 0;
+}
+
+void update_MenuItem() {
+	gboolean is_a_single_image_loaded;		/* An image is loaded. Not a sequence or only the result of stacking process */
+	gboolean is_a_singleRGB_image_loaded;	/* A RGB image is laoded. Not a sequence or only the result of stacking process */
+	gboolean any_image_is_loaded;			/* Something is loaded. Single image or Sequence */
+	gboolean any_RGB_image_is_loaded;		/* Some RGB data are loaded. Single image or Sequence */
+
+	is_a_singleRGB_image_loaded = isrgb(&gfit) && (!sequence_is_loaded()
+			|| (sequence_is_loaded() && com.seq.current == RESULT_IMAGE));
+
+	is_a_single_image_loaded = single_image_is_loaded()	&& (!sequence_is_loaded()
+			|| (sequence_is_loaded() && com.seq.current == RESULT_IMAGE));
+
+	any_image_is_loaded = single_image_is_loaded() || sequence_is_loaded();
+
+	any_RGB_image_is_loaded = isrgb(&gfit) && (single_image_is_loaded() || sequence_is_loaded());
+
+	/* File Menu */
+	gtk_widget_set_sensitive(lookup_widget("save1"), any_image_is_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menu_FITS_header"), any_image_is_loaded && gfit.header != NULL);
+
+	/* Edit Menu */
+	gtk_widget_set_sensitive(lookup_widget("undo_item"), is_undo_available());
+	gtk_widget_set_sensitive(lookup_widget("redo_item"), is_redo_available());
+
+	/* Image processing Menu */
+	gtk_widget_set_sensitive(lookup_widget("removegreen"), is_a_singleRGB_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_satu"), is_a_singleRGB_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitemcalibration"), is_a_singleRGB_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menu_channel_separation"), is_a_singleRGB_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_histo"), any_image_is_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_fixbanding"), any_image_is_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_cosmetic"), any_image_is_loaded);
+#ifdef HAVE_OPENCV
+	gtk_widget_set_sensitive(lookup_widget("menuitem_resample"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation90"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation270"), is_a_single_image_loaded);
+#else
+	gtk_widget_set_sensitive(lookup_widget("menuitem_resample"), FALSE);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation"), FALSE);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation90"), FALSE);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_rotation270"), FALSE);
+#endif
+	gtk_widget_set_sensitive(lookup_widget("menuitem_mirrorx"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_mirrory"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_bkg_extraction"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_wavelets"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menu_wavelet_separation"), is_a_single_image_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_medianfilter"), is_a_single_image_loaded);
+
+	/* Analysis Menu */
+	gtk_widget_set_sensitive(lookup_widget("menuitem_noise"), any_image_is_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitem_stat"), any_image_is_loaded);
+
+	/* Windows Menu */
+	gtk_widget_set_sensitive(lookup_widget("menuitemgray"), any_image_is_loaded);
+	gtk_widget_set_sensitive(lookup_widget("menuitemcolor"), any_RGB_image_is_loaded);
+}
+
+gboolean redraw(int vport, int doremap) {
+	GtkWidget *widget;
+
+	if (vport >= MAXVPORT) {
+		fprintf(stderr, _("redraw: maximum number of layers supported is %d"
+				" (current image has %d).\n"), MAXVPORT, vport);
+		return FALSE;
+	}
+	widget = com.vport[vport];
+
+	switch (vport) {
+	case RED_VPORT:
+	case BLUE_VPORT:
+	case GREEN_VPORT:
+		if (doremap == REMAP_ONLY) {
+			remap(vport);
+		} else if (doremap == REMAP_ALL) {
+			int i;
+//#pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)		//probably causes crashes in HESTEQ_MODE
+			for (i = 0; i < gfit.naxes[2]; i++) {
+				remap(i);
+			}
+		}
+		gtk_widget_queue_draw(widget);
+		if (gfit.naxes[2] == 1)
+			break;
+		/* no break */
+	case RGB_VPORT:
+		if (gfit.naxis == 3) {
+			if (doremap != REMAP_NONE) {
+				remaprgb();
+			}
+			widget = com.vport[RGB_VPORT];
+			gtk_widget_queue_draw(widget);
+		}
+		break;
+	default:
+		fprintf(stderr, "redraw: unknown viewport number %d\n", vport);
+		break;
+	}
+	//fprintf(stdout, "end of redraw\n");
+	com.drawn = FALSE;
+	return FALSE;
+}
+
+void sliders_mode_set_state(sliders_mode sliders) {
+	GtkToggleButton *radiobutton;	// Must not be static
+	char *str[] =
+			{ "radiobutton_hilo", "radiobutton_minmax", "radiobutton_user" };
+	void *func[] = { on_radiobutton_hilo_toggled, on_radiobutton_minmax_toggled,
+			on_radiobutton_user_toggled };
+
+	radiobutton = GTK_TOGGLE_BUTTON(
+			gtk_builder_get_object(builder, str[sliders]));
+
+	g_signal_handlers_block_by_func(radiobutton, func[sliders], NULL);
+	gtk_toggle_button_set_active(radiobutton, TRUE);
+	g_signal_handlers_unblock_by_func(radiobutton, func[sliders], NULL);
+}
+
+/* When rendering settings are chained, they need to be copied to other layers
+ * when modified on the current layer. This procedure does that. It can be
+ * called whenever a value has changed, or when the chaning has been enabled,
+ * to synchronize all data.
+ * Current view port is com.cvport, and data is stored in layer_info structs
+ * Synchronized data: hi and lo cursors, cut over box, rendering mode.
+ * DOES NOT REMAP/REDRAW.
+ *
+ * from_GUI: TRUE if get values from the GUI, FALSE if get the values from structs.
+ * Returns 1 if chained, 0 if not.
+ */
+int copy_rendering_settings_when_chained(gboolean from_GUI) {
+	static GtkToggleButton *chainedbutton = NULL;
+	static GtkRange *range_lo = NULL, *range_hi = NULL;
+	static GtkComboBox *modecombo = NULL;
+	static GtkToggleButton *cutmax = NULL;
+
+	gboolean is_chained;
+	display_mode mode;
+	WORD lo, hi;
+	gboolean cut_over;
+	int i, nb_layers;
+	layer_info *layers = NULL;
+
+	if (!chainedbutton) {	// init widgets
+		chainedbutton = GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_chain"));
+		modecombo = GTK_COMBO_BOX(lookup_widget("combodisplay"));
+		range_lo = GTK_RANGE(gtk_builder_get_object(builder, "scalemin"));
+		range_hi = GTK_RANGE(gtk_builder_get_object(builder, "scalemax"));
+		cutmax = GTK_TOGGLE_BUTTON(
+				gtk_builder_get_object(builder, "checkcut_max"));
+	}
+
+	is_chained = gtk_toggle_button_get_active(chainedbutton);
+	if (single_image_is_loaded() &&
+			com.cvport < com.uniq->nb_layers && com.uniq->layers &&
+			com.seq.current != RESULT_IMAGE) {
+		layers = com.uniq->layers;
+		nb_layers = com.uniq->nb_layers;
+	} else if (sequence_is_loaded() && com.cvport < com.seq.nb_layers
+			&& com.seq.layers) {
+		layers = com.seq.layers;
+		nb_layers = com.seq.nb_layers;
+	} else
+		return 0;
+
+	if (from_GUI) {
+		int raw_mode = gtk_combo_box_get_active(modecombo);
+		/* update values in the layer_info for cvport */
+		layers[com.cvport].rendering_mode =
+				raw_mode >= 0 ? raw_mode : NORMAL_DISPLAY;
+		layers[com.cvport].lo = round_to_WORD(gtk_range_get_value(range_lo));
+		layers[com.cvport].hi = round_to_WORD(gtk_range_get_value(range_hi));
+		layers[com.cvport].cut_over = gtk_toggle_button_get_active(cutmax);
+	}
+	if (!is_chained)
+		return 0;
+	mode = layers[com.cvport].rendering_mode;
+	lo = layers[com.cvport].lo;
+	hi = layers[com.cvport].hi;
+	cut_over = layers[com.cvport].cut_over;
+
+	for (i = 0; i < nb_layers; i++) {
+		if (i == com.cvport)
+			continue;
+		layers[i].rendering_mode = mode;
+		layers[i].lo = lo;
+		layers[i].hi = hi;
+		layers[i].cut_over = cut_over;
+	}
+
+	return 1;
+}
+
+void set_prepro_button_sensitiveness() {
+	static GtkToggleButton *udark = NULL, *uoffset = NULL, *uflat = NULL,
+			*checkAutoEvaluate = NULL;
+	if (udark == NULL) {
+		udark = GTK_TOGGLE_BUTTON(
+				gtk_builder_get_object(builder, "usedark_button"));
+		uoffset = GTK_TOGGLE_BUTTON(
+				gtk_builder_get_object(builder, "useoffset_button"));
+		uflat = GTK_TOGGLE_BUTTON(
+				gtk_builder_get_object(builder, "useflat_button"));
+		checkAutoEvaluate = GTK_TOGGLE_BUTTON(
+				gtk_builder_get_object(builder, "checkbutton_auto_evaluate"));
+	}
+
+	gtk_widget_set_sensitive(lookup_widget("prepro_button"),
+			(sequence_is_loaded() || single_image_is_loaded())
+					&& (gtk_toggle_button_get_active(udark)
+							|| gtk_toggle_button_get_active(uoffset)
+							|| gtk_toggle_button_get_active(uflat)));
+	gtk_widget_set_sensitive(lookup_widget("grid24"),
+			gtk_toggle_button_get_active(udark));
+	gtk_widget_set_sensitive(lookup_widget("checkDarkOptimize"),
+			gtk_toggle_button_get_active(udark));
+	gtk_widget_set_sensitive(lookup_widget("checkbutton_auto_evaluate"),
+			gtk_toggle_button_get_active(uflat));
+	gtk_widget_set_sensitive(lookup_widget("entry_flat_norm"),
+			gtk_toggle_button_get_active(uflat)
+					&& !gtk_toggle_button_get_active(checkAutoEvaluate));
+}
+
+void clear_sampling_setting_box() {
+	GtkComboBox *binning = GTK_COMBO_BOX(
+			gtk_builder_get_object(builder, "combobinning"));
+	GtkEntry* focal_entry = GTK_ENTRY(lookup_widget("focal_entry"));
+	GtkEntry* pitchX_entry = GTK_ENTRY(lookup_widget("pitchX_entry"));
+	GtkEntry* pitchY_entry = GTK_ENTRY(lookup_widget("pitchY_entry"));
+
+	gtk_entry_set_text(focal_entry, "");
+	gtk_entry_set_text(pitchX_entry, "");
+	gtk_entry_set_text(pitchY_entry, "");
+	gtk_combo_box_set_active(binning, 0);
+}
+
+void update_libraw_interface() {
+	/**********COLOR ADJUSTEMENT**************/
+	com.raw_set.bright = gtk_spin_button_get_value(
+			GTK_SPIN_BUTTON(lookup_widget("Brightness_spinbutton")));
+	com.raw_set.mul[0] = gtk_spin_button_get_value(
+			GTK_SPIN_BUTTON(lookup_widget("Red_spinbutton")));
+	com.raw_set.mul[2] = gtk_spin_button_get_value(
+			GTK_SPIN_BUTTON(lookup_widget("Blue_spinbutton")));
+
+	com.raw_set.auto_mul = gtk_toggle_button_get_active(
+			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_multipliers")));
+	com.raw_set.user_black = gtk_toggle_button_get_active(
+			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_blackpoint")));
+
+	/**************WHITE BALANCE**************/
+	com.raw_set.use_camera_wb = (int) gtk_toggle_button_get_active(
+			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_cam")));
+	com.raw_set.use_auto_wb = (int) gtk_toggle_button_get_active(
+			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_auto")));
+
+	/********MATRIX INTERPOLATION**************/
+	com.raw_set.user_qual = gtk_combo_box_get_active(
+			GTK_COMBO_BOX(lookup_widget("combo_dcraw_inter")));
+
+	/********GAMMA CORRECTION**************/
+	if (gtk_toggle_button_get_active(
+			GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_gamm0"))) == TRUE) {
+		/* Linear Gamma Curve */
+		com.raw_set.gamm[0] = 1.0;
+		com.raw_set.gamm[1] = 1.0;
+	} else if (gtk_toggle_button_get_active(
+			GTK_TOGGLE_BUTTON(lookup_widget("radiobutton_gamm1"))) == TRUE) {
+		/* BT.709 Gamma curve */
+		com.raw_set.gamm[0] = 2.222;
+		com.raw_set.gamm[1] = 4.5;
+	} else {
+		/* sRGB Gamma curve */
+		com.raw_set.gamm[0] = 2.40;
+		com.raw_set.gamm[1] = 12.92;
+	}
+	/* We write in config file */
+	/*************SER**********************/
+	com.debayer.use_bayer_header = gtk_toggle_button_get_active(
+			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_SER_use_header")));
+	writeinitfile();
+}
+
+char *vport_number_to_name(int vport) {
+	switch (vport) {
+	case RED_VPORT:
+		return strdup("red");
+	case GREEN_VPORT:
+		return strdup("green");
+	case BLUE_VPORT:
+		return strdup("blue");
+	case RGB_VPORT:
+		return strdup("rgb");
+	}
+	return NULL;
+}
+
+int match_drawing_area_widget(GtkWidget *drawing_area, gboolean allow_rgb) {
+	/* could be done with a for i=0 loop, to get rid of these defines */
+	if (drawing_area == com.vport[RED_VPORT])
+		return RED_VPORT;
+	if (drawing_area == com.vport[GREEN_VPORT])
+		return GREEN_VPORT;
+	else if (drawing_area == com.vport[BLUE_VPORT])
+		return BLUE_VPORT;
+	else if (allow_rgb && drawing_area == com.vport[RGB_VPORT])
+		return RGB_VPORT;
+	return -1;
+}
+
+void calculate_fwhm(GtkWidget *widget) {
+	/* calculate and display FWHM */
+	int layer = match_drawing_area_widget(widget, FALSE);
+	if (layer != -1) {
+		char buf[64], label_name[16];
+		char *layer_name = vport_number_to_name(layer);
+		GtkLabel *label;
+		if (com.selection.w && com.selection.h) {// Now we don't care about the size of the sample. Minimization checks that
+			if (com.selection.w < 300 && com.selection.h < 300) {
+				double roundness;
+				double fwhm_val;
+
+				fwhm_val = psf_get_fwhm(&gfit, layer, &roundness);
+				g_snprintf(buf, sizeof(buf), "fwhm = %.2f, r = %.2f", fwhm_val,
+						roundness);
+			} else
+				g_snprintf(buf, sizeof(buf), _("fwhm: selection is too large"));
+		} else {
+			g_snprintf(buf, sizeof(buf), _("fwhm: no selection"));
+		}
+		g_snprintf(label_name, sizeof(label_name), "labelfwhm%s", layer_name);
+		free(layer_name);
+		label = GTK_LABEL(gtk_builder_get_object(builder, label_name));
+		gtk_label_set_text(label, buf);
+	}
+}
+
+/* displays the opened image file name in the layers window.
+ * if a unique file is loaded, its details are used instead of any sequence data
+ */
+void display_filename() {
+	GtkLabel *fn_label;
+	int nb_layers;
+	char str[64], *filename;
+	if (com.uniq) {	// unique image
+		filename = com.uniq->filename;
+		nb_layers = com.uniq->nb_layers;
+	} else {	// sequence
+		filename = malloc(256);
+		seq_get_image_filename(&com.seq, com.seq.current, filename);
+		nb_layers = com.seq.nb_layers;
+	}
+	fn_label = GTK_LABEL(gtk_builder_get_object(builder, "labelfilename_red"));
+	gchar *name = g_path_get_basename(filename);
+	g_snprintf(str, sizeof(str), _("%s (channel 0)"), name);
+	gtk_label_set_text(fn_label, str);
+	if (nb_layers == 3) {	//take in charge both sequence and single image
+		fn_label = GTK_LABEL(
+				gtk_builder_get_object(builder, "labelfilename_green"));
+		g_snprintf(str, sizeof(str), _("%s (channel 1)"), name);
+		gtk_label_set_text(fn_label, str);
+		fn_label = GTK_LABEL(
+				gtk_builder_get_object(builder, "labelfilename_blue"));
+		g_snprintf(str, sizeof(str), _("%s (channel 2)"), name);
+		gtk_label_set_text(fn_label, str);
+	}
+	g_free(name);
+}
+
+/* set available layers in the layer list of registration */
+void set_layers_for_assign() {
+	int i;
+	if (!com.seq.layers)
+		return;
+	for (i = 0; i < com.seq.nb_layers; i++) {
+		char layer[100];
+		if (!com.seq.layers[i].name) {
+			if (com.seq.nb_layers == 1) {
+				com.seq.layers[i].name = strdup(
+						predefined_layers_colors[i].name);
+				com.seq.layers[i].wavelength =
+						predefined_layers_colors[i].wavelength;
+			} else if (com.seq.nb_layers == 3) {
+				com.seq.layers[i].name = strdup(
+						predefined_layers_colors[i + 1].name);
+				com.seq.layers[i].wavelength =
+						predefined_layers_colors[i + 1].wavelength;
+			} else {
+				com.seq.layers[i].name = strdup("Unassigned");
+				com.seq.layers[i].wavelength = -1.0;
+			}
+		}
+		g_snprintf(layer, sizeof(layer), "%d: %s", i, com.seq.layers[i].name);
+	}
+}
+
+void set_layers_for_registration() {
+	static GtkComboBoxText *cbbt_layers = NULL;
+	int i;
+	int reminder;
+
+	if (cbbt_layers == NULL)
+		cbbt_layers = GTK_COMBO_BOX_TEXT(
+				gtk_builder_get_object(builder, "comboboxreglayer"));
+	reminder = gtk_combo_box_get_active(GTK_COMBO_BOX(cbbt_layers));
+	gtk_combo_box_text_remove_all(cbbt_layers);
+	for (i = 0; i < com.seq.nb_layers; i++) {
+		char layer[100];
+		if (com.seq.layers[i].name)
+			g_snprintf(layer, sizeof(layer), "%d: %s", i,
+					com.seq.layers[i].name);
+		else
+			g_snprintf(layer, sizeof(layer), _("%d: not affected yet"), i);
+		if (com.seq.regparam[i]) {
+			// calculate average quality for this layer
+			strcat(layer, " (*)");
+		}
+		gtk_combo_box_text_append_text(cbbt_layers, layer);
+	}
+	/* First initialization */
+	if (reminder == -1) {
+		if (com.seq.nb_layers == 3)
+			gtk_combo_box_set_active(GTK_COMBO_BOX(cbbt_layers), 1);
+		else
+			gtk_combo_box_set_active(GTK_COMBO_BOX(cbbt_layers), 0);
+	}
+	/* Already initialized */
+	else
+		gtk_combo_box_set_active(GTK_COMBO_BOX(cbbt_layers), reminder);
+}
+
+void display_image_number(int index) {
+	static GtkSpinButton *spin = NULL;
+	if (!spin)
+		spin = GTK_SPIN_BUTTON(
+				gtk_builder_get_object(builder, "imagenumber_spin"));
+	char text[16];
+	char format[10];
+	if (com.seq.fixed <= 1)
+		g_snprintf(format, sizeof(format), "%%d");
+	else
+		g_snprintf(format, sizeof(format), "%%.%dd", com.seq.fixed);
+	g_snprintf(text, sizeof(text), format, com.seq.imgparam[index].filenum);
+	gtk_entry_set_text(GTK_ENTRY(spin), text);
+}
+
+char* siril_log_message(const char* format, ...) {
+	va_list args;
+	va_start(args, format);
+	g_mutex_lock(&com.mutex);
+	char *msg = siril_log_internal(format, NULL, args);
+	g_mutex_unlock(&com.mutex);
+	va_end(args);
+	return msg;
+}
+
+char* siril_log_color_message(const char* format, const char* color, ...) {
+	va_list args;
+	va_start(args, color);
+	g_mutex_lock(&com.mutex);
+	char *msg = siril_log_internal(format, color, args);
+	g_mutex_unlock(&com.mutex);
+	va_end(args);
+	return msg;
+}
+
+void show_time(struct timeval t_start, struct timeval t_end) {
+	float time = (float) (((t_end.tv_sec - t_start.tv_sec) * 1000000L
+			+ t_end.tv_usec) - t_start.tv_usec) / 1000000.0;
+
+	if (time > 60.f) {
+		int min = (int) time / 60;
+		int sec = (int) time % 60 + 1;
+		siril_log_color_message(_("Execution time: %d min %.2d s.\n"), "green",
+				min, sec);
+	} else if (time < 1.f) {
+		float ms = time * 1000.f;
+		siril_log_color_message(_("Execution time: %.2f ms.\n"), "green", ms);
+	} else {
+		siril_log_color_message(_("Execution time: %.2f s.\n"), "green", time);
+	}
+}
+
+/* sets text in the label and displays the dialog window 1 */
+void show_dialog(const char *text, const char *title, const char *icon) {
+	struct _dialog_data *args = malloc(sizeof(struct _dialog_data));
+	args->text = text;
+	args->title = title;
+	args->icon = icon;
+	gdk_threads_add_idle(show_dialog_idle, args);
+}
+
+void show_data_dialog(char *text, char *title) {
+	GtkTextView *tv = GTK_TEXT_VIEW(lookup_widget("data_txt"));
+	GtkTextBuffer *tbuf = gtk_text_view_get_buffer(tv);
+	GtkTextIter itDebut;
+	GtkTextIter itFin;
+
+	gtk_text_buffer_get_bounds(tbuf, &itDebut, &itFin);
+	gtk_text_buffer_delete(tbuf, &itDebut, &itFin);
+	gtk_text_buffer_set_text(tbuf, text, strlen(text));
+	gtk_window_set_title(GTK_WINDOW(lookup_widget("data_dialog")), title);
+
+	gtk_widget_show_all(lookup_widget("data_dialog"));
+}
+
+void show_main_gray_window() {
+	GtkCheckMenuItem *graycheck = GTK_CHECK_MENU_ITEM(
+			gtk_builder_get_object(builder, "menuitemgray"));
+	gtk_check_menu_item_set_active(graycheck, TRUE);
+	gtk_widget_show_all(lookup_widget("main_window"));
+	gtk_window_present(GTK_WINDOW(lookup_widget("main_window")));
+}
+
+void show_rgb_window() {
+	GtkCheckMenuItem *rgbcheck = GTK_CHECK_MENU_ITEM(
+			gtk_builder_get_object(builder, "menuitemcolor"));
+	gtk_check_menu_item_set_active(rgbcheck, TRUE);
+	gtk_widget_show_all(lookup_widget("rgb_window"));
+}
+
+void hide_rgb_window() {
+	/* unchecking the menu item is done in the window destruction callback */
+	/*GtkCheckMenuItem *rgbcheck =
+	 GTK_CHECK_MENU_ITEM(gtk_builder_get_object(builder, "menuitemcolor"));
+	 gtk_check_menu_item_set_active(rgbcheck, FALSE);*/
+	gtk_widget_hide(lookup_widget("rgb_window"));
+}
+
+void set_cursor_waiting(gboolean waiting) {
+	GdkCursor *cursor;
+	static GdkCursor *clock = NULL;
+	GdkDisplay *display;
+	GdkScreen *screen;
+	GList *list;
+
+	display = gdk_display_get_default ();
+
+	if (clock == NULL)
+		clock = gdk_cursor_new_for_display(display, GDK_WATCH);
+
+	screen = gdk_screen_get_default();
+	list = gdk_screen_get_toplevel_windows(screen);
+
+	if (waiting) {
+		cursor = clock;
+	} else {
+		cursor = NULL;
+	}
+	while (list) {
+		GdkWindow *window = GDK_WINDOW(list->data);
+		gdk_window_set_cursor(window, cursor);
+		gdk_display_sync(gdk_window_get_display(window));
+		gdk_flush();
+		list = g_list_next(list);
+	}
+	g_free(list);
+}
+
+// Thread-safe progress bar update.
+// text can be NULL, percent can be -1 for pulsating, -2 for nothing, or between 0 and 1 for percent
+void set_progress_bar_data(const char *text, double percent) {
+	struct progress_bar_idle_data *data;
+	g_mutex_lock(&com.mutex);
+	//fprintf(stdout, "progress: %s, %g\n", text ? text : "NULL", percent);
+	data = malloc(sizeof(struct progress_bar_idle_data));
+	data->progress_bar_text = text ? strdup(text) : NULL;
+	data->progress_bar_percent = percent;
+	assert(percent == PROGRESS_PULSATE || percent == PROGRESS_NONE ||
+			(percent >= 0.0 && percent <= 1.0));
+	gdk_threads_add_idle(progress_bar_idle_callback, data);
+	g_mutex_unlock(&com.mutex);
+}
+
+void zoomcombo_update_display_for_zoom() {
+	static GtkComboBox *zoomcombo = NULL;
+	static double indexes[] = { 16., 8., 4., 2., 1., .5, .25, .125, /*.0625, */
+	-1. };
+	int i;
+	char *msg;
+
+	if (zoomcombo == NULL)
+		zoomcombo = GTK_COMBO_BOX(gtk_builder_get_object(builder, "combozoom"));
+	for (i = 0; i < sizeof(indexes) / sizeof(double); i++) {
+		if (indexes[i] == com.zoom_value) {
+			g_signal_handlers_block_by_func(zoomcombo, on_combozoom_changed,
+					NULL);
+			gtk_combo_box_set_active(zoomcombo, i);
+			g_signal_handlers_unblock_by_func(zoomcombo, on_combozoom_changed,
+					NULL);
+			return;
+		}
+	}
+	msg = siril_log_message(
+			_("Unknown zoom_value value, what is the current zoom?\n"));
+	show_dialog(msg, _("Error"), "gtk-dialog-error");
+}
+
+void adjust_vport_size_to_image() {
+	int vport;
+	// make GtkDrawingArea the same size than the image
+	// http://developer.gnome.org/gtk3/3.4/GtkWidget.html#gtk-widget-set-size-request
+	double zoom = get_zoom_val();
+	int w, h;
+	if (zoom <= 0)
+		return;
+	w = (int) (((double) gfit.rx) * zoom);
+	h = (int) (((double) gfit.ry) * zoom);
+	for (vport = 0; vport < MAXVPORT; vport++)
+		gtk_widget_set_size_request(com.vport[vport], w, h);
+	fprintf(stdout, "set new vport size (%d, %d)\n", w, h);
+}
+
+/* when a sequence is loaded, the processing (stacking) output file name is
+ * modified to include the name of the sequence */
+void set_output_filename_to_sequence_name() {
+	static GtkEntry *output_file = NULL;
+	gchar msg[256];
+	if (!output_file)
+		output_file = GTK_ENTRY(
+				gtk_builder_get_object(builder, "entryresultfile"));
+	if (!com.seq.seqname || *com.seq.seqname == '\0')
+		return;
+	g_snprintf(msg, sizeof(msg), "%s%sstacked.fit", com.seq.seqname,
+			ends_with(com.seq.seqname, "_") ? "" : "_");
+	gtk_entry_set_text(output_file, msg);
+}
+
+void adjust_refimage(int n) {
+	static GtkWidget *ref_butt = NULL;
+	if (ref_butt == NULL)
+		ref_butt = lookup_widget("refframe");
+
+	//fprintf(stdout, "adjust refimage: %d (ref is %d)\n", n, com.seq.reference_image);
+	g_signal_handlers_block_by_func(ref_butt, on_ref_frame_toggled, NULL);
+	if (com.seq.reference_image == n) {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ref_butt), TRUE);
+	} else {
+		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ref_butt), FALSE);
+	}
+	g_signal_handlers_unblock_by_func(ref_butt, on_ref_frame_toggled, NULL);
+}
+
 void close_tab() {
 	GtkNotebook* Color_Layers = GTK_NOTEBOOK(
 			gtk_builder_get_object(builder, "notebook1"));
@@ -2350,69 +2480,6 @@ void control_window_switch_to_tab(main_tabs tab) {
 	gtk_notebook_set_current_page(notebook, tab);
 }
 
-/****** GUI for wavelets *****************/
-
-static void reset_scale_w() {
-	static GtkSpinButton *spin_w[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
-	int i;
-
-	if (spin_w[0] == NULL) {
-		spin_w[0] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w0"));
-		spin_w[1] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w1"));
-		spin_w[2] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w2"));
-		spin_w[3] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w3"));
-		spin_w[4] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w4"));
-		spin_w[5] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w5"));
-	}
-
-	for (i = 0; i < 6; i++) {
-		g_signal_handlers_block_by_func(spin_w[i], on_spin_w_changed, NULL);
-		gtk_spin_button_set_value(spin_w[i], 1.f);
-		g_signal_handlers_unblock_by_func(spin_w[i], on_spin_w_changed, NULL);
-	}
-
-	gtk_widget_set_sensitive(lookup_widget("button_apply_w"), FALSE);
-}
-
-static void update_wavelets() {
-	float scale[6];
-	static GtkSpinButton *spin_w[6] = { NULL, NULL, NULL, NULL, NULL, NULL };
-	int i;
-	char *File_Name_Transform[3] = { "r_rawdata.wave", "g_rawdata.wave",
-			"b_rawdata.wave" }, *dir[3];
-	const char *tmpdir;
-
-	tmpdir = g_get_tmp_dir();
-
-	if (spin_w[0] == NULL) {
-		spin_w[0] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w0"));
-		spin_w[1] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w1"));
-		spin_w[2] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w2"));
-		spin_w[3] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w3"));
-		spin_w[4] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w4"));
-		spin_w[5] = GTK_SPIN_BUTTON(gtk_builder_get_object(builder, "spin_w5"));
-	}
-
-	for (i = 0; i < 6; i++)
-		scale[i] = (float) gtk_spin_button_get_value(spin_w[i]);
-
-	set_cursor_waiting(TRUE);
-
-	for (i = 0; i < gfit.naxes[2]; i++) {
-		dir[i] = malloc(strlen(tmpdir) + strlen(File_Name_Transform[i]) + 2);
-		strcpy(dir[i], tmpdir);
-		strcat(dir[i], "/");
-		strcat(dir[i], File_Name_Transform[i]);
-		wavelet_reconstruct_file(dir[i], scale, gfit.pdata[i]);
-		free(dir[i]);
-	}
-
-	adjust_cutoff_from_updated_gfit();
-	redraw(com.cvport, REMAP_ALL);
-	redraw_previews();
-	set_cursor_waiting(FALSE);
-}
-
 void update_statusbar_convert() {
 	GtkLabel *status_label = GTK_LABEL(
 			gtk_builder_get_object(builder, "statuslabel_convert"));
@@ -2437,28 +2504,6 @@ void update_spinCPU(int max) {
 		gtk_spin_button_set_range (spin_cpu, 1, (gdouble) max);
 	}
 	gtk_spin_button_set_value (spin_cpu, (gdouble) com.max_thread);
-}
-
-void fillSeqAviExport() {
-	char width[6], height[6], fps[7];
-	GtkEntry *heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
-	GtkEntry *widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
-
-	g_snprintf(width, sizeof(width), "%d", com.seq.rx);
-	g_snprintf(height, sizeof(width), "%d", com.seq.ry);
-	gtk_entry_set_text(widthEntry, width);
-	gtk_entry_set_text(heightEntry, height);
-	if (com.seq.type == SEQ_SER) {
-		GtkEntry *entryAviFps = GTK_ENTRY(lookup_widget("entryAviFps"));
-
-		if (com.seq.ser_file && com.seq.ser_file->fps <= 0.0) {
-			g_snprintf(fps, sizeof(fps), "25.000");
-		} else {
-			g_snprintf(fps, sizeof(fps), "%2.3lf", com.seq.ser_file->fps);
-		}
-		gtk_entry_set_text(entryAviFps, fps);
-
-	}
 }
 
 /*****************************************************************************

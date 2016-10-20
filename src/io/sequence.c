@@ -61,6 +61,28 @@
 #include "registration/registration.h"	// for update_reg_interface
 #include "stacking/stacking.h"	// for update_stack_interface
 
+static void fillSeqAviExport() {
+	char width[6], height[6], fps[7];
+	GtkEntry *heightEntry = GTK_ENTRY(lookup_widget("entryAviHeight"));
+	GtkEntry *widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
+
+	g_snprintf(width, sizeof(width), "%d", com.seq.rx);
+	g_snprintf(height, sizeof(width), "%d", com.seq.ry);
+	gtk_entry_set_text(widthEntry, width);
+	gtk_entry_set_text(heightEntry, height);
+	if (com.seq.type == SEQ_SER) {
+		GtkEntry *entryAviFps = GTK_ENTRY(lookup_widget("entryAviFps"));
+
+		if (com.seq.ser_file && com.seq.ser_file->fps <= 0.0) {
+			g_snprintf(fps, sizeof(fps), "25.000");
+		} else {
+			g_snprintf(fps, sizeof(fps), "%2.3lf", com.seq.ser_file->fps);
+		}
+		gtk_entry_set_text(entryAviFps, fps);
+
+	}
+}
+
 /* when opening a file outside the main sequence loading system and that file
  * is a sequence (SER/AVI), this function is called to load this sequence. */
 int read_single_sequence(char *realname, int imagetype) {

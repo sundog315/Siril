@@ -71,8 +71,6 @@ void update_statusbar_convert();
 
 void update_spinCPU(int max);
 
-void fillSeqAviExport();
-
 /*****************************************************************************
 *      P U B L I C      C A L L B A C K      F U N C T I O N S               *
  ****************************************************************************/
