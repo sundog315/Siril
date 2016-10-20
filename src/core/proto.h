@@ -119,6 +119,7 @@ char*	remove_ext_from_filename(const char *basename);
 char*	str_append(char** data, const char* newdata);
 char*	format_basename(char *root);
 float	computePente(WORD *lo, WORD *hi);
+void load_css_style_sheet (char *path);
 
 /****************** quantize.h ***************/
 int fits_img_stats_ushort(WORD *array, long nx, long ny, int nullcheck,

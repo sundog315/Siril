@@ -103,6 +103,11 @@ static void _update_clipped_pixels(int data) {
 
 }
 
+static int is_histogram_visible() {
+	GtkWidget *window = lookup_widget("histogram_window");
+	return gtk_widget_get_visible(window);
+}
+
 gsl_histogram* computeHisto(fits* fit, int layer) {
 	assert(layer < 3);
 	size_t i, ndata, size;

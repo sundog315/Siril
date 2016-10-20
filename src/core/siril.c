@@ -977,6 +977,31 @@ static int darkOptimization(fits *brut, fits *dark, fits *offset) {
 	return 0;
 }
 
+// idle function executed at the end of the sequence preprocessing
+static gboolean end_sequence_prepro(gpointer p) {
+	struct preprocessing_data *args = (struct preprocessing_data *) p;
+	struct timeval t_end;
+	fprintf(stdout, "Ending sequence prepro idle function, retval=%d\n",
+			args->retval);
+	stop_processing_thread();// can it be done here in case there is no thread?
+	set_cursor_waiting(FALSE);
+	gettimeofday(&t_end, NULL);
+	show_time(args->t_start, t_end);
+	update_used_memory();
+	if (!args->retval && !single_image_is_loaded()) {
+		// load the new sequence
+		char *ppseqname = malloc(
+				strlen(com.seq.ppprefix) + strlen(com.seq.seqname) + 5);
+		sprintf(ppseqname, "%s%s.seq", com.seq.ppprefix, com.seq.seqname);
+		check_seq(0);
+		update_sequences_list(ppseqname);
+		free(ppseqname);
+	}
+	sequence_free_preprocessing_data(&com.seq);
+	free(args);
+	return FALSE;
+}
+
 /* doing the preprocessing. No unprotected GTK+ calls can go there.
  * returns 1 on error */
 gpointer seqpreprocess(gpointer p) {
