@@ -31,30 +31,39 @@
 #include "kplot.h"
 
 static GtkWidget *drawingPlot = NULL;
-struct kpair *dataploted = NULL;
-struct kpair ref;
-gboolean is_fwhm = FALSE, export_to_PNG = FALSE;
-int nb_point = 0;
+static pldata *plot_data;
+static struct kpair ref;
+static gboolean is_fwhm = FALSE, export_to_PNG = FALSE;
 
-static void remove_point(struct kpair *arr, int i, int N) {
-	memmove(&arr[i], &arr[i + 1], (N - i - 1) * sizeof(*arr));
+static void remove_point(pldata *plot, int i) {
+	memmove(&plot->data[i], &plot->data[i + 1], (plot->nb - i - 1) * sizeof(*plot->data));
+	plot->nb--;
 }
 
-static void build_quality(sequence *seq, int layer, int ref_image) {
+static pldata *alloc_plot_data(int size) {
+	pldata *plot = malloc(sizeof(pldata));
+	if (!plot) return NULL;
+	plot->data = malloc(size * sizeof(struct kpair));
+	if (!plot->data) return NULL;
+	plot->nb = size;
+	plot->next = NULL;
+	return plot;
+}
+
+static void build_quality(sequence *seq, int layer, int ref_image, pldata *plot) {
 	int i;
 
-	for (i = 0; i < nb_point; i++) {
+	for (i = 0; i < plot->nb; i++) {
 		if (!seq->imgparam[i].incl) continue;
-		dataploted[i].x = (double) i;
-		dataploted[i].y = (is_fwhm == TRUE) ?
+		plot->data[i].x = (double) i;
+		plot->data[i].y = (is_fwhm == TRUE) ?
 						seq->regparam[layer][i].fwhm :
 						seq->regparam[layer][i].quality;
 	}
 	/* removing non selected points */
-	for (i = 0; i < nb_point; i++) {
-		if (dataploted[i].x == 0.0 && dataploted[i].y == 0.0) {
-			remove_point(dataploted, i, nb_point);
-			nb_point--;
+	for (i = 0; i < plot->nb; i++) {
+		if (plot->data[i].x == 0.0 && plot->data[i].y == 0.0) {
+			remove_point(plot, i);
 			i--;
 		}
 	}
@@ -65,11 +74,15 @@ static void build_quality(sequence *seq, int layer, int ref_image) {
 
 }
 
-void free_drawPlot() {
-	if (dataploted) {
-		free(dataploted);
-		dataploted = NULL;
+void free_plot_data() {
+	pldata *plot = plot_data;
+	while (plot) {
+		if (plot->data)
+			free(plot->data);
+		free(plot);
+		plot = plot->next;
 	}
+	plot_data = NULL;
 }
 
 void drawPlot() {
@@ -106,20 +119,18 @@ void drawPlot() {
 		is_fwhm = TRUE;
 	} else if (seq->regparam[layer][ref_image].quality >= 0.0) {
 		is_fwhm = FALSE;
-	} else
-		return;
+	} else return;
 
-	nb_point = seq->number;
 	ref.x = (double) ref_image;
 
-	/* building dataploted data array */
-	if (dataploted) {
-		free_drawPlot();
+	/* building data array */
+	if (plot_data) {
+		free_plot_data();
 	}
-	dataploted = calloc(nb_point, sizeof(struct kpair));
+	plot_data = alloc_plot_data(seq->number);
 
 	ref.x = (double) ref_image;
-	build_quality(seq, layer, ref_image);
+	build_quality(seq, layer, ref_image, plot_data);
 
 	gtk_widget_queue_draw(drawingPlot);
 }
@@ -141,7 +152,7 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	struct kdata *d1, *d2, *m;
 	struct kplot *p;
 
-	if (dataploted) {
+	if (plot_data) {
 
 		d1 = d2 = m = NULL;
 		p = NULL;
@@ -155,15 +166,15 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 		cfgplot.xticlabelpad = cfgplot.yticlabelpad = 10.0;
 		cfgdata.point.radius = 10;
 
-		d1 = kdata_array_alloc(dataploted, nb_point);
+		d1 = kdata_array_alloc(plot_data->data, plot_data->nb);
 		d2 = kdata_array_alloc(&ref, 1);
 
 		/* mean and sigma */
 		mean = kdata_ymean(d1);
 		//sigma = kdata_ystddev(d1);
-		min = dataploted[0].x;
+		min = plot_data->data[0].x;
 		/* if reference is ploted, we take it as maximum if it is */
-		max = (dataploted[nb_point- 1].x > ref.x) ? dataploted[nb_point - 1].x + 1: ref.x + 1;
+		max = (plot_data->data[plot_data->nb-1].x > ref.x) ? plot_data->data[plot_data->nb-1].x + 1: ref.x + 1;
 
 		avg = calloc(max - min, sizeof(struct kpair));
 
@@ -178,7 +189,7 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 
 		p = kplot_alloc(&cfgplot);
 
-		kplot_attach_data(p, d1, ((nb_point <= 100) ? KPLOT_LINESPOINTS : KPLOT_LINES), NULL);	// data plot
+		kplot_attach_data(p, d1, ((plot_data->nb <= 100) ? KPLOT_LINESPOINTS : KPLOT_LINES), NULL);	// data plot
 		kplot_attach_data(p, d2, KPLOT_POINTS, &cfgdata);	// ref image dot
 		kplot_attach_data(p, m, KPLOT_LINES, NULL);			// mean plot
 

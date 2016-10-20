@@ -893,7 +893,7 @@ void free_sequence(sequence *seq, gboolean free_seq_too) {
 	 */
 	if (seq->type != SEQ_INTERNAL)
 		undo_flush();
-	free_drawPlot();
+	free_plot_data();
 	if (free_seq_too)	free(seq);
 }
 

@@ -23,7 +23,13 @@
 
 #include "core/siril.h"
 
-void free_drawPlot();
+void free_plot_data();
 void drawPlot();
+
+typedef struct plot_data_struct {
+	struct kpair *data;
+	int nb;
+	struct plot_data_struct *next;
+} pldata;
 
 #endif /* SRC_GUI_QUALITY_PLOT_H_ */
