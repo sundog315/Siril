@@ -2523,8 +2523,12 @@ void initialize_shortcuts() {
 	/* UNDO */
 	gtk_widget_add_accelerator(lookup_widget("undo_item"), "activate", accel,
 	GDK_KEY_z, get_default_modifier(), GTK_ACCEL_VISIBLE);
+	gtk_widget_add_accelerator(lookup_widget("undo_item1"), "activate", accel,
+	GDK_KEY_z, get_default_modifier(), GTK_ACCEL_VISIBLE);
 	/* REDO */
 	gtk_widget_add_accelerator(lookup_widget("redo_item"), "activate", accel,
+	GDK_KEY_z, get_default_modifier() | GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
+	gtk_widget_add_accelerator(lookup_widget("redo_item1"), "activate", accel,
 	GDK_KEY_z, get_default_modifier() | GDK_SHIFT_MASK, GTK_ACCEL_VISIBLE);
 	/* OPEN */
 	gtk_widget_add_accelerator(lookup_widget("open1"), "activate", accel,
@@ -2532,13 +2536,23 @@ void initialize_shortcuts() {
 	/* SAVE */
 	gtk_widget_add_accelerator(lookup_widget("menu_save_fits"), "activate", accel,
 	GDK_KEY_s, get_default_modifier(), GTK_ACCEL_VISIBLE);
+	gtk_widget_add_accelerator(lookup_widget("menu_rgb_savefits"), "activate", accel,
+	GDK_KEY_s, get_default_modifier(), GTK_ACCEL_VISIBLE);
 	gtk_widget_add_accelerator(lookup_widget("menu_save_tiff"), "activate", accel,
+	GDK_KEY_t, get_default_modifier(), GTK_ACCEL_VISIBLE);
+	gtk_widget_add_accelerator(lookup_widget("menu_rgb_savetiff"), "activate", accel,
 	GDK_KEY_t, get_default_modifier(), GTK_ACCEL_VISIBLE);
 	gtk_widget_add_accelerator(lookup_widget("menu_save_bmp"), "activate", accel,
 	GDK_KEY_b, get_default_modifier(), GTK_ACCEL_VISIBLE);
+	gtk_widget_add_accelerator(lookup_widget("menu_rgb_savebmp"), "activate", accel,
+	GDK_KEY_b, get_default_modifier(), GTK_ACCEL_VISIBLE);
 	gtk_widget_add_accelerator(lookup_widget("menu_save_jpg"), "activate", accel,
 	GDK_KEY_j, get_default_modifier(), GTK_ACCEL_VISIBLE);
+	gtk_widget_add_accelerator(lookup_widget("menu_rgb_savejpg"), "activate", accel,
+	GDK_KEY_j, get_default_modifier(), GTK_ACCEL_VISIBLE);
 	gtk_widget_add_accelerator(lookup_widget("menu_save_pbm"), "activate", accel,
+	GDK_KEY_p, get_default_modifier(), GTK_ACCEL_VISIBLE);
+	gtk_widget_add_accelerator(lookup_widget("menu_rgb_save8ppm"), "activate", accel,
 	GDK_KEY_p, get_default_modifier(), GTK_ACCEL_VISIBLE);
 }
 
