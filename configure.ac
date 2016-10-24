@@ -142,6 +142,57 @@ fi
 
 AM_CONDITIONAL(HAVE_OPENCV, [test "x$OPENCV_LIBS" != "x"])
 
+dnl check for osx platform
+AC_MSG_CHECKING([for Mac OS X platform])
+case "$host" in
+  *-*-darwin*)
+    platform_osx=yes
+    ;;
+  *)
+    platform_osx=no
+    ;;
+esac
+AC_MSG_RESULT([$platform_osx])
+AM_CONDITIONAL(PLATFORM_OSX, test "$platform_osx" = "yes")
+
+dnl check for native osx
+gdk_targets=`$PKG_CONFIG --variable=targets gdk-3.0`
+
+gdk_windowing="x11"
+
+for target in $gdk_targets;
+do
+	case "$target" in
+		quartz)
+			gdk_windowing=quartz
+			;;
+		win32)
+			gdk_windowing=win32
+			;;
+	esac
+done
+
+AC_MSG_CHECKING([for native Mac OS X])
+if test "$gdk_windowing" = "quartz"; then
+	os_osx=yes
+	ACTIVE_PLUGINS="${ACTIVE_PLUGINS}, 'checkupdate'"
+else
+	os_osx=no
+fi
+AC_MSG_RESULT([$os_osx])
+AM_CONDITIONAL(OS_OSX, test "$os_osx" = "yes")
+
+AM_CONDITIONAL(GDK_WINDOWING_X11, test "$gdk_windowing" = "x11")
+
+if test "$os_osx" = "yes"; then
+	AC_DEFINE([OS_OSX],[1],[Defined if os is Mac OSX])
+
+	PKG_CHECK_MODULES(GTK_MAC, gtk-mac-integration-gtk3 >= 2.0.8)
+
+	AC_SUBST(GTK_MAC_CFLAGS)
+	AC_SUBST(GTK_MAC_LIBS)
+fi
+
 AC_CONFIG_FILES([Makefile src/Makefile po/Makefile.in])
 AC_OUTPUT
 

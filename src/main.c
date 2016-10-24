@@ -24,6 +24,9 @@
 #endif
 
 #include <gtk/gtk.h>
+#ifdef MAC_INTEGRATION
+#include "gtkmacintegration/gtkosxapplication.h"
+#endif
 #include <unistd.h>
 #include <signal.h>
 #include <stdio.h>
@@ -54,6 +57,47 @@ fits wfit[5];	// used for temp files, can probably be replaced by local variable
 GtkBuilder *builder;	// get widget references anywhere
 void initialize_scrollbars();
 
+
+#ifdef MAC_INTEGRATION
+static void set_osx_integration(GtkosxApplication *osx_app, gchar *siril_path) {
+	GtkWidget *menubar = lookup_widget("menubar1");
+	GtkWidget *file_quit_menu_item = lookup_widget("exit");
+	GtkWidget *file_settings_menu_item = lookup_widget("settings");
+	GtkWidget *help_menu = lookup_widget("help1");
+	GtkWidget *help_about_menu_item = lookup_widget("help_item1");
+	GtkWidget *sep;
+	GdkPixbuf *icon;
+	GString *icon_str;
+	gchar *icon_path;
+	
+	gtk_widget_hide(menubar);
+
+	gtkosx_application_set_menu_bar(osx_app, GTK_MENU_SHELL(menubar));
+	gtkosx_application_insert_app_menu_item(osx_app, help_about_menu_item, 0);
+	sep = gtk_separator_menu_item_new();
+	g_object_ref(sep);
+	gtkosx_application_insert_app_menu_item(osx_app, sep, 1);
+	gtkosx_application_insert_app_menu_item(osx_app, file_settings_menu_item, 2);
+	sep = gtk_separator_menu_item_new();
+	g_object_ref(sep);
+	gtkosx_application_insert_app_menu_item(osx_app, sep, 3);
+	
+	gtk_widget_hide(file_quit_menu_item);
+	gtk_widget_hide(help_menu);
+	
+	//gtkosx_application_set_use_quartz_accelerators (osx_app, FALSE);
+	
+	icon_str = g_string_new(siril_path);
+	g_string_append(icon_str, "pixmaps/siril_1.svg");
+	
+	icon_path = g_string_free(icon_str, FALSE);
+	icon = gdk_pixbuf_new_from_file(icon_path, NULL);
+	gtkosx_application_set_dock_icon_pixbuf(osx_app, icon);
+		
+	gtkosx_application_ready(osx_app);
+	g_free(icon_path);
+}
+#endif
 
 char *siril_sources[] = {
 	"",
@@ -96,7 +140,7 @@ int main(int argc, char *argv[]) {
 	opterr = 0;
 	memset(&com, 0, sizeof(struct cominf));	// needed?
 	com.initfile = NULL;
-
+	
 	/* for translation */
 	bindtextdomain(PACKAGE, LOCALEDIR);
 	textdomain(PACKAGE);
@@ -336,6 +380,12 @@ int main(int argc, char *argv[]) {
 		gtk_tool_button_set_label_widget(GTK_TOOL_BUTTON(lookup_widget("histogram_button")), lookup_widget("image_histogram_dark"));
 		gtk_tool_button_set_label_widget(GTK_TOOL_BUTTON(lookup_widget("seqlist_button")), lookup_widget("image_seqlist_dark"));
 	}
+	
+	/* handling OS-X integration */
+#ifdef MAC_INTEGRATION
+	GtkosxApplication *osx_app = gtkosx_application_get();
+	set_osx_integration(osx_app, siril_path);
+#endif //MAC_INTEGRATION
 
 	/* start Siril */
 	update_used_memory();
@@ -354,6 +404,9 @@ int main(int argc, char *argv[]) {
 
 	/* quit Siril */
 	undo_flush();
+#ifdef MAC_INTEGRATION
+	g_object_unref (osx_app);
+#endif //MAC_INTEGRATION
 	return 0;
 }
 
