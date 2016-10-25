@@ -175,7 +175,8 @@ int undo_save_state(char *message, ...) {
 		va_end(args);
 		return 1;
 	}
-	undo_add_item(&gfit, filename, histo);
+	if (single_image_is_loaded())
+		undo_add_item(&gfit, filename, histo);
 
 	/* update menus */
 	update_MenuItem();

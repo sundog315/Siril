@@ -57,8 +57,16 @@ fits wfit[5];	// used for temp files, can probably be replaced by local variable
 GtkBuilder *builder;	// get widget references anywhere
 void initialize_scrollbars();
 
-
 #ifdef MAC_INTEGRATION
+
+static gboolean osx_open_file(GtkosxApplication *osx_app, gchar *path, gpointer data){
+	if (path != NULL) {
+		open_single_image(path);
+		return FALSE;
+	}
+	return TRUE;
+}
+
 static void set_osx_integration(GtkosxApplication *osx_app, gchar *siril_path) {
 	GtkWidget *menubar = lookup_widget("menubar1");
 	GtkWidget *file_quit_menu_item = lookup_widget("exit");
@@ -70,6 +78,8 @@ static void set_osx_integration(GtkosxApplication *osx_app, gchar *siril_path) {
 	GString *icon_str;
 	gchar *icon_path;
 	
+	g_signal_connect(osx_app, "NSApplicationOpenFile", G_CALLBACK(osx_open_file), NULL);
+
 	gtk_widget_hide(menubar);
 
 	gtkosx_application_set_menu_bar(osx_app, GTK_MENU_SHELL(menubar));
@@ -84,9 +94,7 @@ static void set_osx_integration(GtkosxApplication *osx_app, gchar *siril_path) {
 	
 	gtk_widget_hide(file_quit_menu_item);
 	gtk_widget_hide(help_menu);
-	
-	//gtkosx_application_set_use_quartz_accelerators (osx_app, FALSE);
-	
+
 	icon_str = g_string_new(siril_path);
 	g_string_append(icon_str, "pixmaps/siril_1.svg");
 	
@@ -97,6 +105,7 @@ static void set_osx_integration(GtkosxApplication *osx_app, gchar *siril_path) {
 	gtkosx_application_ready(osx_app);
 	g_free(icon_path);
 }
+
 #endif
 
 char *siril_sources[] = {
