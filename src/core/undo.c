@@ -166,21 +166,22 @@ int undo_save_state(char *message, ...) {
 	va_list args;
 	va_start(args, message);
 
-	if (message == NULL)
-		memset(histo, 0, FLEN_VALUE);
-	else
-		vsnprintf(histo, FLEN_VALUE, message, args);
+	if (single_image_is_loaded()) {
+		if (message == NULL)
+			memset(histo, 0, FLEN_VALUE);
+		else
+			vsnprintf(histo, FLEN_VALUE, message, args);
 
-	if (undo_build_swapfile(&gfit, &filename)) {
-		va_end(args);
-		return 1;
-	}
-	if (single_image_is_loaded())
+		if (undo_build_swapfile(&gfit, &filename)) {
+			va_end(args);
+			return 1;
+		}
+
 		undo_add_item(&gfit, filename, histo);
 
-	/* update menus */
-	update_MenuItem();
-
+		/* update menus */
+		update_MenuItem();
+	}
 	va_end(args);
 	return 0;
 }
