@@ -310,7 +310,7 @@ struct _dialog_data {
 static gboolean show_dialog_idle(gpointer p) {
 	static GtkLabel *label = NULL;
 	struct _dialog_data *args = (struct _dialog_data *) p;
-	GtkImage *image = GTK_IMAGE(GTK_WIDGET(lookup_widget("image1")));
+	GtkImage *image = GTK_IMAGE(lookup_widget("image1"));
 	if (label == NULL) {
 		label = GTK_LABEL(gtk_builder_get_object(builder, "labeldialog1"));
 	}

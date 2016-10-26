@@ -3,7 +3,7 @@
 
 #include <gtk/gtk.h>
 #include <sys/time.h>
-#include "core/siril.h"	// for sequence
+#include "core/siril.h"	// for sliders_mode
 
 GtkWidget* lookup_widget (const gchar *widget_name);
 
