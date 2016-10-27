@@ -44,7 +44,7 @@ static pldata *alloc_plot_data(int size) {
 	pldata *plot = malloc(sizeof(pldata));
 	if (!plot) return NULL;
 	plot->data = malloc(size * sizeof(struct kpair));
-	if (!plot->data) return NULL;
+	if (!plot->data) { free(plot); return NULL; }
 	plot->nb = size;
 	plot->next = NULL;
 	return plot;
