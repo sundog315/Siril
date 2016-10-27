@@ -1539,12 +1539,14 @@ static void sequence_setselect_all(gboolean include_all) {
 
 static void do_popup_rgbmenu(GtkWidget *my_widget, GdkEventButton *event) {
 	static GtkMenu *menu = NULL;
-	int button, event_time;
 
 	if (!menu) {
 		menu = GTK_MENU(gtk_builder_get_object(builder, "menurgb"));
 		gtk_menu_attach_to_widget(GTK_MENU(menu), my_widget, NULL);
 	}
+
+#if defined GTK_MAJOR_VERSION == 3 && defined GTK_MINOR_VERSION < 22
+	int button, event_time;
 
 	if (event) {
 		button = event->button;
@@ -1554,14 +1556,17 @@ static void do_popup_rgbmenu(GtkWidget *my_widget, GdkEventButton *event) {
 		event_time = gtk_get_current_event_time();
 	}
 
-	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, button, event_time);
+	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, button,
+			event_time);
+#else
+	gtk_menu_popup_at_pointer(GTK_MENU(menu), NULL);
+#endif
 }
 
 /* Gray popup menu */
 
 static void do_popup_graymenu(GtkWidget *my_widget, GdkEventButton *event) {
 	static GtkMenu *menu = NULL;
-	int button, event_time;
 	gboolean selected;
 	gboolean is_a_single_image_loaded = single_image_is_loaded() && (!sequence_is_loaded()
 				|| (sequence_is_loaded() && com.seq.current == RESULT_IMAGE));
@@ -1569,14 +1574,6 @@ static void do_popup_graymenu(GtkWidget *my_widget, GdkEventButton *event) {
 	if (!menu) {
 		menu = GTK_MENU(gtk_builder_get_object(builder, "menugray"));
 		gtk_menu_attach_to_widget(GTK_MENU(menu), my_widget, NULL);
-	}
-
-	if (event) {
-		button = event->button;
-		event_time = event->time;
-	} else {
-		button = 0;
-		event_time = gtk_get_current_event_time();
 	}
 
 	selected = com.selection.w && com.selection.h;
@@ -1587,7 +1584,21 @@ static void do_popup_graymenu(GtkWidget *my_widget, GdkEventButton *event) {
 	gtk_widget_set_sensitive(lookup_widget("menu_gray_crop"), selected && is_a_single_image_loaded);
 	gtk_widget_set_sensitive(lookup_widget("menu_gray_crop_seq"), selected && sequence_is_loaded());
 
+#if defined GTK_MAJOR_VERSION == 3 && defined GTK_MINOR_VERSION < 22
+	int button, event_time;
+
+	if (event) {
+		button = event->button;
+		event_time = event->time;
+	} else {
+		button = 0;
+		event_time = gtk_get_current_event_time();
+	}
+
 	gtk_menu_popup(GTK_MENU(menu), NULL, NULL, NULL, NULL, button, event_time);
+#else
+	gtk_menu_popup_at_pointer(GTK_MENU(menu), NULL);
+#endif
 }
 
 /*****************************************************************************
