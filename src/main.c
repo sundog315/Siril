@@ -67,12 +67,18 @@ static gboolean osx_open_file(GtkosxApplication *osx_app, gchar *path, gpointer 
 	return TRUE;
 }
 
+static void gui_add_osx_to_app_menu(GtkosxApplication *osx_app, const gchar *item_name, gint index) {
+	GtkWidget *item;
+
+	item = lookup_widget(item_name);
+	if (GTK_IS_MENU_ITEM(item))
+		gtkosx_application_insert_app_menu_item(osx_app, GTK_WIDGET(item), index);
+}
+
 static void set_osx_integration(GtkosxApplication *osx_app, gchar *siril_path) {
 	GtkWidget *menubar = lookup_widget("menubar1");
 	GtkWidget *file_quit_menu_item = lookup_widget("exit");
-	GtkWidget *file_settings_menu_item = lookup_widget("settings");
 	GtkWidget *help_menu = lookup_widget("help1");
-	GtkWidget *help_about_menu_item = lookup_widget("help_item1");
 	GtkWidget *sep;
 	GdkPixbuf *icon;
 	GString *icon_str;
@@ -83,15 +89,14 @@ static void set_osx_integration(GtkosxApplication *osx_app, gchar *siril_path) {
 	gtk_widget_hide(menubar);
 
 	gtkosx_application_set_menu_bar(osx_app, GTK_MENU_SHELL(menubar));
-	gtkosx_application_insert_app_menu_item(osx_app, help_about_menu_item, 0);
+
+	gui_add_osx_to_app_menu(osx_app, "help_item1", 0);
 	sep = gtk_separator_menu_item_new();
-	g_object_ref(sep);
 	gtkosx_application_insert_app_menu_item(osx_app, sep, 1);
-	gtkosx_application_insert_app_menu_item(osx_app, file_settings_menu_item, 2);
+	gui_add_osx_to_app_menu(osx_app, "settings", 2);
 	sep = gtk_separator_menu_item_new();
-	g_object_ref(sep);
 	gtkosx_application_insert_app_menu_item(osx_app, sep, 3);
-	
+
 	gtk_widget_hide(file_quit_menu_item);
 	gtk_widget_hide(help_menu);
 
