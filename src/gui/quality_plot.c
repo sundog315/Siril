@@ -77,10 +77,11 @@ static void build_quality(sequence *seq, int layer, int ref_image, pldata *plot)
 void free_plot_data() {
 	pldata *plot = plot_data;
 	while (plot) {
+		pldata *next = plot->next;
 		if (plot->data)
 			free(plot->data);
 		free(plot);
-		plot = plot->next;
+		plot = next;
 	}
 	plot_data = NULL;
 }
