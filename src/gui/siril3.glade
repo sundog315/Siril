@@ -7700,7 +7700,7 @@ by averaging the entire image</property>
                             </child>
                             <child>
                               <object class="GtkCheckButton" id="checkbutton_debayer_compatibility">
-                                <property name="label" translatable="yes">Ensure KSTARS compatibility</property>
+                                <property name="label" translatable="yes">Ensure KSTARS/EKOS compatibility</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
