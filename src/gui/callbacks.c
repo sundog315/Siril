@@ -2093,6 +2093,8 @@ void update_libraw_interface() {
 	/*************SER**********************/
 	com.debayer.use_bayer_header = gtk_toggle_button_get_active(
 			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_SER_use_header")));
+	com.debayer.compatibility = gtk_toggle_button_get_active(
+			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_debayer_compatibility")));
 	writeinitfile();
 }
 
@@ -2762,8 +2764,10 @@ void set_GUI_LIBRAW() {
 	/********** DEBAYER ******************/
 	GtkComboBox *pattern = GTK_COMBO_BOX(lookup_widget("comboBayer_pattern"));
 	GtkComboBox *inter = GTK_COMBO_BOX(lookup_widget("comboBayer_inter"));
+	GtkToggleButton *compat = GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_debayer_compatibility"));
 	gtk_combo_box_set_active(pattern, com.debayer.bayer_pattern);
 	gtk_combo_box_set_active(inter, com.debayer.bayer_inter);
+	gtk_toggle_button_set_active(compat, com.debayer.compatibility);
 	gtk_toggle_button_set_active(
 			GTK_TOGGLE_BUTTON(lookup_widget("checkbutton_SER_use_header")),
 			com.debayer.use_bayer_header);

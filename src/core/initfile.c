@@ -86,6 +86,8 @@ static int readinitfile() {
 				&com.debayer.use_bayer_header);
 		config_setting_lookup_int(debayer_setting, "pattern",
 				&com.debayer.bayer_pattern);
+		config_setting_lookup_bool(debayer_setting, "compatibility",
+						&com.debayer.compatibility);
 		int inter;
 		config_setting_lookup_int(debayer_setting, "inter", &inter);
 		com.debayer.bayer_inter = inter;
@@ -203,6 +205,10 @@ static void _save_debayer(config_t *config, config_setting_t *root) {
 	debayer_setting = config_setting_add(debayer_group, "pattern",
 			CONFIG_TYPE_INT);
 	config_setting_set_int(debayer_setting, com.debayer.bayer_pattern);
+
+	debayer_setting = config_setting_add(debayer_group, "compatibility",
+			CONFIG_TYPE_BOOL);
+	config_setting_set_int(debayer_setting, com.debayer.compatibility);
 
 	debayer_setting = config_setting_add(debayer_group, "inter",
 			CONFIG_TYPE_INT);

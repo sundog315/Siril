@@ -427,6 +427,7 @@ struct _convert_data {
 	int start;
 	int total;
 	int nb_converted;
+	gboolean compatibility;
 };
 
 void on_convert_button_clicked(GtkButton *button, gpointer user_data) {
@@ -499,6 +500,7 @@ void on_convert_button_clicked(GtkButton *button, gpointer user_data) {
 	args->nb_converted = 0;
 	args->t_start.tv_sec = t_start.tv_sec;
 	args->t_start.tv_usec = t_start.tv_usec;
+	args->compatibility = com.debayer.compatibility;
 	start_in_new_thread(convert_thread_worker, args);
 	return;
 }
@@ -611,7 +613,7 @@ static gpointer convert_thread_worker(gpointer p) {
 			break;
 		}
 		else {	// single image
-			fits *fit = any_to_new_fits(imagetype, src_filename);
+			fits *fit = any_to_new_fits(imagetype, src_filename, args->compatibility);
 			if (convflags & CONVDSTSER) {
 				if (convflags & CONV1X1)
 					keep_first_channel_from_fits(fit);
@@ -720,7 +722,7 @@ static int retrieveBayerPattern(char *bayer) {
 	return BAYER_FILTER_NONE;
 }
 
-int debayer_if_needed(image_type imagetype, fits *fit) {
+int debayer_if_needed(image_type imagetype, fits *fit, gboolean compatibility) {
 	int retval = 0;
 	sensor_pattern tmp;
 	/* What the hell?
@@ -733,7 +735,8 @@ int debayer_if_needed(image_type imagetype, fits *fit) {
 			siril_log_message(_("Cannot perform debayering on image with more than one channel\n"));
 			return retval;
 		}
-		fits_flip_top_to_bottom(fit);
+		if (!compatibility)
+			fits_flip_top_to_bottom(fit);
 		/* Get Bayer informations from header if available */
 		if (com.debayer.use_bayer_header) {
 			sensor_pattern bayer;
@@ -757,7 +760,8 @@ int debayer_if_needed(image_type imagetype, fits *fit) {
 			siril_log_message(_("Cannot perform debayering\n"));
 			retval = -1;
 		} else {
-			fits_flip_top_to_bottom(fit);
+			if (!compatibility)
+				fits_flip_top_to_bottom(fit);
 		}
 		com.debayer.bayer_pattern = tmp;
 	}
@@ -765,14 +769,14 @@ int debayer_if_needed(image_type imagetype, fits *fit) {
 }
 
 /* open the file with path source from any image type and load it into a new FITS object */
-fits *any_to_new_fits(image_type imagetype, const char *source) {
+fits *any_to_new_fits(image_type imagetype, const char *source, gboolean compatibility) {
 	int retval = 0;
 	fits *tmpfit = calloc(1, sizeof(fits));
 
 	retval = any_to_fits(imagetype, source, tmpfit);
 
 	if (!retval)
-		retval = debayer_if_needed(imagetype, tmpfit);
+		retval = debayer_if_needed(imagetype, tmpfit, compatibility);
 
 	if (retval) {
 		clearfits(tmpfit);

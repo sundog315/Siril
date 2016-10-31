@@ -119,7 +119,7 @@ int read_single_image(const char* filename, fits *dest, char **realname_out) {
 	} else {
 		retval = any_to_fits(imagetype, realname, dest);
 		if (!retval)
-			debayer_if_needed(imagetype, dest);
+			debayer_if_needed(imagetype, dest, com.debayer.compatibility);
 	}
 	if (retval != 0 && retval != 3)
 		siril_log_message(_("Opening %s failed.\n"), realname);
