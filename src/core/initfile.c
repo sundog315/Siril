@@ -199,7 +199,7 @@ static void _save_debayer(config_t *config, config_setting_t *root) {
 	debayer_group = config_setting_add(root, keywords[BAY], CONFIG_TYPE_GROUP);
 
 	debayer_setting = config_setting_add(debayer_group, "ser_use_bayer_header",
-	CONFIG_TYPE_BOOL);
+			CONFIG_TYPE_BOOL);
 	config_setting_set_bool(debayer_setting, com.debayer.use_bayer_header);
 
 	debayer_setting = config_setting_add(debayer_group, "pattern",
@@ -208,7 +208,7 @@ static void _save_debayer(config_t *config, config_setting_t *root) {
 
 	debayer_setting = config_setting_add(debayer_group, "compatibility",
 			CONFIG_TYPE_BOOL);
-	config_setting_set_int(debayer_setting, com.debayer.compatibility);
+	config_setting_set_bool(debayer_setting, com.debayer.compatibility);
 
 	debayer_setting = config_setting_add(debayer_group, "inter",
 			CONFIG_TYPE_INT);

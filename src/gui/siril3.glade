@@ -7704,7 +7704,7 @@ by averaging the entire image</property>
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="receives_default">False</property>
-                                <property name="tooltip_text" translatable="yes">If this box is checked, Siril will automatically apply the Bayer pattern found in the file's header. If the result looks wrong uncheck this box and choose manually your pattern in the Debayer box below.</property>
+                                <property name="tooltip_text" translatable="yes">If this box is checked, Siril will try to ensure KSTARS (and PixInsight) compatibility by reading FITS image in top-bottom order.</property>
                                 <property name="halign">start</property>
                                 <property name="draw_indicator">True</property>
                               </object>
