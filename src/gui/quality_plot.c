@@ -29,16 +29,18 @@
 #include "gui/callbacks.h"
 #include "gui/quality_plot.h"
 #include "kplot.h"
+#include "algos/PSF.h"
 
 static GtkWidget *drawingPlot = NULL;
 static pldata *plot_data;
 static struct kpair ref;
 static gboolean is_fwhm = FALSE, export_to_PNG = FALSE;
+static char *ylabel = NULL;
 
-static void remove_point(pldata *plot, int i) {
+/*static void remove_point(pldata *plot, int i) {
 	memmove(&plot->data[i], &plot->data[i + 1], (plot->nb - i - 1) * sizeof(*plot->data));
 	plot->nb--;
-}
+}*/
 
 static pldata *alloc_plot_data(int size) {
 	pldata *plot = malloc(sizeof(pldata));
@@ -50,28 +52,39 @@ static pldata *alloc_plot_data(int size) {
 	return plot;
 }
 
-static void build_quality(sequence *seq, int layer, int ref_image, pldata *plot) {
+static void build_registration_dataset(sequence *seq, int layer, int ref_image, pldata *plot) {
 	int i;
 
 	for (i = 0; i < plot->nb; i++) {
 		if (!seq->imgparam[i].incl) continue;
 		plot->data[i].x = (double) i;
-		plot->data[i].y = (is_fwhm == TRUE) ?
+		plot->data[i].y = is_fwhm ?
 						seq->regparam[layer][i].fwhm :
 						seq->regparam[layer][i].quality;
 	}
-	/* removing non selected points */
-	for (i = 0; i < plot->nb; i++) {
+	/* removing non selected points - I don't see that happening? */
+	/*for (i = 0; i < plot->nb; i++) {
 		if (plot->data[i].x == 0.0 && plot->data[i].y == 0.0) {
 			remove_point(plot, i);
 			i--;
 		}
-	}
+	}*/
 
-	ref.y = (is_fwhm == TRUE) ?
+	ref.x = (double) ref_image;
+	ref.y = is_fwhm ?
 			seq->regparam[layer][ref_image].fwhm :
 			seq->regparam[layer][ref_image].quality;
 
+}
+
+static void build_photometry_dataset(fitted_PSF **psfs, int size, int ref_image, pldata *plot) {
+	int i;
+	for (i = 0; i < size; i++) {
+		if (psfs[i]) {
+			plot->data[i].x = (double)i;
+			plot->data[i].y = psfs[i]->fwhmx;
+		}
+	}
 }
 
 void free_plot_data() {
@@ -95,43 +108,56 @@ void drawPlot() {
 	}
 
 	seq = &com.seq;
+	if (plot_data)
+		free_plot_data();
 
-	if (!(seq->regparam))
-		return;
-
-	for (i = 0; i < seq->nb_layers; i++) {
-		if (com.seq.regparam[i]) {
-			layer = i;
-			break;
-		}
-	}
-
-	if ((!seq->regparam[layer]))
-		return;
-
-	/* loading reference frame */
 	if (seq->reference_image == -1)
 		ref_image = 0;
-	else
-		ref_image = seq->reference_image;
+	else ref_image = seq->reference_image;
 
+	/* XXX include a new way of selecting data to plot here */
+	if (seq->photometry[0]) {
+		pldata *plot;
+		plot = alloc_plot_data(seq->number);
+		plot_data = plot;
+		for (i = 0; i < MAX_SEQPSF && seq->photometry[i]; i++) {
+			if (i > 0) {
+				plot->next = alloc_plot_data(seq->number);
+				plot = plot->next;
+			}
+			
+			build_photometry_dataset(seq->photometry[i], seq->number, ref_image, plot);
+		}
+		ref.x = (double) ref_image;
+		ref.y = seq->photometry[0][ref_image]->fwhmx;
+		ylabel = _("FWHM");
+	} else {
+		// fallback to registration graph display
+		if (!(seq->regparam))
+			return;
 
-	if (seq->regparam[layer][ref_image].fwhm > 0.0f) {
-		is_fwhm = TRUE;
-	} else if (seq->regparam[layer][ref_image].quality >= 0.0) {
-		is_fwhm = FALSE;
-	} else return;
+		for (i = 0; i < seq->nb_layers; i++) {
+			if (com.seq.regparam[i]) {
+				layer = i;
+				break;
+			}
+		}
+		if ((!seq->regparam[layer]))
+			return;
 
-	ref.x = (double) ref_image;
+		if (seq->regparam[layer][ref_image].fwhm > 0.0f) {
+			is_fwhm = TRUE;
+			ylabel = _("FWHM");
+		} else if (seq->regparam[layer][ref_image].quality >= 0.0) {
+			is_fwhm = FALSE;
+			ylabel = _("Quality");
+		} else return;
 
-	/* building data array */
-	if (plot_data) {
-		free_plot_data();
+		/* building data array */
+		plot_data = alloc_plot_data(seq->number);
+
+		build_registration_dataset(seq, layer, ref_image, plot_data);
 	}
-	plot_data = alloc_plot_data(seq->number);
-
-	ref.x = (double) ref_image;
-	build_quality(seq, layer, ref_image, plot_data);
 
 	gtk_widget_queue_draw(drawingPlot);
 }
@@ -154,21 +180,27 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	struct kplot *p;
 
 	if (plot_data) {
-
+		pldata *plot = plot_data;
 		d1 = d2 = m = NULL;
 		p = NULL;
 
 		kplotcfg_defaults(&cfgplot);
 		kdatacfg_defaults(&cfgdata);
 		cfgplot.xaxislabel = _("Frames");
-		cfgplot.yaxislabel = (is_fwhm == TRUE) ? _("FWHM") : _("Quality");
+		cfgplot.yaxislabel = ylabel;
 		cfgplot.yaxislabelrot = M_PI_2 * 3.0;
-//		cfgplot.y2axislabel = _("Sigma");
+		//cfgplot.y2axislabel = _("Sigma");
 		cfgplot.xticlabelpad = cfgplot.yticlabelpad = 10.0;
 		cfgdata.point.radius = 10;
 
-		d1 = kdata_array_alloc(plot_data->data, plot_data->nb);
-		d2 = kdata_array_alloc(&ref, 1);
+		p = kplot_alloc(&cfgplot);
+
+		// data plots
+		while (plot) {
+			d1 = kdata_array_alloc(plot->data, plot->nb);
+			kplot_attach_data(p, d1, ((plot_data->nb <= 100) ? KPLOT_LINESPOINTS : KPLOT_LINES), NULL);
+			plot = plot->next;
+		}
 
 		/* mean and sigma */
 		mean = kdata_ymean(d1);
@@ -187,10 +219,8 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 		}
 
 		m = kdata_array_alloc(avg, max - min);
+		d2 = kdata_array_alloc(&ref, 1);
 
-		p = kplot_alloc(&cfgplot);
-
-		kplot_attach_data(p, d1, ((plot_data->nb <= 100) ? KPLOT_LINESPOINTS : KPLOT_LINES), NULL);	// data plot
 		kplot_attach_data(p, d2, KPLOT_POINTS, &cfgdata);	// ref image dot
 		kplot_attach_data(p, m, KPLOT_LINES, NULL);			// mean plot
 

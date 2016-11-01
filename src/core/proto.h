@@ -229,7 +229,7 @@ void	sequence_free_preprocessing_data(sequence *seq);
 gboolean sequence_is_loaded();
 int	sequence_processing(sequence *seq, sequence_proc process, int layer, gboolean run_in_thread, gboolean run_in_parallel, void *arg);
 int	seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit, rectangle *source_area, void *arg);
-int	do_fwhm_sequence_processing(sequence *seq, int layer, int print_psf, gboolean follow_star, gboolean run_in_thread);
+int	do_fwhm_sequence_processing(sequence *seq, int layer, gboolean print_psf, gboolean follow_star, gboolean run_in_thread, gboolean for_registration);
 void	check_or_allocate_regparam(sequence *seq, int layer);
 sequence *create_internal_sequence(int size);
 void	internal_sequence_set(sequence *seq, int index, fits *fit);
@@ -237,7 +237,7 @@ int	internal_sequence_find_index(sequence *seq, fits *fit);
 gpointer crop_sequence(gpointer p);
 gboolean sequence_is_rgb(sequence *seq);
 imstats* seq_get_imstats(sequence *seq, int index, fits *the_image, int option);
-void	check_area_is_in_image(rectangle *area, sequence *seq);
+void	enforce_area_in_image(rectangle *area, sequence *seq);
 void	update_export_crop_label();
 
 /****************** seqfile.h ******************/

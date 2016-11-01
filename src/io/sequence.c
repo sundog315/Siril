@@ -826,7 +826,7 @@ void initialize_sequence(sequence *seq, gboolean is_zeroed) {
  * (= do it for com.seq) */
 void free_sequence(sequence *seq, gboolean free_seq_too) {
 	static GtkComboBoxText *cbbt_layers = NULL;
-	int i;
+	int i, j;
 		
 	if (cbbt_layers == NULL)
 		cbbt_layers = GTK_COMBO_BOX_TEXT(gtk_builder_get_object(
@@ -837,7 +837,6 @@ void free_sequence(sequence *seq, gboolean free_seq_too) {
 	if (seq->nb_layers > 0 && seq->regparam) {
 		for (i=0; i<seq->nb_layers; i++) {
 			if (seq->regparam[i]) {
-				int j;
 				for (j=0; j < seq->number; j++) {
 					if (seq->regparam[i][j].fwhm_data)
 						free(seq->regparam[i][j].fwhm_data);
@@ -894,6 +893,15 @@ void free_sequence(sequence *seq, gboolean free_seq_too) {
 	if (seq->type != SEQ_INTERNAL)
 		undo_flush();
 	free_plot_data();
+
+	for (i = 0; i < MAX_SEQPSF && seq->photometry[i]; i++) {
+		for (j = 0; j < seq->number; j++) {
+			if (seq->photometry[i][j])
+				free(seq->photometry[i][j]);
+		}
+		free(seq->photometry[i]);
+	}
+
 	if (free_seq_too)	free(seq);
 }
 
@@ -945,7 +953,6 @@ int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolea
 	}
 	memcpy(&area, &com.selection, sizeof(rectangle));
 	memset(&fit, 0, sizeof(fits));
-	check_or_allocate_regparam(seq, layer);
 
 	nb_frames = (float)seq->number;
 
@@ -960,7 +967,7 @@ int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolea
 				abort = 1;
 				continue;
 			}
-			check_area_is_in_image(&area, seq);
+			enforce_area_in_image(&area, seq);
 
 			/* opening the image */
 			if (seq_read_frame_part(seq, layer, i, &fit, &area)) {
@@ -984,12 +991,19 @@ int sequence_processing(sequence *seq, sequence_proc process, int layer, gboolea
 	return abort;
 }
 
-/* Computes FWHM for a sequence image and store data in the sequence imgdata.
+struct fwhm_seq_proc_struct {
+	gboolean follow_star;		// input
+	fitted_PSF **psf;		// input allocated, output result
+};
+
+
+/* Computes FWHM for a sequence image and store data in the sequence regdata.
  * seq_layer is the corresponding layer in the raw image from the sequence.
- * source_area is the area from which fit was extracted from the full frame. It can be used
- * for reference, but can also be modified to help subsequent minimisations.
+ * source_area is the area from which fit was extracted from the full frame.
+ * when arg->follow_star is true, source_area is centered on the found star.
  */
 int seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit, rectangle *source_area, void *arg) {
+	struct fwhm_seq_proc_struct *args = (struct fwhm_seq_proc_struct *)arg;
 	rectangle area;
 	area.x = area.y = 0;
 	area.w = fit->rx; area.h = fit->ry;
@@ -998,39 +1012,67 @@ int seqprocess_fwhm(sequence *seq, int seq_layer, int frame_no, fits *fit, recta
 	if (result) {
 		result->xpos = result->x0 + source_area->x;
 		result->ypos = source_area->y + source_area->h - result->y0;
-		seq->regparam[seq_layer][frame_no].fwhm_data = result;
-		seq->regparam[seq_layer][frame_no].fwhm = result->fwhmx;
+		args->psf[frame_no] = result;
 
 		/* let's move source_area to center it on the star */
-		if (arg) {
+		if (args->follow_star) {
 			source_area->x = round_to_int(result->xpos) - source_area->w/2;
 			source_area->y = round_to_int(result->ypos) - source_area->h/2;
 		}
 		return 0;
 	} else {
-		seq->regparam[seq_layer][frame_no].fwhm_data = NULL;
-		seq->regparam[seq_layer][frame_no].fwhm = 0.0f;
+		args->psf[frame_no] = NULL;
 		return 1;
 	}
 }
 
 /* Computes PSF for all images in a sequence.
  * Prints PSF data if print_psf is true, only position if false. */
-int do_fwhm_sequence_processing(sequence *seq, int layer, gboolean print_psf, gboolean follow_star, gboolean run_in_thread) {
+int do_fwhm_sequence_processing(sequence *seq, int layer, gboolean print_psf, gboolean follow_star, gboolean run_in_thread, gboolean for_registration) {
 	int i, retval;
+	struct fwhm_seq_proc_struct args;
+
 	siril_log_message(_("Starting sequence processing of PSF\n"));
 	set_progress_bar_data(_("Computing PSF on selected star"), PROGRESS_NONE);
-	retval = sequence_processing(seq, &seqprocess_fwhm, layer, run_in_thread, !follow_star, GINT_TO_POINTER(follow_star));	// allocates regparam
+
+	args.follow_star = follow_star;
+	args.psf = malloc(seq->number * sizeof(fitted_PSF *));
+	retval = sequence_processing(seq, &seqprocess_fwhm, layer, run_in_thread, !follow_star, &args);
+
 	if (retval) {
 		set_progress_bar_data(_("Failed to compute PSF for the sequence. Ready."), PROGRESS_NONE);
 		set_cursor_waiting(FALSE);
 		return 1;
 	}
 	siril_log_message(_("Finished sequence processing of PSF\n"));
-	// update the list
+
+	// for registration use: store data in seq->regparam
+	if (for_registration || !seq->regparam[layer]) {
+		check_or_allocate_regparam(seq, layer);
+		for (i = 0; i < seq->number; i++) {
+			seq->regparam[layer][i].fwhm_data = args.psf[i];
+			if (args.psf[i])
+				seq->regparam[layer][i].fwhm = args.psf[i]->fwhmx;
+		}
+		// the data put in regparam if !for_registration will not be saved
+		// should we writeseqfile(seq); ?
+
+		if (for_registration)
+			free(args.psf);
+	}
+
+	// for photometry use: store data in seq->photometry
+	if (!for_registration) {
+		for (i = 0; i < MAX_SEQPSF && seq->photometry[i]; i++);
+		if (i == MAX_SEQPSF) i = 0;
+		seq->photometry[i] = args.psf;
+	}
+
+	// update the list in the GUI
 	if (seq->type != SEQ_INTERNAL)
 		fill_sequence_list(seq, layer);
 
+	// deprecated soon
 	if (print_psf) {
 		siril_log_message(_("See the console for a dump of star data over the sequence (stdout)\n"));
 		fprintf(stdout, _("# image_no amplitude magnitude fwhm x y\n"));
@@ -1081,8 +1123,8 @@ sequence *create_internal_sequence(int size) {
 		seq->imgparam[i].filenum = i;
 		seq->imgparam[i].incl = 1;
 		seq->imgparam[i].stats = NULL;
-	}
-	check_or_allocate_regparam(seq, 0);
+}
+check_or_allocate_regparam(seq, 0);
 	return seq;
 }
 
@@ -1217,10 +1259,10 @@ imstats* seq_get_imstats(sequence *seq, int index, fits *the_image, int option) 
 	return seq->imgparam[index].stats;
 }
 
-/* ensures that an area does not derive off-image.
+/* Ensures that an area does not derive off-image.
  * Verifies coordinates of the center and moves it inside the image if the area crosses the bounds.
  */
-void check_area_is_in_image(rectangle *area, sequence *seq) {
+void enforce_area_in_image(rectangle *area, sequence *seq) {
 	if (area->x < 0) area->x = 0;
 	if (area->y < 0) area->y = 0;
 	if (area->x + area->w > seq->rx)

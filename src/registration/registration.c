@@ -416,7 +416,7 @@ int register_shift_fwhm(struct registration_args *args) {
 	// TODO: detect that it was already computed, and don't do it again
 	// -> should be done at a higher level and passed in the args
 	if (do_fwhm_sequence_processing(args->seq, args->layer, TRUE, args->follow_star,
-			args->run_in_thread))	// stores in regparam
+			args->run_in_thread, TRUE))	// stores in regparam
 		return 1;
 
 	current_regdata = args->seq->regparam[args->layer];

@@ -43,6 +43,8 @@ typedef unsigned short WORD;		// default type for internal image data
 
 #define MAX_COMMAND_WORDS 16		// max number of words to split in command line input
 
+#define MAX_SEQPSF 10			// max number of stars for which seqpsf can be run
+
 #define CMD_HISTORY_SIZE 50		// size of the command line history
 
 #define ZOOM_MAX	16.0
@@ -192,54 +194,13 @@ typedef struct libraw_config libraw;
 typedef struct stack_config stackconf;
 typedef struct cominf cominfo;
 typedef struct image_stats imstats;
-typedef struct fwhm_struct fitted_PSF;
 typedef struct rectangle_struct rectangle;
 typedef struct point_struct point;
 typedef struct gradient_struct gradient;
 typedef struct historic_struct historic;
+typedef struct fwhm_struct fitted_PSF;
 
 /* global structures */
-
-/* image data, exists once for each image */
-struct imdata {
-	int filenum;		/* real file index in the sequence, i.e. for mars9.fit = 9 */
-	gboolean incl;		/* selected in the sequence, included for future processings? */
-	//double eval;		/* an evaluation of the quality of the image, not yet used */
-	/* for deep-sky images, the quality is the FWHM of a star or an average of FWHM of stars,
-	 * for planetary and deep-sky images, it's computed from entropy, contrast or other eval functions. */
-	imstats *stats;		/* statistics of the image, used as a cache for full image first
-				   channel statistics, particularly used in stacking normalization.
-				   NULL if not available, this is stored in seqfile if non NULL */
-};
-
-/* Procedure signature for sequence processing.
- * Returns < 0 for an error that should stop the processing on the sequence.
- * Other return values are not used.
- * Processed data should be written in the sequence data directly. */
-typedef int (*sequence_proc)(sequence *seq, int seq_layer, int frame_no, fits *fit, rectangle *source_area, void *arg);
-
-/* preprocessing data from GUI */
-struct preprocessing_data {
-	struct timeval t_start;
-	gboolean autolevel;
-	double sigma[2];
-	gboolean is_cfa;
-	float normalisation;
-	int retval;
-};
-
-/* registration data, exists once for each image and each layer */
-struct registration_data {
-	int shiftx, shifty;	// we could have a subpixel precision, but is it needed? saved
-	float rot_centre_x, rot_centre_y;	// coordinates for the rotation centre, saved
-	float angle;		// angle for the rotation, saved
-	fitted_PSF *fwhm_data;	// used in PSF/FWHM registration, not saved
-	float fwhm;		// copy of fwhm->fwhmx, used as quality indicator, saved data
-	//double entropy;		// used in DFT registration, saved data
-	// entropy could be replaced by a more general quality indicator at
-	// some point. It's the only double value stored in the .seq files, others are single.
-	double quality;
-};
 
 /* ORDER OF POLYNOMES */
 typedef enum {
@@ -324,6 +285,47 @@ typedef enum { SEQ_REGULAR, SEQ_SER,
 	SEQ_INTERNAL
 } sequence_type;
 
+/* image data, exists once for each image */
+struct imdata {
+	int filenum;		/* real file index in the sequence, i.e. for mars9.fit = 9 */
+	gboolean incl;		/* selected in the sequence, included for future processings? */
+	//double eval;		/* an evaluation of the quality of the image, not yet used */
+	/* for deep-sky images, the quality is the FWHM of a star or an average of FWHM of stars,
+	 * for planetary and deep-sky images, it's computed from entropy, contrast or other eval functions. */
+	imstats *stats;		/* statistics of the image, used as a cache for full image first
+				   channel statistics, particularly used in stacking normalization.
+				   NULL if not available, this is stored in seqfile if non NULL */
+};
+
+/* Procedure signature for sequence processing.
+ * Returns < 0 for an error that should stop the processing on the sequence.
+ * Other return values are not used.
+ * Processed data should be written in the sequence data directly. */
+typedef int (*sequence_proc)(sequence *seq, int seq_layer, int frame_no, fits *fit, rectangle *source_area, void *arg);
+
+/* preprocessing data from GUI */
+struct preprocessing_data {
+	struct timeval t_start;
+	gboolean autolevel;
+	double sigma[2];
+	gboolean is_cfa;
+	float normalisation;
+	int retval;
+};
+
+/* registration data, exists once for each image and each layer */
+struct registration_data {
+	int shiftx, shifty;	// we could have a subpixel precision, but is it needed? saved
+	float rot_centre_x, rot_centre_y;	// coordinates for the rotation centre, saved
+	float angle;		// angle for the rotation, saved
+	fitted_PSF *fwhm_data;	// used in PSF/FWHM registration, not saved
+	float fwhm;		// copy of fwhm->fwhmx, used as quality indicator, saved data
+	//double entropy;		// used in DFT registration, saved data
+	// entropy could be replaced by a more general quality indicator at
+	// some point. It's the only double value stored in the .seq files, others are single.
+	double quality;
+};
+
 struct sequ {
 	char *seqname;		// name of the sequence, as in name.seq
 	int number;		// number of images in the sequence
@@ -364,6 +366,8 @@ struct sequ {
 	//struct registration_method reg_method;	// is it the right place for that?
 	
 	gboolean needs_saving;	// a dirty flag for the sequence, avoid saving it too often
+
+	fitted_PSF **photometry[MAX_SEQPSF];// psf for multiple stars for all images
 };
 
 /* this struct is used to manage data associated with a single image loaded, outside a sequence */

@@ -43,6 +43,7 @@
 #include "gui/callbacks.h"
 #include "gui/PSF_list.h"
 #include "gui/histogram.h"
+#include "gui/quality_plot.h"
 #include "algos/colors.h"
 #include "algos/PSF.h"
 #include "algos/star_finder.h"
@@ -724,10 +725,16 @@ int process_psf(int nb){
 	return 0;
 }
 
+gboolean end_seqpsf(gpointer arg) {
+	set_layers_for_registration();	// update display of available reg data
+	drawPlot();
+	return end_generic(arg);
+}
+
 void *_psf_thread(void *arg) {
 	int layer = (intptr_t) arg;
-	do_fwhm_sequence_processing(&com.seq, layer, TRUE, TRUE, TRUE);
-	gdk_threads_add_idle(end_generic, NULL);
+	do_fwhm_sequence_processing(&com.seq, layer, TRUE, TRUE, TRUE, FALSE);
+	gdk_threads_add_idle(end_seqpsf, NULL);
 	return NULL;
 }
 
