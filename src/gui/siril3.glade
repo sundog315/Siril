@@ -66,6 +66,14 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
       </object>
     </child>
     <child>
+      <object class="GtkMenuItem" id="menu_gray_seqpsf">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="label" translatable="yes">PSF for the sequence</property>
+        <signal name="activate" handler="on_menu_gray_seqpsf_activate" swapped="no"/>
+      </object>
+    </child>
+    <child>
       <object class="GtkMenuItem" id="menu_gray_pick_star">
         <property name="visible">True</property>
         <property name="can_focus">False</property>

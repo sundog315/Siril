@@ -5265,6 +5265,10 @@ void on_menu_gray_psf_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	free(result);
 }
 
+void on_menu_gray_seqpsf_activate(GtkMenuItem *menuitem, gpointer user_data) {
+	process_seq_psf(0);
+}
+
 void on_menu_gray_pick_star_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	int layer = match_drawing_area_widget(com.vport[com.cvport], FALSE);
 	int new_index;
