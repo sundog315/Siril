@@ -31,16 +31,14 @@
 #include "kplot.h"
 #include "algos/PSF.h"
 
-static GtkWidget *drawingPlot = NULL;
+static GtkWidget *drawingPlot = NULL, *combo = NULL;
 static pldata *plot_data;
 static struct kpair ref;
 static gboolean is_fwhm = FALSE, export_to_PNG = FALSE;
 static char *ylabel = NULL;
+static enum photmetry_source selected_source = ROUNDNESS;
 
-/*static void remove_point(pldata *plot, int i) {
-	memmove(&plot->data[i], &plot->data[i + 1], (plot->nb - i - 1) * sizeof(*plot->data));
-	plot->nb--;
-}*/
+static void update_ylabel();
 
 static pldata *alloc_plot_data(int size) {
 	pldata *plot = malloc(sizeof(pldata));
@@ -72,14 +70,42 @@ static void build_registration_dataset(sequence *seq, int layer, int ref_image, 
 
 }
 
-static void build_photometry_dataset(fitted_PSF **psfs, int size, int ref_image, pldata *plot) {
-	int i;
-	for (i = 0; i < size; i++) {
+static void build_photometry_dataset(sequence *seq, int dataset, int size, int ref_image, pldata *plot) {
+	int i, j;
+	fitted_PSF **psfs = seq->photometry[dataset];
+
+	for (i = 0, j = 0; i < size; i++) {
+		if (!seq->imgparam[i].incl) continue;
 		if (psfs[i]) {
-			plot->data[i].x = (double)i;
-			plot->data[i].y = psfs[i]->fwhmx;
+			plot->data[j].x = (double)i;
+			switch (selected_source) {
+				case ROUNDNESS:
+					plot->data[j].y = psfs[i]->fwhmy / psfs[i]->fwhmx;
+					break;
+				case FWHM:
+					plot->data[j].y = psfs[i]->fwhmx;
+					break;
+				case AMPLITUDE:
+					plot->data[j].y = psfs[i]->A;
+					break;
+				case MAGNITUDE:
+					plot->data[j].y = psfs[i]->mag;
+					break;
+				case BACKGROUND:
+					plot->data[j].y = psfs[i]->B;
+					break;
+			}
 		}
+
+		/* we'll just take the reference image point from the last data set rendered */
+		if (i == ref_image) {
+			ref.x = (double) ref_image;
+			ref.y = plot->data[j].y;
+		}
+
+		j++;
 	}
+	plot->nb = j;
 }
 
 void free_plot_data() {
@@ -100,6 +126,7 @@ void drawPlot() {
 
 	if (drawingPlot == NULL) {
 		drawingPlot = lookup_widget("DrawingPlot");
+		combo = lookup_widget("plotCombo");
 	}
 
 	seq = &com.seq;
@@ -113,6 +140,9 @@ void drawPlot() {
 	/* XXX include a new way of selecting data to plot here */
 	if (seq->photometry[0]) {
 		pldata *plot;
+		gtk_widget_set_visible(combo, TRUE);
+		update_ylabel();
+
 		plot = alloc_plot_data(seq->number);
 		plot_data = plot;
 		for (i = 0; i < MAX_SEQPSF && seq->photometry[i]; i++) {
@@ -121,13 +151,11 @@ void drawPlot() {
 				plot = plot->next;
 			}
 			
-			build_photometry_dataset(seq->photometry[i], seq->number, ref_image, plot);
+			build_photometry_dataset(seq, i, seq->number, ref_image, plot);
 		}
-		ref.x = (double) ref_image;
-		ref.y = seq->photometry[0][ref_image]->fwhmx;
-		ylabel = _("FWHM");
 	} else {
 		// fallback to registration graph display
+		gtk_widget_set_visible(combo, FALSE);
 		if (!(seq->regparam))
 			return;
 
@@ -167,16 +195,16 @@ void on_ButtonSavePNG_clicked(GtkButton *button, gpointer user_data) {
 gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	guint width, height, i, j;
 	double mean/*, sigma*/;
-	int min, max;
+	int min, max, nb_graphs = 0;
 	struct kpair *avg;
 	struct kplotcfg	 cfgplot;
 	struct kdatacfg	 cfgdata;
-	struct kdata *d1, *d2, *m;
+	struct kdata *d1, *ref_d, *mean_d;
 	struct kplot *p;
 
 	if (plot_data) {
 		pldata *plot = plot_data;
-		d1 = d2 = m = NULL;
+		d1 = ref_d = mean_d = NULL;
 		p = NULL;
 
 		kplotcfg_defaults(&cfgplot);
@@ -195,6 +223,7 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 			d1 = kdata_array_alloc(plot->data, plot->nb);
 			kplot_attach_data(p, d1, ((plot_data->nb <= 100) ? KPLOT_LINESPOINTS : KPLOT_LINES), NULL);
 			plot = plot->next;
+			nb_graphs++;
 		}
 
 		/* mean and sigma */
@@ -204,20 +233,23 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 		/* if reference is ploted, we take it as maximum if it is */
 		max = (plot_data->data[plot_data->nb-1].x > ref.x) ? plot_data->data[plot_data->nb-1].x + 1: ref.x + 1;
 
-		avg = calloc(max - min, sizeof(struct kpair));
+		if (nb_graphs == 1) {
+			avg = calloc(max - min, sizeof(struct kpair));
+			j = min;
+			for (i = 0; i < max - min; i++) {
+				avg[i].x = (double) j;
+				avg[i].y = mean;
+				++j;
+			}
 
-		j = min;
-		for (i = 0; i < max - min; i++) {
-			avg[i].x = (double) j;
-			avg[i].y = mean;
-			++j;
+			mean_d = kdata_array_alloc(avg, max - min);
+			kplot_attach_data(p, mean_d, KPLOT_LINES, NULL);	// mean plot
+			free(avg);
 		}
 
-		m = kdata_array_alloc(avg, max - min);
-		d2 = kdata_array_alloc(&ref, 1);
+		ref_d = kdata_array_alloc(&ref, 1);
 
-		kplot_attach_data(p, d2, KPLOT_POINTS, &cfgdata);	// ref image dot
-		kplot_attach_data(p, m, KPLOT_LINES, NULL);			// mean plot
+		kplot_attach_data(p, ref_d, KPLOT_POINTS, &cfgdata);	// ref image dot
 
 		width = gtk_widget_get_allocated_width(widget);
 		height = gtk_widget_get_allocated_height(widget);
@@ -244,11 +276,11 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 			}
 		}
 
-		free(avg);
 		kplot_free(p);
 		kdata_destroy(d1);
-		kdata_destroy(d2);
-		kdata_destroy(m);
+		kdata_destroy(ref_d);
+		if (mean_d)
+			kdata_destroy(mean_d);
 	}
 	export_to_PNG = FALSE;
 	return FALSE;
@@ -264,3 +296,31 @@ void on_GtkEntryPng_changed(GtkEditable *editable, gpointer user_data) {
 	else
 		gtk_widget_set_sensitive(lookup_widget("ButtonSavePNG"), TRUE);
 }
+
+void on_plotCombo_changed(GtkComboBox *box, gpointer user_data) {
+	drawPlot();
+}
+
+static void update_ylabel() {
+	selected_source = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
+	switch (selected_source) {
+		case ROUNDNESS:
+			ylabel = _("Star roundness (1 is round)");
+			break;
+		case FWHM:
+			ylabel = _("FWHM");
+			break;
+		case AMPLITUDE:
+			ylabel = _("Amplitude");
+			break;
+		case MAGNITUDE:
+			if (com.magOffset > 0.0)
+				ylabel = _("Star magnitude (absolute)");
+			else ylabel = _("Star magnitude (relative, use setmag)");
+			break;
+		case BACKGROUND:
+			ylabel = _("Background value");
+			break;
+	}
+}
+

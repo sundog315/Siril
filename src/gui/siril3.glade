@@ -12381,11 +12381,12 @@ To be enabled, the reference image must have been explicitly set and already dis
                       <object class="GtkLabel" id="GtkLabelPng">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="label" translatable="yes">Filename: </property>
+                        <property name="label" translatable="yes">Filename:</property>
                       </object>
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
+                        <property name="padding">5</property>
                         <property name="position">0</property>
                       </packing>
                     </child>
@@ -12417,6 +12418,39 @@ To be enabled, the reference image must have been explicitly set and already dis
                         <property name="expand">False</property>
                         <property name="fill">True</property>
                         <property name="position">2</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkSeparator" id="plotsep">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                      </object>
+                      <packing>
+                        <property name="expand">True</property>
+                        <property name="fill">True</property>
+                        <property name="padding">10</property>
+                        <property name="position">3</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkComboBoxText" id="plotCombo">
+                        <property name="can_focus">False</property>
+                        <property name="tooltip_text" translatable="yes">Select which information to display from photometry data.</property>
+                        <property name="active">0</property>
+                        <items>
+                          <item translatable="yes">Roundness</item>
+                          <item translatable="yes">FWHM</item>
+                          <item translatable="yes">Amplitude</item>
+                          <item translatable="yes">Magnitude</item>
+                          <item translatable="yes">Background</item>
+                        </items>
+                        <signal name="changed" handler="on_plotCombo_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="expand">False</property>
+                        <property name="fill">True</property>
+                        <property name="pack_type">end</property>
+                        <property name="position">4</property>
                       </packing>
                     </child>
                   </object>

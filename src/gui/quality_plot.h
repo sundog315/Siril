@@ -32,4 +32,14 @@ typedef struct plot_data_struct {
 	struct plot_data_struct *next;
 } pldata;
 
+
+/* has to be the same as in the glade file */
+enum photmetry_source {
+	ROUNDNESS,
+	FWHM,
+	AMPLITUDE,
+	MAGNITUDE,
+	BACKGROUND
+};
+
 #endif /* SRC_GUI_QUALITY_PLOT_H_ */
