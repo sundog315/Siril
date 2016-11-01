@@ -53,22 +53,17 @@ static pldata *alloc_plot_data(int size) {
 }
 
 static void build_registration_dataset(sequence *seq, int layer, int ref_image, pldata *plot) {
-	int i;
+	int i, j;
 
-	for (i = 0; i < plot->nb; i++) {
+	for (i = 0, j = 0; i < plot->nb; i++) {
 		if (!seq->imgparam[i].incl) continue;
-		plot->data[i].x = (double) i;
-		plot->data[i].y = is_fwhm ?
+		plot->data[j].x = (double) i;
+		plot->data[j].y = is_fwhm ?
 						seq->regparam[layer][i].fwhm :
 						seq->regparam[layer][i].quality;
+		j++;
 	}
-	/* removing non selected points - I don't see that happening? */
-	/*for (i = 0; i < plot->nb; i++) {
-		if (plot->data[i].x == 0.0 && plot->data[i].y == 0.0) {
-			remove_point(plot, i);
-			i--;
-		}
-	}*/
+	plot->nb = j;
 
 	ref.x = (double) ref_image;
 	ref.y = is_fwhm ?
