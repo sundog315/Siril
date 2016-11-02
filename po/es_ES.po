@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-02 09:27+0100\n"
+"POT-Creation-Date: 2016-11-02 09:53+0100\n"
 "PO-Revision-Date: 2016-10-12 21:01+0200\n"
 "Last-Translator: Cyril Richard <cyril@free-astro.fr>\n"
 "Language-Team: \n"
@@ -4675,6 +4675,11 @@ msgstr "Calidad"
 #: ../src/gui/quality_plot.c:211
 msgid "Frames"
 msgstr "Frames:"
+
+#: ../src/gui/quality_plot.c:269
+#, c-format
+msgid "%s.png has been saved.\n"
+msgstr ""
 
 #: ../src/gui/quality_plot.c:270
 msgid "Information"

@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Siril in Italiano\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-02 09:27+0100\n"
+"POT-Creation-Date: 2016-11-02 09:53+0100\n"
 "PO-Revision-Date: 2016-08-19 23:31+0200\n"
 "Last-Translator: Sonia Zorba <sonia@zonia3000.net>\n"
 "Language-Team: Italian <sonia@zonia3000.net>\n"
@@ -4723,6 +4723,11 @@ msgstr "Qualità:"
 #, fuzzy
 msgid "Frames"
 msgstr "Frame rate"
+
+#: ../src/gui/quality_plot.c:269
+#, c-format
+msgid "%s.png has been saved.\n"
+msgstr ""
 
 #: ../src/gui/quality_plot.c:270
 #, fuzzy

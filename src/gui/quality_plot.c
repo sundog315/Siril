@@ -266,7 +266,7 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 			EntryPng = GTK_ENTRY(lookup_widget("GtkEntryPng"));
 			file = gtk_entry_get_text(EntryPng);
 			if (file && file[0] != '\0') {
-				msg = siril_log_message("%s.png has been saved.\n", file);
+				msg = siril_log_message(_("%s.png has been saved.\n"), file);
 				show_dialog(msg, _("Information"), "gtk-dialog-info");
 				filename = g_strndup(file, strlen(file) + 5);
 				g_strlcat(filename, ".png", strlen(file) + 5);

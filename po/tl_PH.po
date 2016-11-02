@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Siril\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-02 09:27+0100\n"
+"POT-Creation-Date: 2016-11-02 09:53+0100\n"
 "PO-Revision-Date: 2016-07-08 16:10+0800\n"
 "Last-Translator: Bamm Gabriana <bamm@distroastro.org>\n"
 "Language-Team: \n"
@@ -4217,6 +4217,11 @@ msgstr "kalidad"
 
 #: ../src/gui/quality_plot.c:211
 msgid "Frames"
+msgstr ""
+
+#: ../src/gui/quality_plot.c:269
+#, c-format
+msgid "%s.png has been saved.\n"
 msgstr ""
 
 #: ../src/gui/quality_plot.c:270
