@@ -90,6 +90,8 @@ static void build_photometry_dataset(sequence *seq, int dataset, int size, int r
 					break;
 				case MAGNITUDE:
 					plot->data[j].y = psfs[i]->mag;
+					if (com.magOffset > 0.0)
+						plot->data[j].y += com.magOffset;
 					break;
 				case BACKGROUND:
 					plot->data[j].y = psfs[i]->B;
