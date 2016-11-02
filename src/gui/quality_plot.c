@@ -205,7 +205,6 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	if (plot_data) {
 		pldata *plot = plot_data;
 		d1 = ref_d = mean_d = NULL;
-		p = NULL;
 
 		kplotcfg_defaults(&cfgplot);
 		kdatacfg_defaults(&cfgdata);
