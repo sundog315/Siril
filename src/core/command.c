@@ -727,7 +727,10 @@ int process_psf(int nb){
 
 gboolean end_seqpsf(gpointer arg) {
 	set_layers_for_registration();	// update display of available reg data
+	if (com.seq.needs_saving)
+		writeseqfile(&com.seq);
 	drawPlot();
+	notify_new_photometry();
 	return end_generic(arg);
 }
 

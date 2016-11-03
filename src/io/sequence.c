@@ -1060,6 +1060,7 @@ int do_fwhm_sequence_processing(sequence *seq, int layer, gboolean print_psf, gb
 
 		if (for_registration)
 			free(args.psf);
+		seq->needs_saving = TRUE;
 	}
 
 	// for photometry use: store data in seq->photometry

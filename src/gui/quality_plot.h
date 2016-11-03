@@ -25,6 +25,7 @@
 
 void free_plot_data();
 void drawPlot();
+void notify_new_photometry();
 
 typedef struct plot_data_struct {
 	struct kpair *data;

@@ -31,10 +31,10 @@
 #include "kplot.h"
 #include "algos/PSF.h"
 
-static GtkWidget *drawingPlot = NULL, *combo = NULL;
+static GtkWidget *drawingPlot = NULL, *sourceCombo = NULL, *combo = NULL;
 static pldata *plot_data;
 static struct kpair ref;
-static gboolean is_fwhm = FALSE, export_to_PNG = FALSE;
+static gboolean is_fwhm = FALSE, export_to_PNG = FALSE, use_photometry = FALSE;
 static char *ylabel = NULL;
 static enum photmetry_source selected_source = ROUNDNESS;
 
@@ -129,6 +129,7 @@ void drawPlot() {
 	if (drawingPlot == NULL) {
 		drawingPlot = lookup_widget("DrawingPlot");
 		combo = lookup_widget("plotCombo");
+		sourceCombo = lookup_widget("plotSourceCombo");
 	}
 
 	seq = &com.seq;
@@ -139,10 +140,9 @@ void drawPlot() {
 		ref_image = 0;
 	else ref_image = seq->reference_image;
 
-	/* XXX include a new way of selecting data to plot here */
-	if (seq->photometry[0]) {
+	if (use_photometry) {
+		// photometry data display
 		pldata *plot;
-		gtk_widget_set_visible(combo, TRUE);
 		update_ylabel();
 
 		plot = alloc_plot_data(seq->number);
@@ -155,11 +155,8 @@ void drawPlot() {
 			
 			build_photometry_dataset(seq, i, seq->number, ref_image, plot);
 		}
-		seq->needs_saving = TRUE;
-		writeseqfile(seq);
 	} else {
-		// fallback to registration graph display
-		gtk_widget_set_visible(combo, FALSE);
+		// registration data display
 		if (!(seq->regparam))
 			return;
 
@@ -309,6 +306,12 @@ void on_plotCombo_changed(GtkComboBox *box, gpointer user_data) {
 	drawPlot();
 }
 
+void on_plotSourceCombo_changed(GtkComboBox *box, gpointer user_data) {
+	use_photometry = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
+	gtk_widget_set_visible(combo, use_photometry);
+	drawPlot();
+}
+
 static void update_ylabel() {
 	selected_source = gtk_combo_box_get_active(GTK_COMBO_BOX(combo));
 	switch (selected_source) {
@@ -330,5 +333,10 @@ static void update_ylabel() {
 			ylabel = _("Background value");
 			break;
 	}
+}
+
+void notify_new_photometry() {
+	gtk_widget_set_visible(sourceCombo, TRUE);
+	gtk_combo_box_set_active(GTK_COMBO_BOX(sourceCombo), 1);
 }
 
