@@ -155,6 +155,8 @@ void drawPlot() {
 			
 			build_photometry_dataset(seq, i, seq->number, ref_image, plot);
 		}
+		seq->needs_saving = TRUE;
+		writeseqfile(seq);
 	} else {
 		// fallback to registration graph display
 		gtk_widget_set_visible(combo, FALSE);
