@@ -270,11 +270,16 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 			EntryPng = GTK_ENTRY(lookup_widget("GtkEntryPng"));
 			file = gtk_entry_get_text(EntryPng);
 			if (file && file[0] != '\0') {
-				msg = siril_log_message(_("%s.png has been saved.\n"), file);
-				show_dialog(msg, _("Information"), "gtk-dialog-info");
 				filename = g_strndup(file, strlen(file) + 5);
 				g_strlcat(filename, ".png", strlen(file) + 5);
-				cairo_surface_write_to_png(cairo_get_target(cr), filename);
+				cairo_status_t status = cairo_surface_write_to_png(cairo_get_target(cr), filename);
+				if (status == CAIRO_STATUS_SUCCESS) {
+					msg = siril_log_message(_("%s.png has been saved.\n"), file);
+					show_dialog(msg, _("Information"), "gtk-dialog-info");
+				}
+				else {
+					show_dialog(_("Something went wrong while saving plot"), _("Error"), "gtk-dialog-error");
+				}
 				g_free(filename);
 			}
 		}
