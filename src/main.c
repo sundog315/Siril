@@ -298,9 +298,6 @@ int main(int argc, char *argv[]) {
 	/* Keybord Shortcuts */
 	initialize_shortcuts();
 
-	/* Fill the "About" window */
-	fill_about_dialog();
-
 	/* Select combo boxes that trigger some text display or other things */
 	gtk_combo_box_set_active(GTK_COMBO_BOX(gtk_builder_get_object(builder, "comboboxstack_methods")), 0);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(gtk_builder_get_object(builder, "comboboxstacksel")), 0);

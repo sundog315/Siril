@@ -936,6 +936,13 @@ enter a visible wavelength in nm</property>
       </object>
     </child>
   </object>
+  <object class="GtkImage" id="pixmap1">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="halign">center</property>
+    <property name="valign">center</property>
+    <property name="pixbuf">pixmaps/siril_logo.svg</property>
+  </object>
   <object class="GtkImage" id="remove_convert_image">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -13405,138 +13412,6 @@ WARNING: Reducing the number of allowed processors too much will degrade perform
             <property name="fill">True</property>
             <property name="padding">2</property>
             <property name="position">8</property>
-          </packing>
-        </child>
-      </object>
-    </child>
-  </object>
-  <object class="GtkWindow" id="about_window">
-    <property name="width_request">350</property>
-    <property name="height_request">300</property>
-    <property name="can_focus">False</property>
-    <property name="title" translatable="yes">About Siril</property>
-    <property name="resizable">False</property>
-    <property name="window_position">center</property>
-    <property name="type_hint">dialog</property>
-    <property name="skip_taskbar_hint">True</property>
-    <property name="transient_for">control_window</property>
-    <signal name="delete-event" handler="gtk_widget_hide_on_delete" swapped="no"/>
-    <child>
-      <object class="GtkBox" id="vbox7">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkImage" id="pixmap1">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="halign">center</property>
-            <property name="valign">center</property>
-            <property name="pixbuf">pixmaps/siril_logo.svg</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="aboutlabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_left">10</property>
-            <property name="margin_right">10</property>
-            <property name="label">Siril version, inserted at runtime.</property>
-            <property name="justify">center</property>
-            <attributes>
-              <attribute name="font-desc" value="TeX Gyre Heros Cn Bold Condensed 40"/>
-              <attribute name="weight" value="bold"/>
-              <attribute name="size" value="25000"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="padding">10</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="label61">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes" comments="At the end, add a line with this template: Translation: name_of_translator. Do not forget to add a '\n' char at the end of the line before.">Copyright © 2004-2011 François Meyer 
-Copyright © 2012-2016 team free-astro
-Project leader: Vincent Hourdin
-Project scientist: Cyril Richard
-and the Siril Development Team</property>
-            <property name="justify">center</property>
-            <attributes>
-              <attribute name="absolute-size" value="11000"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButtonBox" id="dialog-action_area14">
-            <property name="can_focus">False</property>
-            <property name="margin_left">10</property>
-            <property name="margin_right">10</property>
-            <property name="spacing">2</property>
-            <child>
-              <object class="GtkButton" id="button_credits">
-                <property name="label" translatable="yes">Credits</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="receives_default">True</property>
-                <signal name="clicked" handler="on_button_credits_clicked" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkButton" id="button1">
-                <property name="label">gtk-ok</property>
-                <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="margin_right">5</property>
-                <property name="use_stock">True</property>
-                <signal name="clicked" handler="on_button1_clicked" swapped="no"/>
-              </object>
-              <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">2</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="padding">10</property>
-            <property name="pack_type">end</property>
-            <property name="position">3</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkLabel" id="labelurl">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label">Free Astro URL, inserted at runtime</property>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="padding">20</property>
-            <property name="position">5</property>
           </packing>
         </child>
       </object>
