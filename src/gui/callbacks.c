@@ -3745,14 +3745,19 @@ gboolean on_main_window_key_press_event(GtkWidget *widget, GdkEventKey *event,
 }
 
 static const gchar* copyright = N_("Copyright © 2004-2011 François Meyer\n"
-"Copyright © 2012-2016 team free-astro\n");
+		"Copyright © 2012-2016 team free-astro");
 
-static gchar **authors = (gchar *[] ) { "Vincent Hourdin <vincent@vinvin.tf>",
+static gchar **authors = (gchar *[] ) { "Vincent Hourdin <vh@free-astro.vinvin.tf>",
 				"Cyril Richard <cyril@free-astro.org>", "François Meyer", NULL };
+
 static gchar **documenters = (gchar *[] ) { "Laurent Roge", NULL };
+
 static gchar **artists = (gchar *[] ) { "Coralie Monnier",
 				"Cyril Richard <cyril@free-astro.org>", NULL };
-static gchar *translator = N_("Cyril Richard <cyril@free-astro.org>");
+
+// translator names
+static gchar *translator = N_("Cyril Richard <cyril@free-astro.org>\n"
+		"Vincent Hourdin <vh@free-astro.vinvin.tf>");
 
 void on_about_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	GdkPixbuf *icon;
@@ -3762,6 +3767,7 @@ void on_about_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	icon = gtk_image_get_pixbuf(GTK_IMAGE(lookup_widget("pixmap1")));
 	gtk_show_about_dialog(parent,
 			"program-name", PACKAGE,
+			"title", _("About siril"),
 			"logo", icon,
 			"version", VERSION,
 			"copyright", _(copyright),

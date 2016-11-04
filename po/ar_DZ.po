@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-03 23:22+0100\n"
+"POT-Creation-Date: 2016-11-04 11:20+0100\n"
 "PO-Revision-Date: 2016-07-30 17:44+0100\n"
 "Last-Translator: Cyril <cyril@free-astro.fr>\n"
 "Language-Team: \n"
@@ -2285,7 +2285,7 @@ msgid ""
 "resulting is smaller file size."
 msgstr ""
 
-#: ../src/gui/siril3.glade.h:519 ../src/io/sequence.c:1733
+#: ../src/gui/siril3.glade.h:519 ../src/io/sequence.c:1734
 #, fuzzy
 msgid "Select area to crop"
 msgstr "المساحة المحددة"
@@ -2703,12 +2703,12 @@ msgstr ""
 msgid "Roundness"
 msgstr "عتبة استدارة:"
 
-#: ../src/gui/siril3.glade.h:612 ../src/gui/quality_plot.c:177
-#: ../src/gui/quality_plot.c:319
+#: ../src/gui/siril3.glade.h:612 ../src/gui/quality_plot.c:174
+#: ../src/gui/quality_plot.c:322
 msgid "FWHM"
 msgstr ""
 
-#: ../src/gui/siril3.glade.h:613 ../src/gui/quality_plot.c:322
+#: ../src/gui/siril3.glade.h:613 ../src/gui/quality_plot.c:325
 msgid "Amplitude"
 msgstr ""
 
@@ -2723,10 +2723,19 @@ msgid "Background"
 msgstr "مشاهدة الخلفية"
 
 #: ../src/gui/siril3.glade.h:616
-msgid "Plot"
+msgid "Select the source of graph information."
 msgstr ""
 
 #: ../src/gui/siril3.glade.h:617
+#, fuzzy
+msgid "Photometry"
+msgstr "الهندسة"
+
+#: ../src/gui/siril3.glade.h:618
+msgid "Plot"
+msgstr ""
+
+#: ../src/gui/siril3.glade.h:619
 msgid ""
 "Stacking of images, either summing, median, mean with rejection or pixel "
 "minimum/maximum."
@@ -2734,19 +2743,19 @@ msgstr ""
 "التراص من الصور، سواء التلخيص، متوسط، يعني مع الرفض أو بكسل الحد الأدنى / "
 "الحد الأقصى."
 
-#: ../src/gui/siril3.glade.h:618
+#: ../src/gui/siril3.glade.h:620
 msgid "Sequence stacking"
 msgstr "تسلسل التراص"
 
-#: ../src/gui/siril3.glade.h:619
+#: ../src/gui/siril3.glade.h:621
 msgid "Stacking Methods: "
 msgstr "طرق التراص :"
 
-#: ../src/gui/siril3.glade.h:620
+#: ../src/gui/siril3.glade.h:622
 msgid "Stack this set of images: "
 msgstr "كومة هذه المجموعة من الصور:"
 
-#: ../src/gui/siril3.glade.h:621
+#: ../src/gui/siril3.glade.h:623
 msgid ""
 "Sum: This is the simplest method.\n"
 "Pixel values are added in an image normalized to 16-bit values.\n"
@@ -2805,61 +2814,61 @@ msgstr ""
 "بعد عملية مكدس.\n"
 "يتم استبدال بكسل من الصورة عن طريق بكسل في الإحداثيات نفسها إذا كثافة أقل."
 
-#: ../src/gui/siril3.glade.h:644
+#: ../src/gui/siril3.glade.h:646
 msgid "Sum stacking"
 msgstr "المجموع"
 
-#: ../src/gui/siril3.glade.h:645
+#: ../src/gui/siril3.glade.h:647
 msgid "Average stacking with rejection"
 msgstr "متوسط ​​التراص مع الرفض"
 
-#: ../src/gui/siril3.glade.h:646
+#: ../src/gui/siril3.glade.h:648
 msgid "Median stacking"
 msgstr "التراص متوسط"
 
-#: ../src/gui/siril3.glade.h:647
+#: ../src/gui/siril3.glade.h:649
 msgid "Pixel maximum stacking"
 msgstr "بكسل كحد أقصى لتراص"
 
-#: ../src/gui/siril3.glade.h:648
+#: ../src/gui/siril3.glade.h:650
 msgid "Pixel minimum stacking"
 msgstr "بكسل الحد الأدنى للتراص"
 
-#: ../src/gui/siril3.glade.h:649
+#: ../src/gui/siril3.glade.h:651
 msgid "all the images of the sequence"
 msgstr "جميع الصور من تسلسل"
 
-#: ../src/gui/siril3.glade.h:650
+#: ../src/gui/siril3.glade.h:652
 msgid "images previously manually selected from the sequence"
 msgstr "صور قبل اختيار يدويا من تسلسل"
 
-#: ../src/gui/siril3.glade.h:651
+#: ../src/gui/siril3.glade.h:653
 msgid "best images, automatically selected from the registration data (PSF)"
 msgstr "أفضل الصور المختارة تلقائيا من بيانات التسجيل (PSF)"
 
-#: ../src/gui/siril3.glade.h:652
+#: ../src/gui/siril3.glade.h:654
 msgid ""
 "best images, automatically selected from the registration data (Planetary)"
 msgstr "أفضل الصور المختارة تلقائيا من بيانات التسجيل (الكواكب)"
 
-#: ../src/gui/siril3.glade.h:653 ../src/stacking/stacking.c:2374
+#: ../src/gui/siril3.glade.h:655 ../src/stacking/stacking.c:2374
 #, c-format
 msgid "Based on FWHM"
 msgstr "بناء على FWHM"
 
-#: ../src/gui/siril3.glade.h:654
+#: ../src/gui/siril3.glade.h:656
 msgid "Stack best: "
 msgstr "أفضل كومة :"
 
-#: ../src/gui/siril3.glade.h:655
+#: ../src/gui/siril3.glade.h:657
 msgid "Sigma low: "
 msgstr "سيغما منخفض:"
 
-#: ../src/gui/siril3.glade.h:656
+#: ../src/gui/siril3.glade.h:658
 msgid "Sigma high: "
 msgstr "سيغما عالية:"
 
-#: ../src/gui/siril3.glade.h:657
+#: ../src/gui/siril3.glade.h:659
 msgid ""
 "Five rejection algorithms are available.\n"
 "- Percentile Clipping is a one-step rejection algorithm ideal for small sets "
@@ -2906,48 +2915,48 @@ msgstr ""
 "[1] بيتر جي هوبر وE. Ronchetti (2009)، الاحصائيات قوية، إد 2ND، وايلي\n"
 "[2] خوان Conejero، ImageIntegration، Pixinsight تعليمي"
 
-#: ../src/gui/siril3.glade.h:673
+#: ../src/gui/siril3.glade.h:675
 msgid "No rejection"
 msgstr "بدون رفض"
 
-#: ../src/gui/siril3.glade.h:674
+#: ../src/gui/siril3.glade.h:676
 msgid "Percentile Clipping"
 msgstr "اللقطة المئوية "
 
-#: ../src/gui/siril3.glade.h:675
+#: ../src/gui/siril3.glade.h:677
 msgid "Sigma Clipping"
 msgstr "لقطة سيغما "
 
-#: ../src/gui/siril3.glade.h:676
+#: ../src/gui/siril3.glade.h:678
 msgid "Median Sigma Clipping"
 msgstr "متوسط ​​سيجما لقطة"
 
-#: ../src/gui/siril3.glade.h:677
+#: ../src/gui/siril3.glade.h:679
 msgid "Winsorized Sigma Clipping"
 msgstr "لقطة سيغما"
 
-#: ../src/gui/siril3.glade.h:678
+#: ../src/gui/siril3.glade.h:680
 msgid "Linear Fit Clipping"
 msgstr " صالح لقطة خطي"
 
-#: ../src/gui/siril3.glade.h:679
+#: ../src/gui/siril3.glade.h:681
 msgid "Rejection:"
 msgstr "رفض :"
 
-#: ../src/gui/siril3.glade.h:681
+#: ../src/gui/siril3.glade.h:683
 #, no-c-format
 msgid "%"
 msgstr ""
 
-#: ../src/gui/siril3.glade.h:682
+#: ../src/gui/siril3.glade.h:684
 msgid "Normalisation:"
 msgstr "تطبيع :"
 
-#: ../src/gui/siril3.glade.h:683
+#: ../src/gui/siril3.glade.h:685
 msgid "Start stacking"
 msgstr "بدء التراص"
 
-#: ../src/gui/siril3.glade.h:684
+#: ../src/gui/siril3.glade.h:686
 msgid ""
 "Start stacking the current sequence of images, using the method and other "
 "information provided above.\n"
@@ -2958,19 +2967,19 @@ msgstr ""
 "الواردة أعلاه. يستخدم Siril صورة داخلية 32 بت لمعالجة التراص، وهو ما يتم "
 "حفظها في صورة 16 بت الذي يرد أدناه الاسم."
 
-#: ../src/gui/siril3.glade.h:686
+#: ../src/gui/siril3.glade.h:688
 msgid "Store result in file:"
 msgstr "تسجيل الصورة في ملف :"
 
-#: ../src/gui/siril3.glade.h:687
+#: ../src/gui/siril3.glade.h:689
 msgid "Overwrite"
 msgstr "الكتابة فوق"
 
-#: ../src/gui/siril3.glade.h:688
+#: ../src/gui/siril3.glade.h:690
 msgid "Overwrite file without notice if it already exists."
 msgstr "الكتابة الملف دون إشعار إذا كان موجودا بالفعل."
 
-#: ../src/gui/siril3.glade.h:689
+#: ../src/gui/siril3.glade.h:691
 msgid ""
 "If one of these items is selected, a normalisation process will be applied "
 "to all input\n"
@@ -3004,31 +3013,31 @@ msgstr ""
 "لا ينبغي أن تتم معالجة سادة، ويقابل الظلام مع التطبيع.\n"
 "ومع ذلك، يجب أن تستخدم تطبيع المضاعف مع إطارات شقة الميدان."
 
-#: ../src/gui/siril3.glade.h:701
+#: ../src/gui/siril3.glade.h:703
 msgid "No normalisation"
 msgstr "تطبيع :"
 
-#: ../src/gui/siril3.glade.h:702
+#: ../src/gui/siril3.glade.h:704
 msgid "Additive"
 msgstr "مُضَافٌ"
 
-#: ../src/gui/siril3.glade.h:703
+#: ../src/gui/siril3.glade.h:705
 msgid "Multiplicative"
 msgstr "مكثر"
 
-#: ../src/gui/siril3.glade.h:704
+#: ../src/gui/siril3.glade.h:706
 msgid "Additive with scaling"
 msgstr "مضافة مع التحجيم"
 
-#: ../src/gui/siril3.glade.h:705
+#: ../src/gui/siril3.glade.h:707
 msgid "Multiplicative with scaling"
 msgstr "مكثر مع التحجيم"
 
-#: ../src/gui/siril3.glade.h:706
+#: ../src/gui/siril3.glade.h:708
 msgid "Force recomputing"
 msgstr "فرض إعادة الحساب"
 
-#: ../src/gui/siril3.glade.h:707
+#: ../src/gui/siril3.glade.h:709
 msgid ""
 "By default, Siril takes the normalisation coefficients from seq file if "
 "already computed. However you can force Siril to recompute it before "
@@ -3037,51 +3046,51 @@ msgstr ""
 "افتراضيا، Siril يأخذ معاملات التطبيع من ملف يليها إذا حسبت بالفعل. ولكن هل "
 "يمكن أن تجبر Siril إلى إعادة حساب قبل التراص."
 
-#: ../src/gui/siril3.glade.h:708
+#: ../src/gui/siril3.glade.h:710
 msgid "Stacking"
 msgstr "تكديس"
 
-#: ../src/gui/siril3.glade.h:709
+#: ../src/gui/siril3.glade.h:711
 msgid ""
 "Siril output window, displays messages about what has been done and in "
 "response to command inputs."
 msgstr ""
 "إطار الإخراج Siril، يعرض رسائل حول ما تم إنجازه وردا على مدخلات الأوامر."
 
-#: ../src/gui/siril3.glade.h:710
+#: ../src/gui/siril3.glade.h:712
 msgid "Output logs"
 msgstr "سجلات الانتاج"
 
-#: ../src/gui/siril3.glade.h:711
+#: ../src/gui/siril3.glade.h:713
 msgid ""
 "Input command. Typing `help&apos; here will bring the list of supported "
 "commands."
 msgstr ""
 "القيادة المدخلات. سوف بكتابة  ' help 'هنا تقديم قائمة من الأوامر المعتمدة."
 
-#: ../src/gui/siril3.glade.h:712
+#: ../src/gui/siril3.glade.h:714
 msgid ""
 "Input command. Typing `help' here will bring the list of supported commands."
 msgstr ""
 "القيادة المدخلات. سوف بكتابة ' help 'هنا تقديم قائمة من الأوامر المعتمدة."
 
-#: ../src/gui/siril3.glade.h:713
+#: ../src/gui/siril3.glade.h:715
 msgid "Type help for the list of supported commands"
 msgstr "اكتب help للحصول على قائمة الأوامر المعتمدة"
 
-#: ../src/gui/siril3.glade.h:714
+#: ../src/gui/siril3.glade.h:716
 msgid "<b>Console</b>"
 msgstr "<b> وحدة التحكم <b/>"
 
-#: ../src/gui/siril3.glade.h:715
+#: ../src/gui/siril3.glade.h:717
 msgid "Ready."
 msgstr "جاهز"
 
-#: ../src/gui/siril3.glade.h:716
+#: ../src/gui/siril3.glade.h:718
 msgid "Current working directory:"
 msgstr "دليل العمل الحالي:"
 
-#: ../src/gui/siril3.glade.h:717
+#: ../src/gui/siril3.glade.h:719
 msgid ""
 "The directory in which files will be read from and written to. Can be "
 "changed with the button Change dir on the right, or with the cd command."
@@ -3089,23 +3098,23 @@ msgstr ""
 "والتي سيتم قراءة الملفات من وكتابتها إلى الدليل. ويمكن ان تتغير مع زر تغيير "
 "دير على حق، أو مع الأمر cd."
 
-#: ../src/gui/siril3.glade.h:718
+#: ../src/gui/siril3.glade.h:720
 msgid "Change dir..."
 msgstr "تغيير السجل ..."
 
-#: ../src/gui/siril3.glade.h:719
+#: ../src/gui/siril3.glade.h:721
 msgid "Change current working directory"
 msgstr "تغيير دليل العمل الحالي"
 
-#: ../src/gui/siril3.glade.h:720
+#: ../src/gui/siril3.glade.h:722
 msgid "Stop running processes"
 msgstr "وقف عمليات التشغيل"
 
-#: ../src/gui/siril3.glade.h:721
+#: ../src/gui/siril3.glade.h:723
 msgid "Current working sequence:"
 msgstr "تسلسل العمل الحالي:"
 
-#: ../src/gui/siril3.glade.h:722
+#: ../src/gui/siril3.glade.h:724
 msgid ""
 "Set number of threads manually.\n"
 "WARNING: Reducing the number of allowed processors too much will degrade "
@@ -3114,19 +3123,19 @@ msgstr ""
 "تعيين عدد من المواضيع يدويا. تحذير: تقليل عدد المعالجات يسمح الكثير سوف "
 "تتحلل العروض."
 
-#: ../src/gui/siril3.glade.h:724
+#: ../src/gui/siril3.glade.h:726
 msgid "Memory used by Siril"
 msgstr "الذاكرة المستخدمة من قبل Siril"
 
-#: ../src/gui/siril3.glade.h:725
+#: ../src/gui/siril3.glade.h:727
 msgid "Don't ask me again"
 msgstr "لا تسألني مرة ثانية"
 
-#: ../src/gui/siril3.glade.h:726
+#: ../src/gui/siril3.glade.h:728
 msgid "Color Calibration"
 msgstr " معايرة اللون"
 
-#: ../src/gui/siril3.glade.h:727
+#: ../src/gui/siril3.glade.h:729
 msgid ""
 "A set of three color calibration factors will be computed and multiplied "
 "with every color channel.\n"
@@ -3135,31 +3144,31 @@ msgstr ""
 "وهناك مجموعة من ثلاثة عوامل معايرة اللون سيتم احتساب وتضاعفت مع كل قناة لون. "
 "ينبغي تطبيق تحييد الخلفية قبل هذه العملية."
 
-#: ../src/gui/siril3.glade.h:729
+#: ../src/gui/siril3.glade.h:731
 msgid "x coordinate of the start of the background selection"
 msgstr "س تنسيق من بداية اختيار خلفية"
 
-#: ../src/gui/siril3.glade.h:730
+#: ../src/gui/siril3.glade.h:732
 msgid "y coordinate of the start of the background selection"
 msgstr "ص تنسيق من بداية اختيار خلفية"
 
-#: ../src/gui/siril3.glade.h:731
+#: ../src/gui/siril3.glade.h:733
 msgid "Width of the background selection"
 msgstr "عرض اختيار خلفية"
 
-#: ../src/gui/siril3.glade.h:732
+#: ../src/gui/siril3.glade.h:734
 msgid "Height of the background selection"
 msgstr "ارتفاع اختيار الخلفية"
 
-#: ../src/gui/siril3.glade.h:733
+#: ../src/gui/siril3.glade.h:735
 msgid "Selected area"
 msgstr "المساحة المحددة"
 
-#: ../src/gui/siril3.glade.h:734
+#: ../src/gui/siril3.glade.h:736
 msgid "Use current selection"
 msgstr "التحديد الحالي"
 
-#: ../src/gui/siril3.glade.h:735
+#: ../src/gui/siril3.glade.h:737
 msgid ""
 "You must specify a selection that represents the true background of the "
 "image, trying to exclude all stars or other stellar objects."
@@ -3167,11 +3176,11 @@ msgstr ""
 "يجب تحديد التحديد الذي يمثل الخلفية الحقيقية للصورة، في محاولة لاستبعاد كل "
 "النجوم أو الأجسام النجمية الأخرى."
 
-#: ../src/gui/siril3.glade.h:736
+#: ../src/gui/siril3.glade.h:738
 msgid "Background Neutralization"
 msgstr "تحييد الخلفية"
 
-#: ../src/gui/siril3.glade.h:737
+#: ../src/gui/siril3.glade.h:739
 msgid ""
 "Background Neutralization will compute the mean of each color channel and "
 "will equalize the sky background in a neutral grey.\n"
@@ -3180,15 +3189,15 @@ msgstr ""
 "سوف تحييد خلفية بحساب متوسط ​​كل قناة لون وسوف بمعادلة خلفية السماء في الرمادي "
 "المحايد. يجب تشغيل هذه الخطوة قبل أي محاولة لمعايرة اللون."
 
-#: ../src/gui/siril3.glade.h:739
+#: ../src/gui/siril3.glade.h:741
 msgid "Background reference"
 msgstr "Background reference"
 
-#: ../src/gui/siril3.glade.h:740
+#: ../src/gui/siril3.glade.h:742
 msgid "Manual White Balance"
 msgstr "دليل توازن الأبيض"
 
-#: ../src/gui/siril3.glade.h:741
+#: ../src/gui/siril3.glade.h:743
 msgid ""
 "By clicking on this option, you will use your own color calibration factors. "
 "This option is disabled by default."
@@ -3196,35 +3205,35 @@ msgstr ""
 "من خلال النقر على هذا الخيار، سوف تستخدم الخاصة العوامل معايرة الألوان "
 "الخاصة بك. هذا الخيار معطل افتراضيا."
 
-#: ../src/gui/siril3.glade.h:742
+#: ../src/gui/siril3.glade.h:744
 msgid "Red:"
 msgstr "أحمر:"
 
-#: ../src/gui/siril3.glade.h:743
+#: ../src/gui/siril3.glade.h:745
 msgid "Green:"
 msgstr "أخضر :"
 
-#: ../src/gui/siril3.glade.h:744
+#: ../src/gui/siril3.glade.h:746
 msgid "Blue:"
 msgstr "أزرق:"
 
-#: ../src/gui/siril3.glade.h:745
+#: ../src/gui/siril3.glade.h:747
 msgid "x coordinate of the start of the white reference selection"
 msgstr "س تنسيق من بداية اختيار إشارة البيضاء"
 
-#: ../src/gui/siril3.glade.h:746
+#: ../src/gui/siril3.glade.h:748
 msgid "y coordinate of the start of the white reference selection"
 msgstr " ص تنسيق من بداية اختيار إشارة البيضاء"
 
-#: ../src/gui/siril3.glade.h:747
+#: ../src/gui/siril3.glade.h:749
 msgid "Width of the white reference selection"
 msgstr "عرض اختيار إشارة البيضاء"
 
-#: ../src/gui/siril3.glade.h:748
+#: ../src/gui/siril3.glade.h:750
 msgid "Height of the white reference selection"
 msgstr "ارتفاع اختيار إشارة البيضاء"
 
-#: ../src/gui/siril3.glade.h:749
+#: ../src/gui/siril3.glade.h:751
 msgid ""
 "You should specify a selection that represents an average of suitable white "
 "reference.\n"
@@ -3233,7 +3242,7 @@ msgstr ""
 "يجب تحديد مجموعة مختارة تمثل في المتوسط ​​إشارة بيضاء مناسبة. إذا كان التحديد "
 "فارغة، سيتم استخدام الصورة كاملة كمرجع."
 
-#: ../src/gui/siril3.glade.h:751
+#: ../src/gui/siril3.glade.h:753
 msgid ""
 "Lower rejection bound for white selection. Pixels below this value are not "
 "taken into account. Black pixels are always excluded from computation."
@@ -3241,7 +3250,7 @@ msgstr ""
 "انخفاض رفض ملزمة لاختيار البيضاء. لا تؤخذ بكسل أقل من هذه القيمة في "
 "الاعتبار. بكسل سوداء تستثنى دائما من حساب."
 
-#: ../src/gui/siril3.glade.h:752
+#: ../src/gui/siril3.glade.h:754
 msgid ""
 "Upper rejection bound for white selection. Pixels above this value are not "
 "taken into account. Saturated pixels are always excluded from computation."
@@ -3249,15 +3258,15 @@ msgstr ""
 "رفض العلوي ملزمة لاختيار البيضاء. لا تؤخذ بكسل أعلى من هذه القيمة في "
 "الاعتبار. بكسل المشبعة تستثنى دائما من حساب."
 
-#: ../src/gui/siril3.glade.h:753
+#: ../src/gui/siril3.glade.h:755
 msgid "Lower limit: "
 msgstr "الحد الأدنى :"
 
-#: ../src/gui/siril3.glade.h:754
+#: ../src/gui/siril3.glade.h:756
 msgid "Upper limit: "
 msgstr "الحد الأقصى :"
 
-#: ../src/gui/siril3.glade.h:755
+#: ../src/gui/siril3.glade.h:757
 msgid "White reference"
 msgstr "إشارة البيضاء"
 
@@ -3278,10 +3287,10 @@ msgstr "تعزيز التشبع: تجهيز  ...\n"
 #: ../src/algos/colors.c:758 ../src/algos/cosmetic_correction.c:137
 #: ../src/algos/cosmetic_correction.c:186
 #: ../src/algos/cosmetic_correction.c:396 ../src/algos/star_finder.c:47
-#: ../src/core/command.c:1364 ../src/core/siril.c:620 ../src/core/siril.c:904
+#: ../src/core/command.c:1367 ../src/core/siril.c:620 ../src/core/siril.c:904
 #: ../src/core/siril.c:1038 ../src/core/siril.c:1181 ../src/core/siril.c:1556
 #: ../src/core/siril.c:1648 ../src/core/siril.c:1757 ../src/gui/histogram.c:695
-#: ../src/gui/statistics_list.c:306 ../src/io/sequence.c:1255
+#: ../src/gui/statistics_list.c:306 ../src/io/sequence.c:1256
 #, fuzzy
 msgid "Error: no data computed.\n"
 msgstr "خطأ : بيانات غير صالحة .\n"
@@ -3436,9 +3445,9 @@ msgstr "صورة التركيب"
 msgid "You must at least load two layers before!\n"
 msgstr ""
 
-#: ../src/compositing/compositing.c:548 ../src/gui/callbacks.c:5244
-#: ../src/gui/callbacks.c:5288 ../src/gui/callbacks.c:5529
-#: ../src/gui/callbacks.c:5538 ../src/gui/callbacks.c:5596
+#: ../src/compositing/compositing.c:548 ../src/gui/callbacks.c:5250
+#: ../src/gui/callbacks.c:5294 ../src/gui/callbacks.c:5535
+#: ../src/gui/callbacks.c:5544 ../src/gui/callbacks.c:5602
 #: ../src/io/conversion.c:485 ../src/io/image_formats_libraries.c:97
 #: ../src/io/image_formats_libraries.c:154
 #: ../src/registration/registration.c:1112
@@ -3471,14 +3480,14 @@ msgstr "لا شيئ للضبط، لا تجاوز\n"
 msgid "Readjusting layer %d to %g times bright\n"
 msgstr "إعادة تعديل طبقة %d في الأوقات%g مشرق\n"
 
-#: ../src/core/command.c:200 ../src/core/command.c:743
-#: ../src/core/command.c:771 ../src/core/command.c:798
-#: ../src/core/command.c:1109 ../src/core/command.c:1211
-#: ../src/core/command.c:1232 ../src/core/command.c:1251
-#: ../src/gui/callbacks.c:3935 ../src/gui/callbacks.c:4657
-#: ../src/gui/callbacks.c:4857 ../src/gui/callbacks.c:5194
-#: ../src/gui/callbacks.c:5334 ../src/gui/callbacks.c:5639
-#: ../src/gui/callbacks.c:5788 ../src/io/conversion.c:454
+#: ../src/core/command.c:200 ../src/core/command.c:746
+#: ../src/core/command.c:774 ../src/core/command.c:801
+#: ../src/core/command.c:1112 ../src/core/command.c:1214
+#: ../src/core/command.c:1235 ../src/core/command.c:1254
+#: ../src/gui/callbacks.c:3941 ../src/gui/callbacks.c:4663
+#: ../src/gui/callbacks.c:4863 ../src/gui/callbacks.c:5200
+#: ../src/gui/callbacks.c:5340 ../src/gui/callbacks.c:5645
+#: ../src/gui/callbacks.c:5794 ../src/io/conversion.c:454
 #: ../src/registration/registration.c:1101 ../src/stacking/stacking.c:1885
 #: ../src/stacking/stacking.c:2012
 msgid "Another task is already in progress, ignoring new request.\n"
@@ -3510,15 +3519,15 @@ msgstr ""
 msgid "Crop: select a region or provide x, y, width, height\n"
 msgstr "المحصول: اختيار المنطقة أو تقديم خ، ذ، العرض، الارتفاع\n"
 
-#: ../src/core/command.c:486 ../src/core/command.c:1482
-#: ../src/gui/callbacks.c:5527 ../src/gui/callbacks.c:5594
+#: ../src/core/command.c:486 ../src/core/command.c:1485
+#: ../src/gui/callbacks.c:5533 ../src/gui/callbacks.c:5600
 #, c-format
 msgid "Wavelet: maximum number of plans for this image size is %d\n"
 msgstr ""
 "المويجات: الحد الأقصى لعدد خطط لهذا الحجم الصورة %d\n"
 "\n"
 
-#: ../src/core/command.c:492 ../src/gui/callbacks.c:5536
+#: ../src/core/command.c:492 ../src/gui/callbacks.c:5542
 #, c-format
 msgid "Wavelet: type must be %d or %d\n"
 msgstr "يجب أن يكون نوع  %d أو %d : المويجات\n"
@@ -3551,7 +3560,7 @@ msgstr "تسلسل:%s\n"
 msgid "Image: %s\n"
 msgstr "صورة:s%\n"
 
-#: ../src/core/command.c:605 ../src/core/command.c:1465
+#: ../src/core/command.c:605 ../src/core/command.c:1468
 msgid "********* END OF THE LIST *********\n"
 msgstr "********* نهاية القائمة ********* \n"
 
@@ -3560,7 +3569,7 @@ msgid "The scaling factor must be less than 5.0\n"
 msgstr "يجب أن يكون عامل التحجيم أقل من 5.0\n"
 
 #: ../src/core/command.c:682 ../src/core/command.c:712
-#: ../src/core/command.c:747
+#: ../src/core/command.c:750
 msgid ""
 "Current selection is too large. To determine the PSF, please make a "
 "selection around a single star.\n"
@@ -3568,7 +3577,7 @@ msgstr ""
 "التحديد الحالي كبيرة جدا. لتحديد PSF، يرجى التأكد التحديد حول نجم واحد.\n"
 
 #: ../src/core/command.c:686 ../src/core/command.c:716
-#: ../src/core/command.c:751
+#: ../src/core/command.c:754
 msgid "Select an area first\n"
 msgstr "تحديد المنطقة الأولى\n"
 
@@ -3578,121 +3587,121 @@ msgid ""
 "Relative magnitude: %.3lf, True reduced magnitude: %.3lf, Offset: %.3lf\n"
 msgstr "الحجم النسبي:٪ .3lf، صحيح خفضت حجم:٪ .3lf، إزاحة:٪ .3lf\n"
 
-#: ../src/core/command.c:757
+#: ../src/core/command.c:760
 #, c-format
 msgid "Running the PSF on the loaded sequence, layer %d\n"
 msgstr "تشغيل قوات الأمن الفلسطينية على تسلسل تحميل، طبقة%d\n"
 
-#: ../src/core/command.c:758
+#: ../src/core/command.c:761
 msgid ""
 "Results will be displayed at the end of the processing, on the console "
 "output, in the following form:\n"
 msgstr ""
 "سيتم عرض النتائج في نهاية المعالجة، على وحدة الإخراج، على الشكل التالي: \n"
 
-#: ../src/core/command.c:763
+#: ../src/core/command.c:766
 msgid "This command can be used only when a sequence is loaded\n"
 msgstr "هذا الأمر يمكن أن تستخدم فقط عندما يكون التسلسل تحميل\n"
 
-#: ../src/core/command.c:791
+#: ../src/core/command.c:794
 #, c-format
 msgid "Background value: %d\n"
 msgstr "قيمة الخلفية:%d\n"
 
-#: ../src/core/command.c:837
+#: ../src/core/command.c:840
 #, c-format
 msgid "The file %s has been created for the %s layer.\n"
 msgstr "تم إنشاء ملف%s للطبقة %s الصورة.\n"
 
-#: ../src/core/command.c:909
+#: ../src/core/command.c:912
 msgid "Number of layers MUST be 1 or 3\n"
 msgstr "عدد من الطبقات يجب أن تكون 1 أو 3\n"
 
-#: ../src/core/command.c:918
+#: ../src/core/command.c:921
 msgid "new empty image"
 msgstr "صورة جديدة فارغة"
 
-#: ../src/core/command.c:928
+#: ../src/core/command.c:931
 #, c-format
 msgid "Values must be positive and less than %d.\n"
 msgstr "يجب أن تكون القيم الإيجابية وأقل من%d\n"
 
-#: ../src/core/command.c:946
+#: ../src/core/command.c:949
 msgid "Fill2: select a region or provide x, y, width, height\n"
 msgstr "المحصول: اختيار المنطقة أو تقديم خ، ذ، العرض، الارتفاع\n"
 
-#: ../src/core/command.c:980
+#: ../src/core/command.c:983
 msgid "find_hot must be applied on an one-channel master-dark frame"
 msgstr "find_hot يجب أن تطبق على الإطار سيد الظلام قناة واحدة"
 
-#: ../src/core/command.c:988
+#: ../src/core/command.c:991
 #, c-format
 msgid "%ld cold and %ld hot pixels\n"
 msgstr "%d البارد و %d بكسل الساخنة\n"
 
-#: ../src/core/command.c:994 ../src/core/command.c:1027
+#: ../src/core/command.c:997 ../src/core/command.c:1030
 #, c-format
 msgid "Cannot open file: %s\n"
 msgstr "لا يمكن فتح ملف: %s\n"
 
-#: ../src/core/command.c:1086
+#: ../src/core/command.c:1089
 msgid "Opencv need to be compiled to remove bad column.\n"
 msgstr ""
 "مكتبة برمجية مفتوحة للرؤية الحاسوبية تحتاج إلى أن يكون ترجمة لإزالة العمود "
 "سيئة.\n"
 
-#: ../src/core/command.c:1091
+#: ../src/core/command.c:1094
 #, c-format
 msgid "cosmetic correction: cosme file format error at line %d: %s\n"
 msgstr "تصحيح مستحضرات التجميل: كوزمي خطأ تنسيق ملف في السطر%d: %s \n"
 
-#: ../src/core/command.c:1099
+#: ../src/core/command.c:1102
 msgid "There were some errors, please check your input file.\n"
 msgstr "وكانت هناك بعض الأخطاء، يرجى مراجعة ملف الإدخال.\n"
 
-#: ../src/core/command.c:1119
+#: ../src/core/command.c:1122
 msgid "The size of the kernel MUST be odd and greater than 1.\n"
 msgstr "حجم النواة يجب أن تكون غريبة وأكبر من 1.\n"
 
-#: ../src/core/command.c:1124
+#: ../src/core/command.c:1127
 msgid "Modulation value MUST be between 0 and 1\n"
 msgstr "يجب أن تكون قيمة تعديل بين 0 و 1\n"
 
 #. FITS are stored bottom to top
-#: ../src/core/command.c:1144
+#: ../src/core/command.c:1147
 #, c-format
 msgid "Center of gravity coordinates are (%.3lf, %.3lf)\n"
 msgstr "مركز الإحداثيات الجاذبية هي (٪ .3lf،٪ .3lf)\n"
 
-#: ../src/core/command.c:1167
+#: ../src/core/command.c:1170
 #, c-format
 msgid "Contrast: %lf\n"
 msgstr "على العكس:%lf\n"
 
-#: ../src/core/command.c:1228
+#: ../src/core/command.c:1231
 msgid "FFT does not work with sequences\n"
 msgstr "FFT لا يعمل مع متواليات\n"
 
-#: ../src/core/command.c:1296
+#: ../src/core/command.c:1299
 msgid ""
 "Use this command to select images in a sequence, load a sequence first.\n"
 msgstr "استخدام هذا الأمر لتحديد الصور في تسلسل، تحميل تسلسل أولا.\n"
 
-#: ../src/core/command.c:1302
+#: ../src/core/command.c:1305
 msgid ""
 "The first argument must be between 0 and the number of images minus one.\n"
 msgstr "يجب أن تكون الوسيطة الأولى بين 0 و عدد الصور ناقص واحد.\n"
 
-#: ../src/core/command.c:1327
+#: ../src/core/command.c:1330
 #, c-format
 msgid "Selection update finished, %d images are selected in the sequence\n"
 msgstr "تحديث اختيار الانتهاء، ويتم اختيار الصور d% في التسلسل\n"
 
-#: ../src/core/command.c:1344
+#: ../src/core/command.c:1347
 msgid "Siril cannot split layers. Make sure your image is in RGB mode.\n"
 msgstr "Siril لا يستطيع استخراج طبقات. تأكد من الصور الخاصة بك في وضع RGB.\n"
 
-#: ../src/core/command.c:1368
+#: ../src/core/command.c:1371
 #, c-format
 msgid ""
 "%s layer: Mean: %0.1lf, Median: %0.1lf, Sigma: %0.1lf, AvgDev: %0.1lf, Min: "
@@ -3701,68 +3710,68 @@ msgstr ""
 "٪ ق طبقة: يعني:٪ 0.1lf، متوسط:٪ 0.1lf، سيغما:٪ 0.1lf، AvgDev:٪ 0.1lf، الحد "
 "الأدنى:٪ 0.1lf، الحد الأقصى:٪ 0.1lf\n"
 
-#: ../src/core/command.c:1383
+#: ../src/core/command.c:1386
 msgid "Looking for sequences in current working directory...\n"
 msgstr "أبحث عن تسلسل في دليل العمل الحالي ... _\n"
 
-#: ../src/core/command.c:1385
+#: ../src/core/command.c:1388
 msgid "Error while searching sequences or opening the directory.\n"
 msgstr "حدث خطأ أثناء البحث متواليات أو فتح الدليل.\n"
 
-#: ../src/core/command.c:1390
+#: ../src/core/command.c:1393
 msgid "Starting stacking of found sequences...\n"
 msgstr "بدءا التراص من تسلسل وجدت ...\n"
 
-#: ../src/core/command.c:1409
+#: ../src/core/command.c:1412
 #, c-format
 msgid "Could not save the stacking result %s\n"
 msgstr "لا يمكن حفظ النتيجة التراص٪ الصورة\n"
 
-#: ../src/core/command.c:1419
+#: ../src/core/command.c:1422
 #, c-format
 msgid "Stacked %d sequences %s.\n"
 msgstr "مكدسة %d متواليات%sالصورة.\n"
 
-#: ../src/core/command.c:1420
+#: ../src/core/command.c:1423
 msgid "with errors"
 msgstr "وكانت هناك بعض الأخطاء، يرجى مراجعة ملف الإدخال."
 
-#: ../src/core/command.c:1420
+#: ../src/core/command.c:1423
 msgid "successfully"
 msgstr "تم بنجاح!"
 
-#: ../src/core/command.c:1438
+#: ../src/core/command.c:1441
 #, fuzzy, c-format
 msgid ""
 "Number of logical processors MUST be greater than 0 and lower or equal to "
 "%d.\n"
 msgstr "عدد من المعالجات المنطقية يجب أن تكون أكبر من 0 وأقل أو يساوي%d\n"
 
-#: ../src/core/command.c:1450
+#: ../src/core/command.c:1453
 #, fuzzy, c-format
 msgid "Using now %d logical processors\n"
 msgstr "باستخدام الآن%d  معالج منطقي\n"
 
-#: ../src/core/command.c:1460
+#: ../src/core/command.c:1463
 msgid "********* LIST OF AVAILABLE COMMANDS *********\n"
 msgstr "********* قائمة من الأوامر المتوفرة *********\n"
 
-#: ../src/core/command.c:1537
+#: ../src/core/command.c:1540
 #, c-format
 msgid "Unknown command: '%s' or not implemented yet\n"
 msgstr "أمر غير معروف: '٪s' أو لم تنفذ حتى الآن\n"
 
-#: ../src/core/command.c:1544
+#: ../src/core/command.c:1547
 #, c-format
 msgid "Usage: %s\n"
 msgstr "الاستعمال:٪s\n"
 
-#: ../src/core/command.c:1567
+#: ../src/core/command.c:1570
 #, c-format
 msgid "File [%s] does not exist\n"
 msgstr "الملف %s غير موجود.\n"
 
-#: ../src/core/command.c:1578
+#: ../src/core/command.c:1581
 #, c-format
 msgid "Error in line: %d. Exiting batch processing\n"
 msgstr "خطأ في السطر: %d. تخرج دفعة تجهيز\n"
@@ -3833,10 +3842,10 @@ msgid "Images don't have the same size (w = %d|%d, h = %d|%d)\n"
 msgstr "الصور ليست لديهم نفس الحجم (w = %d|%d, h = %d|%d)\n"
 
 #: ../src/core/siril.c:201 ../src/core/utils.c:435 ../src/gui/callbacks.c:2414
-#: ../src/gui/callbacks.c:4909 ../src/gui/callbacks.c:4930
-#: ../src/gui/callbacks.c:5350 ../src/gui/callbacks.c:5356
-#: ../src/gui/callbacks.c:5381 ../src/gui/PSF_list.c:150
-#: ../src/gui/quality_plot.c:281 ../src/io/conversion.c:491
+#: ../src/gui/callbacks.c:4915 ../src/gui/callbacks.c:4936
+#: ../src/gui/callbacks.c:5356 ../src/gui/callbacks.c:5362
+#: ../src/gui/callbacks.c:5387 ../src/gui/PSF_list.c:150
+#: ../src/gui/quality_plot.c:278 ../src/io/conversion.c:491
 #: ../src/io/conversion.c:559 ../src/io/image_format_fits.c:176
 #: ../src/io/image_format_fits.c:183 ../src/io/image_format_fits.c:202
 #: ../src/io/image_format_fits.c:216 ../src/io/image_format_fits.c:231
@@ -4278,150 +4287,158 @@ msgstr ""
 #: ../src/gui/callbacks.c:3747
 msgid ""
 "Copyright © 2004-2011 François Meyer\n"
-"Copyright © 2012-2016 team free-astro\n"
+"Copyright © 2012-2016 team free-astro"
 msgstr ""
 
-#: ../src/gui/callbacks.c:3755
-msgid "Cyril Richard <cyril@free-astro.org>"
+#. translator names
+#: ../src/gui/callbacks.c:3759
+msgid ""
+"Cyril Richard <cyril@free-astro.org>\n"
+"Vincent Hourdin <vh@free-astro.vinvin.tf>"
 msgstr ""
 
-#: ../src/gui/callbacks.c:3771
+#: ../src/gui/callbacks.c:3770
+#, fuzzy
+msgid "About siril"
+msgstr "حول Siril"
+
+#: ../src/gui/callbacks.c:3777
 msgid "Astronomical image (pre-)processing program"
 msgstr ""
 
-#: ../src/gui/callbacks.c:3774
+#: ../src/gui/callbacks.c:3780
 #, fuzzy
 msgid "Visit the Siril website"
 msgstr "<a href=\"%s\">زيارة الموقع Siril</a>"
 
-#: ../src/gui/callbacks.c:3809
+#: ../src/gui/callbacks.c:3815
 #, c-format
 msgid "%g nm"
 msgstr "٪g نانومتر"
 
-#: ../src/gui/callbacks.c:3811
+#: ../src/gui/callbacks.c:3817
 #, c-format
 msgid "undefined"
 msgstr "غير محدد"
 
-#: ../src/gui/callbacks.c:3910
+#: ../src/gui/callbacks.c:3916
 msgid ""
 "Exclude all images ?\n"
 " (this erases previous image selection\n"
 " ... and there's no undo)"
 msgstr "استبعاد كل الصور؟ (هذا يمحو اختيار الصورة السابقة ... وليس هناك تراجع)"
 
-#: ../src/gui/callbacks.c:3920
+#: ../src/gui/callbacks.c:3926
 msgid ""
 "Include all images ?\n"
 " (this erases previous image selection\n"
 " ... and there's no undo)"
 msgstr "يشمل جميع الصور؟ (هذا يمحو اختيار الصورة السابقة ... وليس هناك تراجع)"
 
-#: ../src/gui/callbacks.c:3950
+#: ../src/gui/callbacks.c:3956
 msgid "Opening dark image..."
 msgstr "فتح الصورة القاتمة ..."
 
-#: ../src/gui/callbacks.c:3953
+#: ../src/gui/callbacks.c:3959
 msgid "NOT USING DARK: cannot open the file\n"
 msgstr "لم يستخدم الضلام: لا يمكن فتح الملف\n"
 
-#: ../src/gui/callbacks.c:3958
+#: ../src/gui/callbacks.c:3964
 msgid "NOT USING DARK: number of channels is different"
 msgstr "لم يستخدم الضلام: عدد قنوات مختلفة"
 
-#: ../src/gui/callbacks.c:3999
+#: ../src/gui/callbacks.c:4005
 msgid "Opening flat image..."
 msgstr "فتح صورة مسطحة ..."
 
-#: ../src/gui/callbacks.c:4002
+#: ../src/gui/callbacks.c:4008
 msgid "NOT USING FLAT: cannot open the file\n"
 msgstr "لم يستخدم التسطيح: لا يمكن فتح الملف\n"
 
-#: ../src/gui/callbacks.c:4007
+#: ../src/gui/callbacks.c:4013
 msgid "NOT USING FLAT: number of channels is different"
 msgstr "لم يستخدم التسطيح: عدد قنوات مختلفة"
 
-#: ../src/gui/callbacks.c:4035
+#: ../src/gui/callbacks.c:4041
 msgid "Opening offset image..."
 msgstr "فتح صورة تعويض ..."
 
-#: ../src/gui/callbacks.c:4038
+#: ../src/gui/callbacks.c:4044
 msgid "NOT USING OFFSET: cannot open the file\n"
 msgstr "لما تستخدم الأوفست: لا يمكن فتح الملف\n"
 
-#: ../src/gui/callbacks.c:4043
+#: ../src/gui/callbacks.c:4049
 msgid "NOT USING OFFSET: number of channels is different"
 msgstr "لما تستخدم الأوفست: عدد قنوات مختلفة"
 
-#: ../src/gui/callbacks.c:4066
+#: ../src/gui/callbacks.c:4072
 msgid "Preprocessing...\n"
 msgstr "تجهيز ...\n"
 
-#: ../src/gui/callbacks.c:4180
+#: ../src/gui/callbacks.c:4186
 #, c-format
 msgid "Selected %s sequence %s..."
 msgstr "اختيار %s تسلسل %s ..."
 
-#: ../src/gui/callbacks.c:4211
+#: ../src/gui/callbacks.c:4217
 msgid "Searching for sequences in the current working directory..."
 msgstr "البحث عن متواليات في دليل العمل الحالي ..."
 
-#: ../src/gui/callbacks.c:4299
+#: ../src/gui/callbacks.c:4305
 #, c-format
 msgid "new zoom value: %f\n"
 msgstr "قيمة التكبير جديدة: %f\n"
 
 #. Write "Siril Version X.Y in Copyright_Txt
-#: ../src/gui/callbacks.c:4467
+#: ../src/gui/callbacks.c:4473
 msgid "Saving TIFF"
 msgstr "حفظTIFF"
 
-#: ../src/gui/callbacks.c:4485
+#: ../src/gui/callbacks.c:4491
 msgid "Saving Netpbm"
 msgstr "حفظ Netpbm "
 
-#: ../src/gui/callbacks.c:4503
+#: ../src/gui/callbacks.c:4509
 msgid "Saving BMP"
 msgstr "حفظ BMP"
 
-#: ../src/gui/callbacks.c:4521
+#: ../src/gui/callbacks.c:4527
 msgid "Saving JPG"
 msgstr "حفظ JPG"
 
-#: ../src/gui/callbacks.c:4907
+#: ../src/gui/callbacks.c:4913
 msgid ""
 "Background cannot be extracted from itself. Please, click on Show Image\n"
 msgstr "الخلفية لا يمكن استخراجه من نفسها. من فضلك، انقر على مشاهدة صورة\n"
 
-#: ../src/gui/callbacks.c:4929
+#: ../src/gui/callbacks.c:4935
 msgid "Please, apply correction on the image by clicking on Show Image\n"
 msgstr "من فضلك، تطبيق التصحيح على الصورة عن طريق النقر على مشاهدة صورة\n"
 
-#: ../src/gui/callbacks.c:4951
+#: ../src/gui/callbacks.c:4957
 msgid "Subtraction done ...\n"
 msgstr "الطرح القيام به ...\n"
 
-#: ../src/gui/callbacks.c:4958
+#: ../src/gui/callbacks.c:4964
 msgid "Division done ...\n"
 msgstr "تقسيم القيام به ...\n"
 
-#: ../src/gui/callbacks.c:5143
+#: ../src/gui/callbacks.c:5149
 msgid "Load an image first, aborted.\n"
 msgstr "تحميل صورة لأول مرة، أجهضت.\n"
 
-#: ../src/gui/callbacks.c:5172
+#: ../src/gui/callbacks.c:5178
 msgid "The file stars.lst has been created.\n"
 msgstr "تم إنشاء الملف stars.lst .\n"
 
-#: ../src/gui/callbacks.c:5242 ../src/gui/callbacks.c:5287
+#: ../src/gui/callbacks.c:5248 ../src/gui/callbacks.c:5293
 msgid ""
 "Current selection is too large.\n"
 "To determine the PSF, please make a selection around a star.\n"
 msgstr ""
 "التحديد الحالي كبيرة جدا. لتحديد PSF، يرجى التأكد التحديد حول نجم واحد.\n"
 
-#: ../src/gui/callbacks.c:5256
+#: ../src/gui/callbacks.c:5262
 #, c-format
 msgid ""
 "Centroid Coordinates:\n"
@@ -4452,15 +4469,15 @@ msgstr ""
 "الخلفية: B =٪ 6F الكثافة القصوى: A = ٪ .6f حجم (٪ ق): م =٪ 2F RMSE:. RMSE =٪ "
 "3E"
 
-#: ../src/gui/callbacks.c:5349
+#: ../src/gui/callbacks.c:5355
 msgid "FFT does not work with sequences !\n"
 msgstr "FFT لا يعمل مع متواليات\n"
 
-#: ../src/gui/callbacks.c:5355
+#: ../src/gui/callbacks.c:5361
 msgid "Open an image first !\n"
 msgstr "فتح صورة لأول مرة!\n"
 
-#: ../src/gui/callbacks.c:5380
+#: ../src/gui/callbacks.c:5386
 msgid "Select magnitude and phase before !\n"
 msgstr "حدد حجم ومرحلة قبل!\n"
 
@@ -4490,44 +4507,44 @@ msgstr ""
 msgid "Star %d of %d"
 msgstr "نجمة %d من %d"
 
-#: ../src/gui/quality_plot.c:180
+#: ../src/gui/quality_plot.c:177
 #, fuzzy
 msgid "Quality"
 msgstr "جودة:"
 
-#: ../src/gui/quality_plot.c:215
+#: ../src/gui/quality_plot.c:212
 #, fuzzy
 msgid "Frames"
 msgstr "معدل الأطار"
 
-#: ../src/gui/quality_plot.c:277
+#: ../src/gui/quality_plot.c:274
 #, c-format
 msgid "%s.png has been saved.\n"
 msgstr ""
 
-#: ../src/gui/quality_plot.c:278
+#: ../src/gui/quality_plot.c:275
 #, fuzzy
 msgid "Information"
 msgstr "تطبيع :"
 
-#: ../src/gui/quality_plot.c:281
+#: ../src/gui/quality_plot.c:278
 msgid "Something went wrong while saving plot"
 msgstr ""
 
-#: ../src/gui/quality_plot.c:316
+#: ../src/gui/quality_plot.c:319
 msgid "Star roundness (1 is round)"
 msgstr ""
 
-#: ../src/gui/quality_plot.c:326
+#: ../src/gui/quality_plot.c:329
 #, fuzzy
 msgid "Star magnitude (absolute)"
 msgstr "القطبية (الحجم + المرحلة)"
 
-#: ../src/gui/quality_plot.c:327
+#: ../src/gui/quality_plot.c:330
 msgid "Star magnitude (relative, use setmag)"
 msgstr ""
 
-#: ../src/gui/quality_plot.c:330
+#: ../src/gui/quality_plot.c:333
 #, fuzzy
 msgid "Background value"
 msgstr "قيمة الخلفية:%d\n"
@@ -4684,7 +4701,7 @@ msgid ""
 msgstr "سيتم إخراج SER الأسبقية على قناة خيار واحد خلق صورة لكل.\n"
 
 #: ../src/io/conversion.c:528 ../src/io/conversion.c:577
-#: ../src/io/sequence.c:1184 ../src/io/sequence.c:1355
+#: ../src/io/sequence.c:1185 ../src/io/sequence.c:1356
 msgid "Creating the SER file failed, aborting.\n"
 msgstr "إنشاء ملف SER فشلت، إجهاض.\n"
 
@@ -4725,7 +4742,7 @@ msgid "Error while reading frame %d from %s, aborting.\n"
 msgstr "خطأ أثناء قراءة إطار%d من%s إجهاض.\n"
 
 #: ../src/io/conversion.c:594 ../src/io/conversion.c:622
-#: ../src/io/sequence.c:1211 ../src/io/sequence.c:1567
+#: ../src/io/sequence.c:1212 ../src/io/sequence.c:1568
 msgid "Error while converting to SER (no space left?)\n"
 msgstr "خطأ أثناء تحويل إلى SER (أي مساحة يقم؟)\n"
 
@@ -5193,25 +5210,25 @@ msgstr "فشل لPSF  لتسلسل. جاهز."
 msgid "Finished sequence processing of PSF\n"
 msgstr "الانتهاء من معالجة سلسلة من PSF\n"
 
-#: ../src/io/sequence.c:1078
+#: ../src/io/sequence.c:1079
 msgid "See the console for a dump of star data over the sequence (stdout)\n"
 msgstr "ترى وحدة لتفريغ البيانات نجوم على التسلسل (المعياري)\n"
 
-#: ../src/io/sequence.c:1079
+#: ../src/io/sequence.c:1080
 #, c-format
 msgid "# image_no amplitude magnitude fwhm x y\n"
 msgstr ""
 
-#: ../src/io/sequence.c:1091
+#: ../src/io/sequence.c:1092
 msgid "Finished computing PSF for the sequence. Ready."
 msgstr "الانتهاء من PSF لتسلسل الحوسبة. جاهز."
 
-#: ../src/io/sequence.c:1330
+#: ../src/io/sequence.c:1331
 #, c-format
 msgid "Using registration information from layer %d to export sequence\n"
 msgstr "باستخدام معلومات التسجيل من طبقة %d لتصدير تسلسل\n"
 
-#: ../src/io/sequence.c:1375
+#: ../src/io/sequence.c:1376
 #, fuzzy
 msgid ""
 "MP4 output is not supported because siril was not compiled with ffmpeg "
@@ -5220,46 +5237,46 @@ msgstr ""
 "تناوب هو ممكن فقط عندما تم تجميع Siril بدعم مكتبة برمجية مفتوحة للرؤية "
 "الحاسوبية.\n"
 
-#: ../src/io/sequence.c:1386
+#: ../src/io/sequence.c:1387
 msgid ""
 "Film output needs to have a width that is a multiple of 32 and an even "
 "height, resizing selection.\n"
 msgstr ""
 
-#: ../src/io/sequence.c:1467 ../src/stacking/stacking.c:236
+#: ../src/io/sequence.c:1468 ../src/stacking/stacking.c:236
 #: ../src/stacking/stacking.c:860 ../src/stacking/stacking.c:1017
 msgid "Processing image "
 msgstr "معالجة الصورة "
 
-#: ../src/io/sequence.c:1474
+#: ../src/io/sequence.c:1475
 msgid "Export: could not read frame, aborting\n"
 msgstr "التصدير: لا يمكن قراءة الإطار، إجهاض\n"
 
-#: ../src/io/sequence.c:1580
+#: ../src/io/sequence.c:1581
 msgid "Siril needs opencv to resize images\n"
 msgstr "Siril يحتاج مكتبة برمجية مفتوحة للرؤية الحاسوبية لتغيير حجم الصور\n"
 
-#: ../src/io/sequence.c:1624
+#: ../src/io/sequence.c:1625
 msgid "Sequence export failed. Check the log."
 msgstr "فشل تصدير تسلسل. تحقق من سجل."
 
-#: ../src/io/sequence.c:1625
+#: ../src/io/sequence.c:1626
 msgid "Sequence export failed\n"
 msgstr "فشل تصدير تسلسل\n"
 
-#: ../src/io/sequence.c:1628
+#: ../src/io/sequence.c:1629
 msgid "Sequence export succeeded."
 msgstr "نجح تصدير تسلسل."
 
-#: ../src/io/sequence.c:1629
+#: ../src/io/sequence.c:1630
 msgid "Sequence export succeeded.\n"
 msgstr "نجح تصدير تسلسل.\n"
 
-#: ../src/io/sequence.c:1682
+#: ../src/io/sequence.c:1683
 msgid "Width or height cannot be null. Not resizing.\n"
 msgstr ""
 
-#: ../src/io/sequence.c:1732
+#: ../src/io/sequence.c:1733
 #, fuzzy
 msgid "Cropping to selection"
 msgstr "بدون تحديد"
@@ -5924,9 +5941,6 @@ msgstr ""
 #, c-format
 msgid "Based on quality"
 msgstr "على أساس الجودة"
-
-#~ msgid "About Siril"
-#~ msgstr "حول Siril"
 
 #~ msgid "Credits"
 #~ msgstr "الاعتمادات"
