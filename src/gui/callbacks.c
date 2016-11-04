@@ -3750,7 +3750,7 @@ static const gchar* copyright = N_("Copyright © 2004-2011 François Meyer\n"
 static gchar **authors = (gchar *[] ) { "Vincent Hourdin <vh@free-astro.vinvin.tf>",
 				"Cyril Richard <cyril@free-astro.org>", "François Meyer", NULL };
 
-static gchar **documenters = (gchar *[] ) { "Laurent Roge", NULL };
+static gchar **documenters = (gchar *[] ) { "Laurent Roge <siril.doc@orange.fr>", NULL };
 
 static gchar **artists = (gchar *[] ) { "Coralie Monnier",
 				"Cyril Richard <cyril@free-astro.org>", NULL };

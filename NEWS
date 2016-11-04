@@ -1,3 +1,17 @@
+v0.9.5, beta test yet
+Stability update for v0.9.4
+ * Implement a graph interface to display quality registration information
+ * No X and Y binning value could lead to errors with fwhm
+ * Take reference image as normalisation reference
+ * Retrieve Bayer pattern from RAW file
+ * Export sequence to MP4
+ * Statistics should not take into account black point
+ * Add ComboBox for registration interpolation
+ * Fixed interpolation in global star registration that gave blurred results
+ * Fixed FreeBSD intltool compilation fails
+ * Fixed erroneous created sequence in registration with unselected images
+ * Fixed compilation that failed on KFreeBSD
+
 v0.9.4, Aug 17, 2016
 Stability update for v0.9.3
  * Fixed issues with SER in generic processing function
