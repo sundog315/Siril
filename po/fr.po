@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: siril 0.9.4\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-04 11:20+0100\n"
-"PO-Revision-Date: 2016-11-04 11:21+0100\n"
+"POT-Creation-Date: 2016-11-07 13:26+0100\n"
+"PO-Revision-Date: 2016-11-07 13:27+0100\n"
 "Last-Translator: Cyril Richard <cyril@free-astro.fr>\n"
 "Language-Team: French <cyril@free-astro.fr>\n"
 "Language: fr\n"
@@ -2778,16 +2778,16 @@ msgid "Filename:"
 msgstr "Nom de fichier : "
 
 #: ../src/gui/siril3.glade.h:607
-msgid "Enter the filename of the exported PNG file."
-msgstr "Entrer le nom du fichier PNG que vous voulez exporter."
+msgid "Enter the filename of the exported CSV file."
+msgstr "Entrer le nom du fichier CSV que vous voulez exporter."
 
 #: ../src/gui/siril3.glade.h:608
-msgid "Export to PNG"
-msgstr "Exporter en PNG"
+msgid "Export to CSV"
+msgstr "Exporter en CSV"
 
 #: ../src/gui/siril3.glade.h:609
-msgid "Export displayed plot to a PNG file."
-msgstr "Exporte le graphique affiché vers un fichier PNG."
+msgid "Export displayed plot to a CSV file."
+msgstr "Exporte le graphique affiché vers un fichier CSV."
 
 #: ../src/gui/siril3.glade.h:610
 msgid "Select which information to display from photometry data."
@@ -2797,12 +2797,12 @@ msgstr "Sélectionner l'information des données photométriques à afficher."
 msgid "Roundness"
 msgstr "Rondeur"
 
-#: ../src/gui/siril3.glade.h:612 ../src/gui/quality_plot.c:174
-#: ../src/gui/quality_plot.c:322
+#: ../src/gui/siril3.glade.h:612 ../src/gui/quality_plot.c:227
+#: ../src/gui/quality_plot.c:351
 msgid "FWHM"
 msgstr "FWHM"
 
-#: ../src/gui/siril3.glade.h:613 ../src/gui/quality_plot.c:325
+#: ../src/gui/siril3.glade.h:613 ../src/gui/quality_plot.c:354
 msgid "Amplitude"
 msgstr "Amplitude"
 
@@ -3988,7 +3988,7 @@ msgstr "Les images n'ont pas la même taille (l = %d|%d, h = %d|%d)\n"
 #: ../src/gui/callbacks.c:4915 ../src/gui/callbacks.c:4936
 #: ../src/gui/callbacks.c:5356 ../src/gui/callbacks.c:5362
 #: ../src/gui/callbacks.c:5387 ../src/gui/PSF_list.c:150
-#: ../src/gui/quality_plot.c:278 ../src/io/conversion.c:491
+#: ../src/gui/quality_plot.c:161 ../src/io/conversion.c:491
 #: ../src/io/conversion.c:559 ../src/io/image_format_fits.c:176
 #: ../src/io/image_format_fits.c:183 ../src/io/image_format_fits.c:202
 #: ../src/io/image_format_fits.c:216 ../src/io/image_format_fits.c:231
@@ -4698,40 +4698,40 @@ msgstr ""
 msgid "Star %d of %d"
 msgstr "Étoile %d sur %d"
 
-#: ../src/gui/quality_plot.c:177
-msgid "Quality"
-msgstr "Qualité"
-
-#: ../src/gui/quality_plot.c:212
-msgid "Frames"
-msgstr "Images"
-
-#: ../src/gui/quality_plot.c:274
+#: ../src/gui/quality_plot.c:157
 #, c-format
-msgid "%s.png has been saved.\n"
-msgstr "%s.png a été sauvegardé.\n"
+msgid "%s.csv has been saved.\n"
+msgstr "%s.csv a été sauvegardé.\n"
 
-#: ../src/gui/quality_plot.c:275
+#: ../src/gui/quality_plot.c:158
 msgid "Information"
 msgstr "Information"
 
-#: ../src/gui/quality_plot.c:278
+#: ../src/gui/quality_plot.c:161
 msgid "Something went wrong while saving plot"
 msgstr "Une erreur s'est produite pendant la sauvegarde du graphique"
 
-#: ../src/gui/quality_plot.c:319
+#: ../src/gui/quality_plot.c:230
+msgid "Quality"
+msgstr "Qualité"
+
+#: ../src/gui/quality_plot.c:264
+msgid "Frames"
+msgstr "Images"
+
+#: ../src/gui/quality_plot.c:348
 msgid "Star roundness (1 is round)"
 msgstr "Rondeur de l'étoile (1 = rond parfait)"
 
-#: ../src/gui/quality_plot.c:329
+#: ../src/gui/quality_plot.c:358
 msgid "Star magnitude (absolute)"
 msgstr "Magnitude de l'étoile (absolue)"
 
-#: ../src/gui/quality_plot.c:330
+#: ../src/gui/quality_plot.c:359
 msgid "Star magnitude (relative, use setmag)"
 msgstr "Magnitude de l'étoile (relative, utilisez \"setmag\")"
 
-#: ../src/gui/quality_plot.c:333
+#: ../src/gui/quality_plot.c:362
 msgid "Background value"
 msgstr "Valeur de fond du ciel"
 

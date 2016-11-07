@@ -12411,7 +12411,7 @@ To be enabled, the reference image must have been explicitly set and already dis
                         <property name="can_focus">True</property>
                         <property name="tooltip_text" translatable="yes">Enter the filename of the exported CSV file.</property>
                         <property name="text">Plot</property>
-                        <signal name="changed" handler="on_GtkEntryPng_changed" swapped="no"/>
+                        <signal name="changed" handler="on_GtkEntryCSV_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
