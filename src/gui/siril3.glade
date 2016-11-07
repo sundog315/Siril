@@ -12406,10 +12406,10 @@ To be enabled, the reference image must have been explicitly set and already dis
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkEntry" id="GtkEntryPng">
+                      <object class="GtkEntry" id="GtkEntryCSV">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="tooltip_text" translatable="yes">Enter the filename of the exported PNG file.</property>
+                        <property name="tooltip_text" translatable="yes">Enter the filename of the exported CSV file.</property>
                         <property name="text">Plot</property>
                         <signal name="changed" handler="on_GtkEntryPng_changed" swapped="no"/>
                       </object>
@@ -12420,14 +12420,14 @@ To be enabled, the reference image must have been explicitly set and already dis
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton" id="ButtonSavePNG">
-                        <property name="label" translatable="yes">Export to PNG</property>
+                      <object class="GtkButton" id="ButtonSaveCSV">
+                        <property name="label" translatable="yes">Export to CSV</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
-                        <property name="tooltip_text" translatable="yes">Export displayed plot to a PNG file.</property>
+                        <property name="tooltip_text" translatable="yes">Export displayed plot to a CSV file.</property>
                         <property name="halign">center</property>
-                        <signal name="clicked" handler="on_ButtonSavePNG_clicked" swapped="no"/>
+                        <signal name="clicked" handler="on_ButtonSaveCSV_clicked" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">False</property>
@@ -12481,8 +12481,8 @@ To be enabled, the reference image must have been explicitly set and already dis
                       <packing>
                         <property name="expand">False</property>
                         <property name="fill">True</property>
-                        <property name="pack_type">end</property>
                         <property name="padding">6</property>
+                        <property name="pack_type">end</property>
                         <property name="position">5</property>
                       </packing>
                     </child>

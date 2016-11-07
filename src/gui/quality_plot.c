@@ -34,7 +34,7 @@
 static GtkWidget *drawingPlot = NULL, *sourceCombo = NULL, *combo = NULL;
 static pldata *plot_data;
 static struct kpair ref;
-static gboolean is_fwhm = FALSE, export_to_PNG = FALSE, use_photometry = FALSE;
+static gboolean is_fwhm = FALSE, use_photometry = FALSE;
 static char *ylabel = NULL;
 static enum photmetry_source selected_source = ROUNDNESS;
 
@@ -108,6 +108,59 @@ static void build_photometry_dataset(sequence *seq, int dataset, int size, int r
 		j++;
 	}
 	plot->nb = j;
+}
+
+static int exportCSV(pldata *plot, sequence *seq) {
+	int i, j, ret = 0;
+	const gchar *file;
+	gchar *filename, *msg;
+	GtkEntry *EntryCSV;
+
+	EntryCSV = GTK_ENTRY(lookup_widget("GtkEntryCSV"));
+	file = gtk_entry_get_text(EntryCSV);
+	if (file && file[0] != '\0') {
+		filename = g_strndup(file, strlen(file) + 5);
+		g_strlcat(filename, ".csv", strlen(file) + 5);
+		FILE *csv = fopen(filename, "w");
+		if (csv == NULL) {
+			ret = 1;
+		} else {
+			if (use_photometry) {
+				pldata *tmp_plot = plot;
+					for (i = 0, j = 0; i < plot->nb; i++) {
+						if (!seq->imgparam[i].incl)
+							continue;
+						int x = 0;
+						fprintf(csv, "%g", tmp_plot->data[j].x);
+						while (x < MAX_SEQPSF && seq->photometry[x]){
+							fprintf(csv, ", %g", tmp_plot->data[j].y);
+							tmp_plot = tmp_plot->next;
+							++x;
+						}
+						fprintf(csv, "\n");
+						tmp_plot = plot;
+						j++;
+					}
+			} else {
+				for (i = 0, j = 0; i < plot->nb; i++) {
+					if (!seq->imgparam[i].incl)
+						continue;
+					fprintf(csv, "%g, %g\n", plot->data[j].x, plot->data[j].y);
+					j++;
+				}
+			}
+			g_free(filename);
+			fclose(csv);
+		}
+	}
+	if (!ret) {
+		msg = siril_log_message(_("%s.csv has been saved.\n"), file);
+		show_dialog(msg, _("Information"), "gtk-dialog-info");
+	}
+	else {
+		show_dialog(_("Something went wrong while saving plot"), _("Error"), "gtk-dialog-error");
+	}
+	return 0;
 }
 
 void free_plot_data() {
@@ -186,10 +239,9 @@ void drawPlot() {
 	gtk_widget_queue_draw(drawingPlot);
 }
 
-void on_ButtonSavePNG_clicked(GtkButton *button, gpointer user_data) {
+void on_ButtonSaveCSV_clicked(GtkButton *button, gpointer user_data) {
 	set_cursor_waiting(TRUE);
-	export_to_PNG = TRUE;
-	drawPlot();
+	exportCSV(plot_data, &com.seq);
 	set_cursor_waiting(FALSE);
 }
 
@@ -259,47 +311,24 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 		cairo_fill(cr);
 		kplot_draw(p, width, height, cr);
 
-		if (export_to_PNG) {
-			const gchar *file;
-			gchar *filename, *msg;
-			GtkEntry *EntryPng;
-
-			EntryPng = GTK_ENTRY(lookup_widget("GtkEntryPng"));
-			file = gtk_entry_get_text(EntryPng);
-			if (file && file[0] != '\0') {
-				filename = g_strndup(file, strlen(file) + 5);
-				g_strlcat(filename, ".png", strlen(file) + 5);
-				cairo_status_t status = cairo_surface_write_to_png(cairo_get_target(cr), filename);
-				if (status == CAIRO_STATUS_SUCCESS) {
-					msg = siril_log_message(_("%s.png has been saved.\n"), file);
-					show_dialog(msg, _("Information"), "gtk-dialog-info");
-				}
-				else {
-					show_dialog(_("Something went wrong while saving plot"), _("Error"), "gtk-dialog-error");
-				}
-				g_free(filename);
-			}
-		}
-
 		kplot_free(p);
 		kdata_destroy(d1);
 		kdata_destroy(ref_d);
 		if (mean_d)
 			kdata_destroy(mean_d);
 	}
-	export_to_PNG = FALSE;
 	return FALSE;
 }
 
-void on_GtkEntryPng_changed(GtkEditable *editable, gpointer user_data) {
+void on_GtkEntryCSV_changed(GtkEditable *editable, gpointer user_data) {
 	const gchar *txt;
 
 	txt = gtk_entry_get_text(GTK_ENTRY(editable));
 	if (txt[0] == '\0') {
-		gtk_widget_set_sensitive(lookup_widget("ButtonSavePNG"), FALSE);
+		gtk_widget_set_sensitive(lookup_widget("ButtonSaveCSV"), FALSE);
 	}
 	else
-		gtk_widget_set_sensitive(lookup_widget("ButtonSavePNG"), TRUE);
+		gtk_widget_set_sensitive(lookup_widget("ButtonSaveCSV"), TRUE);
 }
 
 void on_plotCombo_changed(GtkComboBox *box, gpointer user_data) {
