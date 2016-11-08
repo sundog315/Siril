@@ -181,7 +181,7 @@ void reset_plot() {
 	if (sourceCombo) {
 		gtk_combo_box_set_active(GTK_COMBO_BOX(sourceCombo), 0);
 		gtk_widget_set_visible(sourceCombo, FALSE);
-		//gtk_widget_set_sensitive(buttonExport, FALSE);
+		gtk_widget_set_sensitive(buttonExport, FALSE);
 	}
 	on_GtkEntryCSV_changed(GTK_EDITABLE(lookup_widget("GtkEntryCSV")), NULL);
 }
@@ -247,7 +247,7 @@ void drawPlot() {
 
 		build_registration_dataset(seq, layer, ref_image, plot_data);
 	}
-
+	gtk_widget_set_sensitive(buttonExport, TRUE);
 	gtk_widget_queue_draw(drawingPlot);
 }
 
