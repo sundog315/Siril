@@ -177,8 +177,10 @@ static void free_plot_data() {
 
 void reset_plot() {
 	free_plot_data();
-	if (sourceCombo)
+	if (sourceCombo) {
 		gtk_combo_box_set_active(GTK_COMBO_BOX(sourceCombo), 0);
+		gtk_widget_set_visible(sourceCombo, FALSE);
+	}
 }
 
 void drawPlot() {
