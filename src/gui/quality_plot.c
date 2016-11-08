@@ -176,14 +176,27 @@ static void free_plot_data() {
 	plot_data = NULL;
 }
 
+void on_plotSourceCombo_changed(GtkComboBox *box, gpointer user_data) {
+	use_photometry = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
+	gtk_widget_set_visible(combo, use_photometry);
+	drawPlot();
+}
+
+void on_GtkEntryCSV_changed(GtkEditable *editable, gpointer user_data) {
+	const gchar *txt;
+	if (!buttonExport) return;
+	txt = gtk_entry_get_text(GTK_ENTRY(editable));
+	gtk_widget_set_sensitive(buttonExport, txt[0] != '\0' && plot_data);
+}
+
 void reset_plot() {
 	free_plot_data();
 	if (sourceCombo) {
 		gtk_combo_box_set_active(GTK_COMBO_BOX(sourceCombo), 0);
 		gtk_widget_set_visible(sourceCombo, FALSE);
+		gtk_widget_set_visible(combo, FALSE);
 		gtk_widget_set_sensitive(buttonExport, FALSE);
 	}
-	on_GtkEntryCSV_changed(GTK_EDITABLE(lookup_widget("GtkEntryCSV")), NULL);
 }
 
 void drawPlot() {
@@ -247,7 +260,7 @@ void drawPlot() {
 
 		build_registration_dataset(seq, layer, ref_image, plot_data);
 	}
-	gtk_widget_set_sensitive(buttonExport, TRUE);
+	on_GtkEntryCSV_changed(GTK_EDITABLE(lookup_widget("GtkEntryCSV")), NULL);
 	gtk_widget_queue_draw(drawingPlot);
 }
 
@@ -332,20 +345,7 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	return FALSE;
 }
 
-void on_GtkEntryCSV_changed(GtkEditable *editable, gpointer user_data) {
-	const gchar *txt;
-	if (!buttonExport) return;
-	txt = gtk_entry_get_text(GTK_ENTRY(editable));
-	gtk_widget_set_sensitive(buttonExport, txt[0] != '\0' && plot_data);
-}
-
 void on_plotCombo_changed(GtkComboBox *box, gpointer user_data) {
-	drawPlot();
-}
-
-void on_plotSourceCombo_changed(GtkComboBox *box, gpointer user_data) {
-	use_photometry = gtk_combo_box_get_active(GTK_COMBO_BOX(box));
-	gtk_widget_set_visible(combo, use_photometry);
 	drawPlot();
 }
 
