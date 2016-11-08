@@ -31,7 +31,7 @@
 #include "kplot.h"
 #include "algos/PSF.h"
 
-static GtkWidget *drawingPlot = NULL, *sourceCombo = NULL, *combo = NULL;
+static GtkWidget *drawingPlot = NULL, *sourceCombo = NULL, *combo = NULL, *buttonExport = NULL;
 static pldata *plot_data;
 static struct kpair ref;
 static gboolean is_fwhm = FALSE, use_photometry = FALSE;
@@ -39,6 +39,7 @@ static char *ylabel = NULL;
 static enum photmetry_source selected_source = ROUNDNESS;
 
 static void update_ylabel();
+void on_GtkEntryCSV_changed(GtkEditable *editable, gpointer user_data);
 
 static pldata *alloc_plot_data(int size) {
 	pldata *plot = malloc(sizeof(pldata));
@@ -180,7 +181,9 @@ void reset_plot() {
 	if (sourceCombo) {
 		gtk_combo_box_set_active(GTK_COMBO_BOX(sourceCombo), 0);
 		gtk_widget_set_visible(sourceCombo, FALSE);
+		//gtk_widget_set_sensitive(buttonExport, FALSE);
 	}
+	on_GtkEntryCSV_changed(GTK_EDITABLE(lookup_widget("GtkEntryCSV")), NULL);
 }
 
 void drawPlot() {
@@ -191,6 +194,7 @@ void drawPlot() {
 		drawingPlot = lookup_widget("DrawingPlot");
 		combo = lookup_widget("plotCombo");
 		sourceCombo = lookup_widget("plotSourceCombo");
+		buttonExport = lookup_widget("ButtonSaveCSV");
 	}
 
 	seq = &com.seq;
@@ -330,13 +334,9 @@ gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
 
 void on_GtkEntryCSV_changed(GtkEditable *editable, gpointer user_data) {
 	const gchar *txt;
-
+	if (!buttonExport) return;
 	txt = gtk_entry_get_text(GTK_ENTRY(editable));
-	if (txt[0] == '\0') {
-		gtk_widget_set_sensitive(lookup_widget("ButtonSaveCSV"), FALSE);
-	}
-	else
-		gtk_widget_set_sensitive(lookup_widget("ButtonSaveCSV"), TRUE);
+	gtk_widget_set_sensitive(buttonExport, txt[0] != '\0' && plot_data);
 }
 
 void on_plotCombo_changed(GtkComboBox *box, gpointer user_data) {
