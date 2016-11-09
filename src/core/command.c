@@ -43,7 +43,7 @@
 #include "gui/callbacks.h"
 #include "gui/PSF_list.h"
 #include "gui/histogram.h"
-#include "gui/quality_plot.h"
+#include "../gui/plot.h"
 #include "algos/colors.h"
 #include "algos/PSF.h"
 #include "algos/star_finder.h"

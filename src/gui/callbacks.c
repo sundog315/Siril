@@ -38,7 +38,6 @@
 #include "core/initfile.h"
 #include "core/undo.h"
 #include "gui/callbacks.h"
-#include "gui/quality_plot.h"
 #include "gui/PSF_list.h"
 #include "gui/histogram.h"
 #include "algos/colors.h"
@@ -57,6 +56,7 @@
 #include "stacking/stacking.h"
 #include "compositing/compositing.h"
 #include "compositing/align_rgb.h"
+#include "plot.h"
 #ifdef HAVE_OPENCV
 #include "opencv/opencv.h"
 #endif

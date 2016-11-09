@@ -18,6 +18,8 @@
  * along with Siril. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "plot.h"
+
 #include <cairo.h>
 #include <math.h>
 #include <stdio.h>
@@ -27,7 +29,6 @@
 #include "core/siril.h"
 #include "core/proto.h"
 #include "gui/callbacks.h"
-#include "gui/quality_plot.h"
 #include "kplot.h"
 #include "algos/PSF.h"
 

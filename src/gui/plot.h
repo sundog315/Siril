@@ -18,8 +18,8 @@
  * along with Siril. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#ifndef SRC_GUI_QUALITY_PLOT_H_
-#define SRC_GUI_QUALITY_PLOT_H_
+#ifndef SRC_GUI_PLOT_H_
+#define SRC_GUI_PLOT_H_
 
 #include "core/siril.h"
 
@@ -43,4 +43,4 @@ enum photmetry_source {
 	BACKGROUND
 };
 
-#endif /* SRC_GUI_QUALITY_PLOT_H_ */
+#endif /* SRC_GUI_PLOT_H_ */
