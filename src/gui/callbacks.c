@@ -2469,7 +2469,8 @@ void set_output_filename_to_sequence_name() {
 	if (!com.seq.seqname || *com.seq.seqname == '\0')
 		return;
 	g_snprintf(msg, sizeof(msg), "%s%sstacked%s", com.seq.seqname,
-			ends_with(com.seq.seqname, "_") ? "" : "_", com.ext);
+			ends_with(com.seq.seqname, "_") ?
+					"" : (ends_with(com.seq.seqname, "-") ? "" : "_"), com.ext);
 	gtk_entry_set_text(output_file, msg);
 }
 
@@ -2480,11 +2481,7 @@ void adjust_refimage(int n) {
 
 	//fprintf(stdout, "adjust refimage: %d (ref is %d)\n", n, com.seq.reference_image);
 	g_signal_handlers_block_by_func(ref_butt, on_ref_frame_toggled, NULL);
-	if (com.seq.reference_image == n) {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ref_butt), TRUE);
-	} else {
-		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ref_butt), FALSE);
-	}
+	gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(ref_butt), com.seq.reference_image == n);
 	g_signal_handlers_unblock_by_func(ref_butt, on_ref_frame_toggled, NULL);
 }
 

@@ -1404,7 +1404,9 @@ gpointer stackall_worker(gpointer args) {
 				args.filtering_criterion = stack_filter_all;
 				args.nb_images_to_stack = seq->number;
 				snprintf(filename, 256, "%s%sstacked%s", seq->seqname,
-						ends_with(seq->seqname, "_") ? "" : "_", com.ext);
+						ends_with(seq->seqname, "_") ?
+								"" : (ends_with(com.seq.seqname, "-") ? "" : "_"),
+						com.ext);
 				gettimeofday(&args.t_start, NULL);
 
 				retval = stack_summing(&args);
