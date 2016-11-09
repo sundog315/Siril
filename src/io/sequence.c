@@ -50,7 +50,7 @@
 #include "opencv/opencv.h"
 #endif
 #ifdef HAVE_FFMPEG
-#include "../io/mp4_output.h"
+#include "io/mp4_output.h"
 #endif
 #include "io/avi_pipp/avi_writer.h"
 #include "io/single_image.h"
@@ -1665,10 +1665,8 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 		args->convflags = TYPESER;
 		break;
 	case 2:
-#ifdef HAVE_FFMPEG
 	case 3:
 	case 4:
-#endif
 		fpsEntry = GTK_ENTRY(lookup_widget("entryAviFps"));
 		args->avi_fps = atoi(gtk_entry_get_text(fpsEntry));
 		widthEntry = GTK_ENTRY(lookup_widget("entryAviWidth"));
@@ -1690,12 +1688,10 @@ void on_buttonExportSeq_clicked(GtkButton *button, gpointer user_data) {
 			args->resize = gtk_toggle_button_get_active(checkResize);
 		}
 		args->convflags = TYPEAVI;
-#ifdef HAVE_FFMPEG
 		if (selected == 3)
 			args->convflags = TYPEMP4;
 		else if (selected == 4)
 			args->convflags = TYPEWEBM;
-#endif
 		break;
 	default:
 		free(args);
