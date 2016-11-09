@@ -366,6 +366,7 @@ int main(int argc, char *argv[]) {
 	/* initialization of default FITS extension */
 	GtkComboBox *box = GTK_COMBO_BOX(lookup_widget("combobox_ext"));
 	gtk_combo_box_set_active_id(box, com.ext);
+	initialize_FITS_name_entries();
 
 #ifdef HAVE_LIBRAW
 	set_GUI_LIBRAW();

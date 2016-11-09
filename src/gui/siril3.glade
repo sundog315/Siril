@@ -11032,7 +11032,6 @@ If not set manually, the first image of the sequence is taken as reference.</pro
 A first computation pass will be done on all images before exporting, it may take some time, only the first export of a sequence.
 			</property>
                         <property name="halign">center</property>
-                        <property name="vexpand">True</property>
                         <property name="draw_indicator">True</property>
                       </object>
                       <packing>

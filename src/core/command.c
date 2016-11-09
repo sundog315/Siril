@@ -1347,9 +1347,9 @@ int process_split(int nb){
 		siril_log_message(_("Siril cannot split layers. Make sure your image is in RGB mode.\n"));
 		return 1;
 	}
-	sprintf(R, "%s.fit", word[1]);
-	sprintf(G, "%s.fit", word[2]);
-	sprintf(B, "%s.fit", word[3]);
+	sprintf(R, "%s%s", word[1], com.ext);
+	sprintf(G, "%s%s", word[2], com.ext);
+	sprintf(B, "%s%s", word[3], com.ext);
 	save1fits16(R, &gfit, RLAYER);
 	save1fits16(G, &gfit, GLAYER);
 	save1fits16(B, &gfit, BLAYER);
@@ -1403,8 +1403,8 @@ gpointer stackall_worker(gpointer args) {
 				args.seq = seq;
 				args.filtering_criterion = stack_filter_all;
 				args.nb_images_to_stack = seq->number;
-				snprintf(filename, 256, "%s%sstacked.fit", seq->seqname,
-						ends_with(seq->seqname, "_") ? "" : "_");
+				snprintf(filename, 256, "%s%sstacked%s", seq->seqname,
+						ends_with(seq->seqname, "_") ? "" : "_", com.ext);
 				gettimeofday(&args.t_start, NULL);
 
 				retval = stack_summing(&args);

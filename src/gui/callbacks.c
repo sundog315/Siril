@@ -2414,6 +2414,35 @@ void zoomcombo_update_display_for_zoom() {
 	show_dialog(msg, _("Error"), "gtk-dialog-error");
 }
 
+void initialize_FITS_name_entries() {
+	GtkEntry *moffset, *mdark, *mflat, *final_stack;
+	GString *str[4];
+	gchar *txt[4];
+	gint i;
+
+	moffset = GTK_ENTRY(lookup_widget("offsetname_entry"));
+	mdark = GTK_ENTRY(lookup_widget("darkname_entry"));
+	mflat = GTK_ENTRY(lookup_widget("flatname_entry"));
+	final_stack = GTK_ENTRY(lookup_widget("entryresultfile"));
+
+	str[0] = g_string_new("master-offset");
+	str[1] = g_string_new("master-dark");
+	str[2] = g_string_new("master-flat");
+	str[3] = g_string_new("stack_result");
+
+	for (i = 0; i < 4; i++) {
+		g_string_append(str[i], com.ext);
+		txt[i] = g_string_free(str[i], FALSE);
+	}
+	gtk_entry_set_text(moffset, txt[0]);
+	gtk_entry_set_text(mdark, txt[1]);
+	gtk_entry_set_text(mflat, txt[2]);
+	gtk_entry_set_text(final_stack, txt[3]);
+
+	for (i = 0; i < 4; i++)
+		g_free(txt[i]);
+}
+
 void adjust_vport_size_to_image() {
 	int vport;
 	// make GtkDrawingArea the same size than the image
@@ -2439,8 +2468,8 @@ void set_output_filename_to_sequence_name() {
 				gtk_builder_get_object(builder, "entryresultfile"));
 	if (!com.seq.seqname || *com.seq.seqname == '\0')
 		return;
-	g_snprintf(msg, sizeof(msg), "%s%sstacked.fit", com.seq.seqname,
-			ends_with(com.seq.seqname, "_") ? "" : "_");
+	g_snprintf(msg, sizeof(msg), "%s%sstacked%s", com.seq.seqname,
+			ends_with(com.seq.seqname, "_") ? "" : "_", com.ext);
 	gtk_entry_set_text(output_file, msg);
 }
 
@@ -3254,6 +3283,7 @@ void on_combobox_ext_changed(GtkComboBox *box, gpointer user_data) {
 	com.ext = gtk_combo_box_text_get_active_text(GTK_COMBO_BOX_TEXT(box));
 	com.len_ext = strlen(com.ext);
 	writeinitfile();
+	initialize_FITS_name_entries();
 }
 
 void gtk_main_quit() {
