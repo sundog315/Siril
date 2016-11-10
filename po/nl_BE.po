@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-04 11:20+0100\n"
+"POT-Creation-Date: 2016-11-07 13:26+0100\n"
 "PO-Revision-Date: 2016-11-03 23:22+0100\n"
 "Last-Translator: Antoine Hoeffelman <antoine.hoeffelman[-at-]gmail.com>\n"
 "Language-Team: Dutch <antoine.hoeffelman[-at-]gmail.com>\n"
@@ -2732,15 +2732,15 @@ msgstr "<b>Bestandsnaam</b>"
 
 #: ../src/gui/siril3.glade.h:607
 #, fuzzy
-msgid "Enter the filename of the exported PNG file."
+msgid "Enter the filename of the exported CSV file."
 msgstr "Naambasis voor de geëxporteerde sequentie"
 
 #: ../src/gui/siril3.glade.h:608
-msgid "Export to PNG"
+msgid "Export to CSV"
 msgstr ""
 
 #: ../src/gui/siril3.glade.h:609
-msgid "Export displayed plot to a PNG file."
+msgid "Export displayed plot to a CSV file."
 msgstr ""
 
 #: ../src/gui/siril3.glade.h:610
@@ -2752,13 +2752,13 @@ msgstr ""
 msgid "Roundness"
 msgstr "Rendheid grenswaarde:"
 
-#: ../src/gui/siril3.glade.h:612 ../src/gui/quality_plot.c:174
-#: ../src/gui/quality_plot.c:322
+#: ../src/gui/siril3.glade.h:612 ../src/gui/quality_plot.c:227
+#: ../src/gui/quality_plot.c:351
 #, fuzzy
 msgid "FWHM"
 msgstr "FWHMx"
 
-#: ../src/gui/siril3.glade.h:613 ../src/gui/quality_plot.c:325
+#: ../src/gui/siril3.glade.h:613 ../src/gui/quality_plot.c:354
 msgid "Amplitude"
 msgstr ""
 
@@ -3938,7 +3938,7 @@ msgstr "Afbeeldingen hebben niet dezelfde afmetingen (w = %d|%d, h = %d|%d)\n"
 #: ../src/gui/callbacks.c:4915 ../src/gui/callbacks.c:4936
 #: ../src/gui/callbacks.c:5356 ../src/gui/callbacks.c:5362
 #: ../src/gui/callbacks.c:5387 ../src/gui/PSF_list.c:150
-#: ../src/gui/quality_plot.c:278 ../src/io/conversion.c:491
+#: ../src/gui/quality_plot.c:161 ../src/io/conversion.c:491
 #: ../src/io/conversion.c:559 ../src/io/image_format_fits.c:176
 #: ../src/io/image_format_fits.c:183 ../src/io/image_format_fits.c:202
 #: ../src/io/image_format_fits.c:216 ../src/io/image_format_fits.c:231
@@ -4643,44 +4643,44 @@ msgstr ""
 msgid "Star %d of %d"
 msgstr "Ster %d van %d"
 
-#: ../src/gui/quality_plot.c:177
-#, fuzzy
-msgid "Quality"
-msgstr "Kwaliteit: "
+#: ../src/gui/quality_plot.c:157
+#, fuzzy, c-format
+msgid "%s.csv has been saved.\n"
+msgstr "Het bestand stars.lst werd aangemaakt.\n"
 
-#: ../src/gui/quality_plot.c:212
-#, fuzzy
-msgid "Frames"
-msgstr "Framerate"
-
-#: ../src/gui/quality_plot.c:274
-#, c-format
-msgid "%s.png has been saved.\n"
-msgstr ""
-
-#: ../src/gui/quality_plot.c:275
+#: ../src/gui/quality_plot.c:158
 #, fuzzy
 msgid "Information"
 msgstr "Geen normalisatie"
 
-#: ../src/gui/quality_plot.c:278
+#: ../src/gui/quality_plot.c:161
 msgid "Something went wrong while saving plot"
 msgstr ""
 
-#: ../src/gui/quality_plot.c:319
+#: ../src/gui/quality_plot.c:230
+#, fuzzy
+msgid "Quality"
+msgstr "Kwaliteit: "
+
+#: ../src/gui/quality_plot.c:264
+#, fuzzy
+msgid "Frames"
+msgstr "Framerate"
+
+#: ../src/gui/quality_plot.c:348
 msgid "Star roundness (1 is round)"
 msgstr ""
 
-#: ../src/gui/quality_plot.c:329
+#: ../src/gui/quality_plot.c:358
 #, fuzzy
 msgid "Star magnitude (absolute)"
 msgstr "Polair (Amplitude + Fase)"
 
-#: ../src/gui/quality_plot.c:330
+#: ../src/gui/quality_plot.c:359
 msgid "Star magnitude (relative, use setmag)"
 msgstr ""
 
-#: ../src/gui/quality_plot.c:333
+#: ../src/gui/quality_plot.c:362
 #, fuzzy
 msgid "Background value"
 msgstr "Achtergrondwaarde: %d\n"

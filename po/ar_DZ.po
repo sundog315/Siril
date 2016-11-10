@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-04 11:20+0100\n"
+"POT-Creation-Date: 2016-11-07 13:26+0100\n"
 "PO-Revision-Date: 2016-07-30 17:44+0100\n"
 "Last-Translator: Cyril <cyril@free-astro.fr>\n"
 "Language-Team: \n"
@@ -2683,15 +2683,15 @@ msgstr "<b> اسم الملف </b>"
 
 #: ../src/gui/siril3.glade.h:607
 #, fuzzy
-msgid "Enter the filename of the exported PNG file."
+msgid "Enter the filename of the exported CSV file."
 msgstr "اسم الأساسية لتسلسل تصديرها"
 
 #: ../src/gui/siril3.glade.h:608
-msgid "Export to PNG"
+msgid "Export to CSV"
 msgstr ""
 
 #: ../src/gui/siril3.glade.h:609
-msgid "Export displayed plot to a PNG file."
+msgid "Export displayed plot to a CSV file."
 msgstr ""
 
 #: ../src/gui/siril3.glade.h:610
@@ -2703,12 +2703,12 @@ msgstr ""
 msgid "Roundness"
 msgstr "عتبة استدارة:"
 
-#: ../src/gui/siril3.glade.h:612 ../src/gui/quality_plot.c:174
-#: ../src/gui/quality_plot.c:322
+#: ../src/gui/siril3.glade.h:612 ../src/gui/quality_plot.c:227
+#: ../src/gui/quality_plot.c:351
 msgid "FWHM"
 msgstr ""
 
-#: ../src/gui/siril3.glade.h:613 ../src/gui/quality_plot.c:325
+#: ../src/gui/siril3.glade.h:613 ../src/gui/quality_plot.c:354
 msgid "Amplitude"
 msgstr ""
 
@@ -3845,7 +3845,7 @@ msgstr "الصور ليست لديهم نفس الحجم (w = %d|%d, h = %d|%d)\
 #: ../src/gui/callbacks.c:4915 ../src/gui/callbacks.c:4936
 #: ../src/gui/callbacks.c:5356 ../src/gui/callbacks.c:5362
 #: ../src/gui/callbacks.c:5387 ../src/gui/PSF_list.c:150
-#: ../src/gui/quality_plot.c:278 ../src/io/conversion.c:491
+#: ../src/gui/quality_plot.c:161 ../src/io/conversion.c:491
 #: ../src/io/conversion.c:559 ../src/io/image_format_fits.c:176
 #: ../src/io/image_format_fits.c:183 ../src/io/image_format_fits.c:202
 #: ../src/io/image_format_fits.c:216 ../src/io/image_format_fits.c:231
@@ -4507,44 +4507,44 @@ msgstr ""
 msgid "Star %d of %d"
 msgstr "نجمة %d من %d"
 
-#: ../src/gui/quality_plot.c:177
-#, fuzzy
-msgid "Quality"
-msgstr "جودة:"
+#: ../src/gui/quality_plot.c:157
+#, fuzzy, c-format
+msgid "%s.csv has been saved.\n"
+msgstr "تم إنشاء الملف stars.lst .\n"
 
-#: ../src/gui/quality_plot.c:212
-#, fuzzy
-msgid "Frames"
-msgstr "معدل الأطار"
-
-#: ../src/gui/quality_plot.c:274
-#, c-format
-msgid "%s.png has been saved.\n"
-msgstr ""
-
-#: ../src/gui/quality_plot.c:275
+#: ../src/gui/quality_plot.c:158
 #, fuzzy
 msgid "Information"
 msgstr "تطبيع :"
 
-#: ../src/gui/quality_plot.c:278
+#: ../src/gui/quality_plot.c:161
 msgid "Something went wrong while saving plot"
 msgstr ""
 
-#: ../src/gui/quality_plot.c:319
+#: ../src/gui/quality_plot.c:230
+#, fuzzy
+msgid "Quality"
+msgstr "جودة:"
+
+#: ../src/gui/quality_plot.c:264
+#, fuzzy
+msgid "Frames"
+msgstr "معدل الأطار"
+
+#: ../src/gui/quality_plot.c:348
 msgid "Star roundness (1 is round)"
 msgstr ""
 
-#: ../src/gui/quality_plot.c:329
+#: ../src/gui/quality_plot.c:358
 #, fuzzy
 msgid "Star magnitude (absolute)"
 msgstr "القطبية (الحجم + المرحلة)"
 
-#: ../src/gui/quality_plot.c:330
+#: ../src/gui/quality_plot.c:359
 msgid "Star magnitude (relative, use setmag)"
 msgstr ""
 
-#: ../src/gui/quality_plot.c:333
+#: ../src/gui/quality_plot.c:362
 #, fuzzy
 msgid "Background value"
 msgstr "قيمة الخلفية:%d\n"

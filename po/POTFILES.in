@@ -34,6 +34,8 @@ src/io/films.c
 src/io/image_format_fits.c
 src/io/image_formats_internal.c
 src/io/image_formats_libraries.c
+src/io/mp4_output.c
+src/io/mp4_output.h
 src/io/seqfile.c
 src/io/sequence.c
 src/io/ser.c
