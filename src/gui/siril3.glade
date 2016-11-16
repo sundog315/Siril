@@ -12458,6 +12458,8 @@ To be enabled, the reference image must have been explicitly set and already dis
                           <item translatable="yes">Amplitude</item>
                           <item translatable="yes">Magnitude</item>
                           <item translatable="yes">Background</item>
+                          <item translatable="yes">X position</item>
+                          <item translatable="yes">Y position</item>
                         </items>
                         <signal name="changed" handler="on_plotCombo_changed" swapped="no"/>
                       </object>

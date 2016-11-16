@@ -2806,7 +2806,7 @@ void on_register_all_toggle(GtkToggleButton *togglebutton, gpointer user_data) {
  */
 gboolean redraw_drawingarea(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	int image_width, image_height, window_width, window_height;
-	int vport;
+	int vport, i = 0;
 	double zoom;
 
 	// we need to identify which vport is being redrawn
@@ -2822,6 +2822,7 @@ gboolean redraw_drawingarea(GtkWidget *widget, cairo_t *cr, gpointer data) {
 	image_width = (int) (((double) window_width) / zoom);
 	image_height = (int) (((double) window_height) / zoom);
 
+	/* draw the RGB and gray images */
 	if (vport == RGB_VPORT) {
 		if (com.rgbbuf) {
 			cairo_scale(cr, zoom, zoom);
@@ -2855,52 +2856,67 @@ gboolean redraw_drawingarea(GtkWidget *widget, cairo_t *cr, gpointer data) {
 		cairo_stroke(cr);
 	}
 
-	/* draw a cross on excluded images */
-	if (sequence_is_loaded() && com.seq.imgparam && com.seq.current >= 0
-			&& !com.seq.imgparam[com.seq.current].incl) {
-		if (image_width > gfit.rx)
-			image_width = gfit.rx;
-		if (image_height > gfit.ry)
-			image_height = gfit.ry;
-		cairo_set_dash(cr, NULL, 0, 0);
-		cairo_set_source_rgb(cr, 1.0, 0.8, 0.7);
-		cairo_set_line_width(cr, 2.0 / zoom);
-		cairo_move_to(cr, 0, 0);
-		cairo_line_to(cr, image_width, image_height);
-		cairo_move_to(cr, 0, image_height);
-		cairo_line_to(cr, image_width, 0);
-		cairo_stroke(cr);
-	}
-
 	/* draw detected stars and highlight the selected star */
 	if (com.stars) {
 		/* com.stars is a NULL-terminated array */
-		int i = 0;
 		cairo_set_dash(cr, NULL, 0, 0);
 		cairo_set_source_rgba(cr, 1.0, 0.4, 0.0, 0.9);
-		cairo_set_line_width(cr, 1.5);	//set_label_text_from_main_thread("labelcwd", com.wd);
+		cairo_set_line_width(cr, 1.5);
 
 		while (com.stars[i]) {
-			double size = sqrt(com.stars[i]->fwhmx / 2.) * 2 * sqrt(log(2.) * 2); // by design Sx>Sy. We redefine FWHM to be sure to have the value in px
+			// by design Sx>Sy, we redefine FWHM to be sure to have the value in px
+			double size = sqrt(com.stars[i]->fwhmx / 2.) * 2 * sqrt(log(2.) * 2);
+
 			if (i == com.selected_star) {
 				cairo_set_line_width(cr, 2);
 				cairo_set_source_rgba(cr, 0.0, 0.4, 1.0, 0.6);
 				cairo_rectangle(cr, com.stars[i]->xpos - 1.5 * size,
 						com.stars[i]->ypos - 1.5 * size, 3 * size, 3 * size);
 				cairo_stroke(cr);
+
 				cairo_set_line_width(cr, 1.5);
 				cairo_set_source_rgba(cr, 1.0, 0.4, 0.0, 0.9);
 			}
-			cairo_arc(cr, com.stars[i]->xpos, com.stars[i]->ypos, size, 0.,
-					2. * M_PI);
+			cairo_arc(cr, com.stars[i]->xpos, com.stars[i]->ypos, size, 0., 2. * M_PI);
 			cairo_stroke(cr);
 			i++;
 		}
 	}
 
-	/* draw preview rectangles */
 	if (sequence_is_loaded()) {
-		int i;
+		/* draw seqpsf stars */
+		for (i = 0; i < MAX_SEQPSF && com.seq.photometry[i]; i++) {
+			cairo_set_dash(cr, NULL, 0, 0);
+			cairo_set_source_rgba(cr, com.seq.photometry_colors[i][0],
+					com.seq.photometry_colors[i][1],
+					com.seq.photometry_colors[i][2], 1.0);
+			cairo_set_line_width(cr, 1.5);
+			fitted_PSF *the_psf = com.seq.photometry[i][com.seq.current];
+			if (the_psf) {
+				double size = sqrt(the_psf->fwhmx / 2.) * 2 * sqrt(log(2.) * 2);
+				cairo_arc(cr, the_psf->xpos, the_psf->ypos, size, 0., 2. * M_PI);
+				cairo_stroke(cr);
+			}
+		}
+
+		/* draw a cross on excluded images */
+		if (com.seq.imgparam && com.seq.current >= 0 &&
+				!com.seq.imgparam[com.seq.current].incl) {
+			if (image_width > gfit.rx)
+				image_width = gfit.rx;
+			if (image_height > gfit.ry)
+				image_height = gfit.ry;
+			cairo_set_dash(cr, NULL, 0, 0);
+			cairo_set_source_rgb(cr, 1.0, 0.8, 0.7);
+			cairo_set_line_width(cr, 2.0 / zoom);
+			cairo_move_to(cr, 0, 0);
+			cairo_line_to(cr, image_width, image_height);
+			cairo_move_to(cr, 0, image_height);
+			cairo_line_to(cr, image_width, 0);
+			cairo_stroke(cr);
+		}
+
+		/* draw preview rectangles for the manual registration */
 		for (i = 0; i < PREVIEW_NB; i++) {
 			if (com.seq.previewX[i] >= 0) {
 				int textX, textY;
@@ -2932,6 +2948,7 @@ gboolean redraw_drawingarea(GtkWidget *widget, cairo_t *cr, gpointer data) {
 		}
 	}
 
+	/* draw background removal gradient selection boxes */
 	if (com.grad && com.grad_boxes_drawn) {
 		int i = 0;
 		while (i < com.grad_nb_boxes) {

@@ -813,6 +813,7 @@ void initialize_sequence(sequence *seq, gboolean is_zeroed) {
 	}
 	seq->nb_layers = -1;		// uninit value
 	seq->reference_image = -1;	// uninit value
+	seq->reference_star = -1;	// uninit value
 	seq->type = SEQ_REGULAR;
 	for (i=0; i<PREVIEW_NB; i++) {
 		seq->previewX[i] = -1;

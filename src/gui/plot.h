@@ -40,7 +40,9 @@ enum photmetry_source {
 	FWHM,
 	AMPLITUDE,
 	MAGNITUDE,
-	BACKGROUND
+	BACKGROUND,
+	X_POSITION,
+	Y_POSITION
 };
 
 #endif /* SRC_GUI_PLOT_H_ */
