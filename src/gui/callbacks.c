@@ -2865,7 +2865,7 @@ gboolean redraw_drawingarea(GtkWidget *widget, cairo_t *cr, gpointer data) {
 
 		while (com.stars[i]) {
 			// by design Sx>Sy, we redefine FWHM to be sure to have the value in px
-			double size = sqrt(com.stars[i]->fwhmx / 2.) * 2 * sqrt(log(2.) * 2);
+			double size = sqrt(com.stars[i]->fwhmx / 2.) * 2 * sqrt(log(2.) * 3);
 
 			if (i == com.selected_star) {
 				cairo_set_line_width(cr, 2);
@@ -2874,7 +2874,7 @@ gboolean redraw_drawingarea(GtkWidget *widget, cairo_t *cr, gpointer data) {
 						com.stars[i]->ypos - 1.5 * size, 3 * size, 3 * size);
 				cairo_stroke(cr);
 
-				cairo_set_line_width(cr, 1.5);
+				cairo_set_line_width(cr, 1.5/zoom);
 				cairo_set_source_rgba(cr, 1.0, 0.4, 0.0, 0.9);
 			}
 			cairo_arc(cr, com.stars[i]->xpos, com.stars[i]->ypos, size, 0., 2. * M_PI);
@@ -2890,10 +2890,10 @@ gboolean redraw_drawingarea(GtkWidget *widget, cairo_t *cr, gpointer data) {
 			cairo_set_source_rgba(cr, com.seq.photometry_colors[i][0],
 					com.seq.photometry_colors[i][1],
 					com.seq.photometry_colors[i][2], 1.0);
-			cairo_set_line_width(cr, 1.5);
+			cairo_set_line_width(cr, 2.0/zoom);
 			fitted_PSF *the_psf = com.seq.photometry[i][com.seq.current];
 			if (the_psf) {
-				double size = sqrt(the_psf->fwhmx / 2.) * 2 * sqrt(log(2.) * 2);
+				double size = sqrt(the_psf->fwhmx / 2.) * 2 * sqrt(log(2.) * 4);
 				cairo_arc(cr, the_psf->xpos, the_psf->ypos, size, 0., 2. * M_PI);
 				cairo_stroke(cr);
 			}
