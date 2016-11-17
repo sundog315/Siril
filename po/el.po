@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-11-17 09:46+0100\n"
-"PO-Revision-Date: 2016-11-17 10:19+0200\n"
+"PO-Revision-Date: 2016-11-17 16:53+0100\n"
 "Last-Translator: Konstantinos Stavropoulos <kookoo_gr@yahoo.com>\n"
 "Language-Team: \n"
 "Language: el\n"
@@ -2802,19 +2802,16 @@ msgid "Filename:"
 msgstr "Όνομα αρχείου:"
 
 #: ../src/gui/siril3.glade.h:607
-#, fuzzy
 msgid "Enter the filename of the exported CSV file."
-msgstr "Εισάγετε το όνομα του εξαγώμενου αρχείου PNG."
+msgstr "Εισάγετε το όνομα του εξαγώμενου αρχείου CSV."
 
 #: ../src/gui/siril3.glade.h:608
-#, fuzzy
 msgid "Export to CSV"
-msgstr "Εξαγωγή σε PNG"
+msgstr "Εξαγωγή σε CSV"
 
 #: ../src/gui/siril3.glade.h:609
-#, fuzzy
 msgid "Export displayed plot to a CSV file."
-msgstr "Εξαγωγή του τρέχοντος διαγράμματος σε αρχείο PNG."
+msgstr "Εξαγωγή του τρέχοντος διαγράμματος σε αρχείο CSV."
 
 #: ../src/gui/siril3.glade.h:610
 msgid "Select which information to display from photometry data."
@@ -4520,10 +4517,7 @@ msgstr ""
 msgid ""
 "Cyril Richard <cyril@free-astro.org>\n"
 "Vincent Hourdin <vh@free-astro.vinvin.tf>"
-msgstr ""
-"Cyril Richard <cyril@free-astro.org>\n"
-"Vincent Hourdin <vh@free-astro.vinvin.tf>\n"
-"Konstantinos Stavropoulos"
+msgstr "Konstantinos Stavropoulos <kookoo_gr@yahoo.com>"
 
 #: ../src/gui/callbacks.c:3819
 msgid "About siril"
@@ -4772,9 +4766,9 @@ msgid "Star %d of %d"
 msgstr "Αστέρι %d από %d"
 
 #: ../src/gui/plot.c:180
-#, fuzzy, c-format
+#, c-format
 msgid "%s.csv has been saved.\n"
-msgstr "%s.png έχει αποθηκευτεί.\n"
+msgstr "%s.csv έχει αποθηκευτεί.\n"
 
 #: ../src/gui/plot.c:181
 msgid "Information"
