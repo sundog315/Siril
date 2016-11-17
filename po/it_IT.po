@@ -2,20 +2,20 @@
 # Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
-# 
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: Siril in Italiano\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-11-16 21:13+0100\n"
-"PO-Revision-Date: 2016-11-16 20:54+0100\n"
-"Last-Translator: Sonia Zorba <sonia@zonia3000.net>\n"
+"POT-Creation-Date: 2016-11-17 09:46+0100\n"
+"PO-Revision-Date: 2016-11-16 23:51+0100\n"
+"Last-Translator: Cyril Richard <cyril@free-astro.fr>\n"
 "Language-Team: Italian <sonia@zonia3000.net>\n"
 "Language: it_IT\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.6.10\n"
+"X-Generator: Poedit 1.8.11\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: ../src/gui/siril3.glade.h:1
@@ -2787,19 +2787,16 @@ msgid "Filename:"
 msgstr "Nome del file:"
 
 #: ../src/gui/siril3.glade.h:607
-#, fuzzy
 msgid "Enter the filename of the exported CSV file."
-msgstr "Inserisci il nome del file PNG esportato."
+msgstr "Inserisci il nome del file CSV esportato."
 
 #: ../src/gui/siril3.glade.h:608
-#, fuzzy
 msgid "Export to CSV"
-msgstr "Esporta in PNG"
+msgstr "Esporta in CSV"
 
 #: ../src/gui/siril3.glade.h:609
-#, fuzzy
 msgid "Export displayed plot to a CSV file."
-msgstr "Esporta il grafico visualizzato in un file PNG."
+msgstr "Esporta il grafico visualizzato in un file CSV."
 
 #: ../src/gui/siril3.glade.h:610
 msgid "Select which information to display from photometry data."
@@ -4755,9 +4752,9 @@ msgid "Star %d of %d"
 msgstr "Stella %d di %d"
 
 #: ../src/gui/plot.c:180
-#, fuzzy, c-format
+#, c-format
 msgid "%s.csv has been saved.\n"
-msgstr "%s.png è stato salvato.\n"
+msgstr "%s.csv è stato salvato.\n"
 
 #: ../src/gui/plot.c:181
 msgid "Information"

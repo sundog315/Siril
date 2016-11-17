@@ -420,7 +420,7 @@ void notify_new_photometry() {
 
 static void set_colors(struct kplotcfg *cfg) {
 	int i;
-	cfg->clrsz = 7;	// should be MAX_SEQPSF
+	cfg->clrsz = MAX_SEQPSF;
 	cfg->clrs = calloc(cfg->clrsz, sizeof(struct kplotccfg));
 	for (i = 0; i < cfg->clrsz; i++) {
 		cfg->clrs[i].type = KPLOTCTYPE_RGBA;
