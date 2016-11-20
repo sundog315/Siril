@@ -897,11 +897,7 @@ void free_sequence(sequence *seq, gboolean free_seq_too) {
 	reset_plot();
 
 	for (i = 0; i < MAX_SEQPSF && seq->photometry[i]; i++) {
-		for (j = 0; j < seq->number; j++) {
-			if (seq->photometry[i][j])
-				free(seq->photometry[i][j]);
-		}
-		free(seq->photometry[i]);
+		free_photometry_set(seq, i);
 	}
 
 	if (free_seq_too)	free(seq);

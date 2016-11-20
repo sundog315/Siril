@@ -32,7 +32,8 @@
 #include "kplot.h"
 #include "algos/PSF.h"
 
-static GtkWidget *drawingPlot = NULL, *sourceCombo = NULL, *combo = NULL, *buttonExport = NULL;
+static GtkWidget *drawingPlot = NULL, *sourceCombo = NULL, *combo = NULL,
+		 *buttonExport = NULL, *buttonClearAll = NULL, *buttonClearLatest = NULL;
 static pldata *plot_data;
 static struct kpair ref;
 static gboolean is_fwhm = FALSE, use_photometry = FALSE, requires_color_update = FALSE;
@@ -218,6 +219,8 @@ void reset_plot() {
 		gtk_widget_set_visible(sourceCombo, FALSE);
 		gtk_widget_set_visible(combo, FALSE);
 		gtk_widget_set_sensitive(buttonExport, FALSE);
+		gtk_widget_set_sensitive(buttonClearLatest, FALSE);
+		gtk_widget_set_sensitive(buttonClearAll, FALSE);
 	}
 }
 
@@ -230,6 +233,8 @@ void drawPlot() {
 		combo = lookup_widget("plotCombo");
 		sourceCombo = lookup_widget("plotSourceCombo");
 		buttonExport = lookup_widget("ButtonSaveCSV");
+		buttonClearAll  = lookup_widget("clearAllPhotometry");
+		buttonClearLatest = lookup_widget("clearLastPhotometry");
 	}
 
 	seq = &com.seq;
@@ -290,6 +295,37 @@ void on_ButtonSaveCSV_clicked(GtkButton *button, gpointer user_data) {
 	set_cursor_waiting(TRUE);
 	exportCSV(plot_data, &com.seq);
 	set_cursor_waiting(FALSE);
+}
+
+void free_photometry_set(sequence *seq, int set) {
+	int j;
+	for (j = 0; j < seq->number; j++) {
+		if (seq->photometry[set][j])
+			free(seq->photometry[set][j]);
+	}
+	free(seq->photometry[set]);
+	seq->photometry[set] = NULL;
+}
+
+void on_clearLatestPhotometry_clicked(GtkButton *button, gpointer user_data) {
+	int i;
+	for (i = 0; i < MAX_SEQPSF && com.seq.photometry[i]; i++);
+	if (i != 0) {
+		i--;
+		free_photometry_set(&com.seq, i);
+	}
+	if (i == 0)
+		reset_plot();
+	drawPlot();
+}
+
+void on_clearAllPhotometry_clicked(GtkButton *button, gpointer user_data) {
+	int i;
+	for (i = 0; i < MAX_SEQPSF && com.seq.photometry[i]; i++) {
+		free_photometry_set(&com.seq, i);
+	}
+	reset_plot();
+	drawPlot();
 }
 
 gboolean on_DrawingPlot_draw(GtkWidget *widget, cairo_t *cr, gpointer data) {
@@ -416,6 +452,8 @@ void notify_new_photometry() {
 	requires_color_update = TRUE;
 	gtk_widget_set_visible(sourceCombo, TRUE);
 	gtk_combo_box_set_active(GTK_COMBO_BOX(sourceCombo), 1);
+	gtk_widget_set_sensitive(buttonClearLatest, TRUE);
+	gtk_widget_set_sensitive(buttonClearAll, TRUE);
 }
 
 static void set_colors(struct kplotcfg *cfg) {
