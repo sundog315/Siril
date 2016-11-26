@@ -35,9 +35,8 @@ static inline int
 kpair_vrfy(const struct kpair *data)
 {
 
-	if (0.0 != data->x && ! isnormal(data->x))
-		return(0);
-	if (0.0 != data->y && ! isnormal(data->y))
+	if (0.0 != data->x && ! isnormal(data->x) &&
+			0.0 != data->y && ! isnormal(data->y))
 		return(0);
 	return(1);
 }

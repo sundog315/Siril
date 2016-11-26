@@ -178,6 +178,7 @@ all: libkplot.a
 install: all
 
 uninstall: ;
+distclean: clean
 
 www: $(HTMLS) $(PNGS) kplot.tgz kplot.tgz.sha512
 

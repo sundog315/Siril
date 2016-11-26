@@ -19,6 +19,7 @@
 #include <string.h>
 #include <glib.h>
 #include <gegl.h>
+#include <stdlib.h>
 #include <gtk/gtk.h>
 #include <gegl-gtk.h>
 

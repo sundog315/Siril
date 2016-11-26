@@ -21,10 +21,18 @@ set -x
 aclocal --install || exit 1
 intltoolize --force --copy --automake || exit 1
 autoreconf --verbose --force --install -Wno-portability || exit 1
+
 { set +x; } 2>/dev/null
+
+echo -e "\n$PKG_NAME preparation finished, doing autogen for gegl-gtk now."
+
+$srcdir/deps/gegl-gtk/autogen.sh || exit 1
 
 if [ "$NOCONFIGURE" = "" ]; then
         set -x
+	cd "$srcdir/deps/gegl-gtk/"
+	./configure --with-gtk=3.0 --disable-shared --enable-static --enable-debug --disable-introspection --without-vala --without-xvfb-run || exit 1
+	cd -
         $srcdir/configure "$@" || exit 1
         { set +x; } 2>/dev/null
 
