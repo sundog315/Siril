@@ -81,7 +81,7 @@ int main(int argc, char **argv) {
 	/* create the gegl buffer from fit */
 	const Babl* format = babl_format("Y u16");
 	GeglBuffer *buf = gegl_buffer_new(&rect, format);
-	gegl_buffer_set(buf, &rect, 0, format, &fit.pdata[0], GEGL_AUTO_ROWSTRIDE);
+	gegl_buffer_set(buf, &rect, 0, format, fit.pdata[0], GEGL_AUTO_ROWSTRIDE);
 	/* create the graph that displays this buffer */
 	GeglNode *bufnode = gegl_node_new_child(gegl,
 			"operation", "gegl:buffer-source", "buffer", buf, NULL);
