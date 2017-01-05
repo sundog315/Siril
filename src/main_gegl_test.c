@@ -125,7 +125,7 @@ static int readfits(const char *filename, fits *fit) {
 	unsigned int nbdata;
 	BYTE *data8;
 
-	fit->naxes[2] = 1; //initialization of the axis numer before opening : NEED TO BE OPTIMIZED
+	fit->naxes[2] = 1;
 
 	status = 0;
 	fits_open_diskfile(&(fit->fptr), filename, READONLY, &status);
