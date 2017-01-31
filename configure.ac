@@ -66,8 +66,8 @@ AC_CHECK_LIB(m, log, LIBS="$LIBS -lm")
 dnl check GTK
 PKG_CHECK_MODULES(GTK, gtk+-3.0 >= 3.6.0)
 
-dnl check GTK
-PKG_CHECK_MODULES(GEGL, gegl-0.3)
+dnl check vips
+PKG_CHECK_MODULES(VIPS, [vips])
 
 dnl check fftw3
 PKG_CHECK_MODULES(FFTW, [fftw3])

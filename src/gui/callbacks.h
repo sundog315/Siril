@@ -36,6 +36,8 @@ void clear_sampling_setting_box();
 void set_GUI_CAMERA();
 void set_GUI_LIBRAW();
 
+void remap(int vport);
+
 typedef void (*selection_update_callback)();
 void register_selection_update_callback(selection_update_callback f);
 void unregister_selection_update_callback(selection_update_callback f);

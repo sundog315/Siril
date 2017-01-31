@@ -47,6 +47,7 @@
 #include "stacking/stacking.h"
 #include "core/undo.h"
 #include "io/single_image.h"
+#include "gui/vips_display.h"
 
 #define GLADE_FILE "siril3.glade"
 
@@ -252,6 +253,8 @@ int main(int argc, char *argv[]) {
 	siril_path = siril_sources[i];
 
 	gtk_builder_connect_signals (builder, NULL);
+
+	initialize_vips(argv[0]);
 
 	/* Create tags associated with the buffer for the output text. */
 	GtkTextBuffer *tbuf = gtk_text_view_get_buffer(GTK_TEXT_VIEW(gtk_builder_get_object(builder, "output")));

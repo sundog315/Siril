@@ -153,7 +153,6 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
                     <property name="events">GDK_BUTTON_PRESS_MASK | GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
                     <signal name="button-press-event" handler="on_drawingarea_button_press_event" swapped="no"/>
                     <signal name="button-release-event" handler="on_drawingarea_button_release_event" swapped="no"/>
-                    <signal name="draw" handler="redraw_drawingarea" swapped="no"/>
                     <signal name="key-press-event" handler="on_drawingarea_key_press_event" swapped="no"/>
                     <signal name="motion-notify-event" handler="on_drawingarea_motion_notify_event" swapped="no"/>
                     <signal name="popup-menu" handler="rgb_area_popup_menu_handler" swapped="no"/>
@@ -1169,7 +1168,6 @@ enter a visible wavelength in nm</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK</property>
                                 <signal name="button-press-event" handler="on_drawingarea_button_press_event" swapped="no"/>
                                 <signal name="button-release-event" handler="on_drawingarea_button_release_event" swapped="no"/>
-                                <signal name="draw" handler="redraw_drawingarea" swapped="no"/>
                                 <signal name="enter-notify-event" handler="on_drawingarea_entry_notify_event" swapped="no"/>
                                 <signal name="key-press-event" handler="on_drawingarea_key_press_event" swapped="no"/>
                                 <signal name="leave-notify-event" handler="on_drawingarea_leave_notify_event" swapped="no"/>
@@ -1319,7 +1317,6 @@ enter a visible wavelength in nm</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK</property>
                                 <signal name="button-press-event" handler="on_drawingarea_button_press_event" swapped="no"/>
                                 <signal name="button-release-event" handler="on_drawingarea_button_release_event" swapped="no"/>
-                                <signal name="draw" handler="redraw_drawingarea" swapped="no"/>
                                 <signal name="enter-notify-event" handler="on_drawingarea_entry_notify_event" swapped="no"/>
                                 <signal name="key-press-event" handler="on_drawingarea_key_press_event" swapped="no"/>
                                 <signal name="leave-notify-event" handler="on_drawingarea_leave_notify_event" swapped="no"/>
@@ -1473,7 +1470,6 @@ enter a visible wavelength in nm</property>
                                 <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK</property>
                                 <signal name="button-press-event" handler="on_drawingarea_button_press_event" swapped="no"/>
                                 <signal name="button-release-event" handler="on_drawingarea_button_release_event" swapped="no"/>
-                                <signal name="draw" handler="redraw_drawingarea" swapped="no"/>
                                 <signal name="enter-notify-event" handler="on_drawingarea_entry_notify_event" swapped="no"/>
                                 <signal name="key-press-event" handler="on_drawingarea_key_press_event" swapped="no"/>
                                 <signal name="leave-notify-event" handler="on_drawingarea_leave_notify_event" swapped="no"/>

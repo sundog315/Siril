@@ -447,6 +447,8 @@ static void remaprgb(void) {
 	if (!isrgb(&gfit))
 		return;
 
+	vips_remaprgb();
+#if 0
 	// allocate if not already done or the same size
 	if (cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, gfit.rx)
 			!= com.surface_stride[RGB_VPORT]
@@ -502,6 +504,7 @@ static void remaprgb(void) {
 	// flush to ensure all writing to the image was done and redraw the surface
 	cairo_surface_flush(com.surface[RGB_VPORT]);
 	cairo_surface_mark_dirty(com.surface[RGB_VPORT]);
+#endif
 }
 
 static void set_viewer_mode_widgets_sensitive(gboolean sensitive) {
@@ -602,7 +605,7 @@ static void test_and_allocate_reference_image(int vport) {
 	}
 }
 
-static void remap(int vport) {
+void remap(int vport) {
 	// This function maps fit data with a linear LUT between lo and hi levels
 	// to the buffer to be displayed; display only is modified
 	guint x, y;
@@ -633,6 +636,25 @@ static void remap(int vport) {
 		return;
 	}
 
+	if (single_image_is_loaded() && com.seq.current != RESULT_IMAGE) {
+		mode = com.uniq->layers[vport].rendering_mode;
+		hi = com.uniq->layers[vport].hi;
+		lo = com.uniq->layers[vport].lo;
+		do_cut_over = com.uniq->layers[vport].cut_over;
+	} else if (sequence_is_loaded() && vport < com.seq.nb_layers) {
+		// the check above is needed because there may be a different
+		// number of channels between the unique image and the sequence
+		mode = com.seq.layers[vport].rendering_mode;
+		hi = com.seq.layers[vport].hi;
+		lo = com.seq.layers[vport].lo;
+		do_cut_over = com.seq.layers[vport].cut_over;
+	} else {
+		fprintf(stderr, "BUG in unique image remap\n");
+		return;
+	}
+
+	vips_remap(vport, lo, hi);
+#if 0
 	// allocate if not already done or the same size
 	if (cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, gfit.rx) !=
 			com.surface_stride[vport] ||
@@ -671,22 +693,6 @@ static void remap(int vport) {
 			com.surface[vport] = NULL;
 			return;
 		}
-	}
-	if (single_image_is_loaded() && com.seq.current != RESULT_IMAGE) {
-		mode = com.uniq->layers[vport].rendering_mode;
-		hi = com.uniq->layers[vport].hi;
-		lo = com.uniq->layers[vport].lo;
-		do_cut_over = com.uniq->layers[vport].cut_over;
-	} else if (sequence_is_loaded() && vport < com.seq.nb_layers) {
-		// the check above is needed because there may be a different
-		// number of channels between the unique image and the sequence
-		mode = com.seq.layers[vport].rendering_mode;
-		hi = com.seq.layers[vport].hi;
-		lo = com.seq.layers[vport].lo;
-		do_cut_over = com.seq.layers[vport].cut_over;
-	} else {
-		fprintf(stderr, "BUG in unique image remap\n");
-		return;
 	}
 
 	if (lo > hi) {
@@ -790,6 +796,7 @@ static void remap(int vport) {
 	cairo_surface_mark_dirty(com.surface[vport]);
 
 	test_and_allocate_reference_image(vport);
+#endif
 }
 
 static int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,

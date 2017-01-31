@@ -31,6 +31,7 @@
 #include "gui/PSF_list.h"
 #include "gui/histogram.h"
 #include "core/undo.h"
+#include "gui/vips_display.h"
 
 /* Closes and frees resources attached to the single image opened in gfit.
  * If a sequence is loaded and one of its images is displayed, nothing is done.
@@ -201,6 +202,7 @@ void open_single_image_from_gfit(char *realname) {
 	/* update menus */
 	update_MenuItem();
 
+	vips_reload();
 	redraw(com.cvport, REMAP_ALL);
 	update_used_memory();
 	show_main_gray_window();
