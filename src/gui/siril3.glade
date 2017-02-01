@@ -143,16 +143,22 @@ along with Siril.  If not, see <http://www.gnu.org/licenses/>.
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkDrawingArea" id="drawingareargb">
+              <object class="GtkViewport" id="viewport2">
                 <property name="visible">True</property>
-                <property name="can_focus">True</property>
-                <property name="events">GDK_BUTTON_PRESS_MASK | GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK | GDK_SCROLL_MASK</property>
-                <signal name="button-press-event" handler="on_drawingarea_button_press_event" swapped="no"/>
-                <signal name="button-release-event" handler="on_drawingarea_button_release_event" swapped="no"/>
-                <signal name="key-press-event" handler="on_drawingarea_key_press_event" swapped="no"/>
-                <signal name="motion-notify-event" handler="on_drawingarea_motion_notify_event" swapped="no"/>
-                <signal name="popup-menu" handler="rgb_area_popup_menu_handler" swapped="no"/>
-                <signal name="scroll-event" handler="on_drawingarea_scroll_event" swapped="no"/>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkDrawingArea" id="drawingareargb">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="events">GDK_BUTTON_PRESS_MASK | GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK | GDK_SCROLL_MASK</property>
+                    <signal name="button-press-event" handler="on_drawingarea_button_press_event" swapped="no"/>
+                    <signal name="button-release-event" handler="on_drawingarea_button_release_event" swapped="no"/>
+                    <signal name="key-press-event" handler="on_drawingarea_key_press_event" swapped="no"/>
+                    <signal name="motion-notify-event" handler="on_drawingarea_motion_notify_event" swapped="no"/>
+                    <signal name="popup-menu" handler="rgb_area_popup_menu_handler" swapped="no"/>
+                    <signal name="scroll-event" handler="on_drawingarea_scroll_event" swapped="no"/>
+                  </object>
+                </child>
               </object>
             </child>
           </object>
@@ -1153,17 +1159,23 @@ enter a visible wavelength in nm</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkDrawingArea" id="drawingarear">
+                          <object class="GtkViewport" id="viewportr">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_SCROLL_MASK</property>
-                            <signal name="button-press-event" handler="on_drawingarea_button_press_event" swapped="no"/>
-                            <signal name="button-release-event" handler="on_drawingarea_button_release_event" swapped="no"/>
-                            <signal name="enter-notify-event" handler="on_drawingarea_entry_notify_event" swapped="no"/>
-                            <signal name="key-press-event" handler="on_drawingarea_key_press_event" swapped="no"/>
-                            <signal name="leave-notify-event" handler="on_drawingarea_leave_notify_event" swapped="no"/>
-                            <signal name="motion-notify-event" handler="on_drawingarea_motion_notify_event" swapped="no"/>
-                            <signal name="scroll-event" handler="on_drawingarea_scroll_event" swapped="no"/>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkDrawingArea" id="drawingarear">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_SCROLL_MASK</property>
+                                <signal name="button-press-event" handler="on_drawingarea_button_press_event" swapped="no"/>
+                                <signal name="button-release-event" handler="on_drawingarea_button_release_event" swapped="no"/>
+                                <signal name="enter-notify-event" handler="on_drawingarea_entry_notify_event" swapped="no"/>
+                                <signal name="key-press-event" handler="on_drawingarea_key_press_event" swapped="no"/>
+                                <signal name="leave-notify-event" handler="on_drawingarea_leave_notify_event" swapped="no"/>
+                                <signal name="motion-notify-event" handler="on_drawingarea_motion_notify_event" swapped="no"/>
+                                <signal name="scroll-event" handler="on_drawingarea_scroll_event" swapped="no"/>
+                              </object>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -1297,16 +1309,23 @@ enter a visible wavelength in nm</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkDrawingArea" id="drawingareag">
+                          <object class="GtkViewport" id="viewportg">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK</property>
-                            <signal name="button-press-event" handler="on_drawingarea_button_press_event" swapped="no"/>
-                            <signal name="button-release-event" handler="on_drawingarea_button_release_event" swapped="no"/>
-                            <signal name="enter-notify-event" handler="on_drawingarea_entry_notify_event" swapped="no"/>
-                            <signal name="key-press-event" handler="on_drawingarea_key_press_event" swapped="no"/>
-                            <signal name="leave-notify-event" handler="on_drawingarea_leave_notify_event" swapped="no"/>
-                            <signal name="motion-notify-event" handler="on_drawingarea_motion_notify_event" swapped="no"/>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkDrawingArea" id="drawingareag">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_SCROLL_MASK</property>
+                                <signal name="button-press-event" handler="on_drawingarea_button_press_event" swapped="no"/>
+                                <signal name="button-release-event" handler="on_drawingarea_button_release_event" swapped="no"/>
+                                <signal name="enter-notify-event" handler="on_drawingarea_entry_notify_event" swapped="no"/>
+                                <signal name="key-press-event" handler="on_drawingarea_key_press_event" swapped="no"/>
+                                <signal name="leave-notify-event" handler="on_drawingarea_leave_notify_event" swapped="no"/>
+                                <signal name="motion-notify-event" handler="on_drawingarea_motion_notify_event" swapped="no"/>
+                                <signal name="scroll-event" handler="on_drawingarea_scroll_event" swapped="no"/>
+                              </object>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -1427,6 +1446,7 @@ enter a visible wavelength in nm</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Green channel</property>
                     <property name="justify">center</property>
+                    <signal name="scroll-event" handler="on_drawingarea_scroll_event" swapped="no"/>
                   </object>
                   <packing>
                     <property name="position">1</property>
@@ -1444,16 +1464,23 @@ enter a visible wavelength in nm</property>
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
-                          <object class="GtkDrawingArea" id="drawingareab">
+                          <object class="GtkViewport" id="viewportb">
                             <property name="visible">True</property>
-                            <property name="can_focus">True</property>
-                            <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK</property>
-                            <signal name="button-press-event" handler="on_drawingarea_button_press_event" swapped="no"/>
-                            <signal name="button-release-event" handler="on_drawingarea_button_release_event" swapped="no"/>
-                            <signal name="enter-notify-event" handler="on_drawingarea_entry_notify_event" swapped="no"/>
-                            <signal name="key-press-event" handler="on_drawingarea_key_press_event" swapped="no"/>
-                            <signal name="leave-notify-event" handler="on_drawingarea_leave_notify_event" swapped="no"/>
-                            <signal name="motion-notify-event" handler="on_drawingarea_motion_notify_event" swapped="no"/>
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkDrawingArea" id="drawingareab">
+                                <property name="visible">True</property>
+                                <property name="can_focus">True</property>
+                                <property name="events">GDK_POINTER_MOTION_MASK | GDK_BUTTON_MOTION_MASK | GDK_BUTTON1_MOTION_MASK | GDK_BUTTON_PRESS_MASK | GDK_BUTTON_RELEASE_MASK | GDK_KEY_PRESS_MASK | GDK_ENTER_NOTIFY_MASK | GDK_LEAVE_NOTIFY_MASK | GDK_SCROLL_MASK</property>
+                                <signal name="button-press-event" handler="on_drawingarea_button_press_event" swapped="no"/>
+                                <signal name="button-release-event" handler="on_drawingarea_button_release_event" swapped="no"/>
+                                <signal name="enter-notify-event" handler="on_drawingarea_entry_notify_event" swapped="no"/>
+                                <signal name="key-press-event" handler="on_drawingarea_key_press_event" swapped="no"/>
+                                <signal name="leave-notify-event" handler="on_drawingarea_leave_notify_event" swapped="no"/>
+                                <signal name="motion-notify-event" handler="on_drawingarea_motion_notify_event" swapped="no"/>
+                                <signal name="scroll-event" handler="on_drawingarea_scroll_event" swapped="no"/>
+                              </object>
+                            </child>
                           </object>
                         </child>
                       </object>
@@ -1575,6 +1602,7 @@ enter a visible wavelength in nm</property>
                     <property name="can_focus">False</property>
                     <property name="label" translatable="yes">Blue channel</property>
                     <property name="justify">center</property>
+                    <signal name="scroll-event" handler="on_drawingarea_scroll_event" swapped="no"/>
                   </object>
                   <packing>
                     <property name="position">2</property>
