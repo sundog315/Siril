@@ -101,5 +101,7 @@ void on_checkbutton_auto_toggled(GtkButton *button, gpointer user_data);
 
 gboolean on_drawingarea_key_press_event(GtkWidget *widget, GdkEventKey *event, gpointer user_data);
 
+gboolean on_drawingarea_scroll_event(GtkWidget *widget,
+		GdkEventScroll *event, gpointer user_data);
 
 #endif

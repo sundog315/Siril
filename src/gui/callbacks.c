@@ -84,28 +84,6 @@ static display_mode last_mode[MAXGRAYVPORT];
  *                    S T A T I C      F U N C T I O N S                     *
  ****************************************************************************/
 
-/* this function calculates the "fit to window" zoom values, given the window
- * size in argument and the image size in gfit.
- * Should not be called before displaying the main gray window when using zoom to fit */
-double get_zoom_val() {
-	int window_width, window_height;
-	double wtmp, htmp;
-	static GtkWidget *scrolledwin = NULL;
-	if (scrolledwin == NULL)
-		scrolledwin = lookup_widget("scrolledwindowr");
-	if (com.zoom_value > 0.)
-		return com.zoom_value;
-	/* else if zoom is < 0, it means fit to window */
-	window_width = gtk_widget_get_allocated_width(scrolledwin);
-	window_height = gtk_widget_get_allocated_height(scrolledwin);
-	if (gfit.rx == 0 || gfit.ry == 0 || window_height <= 1 || window_width <= 1)
-		return 1.0;
-	wtmp = (double) window_width / (double) gfit.rx;
-	htmp = (double) window_height / (double) gfit.ry;
-	//fprintf(stdout, "computed fit to window zooms: %f, %f\n", wtmp, htmp);
-	return min(wtmp, htmp);
-}
-
 /*
  * Progress bar static functions
  */
@@ -1559,6 +1537,28 @@ static void do_popup_graymenu(GtkWidget *my_widget, GdkEventButton *event) {
 
 GtkWidget* lookup_widget(const gchar *widget_name) {
 	return GTK_WIDGET(gtk_builder_get_object(builder, widget_name));
+}
+
+/* this function calculates the "fit to window" zoom values, given the window
+ * size in argument and the image size in gfit.
+ * Should not be called before displaying the main gray window when using zoom to fit */
+double get_zoom_val() {
+	int window_width, window_height;
+	double wtmp, htmp;
+	static GtkWidget *scrolledwin = NULL;
+	if (scrolledwin == NULL)
+		scrolledwin = lookup_widget("scrolledwindowr");
+	if (com.zoom_value > 0.)
+		return com.zoom_value;
+	/* else if zoom is < 0, it means fit to window */
+	window_width = gtk_widget_get_allocated_width(scrolledwin);
+	window_height = gtk_widget_get_allocated_height(scrolledwin);
+	if (gfit.rx == 0 || gfit.ry == 0 || window_height <= 1 || window_width <= 1)
+		return 1.0;
+	wtmp = (double) window_width / (double) gfit.rx;
+	htmp = (double) window_height / (double) gfit.ry;
+	//fprintf(stdout, "computed fit to window zooms: %f, %f\n", wtmp, htmp);
+	return min(wtmp, htmp);
 }
 
 void set_sliders_value_to_gfit() {
@@ -5973,4 +5973,43 @@ void on_rgb_align_dft_activate(GtkMenuItem *menuitem, gpointer user_data) {
 void on_rgb_align_psf_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	undo_save_state("Processing: RGB alignment (PSF)");
 	rgb_align(0);
+}
+
+gboolean on_drawingarea_scroll_event(GtkWidget *widget, GdkEventScroll *event,
+		gpointer user_data) {
+	gboolean handled;
+	int image_x;
+	int image_y;
+
+//	printf("imagepresent_scroll_event: %d\n", event->direction);
+
+	handled = FALSE;
+
+	switch (event->direction) {
+	case GDK_SCROLL_UP:
+		if (com.zoom_value < 16) {
+			com.zoom_value *= 2;
+			adjust_vport_size_to_image();
+			redraw(com.cvport, REMAP_NONE);
+			zoomcombo_update_display_for_zoom();
+		}
+
+		handled = TRUE;
+		break;
+
+	case GDK_SCROLL_DOWN:
+		if (com.zoom_value > 0.125) {
+			com.zoom_value /= 2;
+			adjust_vport_size_to_image();
+			redraw(com.cvport, REMAP_NONE);
+			zoomcombo_update_display_for_zoom();
+		}
+		handled = TRUE;
+		break;
+
+	default:
+		break;
+	}
+
+	return (handled);
 }
