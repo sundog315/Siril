@@ -51,7 +51,7 @@ typedef unsigned short WORD;		// default type for internal image data
 #define ZOOM_MIN	0.0625
 #define ZOOM_NONE	1.0
 #define ZOOM_FIT	-1.0	// or any value < 0
-#define ZOOM_DEFAULT	ZOOM_FIT
+#define ZOOM_DEFAULT	ZOOM_NONE
 
 #define LOW_BOUND  0.00002
 #define HIGH_BOUND 0.99998

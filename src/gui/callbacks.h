@@ -7,6 +7,8 @@
 
 GtkWidget* lookup_widget (const gchar *widget_name);
 
+double get_zoom_val();
+
 void initialize_shortcuts();
 void fill_about_dialog();
 void initialize_remap();

@@ -87,7 +87,7 @@ static display_mode last_mode[MAXGRAYVPORT];
 /* this function calculates the "fit to window" zoom values, given the window
  * size in argument and the image size in gfit.
  * Should not be called before displaying the main gray window when using zoom to fit */
-static double get_zoom_val() {
+double get_zoom_val() {
 	int window_width, window_height;
 	double wtmp, htmp;
 	static GtkWidget *scrolledwin = NULL;
@@ -427,7 +427,7 @@ static gboolean inimage(GdkEvent *event) {
 			&& ((GdkEventButton*) event)->y < gfit.ry * zoom;
 }
 
-static void draw_empty_image(cairo_t *cr, guint width, guint height) {
+/*static void draw_empty_image(cairo_t *cr, guint width, guint height) {
 	// black image with red square
 	cairo_set_source_rgb(cr, 0, 0, 0);
 	cairo_rectangle(cr, 0, 0, width, height);
@@ -435,77 +435,14 @@ static void draw_empty_image(cairo_t *cr, guint width, guint height) {
 	cairo_set_source_rgb(cr, 0.3, 0, 0);
 	cairo_rectangle(cr, 100, 70, 50, 50);
 	cairo_fill(cr);
-}
-
+}*/
 
 static void remaprgb(void) {
-	guchar *dst;
-	guchar *bufr, *bufg, *bufb;
-	gint i, j;
-	int nbdata;
-
 	fprintf(stderr, "remaprgb\n");
 	if (!isrgb(&gfit))
 		return;
 
 	vips_remaprgb();
-#if 0
-	// allocate if not already done or the same size
-	if (cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, gfit.rx)
-			!= com.surface_stride[RGB_VPORT]
-			|| gfit.ry != com.surface_height[RGB_VPORT]
-			|| !com.surface[RGB_VPORT] || !com.rgbbuf) {
-		guchar *oldbuf = com.rgbbuf;
-		fprintf(stderr, "RGB display buffers and surface (re-)allocation\n");
-		com.surface_stride[RGB_VPORT] = cairo_format_stride_for_width(
-				CAIRO_FORMAT_RGB24, gfit.rx);
-		com.surface_height[RGB_VPORT] = gfit.ry;
-		com.rgbbuf = realloc(com.rgbbuf,
-				com.surface_stride[RGB_VPORT] * gfit.ry * sizeof(guchar));
-		if (com.rgbbuf == NULL) {
-			fprintf(stderr,
-					"Could not allocate memory for RGB buffer (out of memory?)\n");
-			if (oldbuf)
-				free(oldbuf);
-			return;
-		}
-		if (com.surface[RGB_VPORT])
-			cairo_surface_destroy(com.surface[RGB_VPORT]);
-		com.surface[RGB_VPORT] = cairo_image_surface_create_for_data(com.rgbbuf,
-				CAIRO_FORMAT_RGB24, gfit.rx, gfit.ry,
-				com.surface_stride[RGB_VPORT]);
-		if (cairo_surface_status(com.surface[RGB_VPORT])
-				!= CAIRO_STATUS_SUCCESS) {
-			fprintf(stderr,
-					"Error creating the Cairo image surface for the RGB image\n");
-			cairo_surface_destroy(com.surface[RGB_VPORT]);
-			com.surface[RGB_VPORT] = NULL;
-			return;
-		}
-	}
-	// WARNING : this assumes that R, G and B buffers are already allocated and mapped
-	// it seems ok, but one can probably imagine situations where it segfaults
-	bufr = com.graybuf[RED_VPORT];
-	bufg = com.graybuf[GREEN_VPORT];
-	bufb = com.graybuf[BLUE_VPORT];
-	if (bufr == NULL || bufg == NULL || bufb == NULL) {
-		fprintf(stderr, "remaprgb: gray buffers not allocated for display\n");
-		return;
-	}
-	dst = com.rgbbuf;	// index is j
-	nbdata = gfit.rx * gfit.ry * 4;	// source images are 32-bit RGBA
-
-	for (i = 0, j = 0; i < nbdata; i += 4) {
-		dst[j++] = bufb[i];
-		dst[j++] = bufg[i];
-		dst[j++] = bufr[i];
-		j++;		// alpha padding
-	}
-
-	// flush to ensure all writing to the image was done and redraw the surface
-	cairo_surface_flush(com.surface[RGB_VPORT]);
-	cairo_surface_mark_dirty(com.surface[RGB_VPORT]);
-#endif
 }
 
 static void set_viewer_mode_widgets_sensitive(gboolean sensitive) {
@@ -535,9 +472,9 @@ static void set_viewer_mode_widgets_sensitive(gboolean sensitive) {
 	gtk_widget_set_sensitive(user, sensitive);
 }
 
-static int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
+/*static int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
 		int vport);
-static int make_index_for_rainbow(BYTE index[][3]);
+static int make_index_for_rainbow(BYTE index[][3]);*/
 
 /* enables or disables the "display reference" checkbox in registration preview */
 static void enable_view_reference_checkbox(gboolean status) {
@@ -609,12 +546,13 @@ static void test_and_allocate_reference_image(int vport) {
 void remap(int vport) {
 	// This function maps fit data with a linear LUT between lo and hi levels
 	// to the buffer to be displayed; display only is modified
-	guint x, y;
-	BYTE *dst, *index, rainbow_index[UCHAR_MAX + 1][3];
-	WORD *src, hi, lo;
+	//guint x, y;
+	//BYTE *dst, *index, rainbow_index[UCHAR_MAX + 1][3];
+	//WORD *src;
+	WORD hi, lo;
 	display_mode mode;
-	color_map color;
-	gboolean do_cut_over, inverted;
+	//color_map color;
+	//gboolean do_cut_over, inverted;
 
 	fprintf(stderr, "remap %d\n", vport);
 	if (vport == RGB_VPORT) {
@@ -641,20 +579,22 @@ void remap(int vport) {
 		mode = com.uniq->layers[vport].rendering_mode;
 		hi = com.uniq->layers[vport].hi;
 		lo = com.uniq->layers[vport].lo;
-		do_cut_over = com.uniq->layers[vport].cut_over;
+		//do_cut_over = com.uniq->layers[vport].cut_over;
 	} else if (sequence_is_loaded() && vport < com.seq.nb_layers) {
 		// the check above is needed because there may be a different
 		// number of channels between the unique image and the sequence
 		mode = com.seq.layers[vport].rendering_mode;
 		hi = com.seq.layers[vport].hi;
 		lo = com.seq.layers[vport].lo;
-		do_cut_over = com.seq.layers[vport].cut_over;
+		//do_cut_over = com.seq.layers[vport].cut_over;
 	} else {
 		fprintf(stderr, "BUG in unique image remap\n");
 		return;
 	}
 
-	vips_remap(vport, lo, hi);
+	set_viewer_mode_widgets_sensitive(mode != HISTEQ_DISPLAY && mode != STF_DISPLAY);
+
+	vips_remap(vport, lo, hi, mode);
 #if 0
 	// allocate if not already done or the same size
 	if (cairo_format_stride_for_width(CAIRO_FORMAT_RGB24, gfit.rx) !=
@@ -800,6 +740,7 @@ void remap(int vport) {
 #endif
 }
 
+#if 0
 static int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
 		int vport) {
 	float pente;
@@ -919,6 +860,7 @@ static int make_index_for_rainbow(BYTE index[][3]) {
 	}
 	return 0;
 }
+#endif
 
 /*
  * Free reference image
@@ -1887,6 +1829,8 @@ void update_MenuItem() {
 }
 
 gboolean redraw(int vport, int doremap) {
+	remap(vport);
+#if 0
 	GtkWidget *widget;
 
 	if (vport >= MAXVPORT) {
@@ -1928,6 +1872,7 @@ gboolean redraw(int vport, int doremap) {
 	}
 	//fprintf(stdout, "end of redraw\n");
 	com.drawn = FALSE;
+#endif
 	return FALSE;
 }
 
@@ -2806,50 +2751,17 @@ void on_register_all_toggle(GtkToggleButton *togglebutton, gpointer user_data) {
 	update_reg_interface(TRUE);
 }
 
-/* callback for GtkDrawingArea, draw event
- * see http://developer.gnome.org/gtk3/3.2/GtkDrawingArea.html
- * http://developer.gnome.org/gdk-pixbuf/stable/gdk-pixbuf-Image-Data-in-Memory.html
- * http://www.cairographics.org/manual/
- * http://www.cairographics.org/manual/cairo-Image-Surfaces.html#cairo-image-surface-create-for-data
- */
-gboolean redraw_drawingarea(GtkWidget *widget, cairo_t *cr, gpointer data) {
+/* paint overlays with cairo on top of vips stuff in the drawing area */
+gboolean paint_overlays(GtkWidget *widget, cairo_t *cr) {
 	int image_width, image_height, window_width, window_height;
-	int vport, i = 0;
+	int i = 0;
 	double zoom;
-
-	// we need to identify which vport is being redrawn
-	vport = match_drawing_area_widget(widget, TRUE);
-	if (vport == -1) {
-		fprintf(stderr, "Could not find the vport for the draw callback\n");
-		return TRUE;
-	}
 
 	window_width = gtk_widget_get_allocated_width(widget);
 	window_height = gtk_widget_get_allocated_height(widget);
 	zoom = get_zoom_val();
 	image_width = (int) (((double) window_width) / zoom);
 	image_height = (int) (((double) window_height) / zoom);
-
-	/* draw the RGB and gray images */
-	if (vport == RGB_VPORT) {
-		if (com.rgbbuf) {
-			cairo_scale(cr, zoom, zoom);
-			cairo_set_source_surface(cr, com.surface[RGB_VPORT], 0, 0);
-			cairo_paint(cr);
-		} else {
-			fprintf(stdout, "RGB buffer is empty, drawing black image\n");
-			draw_empty_image(cr, window_width, window_height);
-		}
-	} else {
-		if (com.graybuf[vport]) {
-			cairo_scale(cr, zoom, zoom);
-			cairo_set_source_surface(cr, com.surface[vport], 0, 0);
-			cairo_paint(cr);
-		} else {
-			fprintf(stdout, "Buffer %d is empty, drawing black image\n", vport);
-			draw_empty_image(cr, window_width, window_height);
-		}
-	}
 
 	/* draw the selection rectangle */
 	if (com.selection.w > 0 && com.selection.h > 0) {

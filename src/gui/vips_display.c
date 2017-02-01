@@ -24,6 +24,7 @@
 
 #include "vips_display.h"
 #include "gui/callbacks.h"
+#include "core/proto.h"
 
 /* This file contains all code interacting with vips, the fast rendering
  * library. It consequently contains the code responsible for drawing images in
@@ -33,15 +34,15 @@
 
 static VipsImage *images[MAXGRAYVPORT];		// raw monochrome images
 static VipsImage *mapped_images[MAXGRAYVPORT];	// colour-mapped monochrome images
-static VipsImage *display_images[MAXVPORT];	// RGB images representing mapped
-static VipsRegion *regions[MAXVPORT];
-static GtkWidget *drawing_area[MAXVPORT];
-static gulong draw_callbacks[MAXVPORT];
+static VipsImage *display_images[MAXVPORT];	// passing data from remap to display
+                                               
 
-static double last_scale[MAXGRAYVPORT];
+static GtkWidget *drawing_area[MAXVPORT];
+static gulong draw_callbacks[MAXVPORT];		// IDs for the draw callbacks
 
 static void render_notify( VipsImage *image, VipsRect *rect, void *client );
 static void vipsdisp_draw( GtkWidget *drawing_area, cairo_t *cr, VipsRegion *region );
+static void commit_rendering( int vport );
 
 
 void initialize_vips(const char *program_name) {
@@ -55,7 +56,6 @@ void initialize_vips(const char *program_name) {
 	memset(images, 0, sizeof(VipsImage *) * MAXGRAYVPORT);
 	memset(mapped_images, 0, sizeof(VipsImage *) * MAXGRAYVPORT);
 	memset(display_images, 0, sizeof(VipsImage *) * MAXVPORT);
-	memset(regions, 0, sizeof(VipsRegion *) * MAXVPORT);
 }
 
 /* to be called when gfit has changed and should be reloaded */
@@ -69,20 +69,13 @@ void vips_reload() {
 			g_object_unref(mapped_images[vport]);
 		if (display_images[vport])
 			g_object_unref(display_images[vport]);
-
-		if (regions[vport])
-			g_object_unref(regions[vport]);
-		last_scale[vport] = -1.0;
 	}
 	if (display_images[RGB_VPORT])
 		g_object_unref(display_images[RGB_VPORT]);
-	if (regions[RGB_VPORT])
-		g_object_unref(regions[RGB_VPORT]);
 
 	memset(images, 0, sizeof(VipsImage *) * MAXGRAYVPORT);
 	memset(mapped_images, 0, sizeof(VipsImage *) * MAXGRAYVPORT);
 	memset(display_images, 0, sizeof(VipsImage *) * MAXVPORT);
-	memset(regions, 0, sizeof(VipsRegion *) * MAXVPORT);
 
 	/* create new images from gfit and map them to mapped_images */
 	for (i = 0; i < gfit.naxes[2]; i++) {
@@ -94,6 +87,15 @@ void vips_reload() {
 			return;
 		}
 
+		VipsImage *x;
+		if (vips_flip(images[i], &x, VIPS_DIRECTION_VERTICAL, NULL)) {
+			g_object_unref(images[i]);
+			fprintf(stderr, "error flipping vips image %d\n", i);
+			return;
+		}
+		g_object_unref(images[i]);
+		images[i] = x;
+
 		remap(i);
 	}
 	vips_remaprgb();
@@ -102,37 +104,83 @@ void vips_reload() {
 /* to be called when gfit data or display parameters have changed and display
  * should be refreshed with the new configuration.
  * If gfit.data has moved or changed size, use vips_reload() instead. */
-void vips_remap(int vport, WORD lo, WORD hi) {
+void vips_remap(int vport, WORD lo, WORD hi, display_mode mode) {
+	int retval;
 	double scale, offset = 0.0;
 	scale = UCHAR_MAX_SINGLE / (double) (hi - lo);
 
 	fprintf(stdout, "vips remap %d, lo: %hd, hi: %hd\n", vport, lo, hi);
 
-	if (last_scale[vport] == scale)
-		return;
-	last_scale[vport] = scale;
-
-	if (mapped_images[vport])
+	if (mapped_images[vport]) {
 		g_object_unref(mapped_images[vport]);
+		mapped_images[vport] = NULL;
+	}
 
 	/* only linear mapping for now */
 	VipsImage *tmprgb[3];
-	vips_linear1( images[vport], &tmprgb[0], scale, offset, "uchar", TRUE, NULL );
+	retval = vips_linear1( images[vport], &tmprgb[0], scale, offset, "uchar", TRUE, NULL );
+	if (retval) return;
 	mapped_images[vport] = tmprgb[0];
-	vips_copy(tmprgb[0], &tmprgb[1], NULL);
-	vips_copy(tmprgb[0], &tmprgb[2], NULL);
-	vips_bandjoin(tmprgb, &display_images[vport], 3, NULL);
-	display_images[vport]->Type = VIPS_INTERPRETATION_sRGB;
-	g_object_unref(tmprgb[0]);
+
+	retval = vips_copy(tmprgb[0], &tmprgb[1], NULL);
+	if (retval) return;
+	retval = vips_copy(tmprgb[0], &tmprgb[2], NULL);
+	if (retval) { g_object_unref(tmprgb[1]); return; }
+
+	retval = vips_bandjoin(tmprgb, &display_images[vport], 3, NULL);
+	//g_object_unref(tmprgb[0]);
 	g_object_unref(tmprgb[1]);
 	g_object_unref(tmprgb[2]);
+	if (retval) return;
+	display_images[vport]->Type = VIPS_INTERPRETATION_sRGB;
+
+	/* recreate the draw callbacks for the viewport */
+	commit_rendering(vport);
+}
+
+/* from the three mapped_images, display the RGB image */
+void vips_remaprgb() {
+	if (!isrgb(&gfit) || !mapped_images[RED_VPORT] ||
+			!mapped_images[GREEN_VPORT] || !mapped_images[BLUE_VPORT])
+		return;
+
+	vips_bandjoin(mapped_images, &display_images[RGB_VPORT], 3, NULL);
+	commit_rendering(RGB_VPORT);
+}
+
+/* recreate the draw callbacks with the new region */
+void commit_rendering(int vport) {
+	VipsImage *x;
 
 	/* manage zoom */
-	// vips_zoom or vips_subsample
+	double zoom = get_zoom_val();
+	if (zoom < 0.0) {
+		// zoom to fit, not yet implemented
+		// use vips_resize()
+	}
+	else if (zoom < 1.0) {
+		// zoom out
+		int factor = round_to_int(1.0 / zoom);
+		if( vips_subsample( display_images[vport], &x, factor, factor, NULL ) ) {
+			g_object_unref(display_images[vport]);
+			return;
+		}
+		g_object_unref(display_images[vport]);
+		display_images[vport] = x;
+	}
+	else if (zoom > 1.0) {
+		// zoom in
+		int factor = round_to_int(zoom);
+		if( vips_zoom( display_images[vport], &x, factor, factor, NULL ) ) {
+			g_object_unref(display_images[vport]);
+			return; 
+		}
+		g_object_unref(display_images[vport]);
+		display_images[vport] = x;
+	}
 
-	/* recreate the draw callbacks with the new region */
 	/* start processing the display */
-	VipsImage *x = vips_image_new();
+	x = vips_image_new();
 	if( vips_sink_screen( display_images[vport], x, NULL, 128, 128, 400, 0, 
 				render_notify, drawing_area[vport] ) ) {
 		g_object_unref( display_images[vport] );
@@ -141,18 +189,12 @@ void vips_remap(int vport, WORD lo, WORD hi) {
 	g_object_unref( display_images[vport] );
 	display_images[vport] = x;
 
-	g_signal_handler_disconnect(drawing_area[vport], draw_callbacks[vport]);
-	if (regions[vport])
-		g_object_unref(regions[vport]);
+	if (draw_callbacks[vport])
+		g_signal_handler_disconnect(drawing_area[vport], draw_callbacks[vport]);
 
-	regions[vport] = vips_region_new(display_images[vport]);
+	VipsRegion *region = vips_region_new(display_images[vport]);
 	draw_callbacks[vport] = g_signal_connect(drawing_area[vport], "draw", 
-			G_CALLBACK( vipsdisp_draw ), regions[vport]);
-}
-
-/* from the three mapped_images, display the RGB image */
-void vips_remaprgb() {
-	fprintf(stderr, "RGB rendering not yet implemented\n");
+			G_CALLBACK( vipsdisp_draw ), region);
 }
 
 typedef struct _Update {
@@ -271,6 +313,8 @@ vipsdisp_draw( GtkWidget *drawing_area, cairo_t *cr, VipsRegion *region )
 	}
 
 	cairo_rectangle_list_destroy( rectangle_list );
+
+	// paint_overlays(drawing_area, cr);
 }
 
 

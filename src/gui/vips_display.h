@@ -7,7 +7,7 @@ void initialize_vips(const char *program_name);
 void uninitialize_vips();
 
 void vips_reload();
-void vips_remap(int vport, WORD lo, WORD hi);
+void vips_remap(int vport, WORD lo, WORD hi, display_mode mode);
 void vips_remaprgb();
 
 #endif
