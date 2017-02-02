@@ -109,7 +109,13 @@ void vips_remap(int vport, WORD lo, WORD hi, display_mode mode) {
 	double scale, offset = 0.0;
 	scale = UCHAR_MAX_SINGLE / (double) (hi - lo);
 
+
 	fprintf(stdout, "vips remap %d, lo: %hd, hi: %hd\n", vport, lo, hi);
+
+	if (lo > hi) {
+		// negative display
+		offset = UCHAR_MAX_DOUBLE;
+	}
 
 	if (mapped_images[vport]) {
 		g_object_unref(mapped_images[vport]);

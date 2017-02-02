@@ -5975,31 +5975,71 @@ void on_rgb_align_psf_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	rgb_align(0);
 }
 
+void get_window_position(int *left, int *top, int *width, int *height) {
+	GtkAdjustment *hadj = gtk_scrolled_window_get_hadjustment(
+			GTK_SCROLLED_WINDOW(lookup_widget("scrolledwindowr")));
+	GtkAdjustment *vadj = gtk_scrolled_window_get_vadjustment(
+			GTK_SCROLLED_WINDOW(lookup_widget("scrolledwindowr")));
+
+	*left = gtk_adjustment_get_value(hadj);
+	*top = gtk_adjustment_get_value(vadj);
+	*width = gtk_adjustment_get_page_size(hadj);
+	*height = gtk_adjustment_get_page_size(vadj);
+
+	printf("get_window_position: %d %d %d %d\n", *left, *top,
+			*width, *height);
+}
+
+static void set_window_position(int left, int top) {
+	GtkAdjustment *hadj = gtk_scrolled_window_get_hadjustment(
+			GTK_SCROLLED_WINDOW(lookup_widget("scrolledwindowr")));
+	GtkAdjustment *vadj = gtk_scrolled_window_get_vadjustment(
+			GTK_SCROLLED_WINDOW(lookup_widget("scrolledwindowr")));
+
+	printf("set_window_position: %d %d\n", left, top);
+
+	gtk_adjustment_set_value(hadj, left);
+	gtk_adjustment_set_value(vadj, top);
+}
+
+
 gboolean on_drawingarea_scroll_event(GtkWidget *widget, GdkEventScroll *event,
 		gpointer user_data) {
 	gboolean handled;
-	int image_x;
-	int image_y;
 
-//	printf("imagepresent_scroll_event: %d\n", event->direction);
+	int window_left;
+	int window_top;
+	int window_width;
+	int window_height;
+
+	int display_x;
+	int display_y;
 
 	handled = FALSE;
+	get_window_position(&window_left, &window_top, &window_width, &window_height);
+	display_x = event->x / com.zoom_value;
+	display_y = event->y / com.zoom_value;
+
+	printf("%d et %d\n", display_x, display_y);
 
 	switch (event->direction) {
 	case GDK_SCROLL_UP:
 		if (com.zoom_value < 16) {
 			com.zoom_value *= 2;
+			set_window_position(display_x - window_width / 2,
+					display_y - window_height / 2);
 			adjust_vport_size_to_image();
 			redraw(com.cvport, REMAP_NONE);
 			zoomcombo_update_display_for_zoom();
 		}
-
 		handled = TRUE;
 		break;
 
 	case GDK_SCROLL_DOWN:
 		if (com.zoom_value > 0.125) {
 			com.zoom_value /= 2;
+			set_window_position(display_x - window_width / 2,
+					display_y - window_height / 2);
 			adjust_vport_size_to_image();
 			redraw(com.cvport, REMAP_NONE);
 			zoomcombo_update_display_for_zoom();
