@@ -99,10 +99,4 @@ void on_spin_w_changed(GtkSpinButton *spinbutton, gpointer user_data);
 void on_checkbutton_cam_toggled(GtkButton *button, gpointer user_data);
 void on_checkbutton_auto_toggled(GtkButton *button, gpointer user_data);
 
-gboolean on_drawingarea_key_press_event(GtkWidget *widget, GdkEventKey *event, gpointer user_data);
-
-void get_window_position(int *left, int *top, int *width, int *height);
-gboolean on_drawingarea_scroll_event(GtkWidget *widget,
-		GdkEventScroll *event, gpointer user_data);
-
 #endif

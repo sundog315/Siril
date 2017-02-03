@@ -43,6 +43,7 @@ static gulong draw_callbacks[MAXVPORT];		// IDs for the draw callbacks
 static void render_notify( VipsImage *image, VipsRect *rect, void *client );
 static void vipsdisp_draw( GtkWidget *drawing_area, cairo_t *cr, VipsRegion *region );
 static void commit_rendering( int vport );
+static void release_data();
 
 
 void initialize_vips(const char *program_name) {
@@ -60,22 +61,9 @@ void initialize_vips(const char *program_name) {
 
 /* to be called when gfit has changed and should be reloaded */
 void vips_reload() {
-	/* release previous data */
-	int vport, i;
-	for (vport = 0; vport < MAXGRAYVPORT; vport++) {
-		if (images[vport])
-			g_object_unref(images[vport]);
-		if (mapped_images[vport])
-			g_object_unref(mapped_images[vport]);
-		if (display_images[vport])
-			g_object_unref(display_images[vport]);
-	}
-	if (display_images[RGB_VPORT])
-		g_object_unref(display_images[RGB_VPORT]);
-
-	memset(images, 0, sizeof(VipsImage *) * MAXGRAYVPORT);
-	memset(mapped_images, 0, sizeof(VipsImage *) * MAXGRAYVPORT);
-	memset(display_images, 0, sizeof(VipsImage *) * MAXVPORT);
+	int i;
+	fprintf(stdout, "vips reload\n");
+	release_data();
 
 	/* create new images from gfit and map them to mapped_images */
 	for (i = 0; i < gfit.naxes[2]; i++) {
@@ -109,11 +97,10 @@ void vips_remap(int vport, WORD lo, WORD hi, display_mode mode) {
 	double scale, offset = 0.0;
 	scale = UCHAR_MAX_SINGLE / (double) (hi - lo);
 
-
 	fprintf(stdout, "vips remap %d, lo: %hd, hi: %hd\n", vport, lo, hi);
 
 	if (lo > hi) {
-		// negative display
+		// negative display, scale is already negative
 		offset = UCHAR_MAX_DOUBLE;
 	}
 
@@ -157,6 +144,7 @@ void vips_remaprgb() {
 /* recreate the draw callbacks with the new region */
 void commit_rendering(int vport) {
 	VipsImage *x;
+	int retval;
 
 	/* manage zoom */
 	double zoom = get_zoom_val();
@@ -167,40 +155,34 @@ void commit_rendering(int vport) {
 	else if (zoom < 1.0) {
 		// zoom out
 		int factor = round_to_int(1.0 / zoom);
-		if( vips_subsample( display_images[vport], &x, factor, factor, NULL ) ) {
-			g_object_unref(display_images[vport]);
-			return;
-		}
+		retval = vips_subsample( display_images[vport], &x, factor, factor, NULL );
 		g_object_unref(display_images[vport]);
+		if (retval) return;
 		display_images[vport] = x;
 	}
 	else if (zoom > 1.0) {
 		// zoom in
 		int factor = round_to_int(zoom);
-		if( vips_zoom( display_images[vport], &x, factor, factor, NULL ) ) {
-			g_object_unref(display_images[vport]);
-			return; 
-		}
+		retval = vips_zoom( display_images[vport], &x, factor, factor, NULL );
 		g_object_unref(display_images[vport]);
+		if (retval) return; 
 		display_images[vport] = x;
 	}
 
-	/* start processing the display */
-	x = vips_image_new();
-	if( vips_sink_screen( display_images[vport], x, NULL, 128, 128, 400, 0, 
-				render_notify, drawing_area[vport] ) ) {
-		g_object_unref( display_images[vport] );
-		g_object_unref( x );
-	}
-	g_object_unref( display_images[vport] );
-	display_images[vport] = x;
-
 	if (draw_callbacks[vport])
 		g_signal_handler_disconnect(drawing_area[vport], draw_callbacks[vport]);
+	/* start processing the display */
+	x = vips_image_new();
+	retval = vips_sink_screen( display_images[vport], x, NULL, 128, 128, 400, 0, 
+				render_notify, drawing_area[vport] );
+	g_object_unref( display_images[vport] );
+	if (retval) { g_object_unref( x ); display_images[vport] = NULL; return; }
+	display_images[vport] = x;
 
 	VipsRegion *region = vips_region_new(display_images[vport]);
 	draw_callbacks[vport] = g_signal_connect(drawing_area[vport], "draw", 
 			G_CALLBACK( vipsdisp_draw ), region);
+	fprintf(stdout, "vips rendering updated\n");
 }
 
 typedef struct _Update {
@@ -323,8 +305,27 @@ vipsdisp_draw( GtkWidget *drawing_area, cairo_t *cr, VipsRegion *region )
 	// paint_overlays(drawing_area, cr);
 }
 
+static void release_data() {
+	/* release previous data */
+	int vport;
+	for (vport = 0; vport < MAXGRAYVPORT; vport++) {
+		if (images[vport])
+			g_object_unref(images[vport]);
+		if (mapped_images[vport])
+			g_object_unref(mapped_images[vport]);
+		if (display_images[vport])
+			g_object_unref(display_images[vport]);
+	}
+	if (display_images[RGB_VPORT])
+		g_object_unref(display_images[RGB_VPORT]);
+
+	memset(images, 0, sizeof(VipsImage *) * MAXGRAYVPORT);
+	memset(mapped_images, 0, sizeof(VipsImage *) * MAXGRAYVPORT);
+	memset(display_images, 0, sizeof(VipsImage *) * MAXVPORT);
+}
 
 void uninitialize_vips() {
 	// release all vips-associated data if needed
+	release_data();
 }
 

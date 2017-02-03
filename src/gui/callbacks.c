@@ -1531,6 +1531,33 @@ static void do_popup_graymenu(GtkWidget *my_widget, GdkEventButton *event) {
 #endif
 }
 
+static void get_window_position(int *left, int *top, int *width, int *height) {
+	GtkAdjustment *hadj = gtk_scrolled_window_get_hadjustment(
+			GTK_SCROLLED_WINDOW(lookup_widget("scrolledwindowr")));
+	GtkAdjustment *vadj = gtk_scrolled_window_get_vadjustment(
+			GTK_SCROLLED_WINDOW(lookup_widget("scrolledwindowr")));
+
+	*left = gtk_adjustment_get_value(hadj);
+	*top = gtk_adjustment_get_value(vadj);
+	*width = gtk_adjustment_get_page_size(hadj);
+	*height = gtk_adjustment_get_page_size(vadj);
+
+	printf("get_window_position: %d %d %d %d\n", *left, *top,
+			*width, *height);
+}
+
+static void set_window_position(int left, int top) {
+	GtkAdjustment *hadj = gtk_scrolled_window_get_hadjustment(
+			GTK_SCROLLED_WINDOW(lookup_widget("scrolledwindowr")));
+	GtkAdjustment *vadj = gtk_scrolled_window_get_vadjustment(
+			GTK_SCROLLED_WINDOW(lookup_widget("scrolledwindowr")));
+
+	printf("set_window_position: %d %d\n", left, top);
+
+	gtk_adjustment_set_value(hadj, left);
+	gtk_adjustment_set_value(vadj, top);
+}
+
 /*****************************************************************************
  *                    P U B L I C      F U N C T I O N S                     *
  ****************************************************************************/
@@ -1829,8 +1856,6 @@ void update_MenuItem() {
 }
 
 gboolean redraw(int vport, int doremap) {
-	remap(vport);
-#if 0
 	GtkWidget *widget;
 
 	if (vport >= MAXVPORT) {
@@ -1848,7 +1873,6 @@ gboolean redraw(int vport, int doremap) {
 			remap(vport);
 		} else if (doremap == REMAP_ALL) {
 			int i;
-//#pragma omp parallel for num_threads(com.max_thread) private(i) schedule(static)		//probably causes crashes in HESTEQ_MODE
 			for (i = 0; i < gfit.naxes[2]; i++) {
 				remap(i);
 			}
@@ -1870,9 +1894,7 @@ gboolean redraw(int vport, int doremap) {
 		fprintf(stderr, "redraw: unknown viewport number %d\n", vport);
 		break;
 	}
-	//fprintf(stdout, "end of redraw\n");
 	com.drawn = FALSE;
-#endif
 	return FALSE;
 }
 
@@ -3321,6 +3343,55 @@ gboolean on_command_key_press_event(GtkWidget *widget, GdkEventKey *event,
 	return (handled == 1);
 }
 
+gboolean on_drawingarea_key_press_event(GtkWidget *widget, GdkEventKey *event,
+		gpointer user_data) {
+
+	/*** ZOOM shortcuts ***/
+	double oldzoom;
+	//fprintf(stdout, "drawing area key event\n");
+	oldzoom = com.zoom_value;
+	is_shift_on = FALSE;
+
+	switch (event->keyval) {
+	case GDK_KEY_plus:
+	case GDK_KEY_KP_Add:
+		if (oldzoom < 0)
+			com.zoom_value = 1.0;
+		else
+			com.zoom_value = min(ZOOM_MAX, oldzoom * 2.0);
+		break;
+	case GDK_KEY_minus:
+	case GDK_KEY_KP_Subtract:
+		if (oldzoom < 0)
+			com.zoom_value = 1.0;
+		else
+			com.zoom_value = max(ZOOM_MIN, oldzoom / 2.0);
+		break;
+	case GDK_KEY_equal:
+	case GDK_KEY_KP_Multiply:
+		com.zoom_value = 1.0;
+		break;
+	case GDK_KEY_KP_0:
+	case GDK_KEY_0:
+		com.zoom_value = -1.0;
+		break;
+	case GDK_KEY_Shift_L:
+	case GDK_KEY_Shift_R:
+		is_shift_on = TRUE;
+		break;
+	default:
+		//~ fprintf(stdout, "No bind found for key '%x'.\n", event->keyval);
+		break;
+	}
+	if (com.zoom_value != oldzoom) {
+		fprintf(stdout, _("new zoom value: %f\n"), com.zoom_value);
+		zoomcombo_update_display_for_zoom();
+		adjust_vport_size_to_image();
+		redraw(com.cvport, REMAP_ALL);
+	}
+	return FALSE;
+}
+
 /* mouse callbacks */
 gboolean on_drawingarea_button_press_event(GtkWidget *widget,
 		GdkEventButton *event, gpointer user_data) {
@@ -3537,6 +3608,58 @@ void on_drawingarea_leave_notify_event(GtkWidget *widget, GdkEvent *event, gpoin
 		window = gtk_widget_get_window(lookup_widget("main_window"));
 	}
 	gdk_window_set_cursor(window, NULL);
+}
+
+gboolean on_drawingarea_scroll_event(GtkWidget *widget, GdkEventScroll *event,
+		gpointer user_data) {
+	gboolean handled;
+
+	int window_left;
+	int window_top;
+	int window_width;
+	int window_height;
+
+	int display_x;
+	int display_y;
+
+	// TODO: check if keyboard has Control pressed first
+	handled = FALSE;
+	get_window_position(&window_left, &window_top, &window_width, &window_height);
+	display_x = event->x / com.zoom_value;
+	display_y = event->y / com.zoom_value;
+
+	printf("%d et %d\n", display_x, display_y);
+
+	switch (event->direction) {
+	case GDK_SCROLL_UP:
+		if (com.zoom_value < 16) {
+			com.zoom_value *= 2;
+			set_window_position(display_x - window_width / 2,
+					display_y - window_height / 2);
+			adjust_vport_size_to_image();
+			redraw(com.cvport, REMAP_ALL);
+			zoomcombo_update_display_for_zoom();
+		}
+		handled = TRUE;
+		break;
+
+	case GDK_SCROLL_DOWN:
+		if (com.zoom_value > 0.125) {
+			com.zoom_value /= 2;
+			set_window_position(display_x - window_width / 2,
+					display_y - window_height / 2);
+			adjust_vport_size_to_image();
+			redraw(com.cvport, REMAP_ALL);
+			zoomcombo_update_display_for_zoom();
+		}
+		handled = TRUE;
+		break;
+
+	default:
+		break;
+	}
+
+	return (handled);
 }
 
 /* We give one signal event by toggle button to fix a bug. Without this solution
@@ -4230,55 +4353,6 @@ void on_confirmcancel_clicked(GtkButton *button, gpointer user_data) {
 	confirm = CD_NULL;
 }
 
-gboolean on_drawingarea_key_press_event(GtkWidget *widget, GdkEventKey *event,
-		gpointer user_data) {
-
-	/*** ZOOM shortcuts ***/
-	double oldzoom;
-	//fprintf(stdout, "drawing area key event\n");
-	oldzoom = com.zoom_value;
-	is_shift_on = FALSE;
-
-	switch (event->keyval) {
-	case GDK_KEY_plus:
-	case GDK_KEY_KP_Add:
-		if (oldzoom < 0)
-			com.zoom_value = 1.0;
-		else
-			com.zoom_value = min(ZOOM_MAX, oldzoom * 2.0);
-		break;
-	case GDK_KEY_minus:
-	case GDK_KEY_KP_Subtract:
-		if (oldzoom < 0)
-			com.zoom_value = 1.0;
-		else
-			com.zoom_value = max(ZOOM_MIN, oldzoom / 2.0);
-		break;
-	case GDK_KEY_equal:
-	case GDK_KEY_KP_Multiply:
-		com.zoom_value = 1.0;
-		break;
-	case GDK_KEY_KP_0:
-	case GDK_KEY_0:
-		com.zoom_value = -1.0;
-		break;
-	case GDK_KEY_Shift_L:
-	case GDK_KEY_Shift_R:
-		is_shift_on = TRUE;
-		break;
-	default:
-		//~ fprintf(stdout, "No bind found for key '%x'.\n", event->keyval);
-		break;
-	}
-	if (com.zoom_value != oldzoom) {
-		fprintf(stdout, _("new zoom value: %f\n"), com.zoom_value);
-		zoomcombo_update_display_for_zoom();
-		adjust_vport_size_to_image();
-		redraw(com.cvport, REMAP_NONE);
-	}
-	return FALSE;
-}
-
 void on_dialog1_OK(GtkButton *button, gpointer user_data) {
 	gtk_widget_hide(lookup_widget("dialog1"));
 }
@@ -4365,7 +4439,7 @@ void on_combozoom_changed(GtkComboBox *widget, gpointer user_data) {
 	}
 	fprintf(stdout, "zoom is now %f\n", com.zoom_value);
 	adjust_vport_size_to_image();
-	redraw(com.cvport, REMAP_NONE);
+	redraw(com.cvport, REMAP_ALL);
 }
 
 void on_comboboxreglayer_changed(GtkComboBox *widget, gpointer user_data) {
@@ -5973,83 +6047,4 @@ void on_rgb_align_dft_activate(GtkMenuItem *menuitem, gpointer user_data) {
 void on_rgb_align_psf_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	undo_save_state("Processing: RGB alignment (PSF)");
 	rgb_align(0);
-}
-
-void get_window_position(int *left, int *top, int *width, int *height) {
-	GtkAdjustment *hadj = gtk_scrolled_window_get_hadjustment(
-			GTK_SCROLLED_WINDOW(lookup_widget("scrolledwindowr")));
-	GtkAdjustment *vadj = gtk_scrolled_window_get_vadjustment(
-			GTK_SCROLLED_WINDOW(lookup_widget("scrolledwindowr")));
-
-	*left = gtk_adjustment_get_value(hadj);
-	*top = gtk_adjustment_get_value(vadj);
-	*width = gtk_adjustment_get_page_size(hadj);
-	*height = gtk_adjustment_get_page_size(vadj);
-
-	printf("get_window_position: %d %d %d %d\n", *left, *top,
-			*width, *height);
-}
-
-static void set_window_position(int left, int top) {
-	GtkAdjustment *hadj = gtk_scrolled_window_get_hadjustment(
-			GTK_SCROLLED_WINDOW(lookup_widget("scrolledwindowr")));
-	GtkAdjustment *vadj = gtk_scrolled_window_get_vadjustment(
-			GTK_SCROLLED_WINDOW(lookup_widget("scrolledwindowr")));
-
-	printf("set_window_position: %d %d\n", left, top);
-
-	gtk_adjustment_set_value(hadj, left);
-	gtk_adjustment_set_value(vadj, top);
-}
-
-
-gboolean on_drawingarea_scroll_event(GtkWidget *widget, GdkEventScroll *event,
-		gpointer user_data) {
-	gboolean handled;
-
-	int window_left;
-	int window_top;
-	int window_width;
-	int window_height;
-
-	int display_x;
-	int display_y;
-
-	handled = FALSE;
-	get_window_position(&window_left, &window_top, &window_width, &window_height);
-	display_x = event->x / com.zoom_value;
-	display_y = event->y / com.zoom_value;
-
-	printf("%d et %d\n", display_x, display_y);
-
-	switch (event->direction) {
-	case GDK_SCROLL_UP:
-		if (com.zoom_value < 16) {
-			com.zoom_value *= 2;
-			set_window_position(display_x - window_width / 2,
-					display_y - window_height / 2);
-			adjust_vport_size_to_image();
-			redraw(com.cvport, REMAP_NONE);
-			zoomcombo_update_display_for_zoom();
-		}
-		handled = TRUE;
-		break;
-
-	case GDK_SCROLL_DOWN:
-		if (com.zoom_value > 0.125) {
-			com.zoom_value /= 2;
-			set_window_position(display_x - window_width / 2,
-					display_y - window_height / 2);
-			adjust_vport_size_to_image();
-			redraw(com.cvport, REMAP_NONE);
-			zoomcombo_update_display_for_zoom();
-		}
-		handled = TRUE;
-		break;
-
-	default:
-		break;
-	}
-
-	return (handled);
 }
