@@ -264,9 +264,9 @@ int savetif(const char *name, fits *fit, uint16 bitspersample){
 		show_dialog(msg, _("Error"), "gtk-dialog-error");
 		return 1;
 	}
-	nsamples	=(uint16)fit->naxes[2];
-	width		=(uint32)fit->rx;
-	height		=(uint32)fit->ry;	
+	nsamples = (uint16) fit->naxes[2];
+	width = (uint32) fit->rx;
+	height = (uint32) fit->ry;
 	
 	/*******************************************************************
 	 * If the user saves a tif from the graphical menu, he can set
@@ -430,11 +430,15 @@ int readjpg(const char* name, fits *fit){
 int savejpg(char *name, fits *fit, int quality){
 	FILE *f;
 	int i, j;
-	unsigned char red, blue, green;
+	WORD red, blue, green;
 	struct jpeg_compress_struct cinfo;    // Basic info for JPEG properties.
 	struct jpeg_error_mgr jerr;           // In case of error.
 	JSAMPROW row_pointer[1];              // Pointer to JSAMPLE row[s].
 	int row_stride;                       // Physical row width in image buffer.
+	float pente;
+	WORD lo, hi;
+
+	mirrorx(fit, FALSE);
 
 	//## ALLOCATE AND INITIALIZE JPEG COMPRESSION OBJECT
 	cinfo.err = jpeg_std_error(&jerr);
@@ -454,39 +458,37 @@ int savejpg(char *name, fits *fit, int quality){
 	cinfo.input_components = 3;     // Number of color components per pixel.
 	cinfo.in_color_space = JCS_RGB; // Colorspace of input image as RGB.
 
-	unsigned char *gbuf[3]={
-		com.graybuf[RLAYER]+cinfo.image_width*(cinfo.image_height-1)*4,
-		com.graybuf[GLAYER]+cinfo.image_width*(cinfo.image_height-1)*4,
-		com.graybuf[BLAYER]+cinfo.image_width*(cinfo.image_height-1)*4 };
+	WORD *gbuf[3] = { fit->pdata[RLAYER], fit->pdata[GLAYER],
+			fit->pdata[BLAYER] };
 	jpeg_set_defaults(&cinfo);
 	jpeg_set_quality(&cinfo, quality, TRUE);
 
+	pente = computePente(&lo, &hi);
+	printf("pente=%f\n",pente);
+
 	//## CREATE IMAGE BUFFER TO WRITE FROM AND MODIFY THE IMAGE TO LOOK LIKE CHECKERBOARD:
 	unsigned char *image_buffer = NULL;
-	image_buffer = (unsigned char*)malloc(cinfo.image_width*cinfo.image_height*cinfo.num_components);
-	for (i=(cinfo.image_height-1);i>=0;i--){
-		for (j=0;j<cinfo.image_width;j++){
-			int pixelIdx = ((i*cinfo.image_width)+j) * cinfo.input_components;
+	image_buffer = (unsigned char*) malloc(
+			cinfo.image_width * cinfo.image_height * cinfo.num_components);
+	for (i = 0; i < cinfo.image_height; i++) {
+		for (j = 0; j < cinfo.image_width; j++) {
+			int pixelIdx = ((i * cinfo.image_width) + j)
+					* cinfo.input_components;
 			red = *gbuf[RLAYER];
-			gbuf[RLAYER] += 4;
-			if (fit->naxes[2]==3){
-				green   = *gbuf[GLAYER];
-				blue    = *gbuf[BLAYER];
-				gbuf[GLAYER] += 4;
-				gbuf[BLAYER] += 4;
+			gbuf[RLAYER]++;
+			if (fit->naxes[2] == 3) {
+				green = *gbuf[GLAYER];
+				blue = *gbuf[BLAYER];
+				gbuf[GLAYER]++;
+				gbuf[BLAYER]++;
 			} else {
-				green   = red;
-				blue    = red;
+				green = red;
+				blue = red;
 			}
-			image_buffer[pixelIdx+0] = red;         // r |-- Set r,g,b components to
-			image_buffer[pixelIdx+1] = green;       // g |   make this pixel 
-			image_buffer[pixelIdx+2] = blue;        // b |
+			image_buffer[pixelIdx+0] = round_to_BYTE(red * pente);         // r |-- Set r,g,b components to
+			image_buffer[pixelIdx+1] = round_to_BYTE(green * pente);       // g |   make this pixel
+			image_buffer[pixelIdx+2] = round_to_BYTE(blue * pente);        // b |
 		}
-		if (fit->naxes[2]==3){
-			gbuf[GLAYER] -= cinfo.image_width * 8;
-			gbuf[BLAYER] -= cinfo.image_width * 8;
-		}
-		gbuf[RLAYER] -= cinfo.image_width * 8;
 	}
 	//## START COMPRESSION:
 	jpeg_start_compress(&cinfo, TRUE);
@@ -508,6 +510,7 @@ int savejpg(char *name, fits *fit, int quality){
 	free(image_buffer);
 	siril_log_message(_("Saving JPG: file %s, quality=%d%%, %ld layer(s), %ux%u pixels\n"),
 						name, quality, fit->naxes[2], fit->rx, fit->ry);
+	mirrorx(fit, FALSE);
 	return 0;
 }
 #endif	// HAVE_LIBJPEG
