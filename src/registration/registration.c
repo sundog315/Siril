@@ -697,6 +697,7 @@ int register_star_alignment(struct registration_args *args) {
 						 * that is at least twice (or more) the size of the final image size wanted. After rotating the image,
 						 * the image is resized down to its final size so as to produce a very sharp lines,
 						 * edges, and much cleaner looking fonts. */
+						/**TODO: use vips and 	VipsInterpolate *interpolate = vips_interpolate_new( "nohalo" );  */
 						cvResizeGaussian(&fit, fit.rx * SUPER_SAMPLING, fit.ry * SUPER_SAMPLING, OPENCV_CUBIC);
 						trans.a *= SUPER_SAMPLING;
 						trans.d *= SUPER_SAMPLING;

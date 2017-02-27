@@ -95,7 +95,7 @@ void vips_reload() {
 void vips_remap(int vport, WORD lo, WORD hi, display_mode mode) {
 	int retval;
 	double scale, offset = 0.0;
-	scale = UCHAR_MAX_SINGLE / (double) (hi - lo);
+	scale = UCHAR_MAX_DOUBLE / (double) (hi - lo);
 
 	fprintf(stdout, "vips remap %d, lo: %hd, hi: %hd\n", vport, lo, hi);
 

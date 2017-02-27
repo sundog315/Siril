@@ -438,8 +438,6 @@ int savejpg(char *name, fits *fit, int quality){
 	float pente;
 	WORD lo, hi;
 
-	mirrorx(fit, FALSE);
-
 	//## ALLOCATE AND INITIALIZE JPEG COMPRESSION OBJECT
 	cinfo.err = jpeg_std_error(&jerr);
 	jpeg_create_compress(&cinfo);
@@ -465,6 +463,8 @@ int savejpg(char *name, fits *fit, int quality){
 
 	pente = computePente(&lo, &hi);
 	printf("pente=%f\n",pente);
+
+	mirrorx(fit, FALSE);
 
 	//## CREATE IMAGE BUFFER TO WRITE FROM AND MODIFY THE IMAGE TO LOOK LIKE CHECKERBOARD:
 	unsigned char *image_buffer = NULL;
