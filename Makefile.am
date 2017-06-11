@@ -2,7 +2,8 @@
 
 export CC CFLAGS CPPFLAGS
 
-SUBDIRS = deps/kplot deps/gegl-gtk po src
+# SUBDIRS = deps/kplot deps/gegl-gtk po src
+SUBDIRS = deps/kplot po src
 
 install-data-local:
 	@$(NORMAL_INSTALL)
