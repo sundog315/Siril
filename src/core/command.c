@@ -39,6 +39,7 @@
 #include "core/initfile.h"
 #include "core/processing.h"
 #include "io/conversion.h"
+#include "io/sequence.h"
 #include "io/single_image.h"
 #include "gui/callbacks.h"
 #include "gui/PSF_list.h"
@@ -521,7 +522,6 @@ int process_log(int nb){
 int process_ls(int nb){
 	struct dirent **list;
 	char filename[256], *path;
-	int i, n;
 	
 	filename[0]='\0';
 	/* If a path is given in argument */
@@ -560,6 +560,11 @@ int process_ls(int nb){
 		return 1;
 	}
 
+#ifdef WIN32
+	ListDirectoryContents(path);
+#else
+	int i, n;
+
 	n = scandir(path, &list, 0, alphasort);
 	if (n < 0)
 		perror("scandir");
@@ -576,6 +581,7 @@ int process_ls(int nb){
 		else {
 			sprintf(file_path, "%s", list[i]->d_name);
 		}
+
 		if (lstat(file_path, &entrystat)) {
 			perror("stat");
 			break;
@@ -604,10 +610,11 @@ int process_ls(int nb){
 		} else if (!strncmp(ext, "seq", 4))
 			siril_log_color_message(_("Sequence: %s\n"), "blue", list[i]->d_name);
 	}
-	siril_log_message(_("********* END OF THE LIST *********\n"));
 	for (i = 0; i < n; i++)
 		free(list[i]);
 	free(list);
+#endif
+	siril_log_message(_("********* END OF THE LIST *********\n"));
 	free(path);
 
 	return 0;
@@ -686,7 +693,7 @@ int process_set_mag(int nb) {
 			siril_log_message(_("Select an area first\n"));
 			return 1;
 		}
-		fitted_PSF *result = psf_get_minimisation(&gfit, layer, &com.selection);
+		fitted_PSF *result = psf_get_minimisation(&gfit, layer, &com.selection, TRUE);
 		if (result) {
 			com.magOffset = mag - result->mag;
 			siril_log_message(_("Relative magnitude: %.3lf, "
@@ -746,29 +753,13 @@ int process_psf(int nb){
 			siril_log_message(_("Select an area first\n"));
 			return 1;
 		}
-		fitted_PSF *result = psf_get_minimisation(&gfit, layer, &com.selection);
+		fitted_PSF *result = psf_get_minimisation(&gfit, layer, &com.selection, TRUE);
 		if (result) {
 			psf_display_result(result, &com.selection);
 			free(result);
 		}
 	}
 	return 0;
-}
-
-gboolean end_seqpsf(gpointer arg) {
-	set_layers_for_registration();	// update display of available reg data
-	if (com.seq.needs_saving)
-		writeseqfile(&com.seq);
-	drawPlot();
-	notify_new_photometry();
-	return end_generic(arg);
-}
-
-void *_psf_thread(void *arg) {
-	int layer = (intptr_t) arg;
-	do_fwhm_sequence_processing(&com.seq, layer, TRUE, TRUE, TRUE, FALSE);
-	gdk_threads_add_idle(end_seqpsf, NULL);
-	return NULL;
 }
 
 int process_seq_psf(int nb) {
@@ -787,9 +778,16 @@ int process_seq_psf(int nb) {
 
 	int layer = match_drawing_area_widget(com.vport[com.cvport], FALSE);
 	if (sequence_is_loaded() && layer != -1) {
+		framing_mode framing = REGISTERED_FRAME;
+		if (framing == REGISTERED_FRAME && !com.seq.regparam[layer])
+			framing = ORIGINAL_FRAME;
+		if (framing == ORIGINAL_FRAME) {
+			GtkToggleButton *follow = GTK_TOGGLE_BUTTON(lookup_widget("followStarCheckButton"));
+			if (gtk_toggle_button_get_active(follow))
+				framing = FOLLOW_STAR_FRAME;
+		}
 		siril_log_message(_("Running the PSF on the loaded sequence, layer %d\n"), layer);
-		siril_log_message(_("Results will be displayed at the end of the processing, on the console output, in the following form:\n"));
-		start_in_new_thread(_psf_thread, (void *)(intptr_t)layer);
+		seqpsf(&com.seq, layer, FALSE, framing, TRUE);
 		return 0;
 	}
 	else {
@@ -1593,15 +1591,17 @@ int processcommand(const char *line) {
 		return 0;
 	if (line[0] == '@') { // case of files
 		FILE * fp;
-		char * linef = NULL;
-		size_t lenf = 0;
-		ssize_t read;
+
 
 		fp = fopen(line + 1, "r");
 		if (fp == NULL) {
 			siril_log_message(_("File [%s] does not exist\n"), line + 1);
 			return 1;
 		}
+#if (_POSIX_C_SOURCE >= 200809L)
+		char * linef = NULL;
+		size_t lenf = 0;
+		ssize_t read;
 		while ((read = getline(&linef, &lenf, fp)) != -1) {
 			++i;
 			if (linef[0] == '#') continue;	// comments
@@ -1616,9 +1616,27 @@ int processcommand(const char *line) {
 			}
 			free(myline);
 		}
+		free(linef);
+#else
+		char linef[256];
+		while (fgets(linef, 256, fp)) {
+			++i;
+			if (linef[0] == '#') continue;	// comments
+			if (linef[0] == '\0' || linef[0] == '\n')
+				continue;
+			myline = strdup(linef);
+			parseLine(myline, sizeof(linef), &wordnb);
+			if (executeCommand(wordnb)) {
+				siril_log_message(_("Error in line: %d. Exiting batch processing\n"), i);
+				free(myline);
+				fclose(fp);
+				return 1;
+			}
+			free(myline);
+		}
+#endif
 
 		fclose(fp);
-		free(linef);
 	} else {
 		myline = strdup(line);
 		len = strlen(line);

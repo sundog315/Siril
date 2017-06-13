@@ -33,10 +33,12 @@ void sliders_mode_set_state(sliders_mode);
 int copy_rendering_settings_when_chained(gboolean from_GUI);
 
 void update_libraw_interface();
+void update_photometry_interface();
 void set_libraw_settings_menu_available(gboolean);
 void clear_sampling_setting_box();
 void set_GUI_CAMERA();
 void set_GUI_LIBRAW();
+void set_GUI_photometry();
 
 void remap(int vport);
 

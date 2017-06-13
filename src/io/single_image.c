@@ -27,6 +27,7 @@
 #include "core/proto.h"
 #include "gui/callbacks.h"
 #include "io/conversion.h"
+#include "io/sequence.h"
 #include "io/single_image.h"
 #include "gui/PSF_list.h"
 #include "gui/histogram.h"
@@ -103,10 +104,9 @@ void free_image_data() {
 int read_single_image(const char* filename, fits *dest, char **realname_out) {
 	int retval;
 	image_type imagetype;
-	char *realname;
+	char *realname = NULL;
 
-	realname = malloc(strlen(filename) + 10);
-	retval = stat_file(filename, &imagetype, realname);
+	retval = stat_file(filename, &imagetype, &realname);
 	if (retval) {
 		char *msg = siril_log_message(_("Error opening image %s: file not found or not supported.\n"), filename);
 		show_dialog(msg, _("Error"), "gtk-dialog-error");
@@ -126,9 +126,11 @@ int read_single_image(const char* filename, fits *dest, char **realname_out) {
 		siril_log_message(_("Opening %s failed.\n"), realname);
 	if (realname_out)
 		*realname_out = realname;
-	else free(realname);
+	else
+		free(realname);
 	set_GUI_CAMERA();
-	com.filter = (int)imagetype;
+	set_GUI_photometry();
+	com.filter = (int) imagetype;
 	return retval;
 }
 

@@ -10,12 +10,13 @@ siril_SOURCES = \
 	core/initfile.c core/initfile.h \
 	io/conversion.c io/conversion.h io/ser.c io/ser.h io/films.c io/films.h \
 	io/image_formats_libraries.c io/image_formats_internal.c io/image_format_fits.c \
-	io/sequence.c io/seqfile.c io/single_image.c io/single_image.h \
+	io/sequence.c io/sequence.h io/seqfile.c io/single_image.c io/single_image.h \
 	io/mp4_output.h io/mp4_output.c \
 	gui/callbacks.c gui/callbacks.h gui/vips_display.c gui/vips_display.h gui/histogram.c gui/histogram.h \
 	gui/PSF_list.h gui/PSF_list.c gui/sequence_list.c gui/registration_preview.c \
 	gui/statistics_list.c \
 	gui/plot.c gui/plot.h \
+	gui/gnuplot_i/gnuplot_i.c gui/gnuplot_i/gnuplot_i.h \
 	registration/registration.c registration/registration.h \
 	registration/matching/match.c registration/matching/atpmatch.c registration/matching/misc.c \
 	stacking/stacking.c stacking/stacking.h \
@@ -29,6 +30,7 @@ siril_SOURCES = \
 	algos/PSF.c algos/PSF.h algos/star_finder.c algos/star_finder.h \
 	algos/cosmetic_correction.c algos/cosmetic_correction.h \
 	algos/quantize.c \
+	algos/photometry.h algos/photometry.c \
 	compositing/compositing.c compositing/compositing.h compositing/filters.c compositing/filters.h compositing/align_rgb.c compositing/align_rgb.h
 	
 siril_LDADD = $(FFMPEG_LIBS) $(GTK_LIBS) ${GTK_MAC_LIBS} ${GEGL_LIBS} $(LIBRAW_LIBS) $(LIBTIFF_LIBS) $(LIBPNG_LIBS) $(FFTW_LIBS) $(CFITSIO_LIBS) $(GSL_LIBS) $(FFMS2_LIBS) $(LIBCONFIGXX_LIBS) $(VIPS_LIBS) ../deps/kplot/libkplot.a
@@ -39,8 +41,5 @@ siril_SOURCES += io/avi_pipp/pipp_avi_write.cpp io/avi_pipp/pipp_avi_write.h io/
 if HAVE_OPENCV
 siril_SOURCES += opencv/opencv.cpp opencv/opencv.h opencv/ecc/ecc.cpp opencv/ecc/ecc.h
 siril_LDADD += $(OPENCV_LIBS)
-siril_LINK = $(CXXLINK)
-else
-siril_LINK = $(LINK)
 endif
-
+siril_LINK = $(CXXLINK)

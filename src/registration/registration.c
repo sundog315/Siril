@@ -45,6 +45,7 @@
 #include "algos/PSF.h"
 #include "gui/PSF_list.h"
 #include "algos/quality.h"
+#include "io/sequence.h"
 #include "io/ser.h"
 #ifdef HAVE_OPENCV
 #include "opencv/opencv.h"
@@ -113,8 +114,6 @@ void initialize_registration_methods() {
 	reg_methods[i++] = new_reg_method(_("Enhanced Correlation Coefficient (planetary - surfaces)"),
 			&register_ecc, REQUIRES_NO_SELECTION, REGTYPE_PLANETARY);
 #endif
-	//if (theli_is_available())
-	//	reg_methods[i++] = new_reg_method("theli", register_theli, REQUIRES_NO_SELECTION);
 	reg_methods[i] = NULL;
 
 	tip = g_string_new ("");
@@ -234,7 +233,7 @@ int register_shift_dft(struct registration_args *args) {
 			PROGRESS_NONE);
 	memset(&fit_ref, 0, sizeof(fits));
 	ret = seq_read_frame_part(args->seq, args->layer, ref_image, &fit_ref,
-			&args->selection);
+			&args->selection, FALSE);
 
 	if (ret) {
 		siril_log_message(
@@ -296,7 +295,7 @@ int register_shift_dft(struct registration_args *args) {
 					tmpfilename);
 			set_progress_bar_data(tmpmsg, PROGRESS_NONE);
 			if (!(seq_read_frame_part(args->seq, args->layer, frame, &fit,
-					&args->selection))) {
+					&args->selection, FALSE))) {
 
 				int x;
 				fftw_complex *img = fftw_malloc(sizeof(fftw_complex) * sqsize);
@@ -415,8 +414,11 @@ int register_shift_fwhm(struct registration_args *args) {
 	 * images to register, which provides FWHM but also star coordinates */
 	// TODO: detect that it was already computed, and don't do it again
 	// -> should be done at a higher level and passed in the args
-	if (do_fwhm_sequence_processing(args->seq, args->layer, TRUE, args->follow_star,
-			args->run_in_thread, TRUE))	// stores in regparam
+	framing_mode framing = ORIGINAL_FRAME;
+	if (args->follow_star)
+		framing = FOLLOW_STAR_FRAME;
+
+	if (seqpsf(args->seq, args->layer, TRUE, framing, FALSE))
 		return 1;
 
 	current_regdata = args->seq->regparam[args->layer];
@@ -516,10 +518,10 @@ static void _print_result(TRANS *trans, float FWHMx, float FWHMy) {
 int register_star_alignment(struct registration_args *args) {
 	int frame, ref_image, ret, i;
 	int abort = 0;
-	int fitted_stars, failed = 0, skipped;
+	int fitted_stars, failed, skipped;
 	float nb_frames, cur_nb;
 	float FWHMx, FWHMy;
-	fitted_PSF **stars;
+	fitted_PSF **stars, **refstars;
 	TRANS trans;
 	regdata *current_regdata;
 	starFinder sf;
@@ -528,6 +530,7 @@ int register_star_alignment(struct registration_args *args) {
 
 	memset(&fit, 0, sizeof(fits));
 	memset(&sf, 0, sizeof(starFinder));
+	memset(&trans, 0, sizeof(TRANS));
 
 	if (!args->seq->regparam) {
 		fprintf(stderr, "regparam should have been created before\n");
@@ -574,6 +577,7 @@ int register_star_alignment(struct registration_args *args) {
 	else {
 		com.stars = peaker(&fit, args->layer, &sf, NULL);
 	}
+
 	if (sf.nb_stars < AT_MATCH_MINPAIRS) {
 		siril_log_message(
 				_("There are not enough stars in reference image to perform alignment\n"));
@@ -583,19 +587,33 @@ int register_star_alignment(struct registration_args *args) {
 		return 1;
 	}
 	redraw(com.cvport, REMAP_NONE); // draw stars
-#ifdef DEBUG
-		FILE *pfile;
 
-		pfile = fopen("ref.txt", "w+");
-		fprintf(pfile, "REFERENCE IMAGE\n");
-		for (i = 0; i < MAX_STARS_FITTED; i++) {
-			fprintf(pfile, "%.3lf\t%.3lf\t%.3lf\n",
-					com.stars[i]->xpos, com.stars[i]->ypos, com.stars[i]->mag);
-		}
-		fclose(pfile);
+	/* we copy com.stars to refstars in case user take a look to another image of the sequence
+	 * that would destroy com.stars
+	 */
+	i = 0;
+	refstars = malloc((MAX_STARS + 1) * sizeof(fitted_PSF *));
+	while (i < MAX_STARS && com.stars[i]) {
+		fitted_PSF *tmp = malloc(sizeof(fitted_PSF));
+		memcpy(tmp, com.stars[i], sizeof(fitted_PSF));
+		refstars[i] = tmp;
+		refstars[i+1] = NULL;
+		i++;
+	}
+
+#ifdef DEBUG
+	FILE *pfile;
+
+	pfile = fopen("ref.txt", "w+");
+	fprintf(pfile, "REFERENCE IMAGE\n");
+	for (i = 0; i < MAX_STARS_FITTED; i++) {
+		fprintf(pfile, "%.3lf\t%.3lf\t%.3lf\n",
+				refstars[i]->xpos, refstars[i]->ypos, refstars[i]->mag);
+	}
+	fclose(pfile);
 #endif
 	fitted_stars = (sf.nb_stars > MAX_STARS_FITTED) ? MAX_STARS_FITTED : sf.nb_stars;
-	FWHM_average(com.stars, &FWHMx, &FWHMy, fitted_stars);
+	FWHM_average(refstars, &FWHMx, &FWHMy, fitted_stars);
 	siril_log_message(_("FWHMx:%*.2f px\n"), 12, FWHMx);
 	siril_log_message(_("FWHMy:%*.2f px\n"), 12, FWHMy);
 	current_regdata[ref_image].fwhm = FWHMx;
@@ -628,6 +646,7 @@ int register_star_alignment(struct registration_args *args) {
 	}
 
 	skipped = 0;
+	failed = 0;
 	for (frame = 0, cur_nb = 0.f; frame < args->seq->number; frame++) {
 		if (!abort) {
 			if (args->run_in_thread && !get_thread_run()) {
@@ -644,6 +663,13 @@ int register_star_alignment(struct registration_args *args) {
 				char dest[256], filename[256];
 				int nbpoints;
 
+				if (args->translation_only) {
+					/* if "translation only", we choose to initialize all frames
+					 * to exclude status. If registration is ok, the status is
+					 * set to include */
+					args->seq->imgparam[frame].incl = !SEQUENCE_DEFAULT_INCLUDE;
+				}
+
 				if (frame != ref_image) {
 					if (args->seq->type == SEQ_SER) {
 						siril_log_color_message(_("Frame %d:\n"), "bold", frame);
@@ -654,6 +680,7 @@ int register_star_alignment(struct registration_args *args) {
 								_("Not enough stars. Image %d skipped\n"), frame);
 						args->new_total--;
 						failed++;
+						cur_nb += 1.f;
 						continue;
 					}
 
@@ -672,9 +699,9 @@ int register_star_alignment(struct registration_args *args) {
 #endif
 
 					nbpoints = (sf.nb_stars < fitted_stars) ?
-									sf.nb_stars : fitted_stars;
+						sf.nb_stars : fitted_stars;
 
-					if (star_match(stars, com.stars, nbpoints, &trans)) {
+					if (star_match(stars, refstars, nbpoints, &trans)) {
 						siril_log_color_message(_("Cannot perform star matching. Image %d skipped\n"),
 								"red", frame);
 						args->new_total--;
@@ -683,6 +710,7 @@ int register_star_alignment(struct registration_args *args) {
 						while (i < MAX_STARS && stars[i])
 							free(stars[i++]);
 						free(stars);
+						cur_nb += 1.f;
 						continue;
 					}
 
@@ -730,6 +758,7 @@ int register_star_alignment(struct registration_args *args) {
 				} else {
 					current_regdata[frame].shiftx = trans.a;
 					current_regdata[frame].shifty = -trans.d;
+					args->seq->imgparam[frame].incl = SEQUENCE_DEFAULT_INCLUDE;
 				}
 
 				cur_nb += 1.f;
@@ -737,6 +766,12 @@ int register_star_alignment(struct registration_args *args) {
 			}
 		}
 	}
+
+	i = 0;
+	while (i < MAX_STARS && refstars[i])
+		free(refstars[i++]);
+	free(refstars);
+
 	if (args->seq->type == SEQ_SER) {
 		ser_write_and_close(new_ser);
 		free(new_ser);
@@ -1191,7 +1226,6 @@ static gboolean end_register_idle(gpointer p) {
 				sprintf(rseqname, "%s%s.seq", args->prefix, seqname);
 				g_free(seqname);
 				unlink(rseqname);	// remove previous to overwrite
-				//check_seq(0);		// search for the new sequence
 				char *newname = remove_ext_from_filename(rseqname);
 				seq->seqname = newname;
 				seq->number = args->new_total;
@@ -1207,7 +1241,6 @@ static gboolean end_register_idle(gpointer p) {
 				seq->beg = seq->imgparam[0].filenum;
 				seq->end = seq->imgparam[seq->number-1].filenum;
 				seq->type = args->seq->type;
-				seq->ser_file = args->seq->ser_file;
 				seq->current = -1;
 				seq->needs_saving = TRUE;
 				writeseqfile(seq);
@@ -1232,6 +1265,7 @@ static gboolean end_register_idle(gpointer p) {
 failed_end:
 #endif
 	update_stack_interface();
+	update_used_memory();
 	set_cursor_waiting(FALSE);
 #ifdef MAC_INTEGRATION
 	GtkosxApplication *osx_app = gtkosx_application_get();

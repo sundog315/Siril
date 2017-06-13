@@ -21,10 +21,12 @@
 #define gettext_noop(String) String
 #define N_(String) gettext_noop (String)
 
+#undef max
 #define max(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
      _a > _b ? _a : _b; })
+#undef min
  #define min(a,b) \
    ({ __typeof__ (a) _a = (a); \
        __typeof__ (b) _b = (b); \
@@ -191,6 +193,7 @@ typedef struct sequ sequence;
 typedef struct single_image single;
 typedef struct ffit fits;
 typedef struct libraw_config libraw;
+typedef struct phot_config phot;
 typedef struct stack_config stackconf;
 typedef struct cominf cominfo;
 typedef struct image_stats imstats;
@@ -198,6 +201,7 @@ typedef struct rectangle_struct rectangle;
 typedef struct point_struct point;
 typedef struct gradient_struct gradient;
 typedef struct historic_struct historic;
+typedef struct dateTime_struct dateTime;
 typedef struct fwhm_struct fitted_PSF;
 
 /* global structures */
@@ -295,13 +299,8 @@ struct imdata {
 	imstats *stats;		/* statistics of the image, used as a cache for full image first
 				   channel statistics, particularly used in stacking normalization.
 				   NULL if not available, this is stored in seqfile if non NULL */
+	char *date_obs;		/* date of the observation, processed and copied from the header */
 };
-
-/* Procedure signature for sequence processing.
- * Returns < 0 for an error that should stop the processing on the sequence.
- * Other return values are not used.
- * Processed data should be written in the sequence data directly. */
-typedef int (*sequence_proc)(sequence *seq, int seq_layer, int frame_no, fits *fit, rectangle *source_area, void *arg);
 
 /* preprocessing data from GUI */
 struct preprocessing_data {
@@ -341,6 +340,7 @@ struct sequ {
 	/* beg and end are used prior to imgparam allocation, hence their usefulness */
 	int beg;		// imgparam[0]->filenum
 	int end;		// imgparam[number-1]->filenum
+	double exposure;	// exposure of frames (we assume they are all identical)
 
 	/* registration previsualisation and manual alignment data */
 	int previewX[PREVIEW_NB], previewY[PREVIEW_NB];	// center, -1 is uninitialized value
@@ -421,6 +421,7 @@ struct ffit {
 	char bayer_pattern[FLEN_VALUE];	// BAYERPAT key Bayer Pattern if available
 	/* data obtained from FITS or RAW files */
 	double focal_length, iso_speed, exposure, aperture, ccd_temp;
+	double cvf; // Conversion factor (e-/adu)
 
 	/* data used in the Fourier space */
 	double dft_norm[3];			// Normalization value
@@ -451,6 +452,13 @@ struct libraw_config {
 	double gamm[2];						// Gamma correction
 };
 
+/* This structure is used for storing all parameters used in photometry module */
+struct phot_config {
+	double gain;	// A/D converter gain in electrons per ADU
+	double inner;	// Inner radius of the annulus used to measure local background.
+	double outer;	// Outer radius of the annulus used to measure local background.
+};
+
 struct debayer_config {
 	gboolean open_debayer;			// debayer images being opened
 	gboolean use_bayer_header;		// use the pattern given in the file header
@@ -460,7 +468,7 @@ struct debayer_config {
 };
 
 struct stack_config {
-	int method;				// 0=sum, 1=median, 2=average, 3=pixel max - Use to save preferences in the init file
+	int method;				// 0=sum, 1=median, 2=average, 3=pixel max, 4=pixel min - Use to save preferences in the init file
 	int normalisation_method;
 	int rej_method;
 	double memory_percent;			// percent of available memory to use for stacking
@@ -485,6 +493,16 @@ struct historic_struct {
 	int rx, ry;
 };
 
+struct dateTime_struct {
+	int year;
+	int month;
+	int day;
+	int hour;
+	int min;
+	int sec;
+	int ms;
+};
+
 struct cominf {
 	/* current version of GTK, through GdkPixmap, doesn't handle gray images, so
 	 * graybufs are the same size than the rgbbuf with 3 times the same value */
@@ -504,7 +522,6 @@ struct cominf {
 	GtkAdjustment *hadj[MAXVPORT];	// adjustments of vport scrollbars
 	GtkAdjustment *vadj[MAXVPORT];	// adjustments of vport scrollbars
 	sliders_mode sliders;		// 0: min/max, 1: MIPS-LO/HI, 2: user
-	gboolean leveldrag;		// middle click being dragged if true
 	int preprostatus;
 	gboolean prepro_cfa;	// Use to save type of sensor for cosmetic correction in preprocessing
 	gboolean show_excluded;		// show excluded images in sequences
@@ -557,6 +574,7 @@ struct cominf {
 
 	libraw raw_set;			// the libraw settings
 	struct debayer_config debayer;	// debayer settings
+	phot phot_set;          // photometry settings
 
 	sequence seq;			// currently loaded sequence	TODO: *seq
 	single *uniq;			// currently loaded image, if outside sequence

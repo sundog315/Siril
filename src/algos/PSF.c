@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <gsl/gsl_statistics_double.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_linalg.h>
@@ -34,12 +35,58 @@
 #include "core/proto.h"
 #include "gui/callbacks.h"
 #include "algos/PSF.h"
+#include "algos/photometry.h"
 
 #define MAX_ITER_NO_ANGLE  10		//Number of iteration in the minimization with no angle
 #define MAX_ITER_ANGLE     10		//Number of iteration in the minimization with angle
 #define EPSILON            0.01
 
 const double radian_conversion = ((3600.0 * 180.0) / M_PI) / 1.0E3;
+
+static WORD getMedian3x3(gsl_matrix *in, const int xx, const int yy,
+		const int w, const int h) {
+	int step, radius, x, y;
+	double *value, median;
+
+	step = 1;
+	radius = 1;
+
+	int n = 0;
+	int start;
+	value = calloc(8, sizeof(double));
+	for (y = yy - radius; y <= yy + radius; y += step) {
+		for (x = xx - radius; x <= xx + radius; x += step) {
+			if (y >= 0 && y < h) {
+				if (x >= 0 && x < w) {
+					if ((x != xx) || (y != yy)) {
+						value[n++] = gsl_matrix_get(in, y, x);
+					}
+				}
+			}
+		}
+	}
+	start = 8 - n - 1;
+	quicksort_d(value, 8);
+	median = gsl_stats_median_from_sorted_data(value + start, 1, n);
+	free(value);
+	return median;
+}
+
+static gsl_matrix *removeHotPixels(gsl_matrix *in) {
+	int width = in->size2;
+	int height = in->size1;
+	int x, y;
+	gsl_matrix *out = gsl_matrix_alloc (in->size1, in->size2);
+
+	gsl_matrix_memcpy (out, in);
+	for (y = 0; y < height; y++) {
+		for (x = 0; x < width; x++) {
+			double a = getMedian3x3(in, x, y, width, height);
+			gsl_matrix_set(out, y, x, a);
+		}
+	}
+	return out;
+}
 
 /* Compute initial values for the algorithm from data in the pixel value matrix */
 static gsl_vector* psf_init_data(gsl_matrix* z, double bg) {
@@ -50,8 +97,11 @@ static gsl_vector* psf_init_data(gsl_matrix* z, double bg) {
 	size_t i, j;
 
 	/* find maximum */
-	max = gsl_matrix_max(z);
-	gsl_matrix_max_index(z, &i, &j);
+	/* first we remove hot pixels in the matrix */
+	gsl_matrix *m_tmp = removeHotPixels(z);
+	max = gsl_matrix_max(m_tmp);
+	gsl_matrix_max_index(m_tmp, &i, &j);
+	gsl_matrix_free(m_tmp);
 	gsl_vector_set(MaxV, 0, j);
 	gsl_vector_set(MaxV, 1, i);
 	gsl_vector_set(MaxV, 2, max);
@@ -88,6 +138,10 @@ static gsl_vector* psf_init_data(gsl_matrix* z, double bg) {
 	return MaxV;
 }
 
+/* Basic magnitude computation. This is not really accurate, all pixels are
+ * taken into account. But this fast function is used if the other one
+ * failed and for star detection when magnitude is not needed.
+ */
 static double psf_get_mag(gsl_matrix* z, double B) {
 	double intensity = 0.0, magnitude;
 	size_t NbRows = z->size1;
@@ -335,7 +389,7 @@ static fitted_PSF *psf_minimiz_no_angle(gsl_matrix* z, double background,
 #define FIT(i) gsl_vector_get(s->x, i)
 #define ERR(i) sqrt(gsl_matrix_get(covar,i,i))	//for now, errors are not displayed
 
-	/*Output structure with parameters fitted */
+	/* Output structure with parameters fitted */
 	psf->B = FIT(0);
 	psf->A = FIT(1);
 	psf->x0 = FIT(2);
@@ -345,13 +399,13 @@ static fitted_PSF *psf_minimiz_no_angle(gsl_matrix* z, double background,
 	psf->fwhmx = sqrt(FIT(4) / 2.) * 2 * sqrt(log(2.) * 2);	//Set the real FWHMx with regards to the Sx parameter
 	psf->fwhmy = sqrt(FIT(5) / 2.) * 2 * sqrt(log(2.) * 2);	//Set the real FWHMy with regards to the Sy parameter
 	psf->angle = 0;	//The angle is not fitted here
-	//Units
+	// Units
 	psf->units = "px";
-	//Magnitude
-	psf->mag = psf_get_mag(z, FIT(0));
-	//Layer: not fitted
+	// Magnitude
+	psf->mag = psf_get_mag(z, psf->B);
+	// Layer: not fitted
 	psf->layer = layer;
-	//RMSE
+	// RMSE
 	psf->rmse = d.rmse;
 	// absolute uncertainties
 	psf->B_err = ERR(0) / FIT(0);
@@ -363,7 +417,7 @@ static fitted_PSF *psf_minimiz_no_angle(gsl_matrix* z, double background,
 	psf->ang_err = 0;
 	psf->xpos = 0;		// will be set by the peaker
 	psf->ypos = 0;
-	//we free the memory
+	// we free the memory
 	free(sigma);
 	free(y);
 	gsl_vector_free(MaxV);
@@ -377,12 +431,13 @@ static fitted_PSF *psf_minimiz_no_angle(gsl_matrix* z, double background,
  * NULL if the number of parameters is => to the pixel number.
  * This should not happen because this case is already treated by the
  * minimiz_no_angle function */
-static fitted_PSF *psf_minimiz_angle(gsl_matrix* z, fitted_PSF *psf) {
+static fitted_PSF *psf_minimiz_angle(gsl_matrix* z, fitted_PSF *psf, gboolean for_photometry) {
 	size_t i, j;
 	size_t NbRows = z->size1; //characteristics of the selection : height and width
 	size_t NbCols = z->size2;
 	const size_t p = 7;			// Number of parameters fitted
 	const size_t n = NbRows * NbCols;
+	g_assert (n > 0);
 	fitted_PSF *psf_angle = malloc(sizeof(fitted_PSF));
 	int status;
 	unsigned int iter = 0;
@@ -468,8 +523,18 @@ static fitted_PSF *psf_minimiz_angle(gsl_matrix* z, fitted_PSF *psf) {
 	}
 	//Units
 	psf_angle->units = "px";
-	//Magnitude
-	psf_angle->mag = psf_get_mag(z, FIT(0));//we take the un-normalized value of B
+	// Photometry
+	if (for_photometry)
+		psf_angle->phot = getPhotometryData(z, psf_angle);
+	else psf_angle->phot = NULL;
+	// Magnitude
+	if (psf_angle->phot != NULL) {
+		psf_angle->mag = psf_angle->phot->mag;
+		psf_angle->s_mag = psf_angle->phot->s_mag;
+	} else {
+		psf_angle->mag = psf_get_mag(z, psf_angle->B);
+		psf_angle->s_mag = 9.999;
+	}
 	//Layer: not fitted
 	psf_angle->layer = psf->layer;
 	//RMSE
@@ -489,6 +554,7 @@ static fitted_PSF *psf_minimiz_angle(gsl_matrix* z, fitted_PSF *psf) {
 	gsl_multifit_fdfsolver_free(s);
 	gsl_matrix_free(covar);
 	gsl_rng_free(r);
+	free(psf_angle->phot);
 	return psf_angle;
 }
 
@@ -497,7 +563,7 @@ static fitted_PSF *psf_minimiz_angle(gsl_matrix* z, fitted_PSF *psf) {
 /* Returns the largest FWHM.
  * The optional output parameter roundness is the ratio between the two axis FWHM */
 double psf_get_fwhm(fits *fit, int layer, double *roundness) {
-	fitted_PSF *result = psf_get_minimisation(fit, layer, &com.selection);
+	fitted_PSF *result = psf_get_minimisation(fit, layer, &com.selection, FALSE);
 	if (result == NULL) {
 		*roundness = 0.0;
 		return 0.0;
@@ -514,7 +580,7 @@ double psf_get_fwhm(fits *fit, int layer, double *roundness) {
  * Selection rectangle is passed as third argument.
  * Return value is a structure, type fitted_PSF, that has to be freed after use.
  */
-fitted_PSF *psf_get_minimisation(fits *fit, int layer, rectangle *area) {
+fitted_PSF *psf_get_minimisation(fits *fit, int layer, rectangle *area, gboolean for_photometry) {
 	WORD *from;
 	int stridefrom, i, j;
 	fitted_PSF *result;
@@ -534,7 +600,7 @@ fitted_PSF *psf_get_minimisation(fits *fit, int layer, rectangle *area) {
 		}
 		from += stridefrom;
 	}
-	result = psf_global_minimisation(z, bg, layer, TRUE);
+	result = psf_global_minimisation(z, bg, layer, TRUE, for_photometry);
 	if (result)
 		psf_update_units(fit, &result);
 	gsl_matrix_free(z);
@@ -552,14 +618,14 @@ fitted_PSF *psf_get_minimisation(fits *fit, int layer, rectangle *area) {
  * The function returns NULL if values look bizarre.
  */
 fitted_PSF *psf_global_minimisation(gsl_matrix* z, double bg, int layer,
-		gboolean fit_angle) {
+		gboolean fit_angle, gboolean for_photometry) {
 	fitted_PSF *psf;
 
 	// To compute good starting values, we first compute with no angle
 	if ((psf = psf_minimiz_no_angle(z, bg, layer)) != NULL) {
 		if (fit_angle && fabs(psf->sx - psf->sy) >= EPSILON) {
 			fitted_PSF *tmp_psf;
-			if ((tmp_psf = psf_minimiz_angle(z, psf)) == NULL) {
+			if ((tmp_psf = psf_minimiz_angle(z, psf, for_photometry)) == NULL) {
 				free(psf);
 				return NULL;
 			}

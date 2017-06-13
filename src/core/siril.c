@@ -47,6 +47,7 @@
 #include "gui/callbacks.h"
 #include "algos/colors.h"
 #include "gui/histogram.h"
+#include "io/sequence.h"
 #include "io/single_image.h"
 #include "algos/gradient.h"
 #include "gui/PSF_list.h"
@@ -436,6 +437,9 @@ int crop(fits *fit, rectangle *bounds) {
 	int i, j, layer;
 	int newnbdata;
 	struct timeval t_start, t_end;
+
+	memset(&t_start, 0, sizeof(struct timeval));
+	memset(&t_end, 0, sizeof(struct timeval));
 
 	if (fit == &gfit) {
 		siril_log_color_message(_("Crop: processing...\n"), "red");
@@ -1085,7 +1089,7 @@ gpointer seqpreprocess(gpointer p) {
 		struct ser_struct *new_ser_file = NULL;
 		char source_filename[256];
 		int i;
-		long icold, ihot;
+		long icold = 0L, ihot = 0L;
 		deviant_pixel *dev = NULL;
 
 		// creating a SER file if the input data is SER
@@ -1127,7 +1131,6 @@ gpointer seqpreprocess(gpointer p) {
 					ser_close_file(new_ser_file);
 					free(new_ser_file);
 				}
-				if (p) free(p);
 				gdk_threads_add_idle(end_sequence_prepro, args);
 				return GINT_TO_POINTER(1);
 			}
@@ -1153,9 +1156,10 @@ gpointer seqpreprocess(gpointer p) {
 		}
 		free(fit);
 		// closing SER file if it applies
-		if (com.seq.type == SEQ_SER) {
+		if (com.seq.type == SEQ_SER && (new_ser_file != NULL)) {
 			close(new_ser_file->fd);
 			free(new_ser_file);
+			new_ser_file = NULL;
 		}
 		set_progress_bar_data(PROGRESS_TEXT_RESET, PROGRESS_RESET);
 		if (dev) free(dev);
@@ -1463,7 +1467,7 @@ static int fmul_layer(fits *a, int layer, float coeff) {
  *      B A N D I N G      R E D U C T I O N      M A N A G E M E N T        *
  ****************************************************************************/
 
-int banding_image_hook(struct generic_seq_args *args, int i, fits *fit) {
+int banding_image_hook(struct generic_seq_args *args, int i, fits *fit, rectangle *_) {
 	struct banding_data *banding_args = (struct banding_data *)args->user;
 	return BandingEngine(fit, banding_args->sigma, banding_args->amount,
 			banding_args->protect_highlights, banding_args->applyRotation);
@@ -1472,23 +1476,25 @@ int banding_image_hook(struct generic_seq_args *args, int i, fits *fit) {
 void apply_banding_to_sequence(struct banding_data *banding_args) {
 	struct generic_seq_args *args = malloc(sizeof(struct generic_seq_args));
 	args->seq = &com.seq;
+	args->partial_image = FALSE;
 	args->filtering_criterion = seq_filter_included;
 	args->nb_filtered_images = com.seq.selnum;
-	args->force_ser_output = FALSE;
 	args->prepare_hook = ser_prepare_hook;
 	args->finalize_hook = ser_finalize_hook;
 	args->save_hook = NULL;
-	args->parallel = TRUE;
 	args->image_hook = banding_image_hook;
 	args->idle_function = NULL;
-	args->user = banding_args;
 	args->description = "Banding Reduction";
+	args->has_output = TRUE;
 	args->new_seq_prefix = banding_args->seqEntry;
 	args->load_new_sequence = TRUE;
+	args->force_ser_output = FALSE;
+	args->user = banding_args;
+	args->already_in_a_thread = FALSE;
+	args->parallel = TRUE;
 
 	banding_args->fit = NULL;	// not used here
 
-	gettimeofday(&args->t_start, NULL);
 	start_in_new_thread(generic_sequence_worker, args);
 }
 

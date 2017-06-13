@@ -23,6 +23,9 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/stat.h>
+#ifdef WIN32
+#include <direct.h>
+#endif
 
 #include "core/siril.h"
 #include "core/proto.h"
@@ -33,7 +36,7 @@
 
 static const char *keywords[] = { "working-directory", "libraw-settings",
 		"debayer-settings", "prepro-settings", "registration-settings",
-		"stacking-settings", "misc-settings" };
+		"stacking-settings", "photometry-settings", "misc-settings" };
 
 static int readinitfile() {
 	config_t config;
@@ -118,6 +121,14 @@ static int readinitfile() {
 	}
 	if (com.stack.memory_percent <= 0.0001)
 		com.stack.memory_percent = 0.9;
+
+	/* Photometry setting */
+	config_setting_t *photometry_setting = config_lookup(&config, keywords[PTM]);
+	if (photometry_setting) {
+		config_setting_lookup_float(photometry_setting, "gain", &com.phot_set.gain);
+		config_setting_lookup_float(photometry_setting, "inner-radius", &com.phot_set.inner);
+		config_setting_lookup_float(photometry_setting, "outer-radius", &com.phot_set.outer);
+	}
 
 	/* Misc setting */
 	config_setting_t *misc_setting = config_lookup(&config, keywords[MISC]);
@@ -248,6 +259,23 @@ static void _save_stacking(config_t *config, config_setting_t *root) {
 	config_setting_set_float(stk_setting, com.stack.memory_percent);
 }
 
+static void _save_photometry(config_t *config, config_setting_t *root) {
+	config_setting_t *photometry_group, *photometry_setting;
+
+	photometry_group = config_setting_add(root, keywords[PTM], CONFIG_TYPE_GROUP);
+
+	photometry_setting = config_setting_add(photometry_group, "gain",
+			CONFIG_TYPE_FLOAT);
+	config_setting_set_float(photometry_setting, com.phot_set.gain);
+	photometry_setting = config_setting_add(photometry_group, "inner-radius",
+			CONFIG_TYPE_FLOAT);
+	config_setting_set_float(photometry_setting, com.phot_set.inner);
+	photometry_setting = config_setting_add(photometry_group, "outer-radius",
+			CONFIG_TYPE_FLOAT);
+	config_setting_set_float(photometry_setting, com.phot_set.outer);
+
+}
+
 static void _save_misc(config_t *config, config_setting_t *root) {
 	config_setting_t *misc_group, *misc_setting;
 
@@ -286,6 +314,7 @@ int writeinitfile() {
 	_save_preprocessing(&config, root);
 	_save_registration(&config, root);
 	_save_stacking(&config, root);
+	_save_photometry(&config, root);
 	_save_misc(&config, root);
 
 	if (!config_write_file(&config, com.initfile)) {
@@ -323,7 +352,11 @@ int checkinitfile() {
 		snprintf(filename, 255, "%s/.siril", home);
 		if (stat(filename, &sts) != 0) {
 			if (errno == ENOENT) {
+#ifdef WIN32
+				if (_mkdir(filename)) {
+#else
 				if (mkdir(filename, 0755)) {
+#endif
 					fprintf(stderr, "Could not create dir %s, please check\n",
 							filename);
 					return 1;

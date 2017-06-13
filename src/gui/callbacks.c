@@ -50,6 +50,7 @@
 #include "algos/gradient.h"
 #include "io/conversion.h"
 #include "io/films.h"
+#include "io/sequence.h"
 #include "io/ser.h"
 #include "io/single_image.h"
 #include "core/command.h"	// for processcommand()
@@ -2079,6 +2080,16 @@ void update_libraw_interface() {
 	writeinitfile();
 }
 
+void update_photometry_interface() {
+	com.phot_set.gain = gtk_spin_button_get_value(
+			GTK_SPIN_BUTTON(lookup_widget("spinGain")));
+	com.phot_set.inner = gtk_spin_button_get_value(
+			GTK_SPIN_BUTTON(lookup_widget("spinInner")));
+	com.phot_set.outer = gtk_spin_button_get_value(
+			GTK_SPIN_BUTTON(lookup_widget("spinOuter")));
+	writeinitfile();
+}
+
 char *vport_number_to_name(int vport) {
 	switch (vport) {
 	case RED_VPORT:
@@ -2765,6 +2776,23 @@ void set_GUI_LIBRAW() {
 	gtk_toggle_button_set_active(demosaicingButton,	com.debayer.open_debayer);
 }
 
+void set_GUI_photometry() {
+	if (gfit.cvf > 0.0)
+		com.phot_set.gain = gfit.cvf;
+	if (com.phot_set.gain > 0.0) {
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(lookup_widget("spinGain")),
+				com.phot_set.gain);
+	}
+	if (com.phot_set.inner > 0.0) {
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(lookup_widget("spinInner")),
+				com.phot_set.inner);
+	}
+	if (com.phot_set.outer > 0.0) {
+		gtk_spin_button_set_value(GTK_SPIN_BUTTON(lookup_widget("spinOuter")),
+				com.phot_set.outer);
+	}
+}
+
 /*****************************************************************************
  *      P U B L I C      C A L L B A C K      F U N C T I O N S              *
  ****************************************************************************/
@@ -2807,7 +2835,7 @@ gboolean paint_overlays(GtkWidget *widget, cairo_t *cr) {
 
 		while (com.stars[i]) {
 			// by design Sx>Sy, we redefine FWHM to be sure to have the value in px
-			double size = sqrt(com.stars[i]->fwhmx / 2.) * 2 * sqrt(log(2.) * 3);
+			double size = sqrt(com.stars[i]->sx / 2.) * 2 * sqrt(log(2.) * 3);
 
 			if (i == com.selected_star) {
 				cairo_set_line_width(cr, 2);
@@ -2835,8 +2863,27 @@ gboolean paint_overlays(GtkWidget *widget, cairo_t *cr) {
 			cairo_set_line_width(cr, 2.0/zoom);
 			fitted_PSF *the_psf = com.seq.photometry[i][com.seq.current];
 			if (the_psf) {
-				double size = sqrt(the_psf->fwhmx / 2.) * 2 * sqrt(log(2.) * 4);
+				double size = sqrt(the_psf->sx / 2.) * 2 * sqrt(log(2.) * 2) + 0.5;
 				cairo_arc(cr, the_psf->xpos, the_psf->ypos, size, 0., 2. * M_PI);
+				cairo_stroke(cr);
+				cairo_arc(cr, the_psf->xpos, the_psf->ypos, com.phot_set.inner, 0.,
+						2. * M_PI);
+				cairo_stroke(cr);
+				cairo_arc(cr, the_psf->xpos, the_psf->ypos, com.phot_set.outer, 0.,
+						2. * M_PI);
+				cairo_stroke(cr);
+				cairo_select_font_face(cr, "Purisa", CAIRO_FONT_SLANT_NORMAL,
+						CAIRO_FONT_WEIGHT_BOLD);
+				cairo_set_font_size(cr, 40);
+				cairo_move_to(cr, the_psf->xpos + com.phot_set.outer + 5, the_psf->ypos);
+				if (i == 0) {
+					cairo_show_text(cr, "V");
+				}
+				else {
+					char tmp[2];
+					g_snprintf(tmp, 2, "%d", i);
+					cairo_show_text(cr, tmp);
+				}
 				cairo_stroke(cr);
 			}
 		}
@@ -3095,6 +3142,8 @@ void on_menu_FITS_header_activate(GtkMenuItem *menuitem, gpointer user_data) {
 }
 
 void on_close_settings_button_clicked(GtkButton *button, gpointer user_data) {
+	update_libraw_interface();
+	update_photometry_interface();
 	gtk_widget_hide(lookup_widget("settings_window"));
 }
 
@@ -3165,10 +3214,6 @@ void on_checkbutton_auto_evaluate_toggled(GtkToggleButton *button,
 	GtkWidget *entry = lookup_widget("entry_flat_norm");
 
 	gtk_widget_set_sensitive(entry, !gtk_toggle_button_get_active(button));
-}
-
-void on_settings_window_hide(GtkWidget *widget, gpointer user_data) {
-	update_libraw_interface();
 }
 
 void on_combobinning_changed(GtkComboBox *box, gpointer user_data) {
@@ -3506,7 +3551,26 @@ gboolean on_drawingarea_button_release_event(GtkWidget *widget,
 			}
 			is_shift_on = FALSE;
 		} else if (event->button == 2) {
-			com.leveldrag = FALSE;
+			double dX, dY, w, h;
+
+			dX = 1.5 * com.phot_set.outer;
+			dY = dX;
+			w = 3 * com.phot_set.outer;
+			h = w;
+
+			if ((dX <= zoomedX) && (dY <= zoomedY)
+					&& (zoomedX - dX + w < gfit.rx)
+					&& (zoomedY - dY + h < gfit.ry)) {
+
+				com.selection.x = zoomedX - dX;
+				com.selection.y = zoomedY - dY;
+				com.selection.w = w;
+				com.selection.h = h;
+
+				new_selection_zone();
+				calculate_fwhm(widget);
+			}
+
 		} else if (event->button == 3) {
 			do_popup_graymenu(widget, NULL);
 		}
@@ -3521,71 +3585,61 @@ gboolean on_drawingarea_motion_notify_event(GtkWidget *widget,
 	fits *fit = &(gfit);
 
 	if (inimage((GdkEvent *) event)) {
-		if (com.leveldrag) {	// with button 2 down
-			/* FIXME: CODE DISABLED
-			 fit->lo = (event->y * (double)fit->max[com.cvport] / 2 / (double)fit->ry);
-			 fit->hi = (event->x * (double)fit->max[com.cvport] * 2 / (double)fit->rx);
-			 --delay;
-			 if(delay<=0) {
-			 level_adjust(fit, FALSE);
-			 delay = 5;
-			 }*/
-		} else {
-			char buffer[45];
-			char format[25], *format_base = "x: %%.%dd y: %%.%dd = %%.%dd";
-			int coords_width = 3, val_width = 3;
-			double zoom = get_zoom_val();
-			gint zoomedX, zoomedY;
-			zoomedX = (gint) (event->x / zoom);
-			zoomedY = (gint) (event->y / zoom);
-			if (fit->rx >= 1000 || fit->ry >= 1000)
-				coords_width = 4;
-			if (fit->hi >= 1000)
-				val_width = 4;
-			if (fit->hi >= 10000)
-				val_width = 5;
-			g_snprintf(format, sizeof(format), format_base, coords_width,
-					coords_width, val_width);
-			g_snprintf(buffer, sizeof(buffer), format, zoomedX, zoomedY,
-					fit->pdata[com.cvport][fit->rx * (fit->ry - zoomedY - 1)
-							+ zoomedX]);
-			/* TODO: fix to use the new function vport_number_to_name() */
-			if (widget == com.vport[RED_VPORT])
-				strcat(label, "r");
-			else if (widget == com.vport[GREEN_VPORT])
-				strcat(label, "g");
-			else if (widget == com.vport[BLUE_VPORT])
-				strcat(label, "b");
-			else
-				return FALSE;
-			gtk_label_set_text(
-					GTK_LABEL(gtk_builder_get_object(builder, label)), buffer);
+		char buffer[45];
+		char format[25], *format_base = "x: %%.%dd y: %%.%dd = %%.%dd";
+		int coords_width = 3, val_width = 3;
+		double zoom = get_zoom_val();
+		gint zoomedX, zoomedY;
+		zoomedX = (gint) (event->x / zoom);
+		zoomedY = (gint) (event->y / zoom);
+		if (fit->rx >= 1000 || fit->ry >= 1000)
+			coords_width = 4;
+		if (fit->hi >= 1000)
+			val_width = 4;
+		if (fit->hi >= 10000)
+			val_width = 5;
+		g_snprintf(format, sizeof(format), format_base, coords_width,
+				coords_width, val_width);
+		g_snprintf(buffer, sizeof(buffer), format, zoomedX, zoomedY,
+				fit->pdata[com.cvport][fit->rx * (fit->ry - zoomedY - 1)
+						+ zoomedX]);
+		/* TODO: fix to use the new function vport_number_to_name() */
+		if (widget == com.vport[RED_VPORT])
+			strcat(label, "r");
+		else if (widget == com.vport[GREEN_VPORT])
+			strcat(label, "g");
+		else if (widget == com.vport[BLUE_VPORT])
+			strcat(label, "b");
+		else
+			return FALSE;
+		gtk_label_set_text(GTK_LABEL(gtk_builder_get_object(builder, label)),
+				buffer);
 
-			if (com.drawing) {	// with button 1 down
-				if (zoomedX > com.startX) {
-					com.selection.x = com.startX;
-					com.selection.w = zoomedX - com.selection.x;
-				} else {
-					com.selection.x = zoomedX;
-					com.selection.w = com.startX - zoomedX;
-				}
-
-				if (zoomedY > com.startY) {
-					com.selection.y = com.startY;
-					if (is_shift_on)
-						com.selection.h = com.selection.w;
-					else
-						com.selection.h = zoomedY - com.selection.y;
-				} else {
-					com.selection.y = zoomedY;
-					if (is_shift_on)
-						com.selection.h = com.selection.w;
-					else
-						com.selection.h = com.startY - zoomedY;
-				}
-				gtk_widget_queue_draw(widget);
+		if (com.drawing) {	// with button 1 down
+			if (zoomedX > com.startX) {
+				com.selection.x = com.startX;
+				com.selection.w = zoomedX - com.selection.x;
+			} else {
+				com.selection.x = zoomedX;
+				com.selection.w = com.startX - zoomedX;
 			}
+
+			if (zoomedY > com.startY) {
+				com.selection.y = com.startY;
+				if (is_shift_on)
+					com.selection.h = com.selection.w;
+				else
+					com.selection.h = zoomedY - com.selection.y;
+			} else {
+				com.selection.y = zoomedY;
+				if (is_shift_on)
+					com.selection.h = com.selection.w;
+				else
+					com.selection.h = com.startY - zoomedY;
+			}
+			gtk_widget_queue_draw(widget);
 		}
+
 	}
 	return FALSE;
 }
@@ -3785,55 +3839,152 @@ void on_mirrory_button_clicked(GtkToolButton *button, gpointer user_data) {
 }
 
 void on_max_entry_changed(GtkEditable *editable, gpointer user_data) {
-	int value = atoi(gtk_entry_get_text(GTK_ENTRY(editable)));
+	const gchar *txt;
+	int value;
 
-	if (com.sliders != USER) {
-		com.sliders = USER;
-		sliders_mode_set_state(com.sliders);
+	txt = gtk_entry_get_text(GTK_ENTRY(editable));
+	if (g_ascii_isalnum(txt[0])) {
+
+		value = atoi(txt);
+
+		if (com.sliders != USER) {
+			com.sliders = USER;
+			sliders_mode_set_state(com.sliders);
+		}
+		if (single_image_is_loaded() && com.cvport < com.uniq->nb_layers
+		&& com.seq.current != RESULT_IMAGE)
+			com.uniq->layers[com.cvport].hi = value;
+		else if (sequence_is_loaded() && com.cvport < com.seq.nb_layers)
+			com.seq.layers[com.cvport].hi = value;
+		else
+			return;
+
+		set_cutoff_sliders_values();
+
+		if (copy_rendering_settings_when_chained(FALSE))
+			redraw(com.cvport, REMAP_ALL);
+		else
+			redraw(com.cvport, REMAP_ONLY);
+		redraw_previews();
 	}
-	if (single_image_is_loaded() && com.cvport < com.uniq->nb_layers
-	&& com.seq.current != RESULT_IMAGE)
-		com.uniq->layers[com.cvport].hi = value;
-	else if (sequence_is_loaded() && com.cvport < com.seq.nb_layers)
-		com.seq.layers[com.cvport].hi = value;
-	else
-		return;
-	set_cutoff_sliders_values();
-	if (copy_rendering_settings_when_chained(FALSE))
-		redraw(com.cvport, REMAP_ALL);
-	else
-		redraw(com.cvport, REMAP_ONLY);
-	redraw_previews();
+}
+
+gboolean on_max_entry_focus_out_event(GtkWidget *widget, gpointer user_data) {
+	const gchar *txt;
+	int len, i;
+	gboolean isalnum = TRUE;
+
+	txt = gtk_entry_get_text(GTK_ENTRY(widget));
+	len = gtk_entry_get_text_length(GTK_ENTRY(widget));
+	for (i = 0; i < len; i++)
+		if (!g_ascii_isalnum(txt[i])) {
+			isalnum = FALSE;
+			break;
+	}
+	if (isalnum == FALSE || len == 0)
+		gtk_entry_set_text(GTK_ENTRY(widget), "65535");
+	return FALSE;
+}
+
+gboolean on_min_entry_focus_out_event(GtkWidget *widget, gpointer user_data) {
+	const gchar *txt;
+	int len, i;
+	gboolean isalnum = TRUE;
+
+	txt = gtk_entry_get_text(GTK_ENTRY(widget));
+	len = gtk_entry_get_text_length(GTK_ENTRY(widget));
+	for (i = 0; i < len; i++)
+		if (!g_ascii_isalnum(txt[i])) {
+			isalnum = FALSE;
+			break;
+	}
+	if (isalnum == FALSE || len == 0)
+		gtk_entry_set_text(GTK_ENTRY(widget), "0");
+	return FALSE;
 }
 
 void on_min_entry_changed(GtkEditable *editable, gpointer user_data) {
-	int value = atoi(gtk_entry_get_text(GTK_ENTRY(editable)));
+	const gchar *txt;
+	int value;
 
-	if (com.sliders != USER) {
-		com.sliders = USER;
-		sliders_mode_set_state(com.sliders);
+	txt = gtk_entry_get_text(GTK_ENTRY(editable));
+	if (g_ascii_isalnum(txt[0])) {
+
+		value = atoi(txt);
+
+		if (com.sliders != USER) {
+			com.sliders = USER;
+			sliders_mode_set_state(com.sliders);
+		}
+		if (single_image_is_loaded() && com.cvport < com.uniq->nb_layers
+		&& com.seq.current != RESULT_IMAGE)
+			com.uniq->layers[com.cvport].lo = value;
+		else if (sequence_is_loaded() && com.cvport < com.seq.nb_layers)
+			com.seq.layers[com.cvport].lo = value;
+		else
+			return;
+		set_cutoff_sliders_values();
+		if (copy_rendering_settings_when_chained(FALSE))
+			redraw(com.cvport, REMAP_ALL);
+		else
+			redraw(com.cvport, REMAP_ONLY);
+		redraw_previews();
 	}
-	if (single_image_is_loaded() && com.cvport < com.uniq->nb_layers
-	&& com.seq.current != RESULT_IMAGE)
-		com.uniq->layers[com.cvport].lo = value;
-	else if (sequence_is_loaded() && com.cvport < com.seq.nb_layers)
-		com.seq.layers[com.cvport].lo = value;
-	else
-		return;
-	set_cutoff_sliders_values();
-	if (copy_rendering_settings_when_chained(FALSE))
-		redraw(com.cvport, REMAP_ALL);
-	else
-		redraw(com.cvport, REMAP_ONLY);
-	redraw_previews();
 }
 
 gboolean on_main_window_key_press_event(GtkWidget *widget, GdkEventKey *event,
 		gpointer user_data) {
-	//fprintf(stdout, "main window key event\n");
 
-	/* FIXME: there is a propagation problem somewhere, we have to do it by hand */
-	return on_drawingarea_key_press_event(widget, event, user_data);
+	GtkWidget *WidgetFocused = gtk_window_get_focus(
+			GTK_WINDOW(lookup_widget("main_window")));
+
+	if ((WidgetFocused != lookup_widget("max_entry")
+			&& WidgetFocused != lookup_widget("min_entry"))) {
+		/*** ZOOM shortcuts ***/
+		double oldzoom;
+		//fprintf(stdout, "drawing area key event\n");
+		oldzoom = com.zoom_value;
+		is_shift_on = FALSE;
+
+		switch (event->keyval) {
+		case GDK_KEY_plus:
+		case GDK_KEY_KP_Add:
+			if (oldzoom < 0)
+				com.zoom_value = 1.0;
+			else
+				com.zoom_value = min(ZOOM_MAX, oldzoom * 2.0);
+			break;
+		case GDK_KEY_minus:
+		case GDK_KEY_KP_Subtract:
+			if (oldzoom < 0)
+				com.zoom_value = 1.0;
+			else
+				com.zoom_value = max(ZOOM_MIN, oldzoom / 2.0);
+			break;
+		case GDK_KEY_equal:
+		case GDK_KEY_KP_Multiply:
+			com.zoom_value = 1.0;
+			break;
+		case GDK_KEY_KP_0:
+		case GDK_KEY_0:
+			com.zoom_value = -1.0;
+			break;
+		case GDK_KEY_Shift_L:
+		case GDK_KEY_Shift_R:
+			is_shift_on = TRUE;
+			break;
+		default:
+			//~ fprintf(stdout, "No bind found for key '%x'.\n", event->keyval);
+			break;
+		}
+		if (com.zoom_value != oldzoom) {
+			fprintf(stdout, _("new zoom value: %f\n"), com.zoom_value);
+			zoomcombo_update_display_for_zoom();
+			adjust_vport_size_to_image();
+			redraw(com.cvport, REMAP_NONE);
+		}
+	}
+	return FALSE;
 }
 
 static const gchar* copyright = N_("Copyright © 2004-2011 François Meyer\n"
@@ -5246,6 +5397,10 @@ void on_extract_channel_button_ok_clicked(GtkButton *button, gpointer user_data)
 
 	struct extract_channels_data *args = malloc(
 			sizeof(struct extract_channels_data));
+	if (args == NULL) {
+		printf("allocation error: extract_channel\n");
+		return;
+	}
 
 	if (combo_extract_channel == NULL) {
 		combo_extract_channel = GTK_COMBO_BOX(
@@ -5272,6 +5427,9 @@ void on_extract_channel_button_ok_clicked(GtkButton *button, gpointer user_data)
 		copyfits(&gfit, args->fit, CP_ALLOC | CP_COPYA | CP_FORMAT, 0);
 		start_in_new_thread(extract_channels, args);
 	}
+	else {
+		free(args);
+	}
 }
 
 /******************* POPUP GRAY MENU *******************************/
@@ -5293,7 +5451,7 @@ void on_menu_gray_psf_activate(GtkMenuItem *menuitem, gpointer user_data) {
 						_("Warning"), "gtk-dialog-warning");
 		return;
 	}
-	result = psf_get_minimisation(&gfit, layer, &com.selection);
+	result = psf_get_minimisation(&gfit, layer, &com.selection, TRUE);
 	if (!result)
 		return;
 
@@ -5307,11 +5465,11 @@ void on_menu_gray_psf_activate(GtkMenuItem *menuitem, gpointer user_data) {
 					"Angle:\n\t\t%0.2fdeg\n\n"
 					"Background Value:\n\t\tB=%.6f\n\n"
 					"Maximal Intensity:\n\t\tA=%.6f\n\n"
-					"Magnitude (%s):\n\t\tm=%.2f\n\n"
+					"Magnitude (%s):\n\t\tm=%.4f\u00B1%.4f\n\n"
 					"RMSE:\n\t\tRMSE=%.3e"), result->x0 + com.selection.x,
 			com.selection.y + com.selection.h - result->y0, result->fwhmx,
 			result->units, result->fwhmy, result->units, result->angle, result->B,
-			result->A, str, result->mag + com.magOffset, result->rmse);
+			result->A, str, result->mag + com.magOffset, result->s_mag, result->rmse);
 	show_data_dialog(msg, "PSF Results");
 	free(result);
 }
@@ -5373,7 +5531,7 @@ void on_menu_gray_stat_activate(GtkMenuItem *menuitem, gpointer user_data) {
 
 void on_button_fft_apply_clicked(GtkButton *button, gpointer user_data) {
 	const char *mag, *phase;
-	char *type, page;
+	char *type = NULL, page;
 	int type_order = -1;
 	static GtkToggleButton *order = NULL;
 	static GtkNotebook* notebookFFT = NULL;
@@ -5446,6 +5604,10 @@ void on_button_fft_apply_clicked(GtkButton *button, gpointer user_data) {
 		args->type_order = type_order;
 		set_cursor_waiting(TRUE);
 		start_in_new_thread(fourier_transform, args);
+	}
+	else {
+		if (type)
+			free(type);
 	}
 }
 
@@ -5932,12 +6094,12 @@ void on_crop_Apply_clicked (GtkButton *button, gpointer user_data) {
 
 #if defined(HAVE_FFMS2_1) || defined(HAVE_FFMS2_2)
 	if (com.seq.type == SEQ_AVI) {
-		siril_log_message("Crop does not work with avi film. Please, convert your file to SER first.\n");
+		siril_log_message(_("Crop does not work with avi film. Please, convert your file to SER first.\n"));
 		return;
 	}
 #endif
 	if (com.seq.type == SEQ_INTERNAL) {
-		siril_log_message("Not a valid sequence for cropping.\n");
+		siril_log_message(_("Not a valid sequence for cropping.\n"));
 	}
 
 	struct crop_sequence_data *args = malloc(sizeof(struct crop_sequence_data));
@@ -6047,4 +6209,8 @@ void on_rgb_align_dft_activate(GtkMenuItem *menuitem, gpointer user_data) {
 void on_rgb_align_psf_activate(GtkMenuItem *menuitem, gpointer user_data) {
 	undo_save_state("Processing: RGB alignment (PSF)");
 	rgb_align(0);
+}
+
+void on_gotoStacking_button_clicked(GtkButton *button, gpointer user_data) {
+	control_window_switch_to_tab(STACKING);
 }

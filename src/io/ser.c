@@ -37,6 +37,8 @@
 #include "algos/demosaicing.h"
 #include "io/ser.h"
 
+static gboolean warning = FALSE;
+
 /* 62135596800 sec from year 0001 to 01 janv. 1970 00:00:00 GMT */
 static const uint64_t epochTicks = 621355968000000000UL;
 static const uint64_t ticksPerSecond = 10000000;
@@ -76,6 +78,9 @@ static int display_date(uint64_t timestamp, char *txt) {
  * This is not thread-safe
  */
 static time_t __timegm(struct tm *tm) {
+#ifdef WIN32
+	return _mkgmtime(tm);
+#else
 	time_t ret;
 	char *tz;
 
@@ -89,6 +94,7 @@ static time_t __timegm(struct tm *tm) {
 		unsetenv("TZ");
 	tzset();
 	return ret;
+#endif
 }
 
 /* Convert FITS keyword DATE in a UNIX time format
@@ -98,13 +104,13 @@ static int FITS_date_key_to_Unix_time(char *date, uint64_t *utc,
 		uint64_t *local) {
 	struct tm timeinfo = { };
 	time_t ut, t;
-	int year = 0, month = 0, day = 0, hour = 0, min = 0, sec = 0;
+	int year = 0, month = 0, day = 0, hour = 0, min = 0, sec = 0, ms = 0;
 
 	if (date[0] == '\0')
 		return -1;
 
-	sscanf(date, "%04d-%02d-%02dT%02d:%02d:%02d", &year, &month, &day, &hour,
-			&min, &sec);
+	sscanf(date, "%04d-%02d-%02dT%02d:%02d:%02d.%02d", &year, &month, &day, &hour,
+			&min, &sec, &ms);
 
 	timeinfo.tm_year = year - 1900;
 	timeinfo.tm_mon = month - 1;
@@ -122,12 +128,14 @@ static int FITS_date_key_to_Unix_time(char *date, uint64_t *utc,
 	ut = __timegm(&timeinfo);
 	ut *= ticksPerSecond;
 	ut += epochTicks;
+	ut += ms * 100000;
 	*utc = (uint64_t) ut;
 
 	/* get local time from timeinfo* */
 	t = mktime(&timeinfo);
 	t *= ticksPerSecond;
 	t += epochTicks;
+	t += ms * 100000;
 	*local = (uint64_t) t;
 
 	return 0;
@@ -251,6 +259,8 @@ static int ser_fix_broken_file(struct ser_struct *ser_file) {
 
 	siril_log_message(_("Trying to fix broken SER file...\n"));
 	int frame_size = ser_file->image_width * ser_file->image_height;
+	if (frame_size == 0)
+		return 0;
 
 	if (ser_file->color_id == SER_RGB || ser_file->color_id == SER_BGR) {
 		frame_size *= 3;  // Color images have twice as many samples
@@ -293,7 +303,7 @@ static int ser_read_header(struct ser_struct *ser_file) {
 	memcpy(&ser_file->date_utc, header + 170, 8);
 
 	// strings
-	ser_file->file_id = strndup(header, 14);
+	ser_file->file_id = g_strndup(header, 14);
 
 	memcpy(ser_file->observer, header + 42, 40);
 	memcpy(ser_file->instrument, header + 82, 40);
@@ -471,6 +481,20 @@ void ser_manage_endianess_and_depth(struct ser_struct *ser_file, WORD *data, int
 /*
  * Public functions
  */
+
+void ser_convertTimeStamp(struct ser_struct *ser_file, GSList *timestamp) {
+	int i = 0;
+	ser_file->ts = calloc(8, ser_file->frame_count);
+
+	while (timestamp) {
+		uint64_t utc, local;
+
+		FITS_date_key_to_Unix_time(timestamp->data, &utc, &local);
+		timestamp = timestamp->next;
+		memcpy(&ser_file->ts[i], &utc, 8);
+		i++;
+	}
+}
 
 void ser_display_info(struct ser_struct *ser_file) {
 	char *color = convert_color_id_to_char(ser_file->color_id);
@@ -683,15 +707,18 @@ int ser_read_frame(struct ser_struct *ser_file, int frame_no, fits *fit) {
 			sensor_pattern bayer;
 			bayer = retrieveSERBayerPattern(type_ser);
 			if (bayer != com.debayer.bayer_pattern) {
-				if (bayer == BAYER_FILTER_NONE) {
+				if (bayer == BAYER_FILTER_NONE  && warning == FALSE) {
 					siril_log_color_message(_("No Bayer pattern found in the header file.\n"), "red");
 				}
 				else {
-					siril_log_color_message(_("Bayer pattern found in header (%s) is different"
-							" from Bayer pattern in settings (%s). Overriding settings.\n"),
-							"red", filter_pattern[bayer], filter_pattern[com.debayer.bayer_pattern]);
+					if (warning == FALSE) {
+						siril_log_color_message(_("Bayer pattern found in header (%s) is different"
+								" from Bayer pattern in settings (%s). Overriding settings.\n"),
+								"red", filter_pattern[bayer], filter_pattern[com.debayer.bayer_pattern]);
+					}
 					com.debayer.bayer_pattern = bayer;
 				}
+				warning = TRUE;
 			}
 		}
 		debayer(fit, com.debayer.bayer_inter);
@@ -793,15 +820,18 @@ int ser_read_opened_partial(struct ser_struct *ser_file, int layer,
 			sensor_pattern bayer;
 			bayer = retrieveSERBayerPattern(type_ser);
 			if (bayer != com.debayer.bayer_pattern) {
-				if (bayer == BAYER_FILTER_NONE) {
+				if (bayer == BAYER_FILTER_NONE && warning == FALSE) {
 					siril_log_color_message(_("No Bayer pattern found in the header file.\n"), "red");
 				}
 				else {
-					siril_log_color_message(_("Bayer pattern found in header (%s) is different"
-							" from Bayer pattern in settings (%s). Overriding settings.\n"),
-							"red", filter_pattern[bayer], filter_pattern[com.debayer.bayer_pattern]);
+					if (warning == FALSE) {
+						siril_log_color_message(_("Bayer pattern found in header (%s) is different"
+								" from Bayer pattern in settings (%s). Overriding settings.\n"),
+								"red", filter_pattern[bayer], filter_pattern[com.debayer.bayer_pattern]);
+					}
 					com.debayer.bayer_pattern = bayer;
 				}
+				warning = TRUE;
 			}
 		}
 		if (layer < 0 || layer >= 3) {

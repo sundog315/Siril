@@ -25,7 +25,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/types.h>
+#include <dirent.h>
+#ifndef WIN32
 #include <sys/resource.h>
+#else
+#include <windows.h>
+#endif
 #include <sys/stat.h>
 #include <fcntl.h>
 #if defined(__unix__) || (defined(__APPLE__) && defined(__MACH__))
@@ -39,7 +44,6 @@
 #include <sys/sysctl.h>
 #include <mach/vm_statistics.h>
 #endif
-#include <dirent.h>
 #include <ctype.h>
 #include <string.h>
 #include <assert.h>
@@ -48,6 +52,7 @@
 #include "core/siril.h"
 #include "core/proto.h"
 #include "io/conversion.h"
+#include "io/sequence.h"
 #include "gui/callbacks.h"
 #include "io/single_image.h"
 
@@ -132,57 +137,68 @@ int is_readable_file(const char *filename) {
 	struct stat sts;
 	if (stat(filename, &sts))
 		return 0;
-	if (S_ISREG (sts.st_mode) || S_ISLNK(sts.st_mode))
+	if (S_ISREG (sts.st_mode)
+#ifndef WIN32
+			|| S_ISLNK(sts.st_mode)
+#endif
+	)
 		return 1;
 	return 0;
 }
 
 /* Tests if filename is the canonical name of a known file type
  * `type' is set according to the result of the test,
- * `realname' (optionnal) is set according to the found file name.
+ * `realname' (optionnal) is set according to the found file name:: it
+ * must be freed with when no longer needed.
  * If filename contains an extension, only this file name is tested, else all
- * extensions are tested for the file name until one is found. */
-int stat_file(const char *filename, image_type *type, char *realname) {
-	// FIXME: realname should be a char ** to be allocated in the function
-	char *test_name;
+ * extensions are tested for the file name until one is found.  */
+int stat_file(const char *filename, image_type *type, char **realname) {
 	int k;
-	const char *ext = get_filename_ext(filename);
+	const char *ext;
 	*type = TYPEUNDEF;	// default value
 
 	/* check for an extension in filename and isolate it, including the . */
-	if (!filename || filename[0] == '\0')
+	if (filename[0] == '\0')
 		return 1;
+
+	ext = get_filename_ext(filename);
 	/* if filename has an extension, we only test for it */
 	if (ext) {
 		if (is_readable_file(filename)) {
 			if (realname)
-				strcpy(realname, filename);
+				*realname = strdup(filename);
 			*type = get_type_for_extension(ext);
 			return 0;
 		}
 		return 1;
 	}
 
-	test_name = malloc(strlen(filename) + 10);
 	/* else, we can test various file extensions */
 	/* first we test lowercase, then uppercase */
 	for (k = 0; k < 2; k++) {
 		int i = 0;
 		while (supported_extensions[i]) {
-			gchar *str;
-			if (k == 0)
-				str = strdup(supported_extensions[i]);
-			else str = g_ascii_strup(supported_extensions[i], strlen(supported_extensions[i]));
-			snprintf(test_name, 255, "%s%s", filename, str);
-			g_free(str);
-			if (is_readable_file(test_name)) {
-				*type = get_type_for_extension(supported_extensions[i]+1);
+			GString *testName = g_string_new(filename);
+			if (k == 0) {
+				testName = g_string_append(testName, supported_extensions[i]);
+			} else {
+				gchar *tmp = g_ascii_strup(supported_extensions[i],
+						strlen(supported_extensions[i]));
+				testName = g_string_append(testName, tmp);
+				g_free(tmp);
+			}
+			gchar *name = g_string_free(testName, FALSE);
+
+			if (is_readable_file(name)) {
+				*type = get_type_for_extension(supported_extensions[i] + 1);
 				assert(*type != TYPEUNDEF);
 				if (realname)
-					strcpy(realname, test_name);
+					*realname = strdup(name);
+				g_free(name);
 				return 0;
 			}
 			i++;
+			g_free(name);
 		}
 	}
 	return 1;
@@ -223,7 +239,7 @@ int changedir(const char *dir) {
 				str);
 		return 0;
 	}
-	siril_log_message(_("Could not change directory.\n"));
+	siril_log_message(_("Could not change directory to '%s'.\n"), dir);
 	return 1;
 }
 
@@ -234,8 +250,6 @@ int changedir(const char *dir) {
 int update_sequences_list(const char *sequence_name_to_select) {
 	GtkComboBoxText *seqcombo;
 	struct dirent **list;
-	int i, n;
-	char filename[256];
 	int number_of_loaded_sequences = 0;
 	int index_of_seq_to_load = -1;
 
@@ -243,6 +257,12 @@ int update_sequences_list(const char *sequence_name_to_select) {
 	seqcombo = GTK_COMBO_BOX_TEXT(
 			gtk_builder_get_object(builder, "sequence_list_combobox"));
 	gtk_combo_box_text_remove_all(seqcombo);
+
+#ifdef WIN32
+	number_of_loaded_sequences = ListSequences(com.wd, sequence_name_to_select, seqcombo, &index_of_seq_to_load);
+#else
+	int i, n;
+	char filename[256];
 
 	n = scandir(com.wd, &list, 0, alphasort);
 	if (n < 0)
@@ -269,6 +289,7 @@ int update_sequences_list(const char *sequence_name_to_select) {
 	for (i = 0; i < n; i++)
 		free(list[i]);
 	free(list);
+#endif
 
 	if (!number_of_loaded_sequences) {
 		fprintf(stderr, "No valid sequence found in CWD.\n");
@@ -609,3 +630,156 @@ void load_css_style_sheet (char *path) {
 	}
 	g_free(CSSFile);
 }
+
+/* code borrowed from muniwin
+ * From a datetime it computes the Julian date needed in photometry */
+double encodeJD(dateTime dt) {
+	double jd1;
+	int before, d1, d2;
+
+	/* Check date and time */
+	if (dt.day <= 0 || dt.year <= 0 || dt.month <= 0)
+		return 0;
+
+	/* Compute Julian date from input citizen year, month and day. */
+	/* Tested for YEAR>0 except 1582-10-07/15 */
+	if (dt.year > 1582) {
+		before = 0;
+	} else if (dt.year < 1582) {
+		before = 1;
+	} else if (dt.month > 10) {
+		before = 0;
+	} else if (dt.month < 10) {
+		before = 1;
+	} else if (dt.day >= 15) {
+		before = 0;
+	} else {
+		before = 1;
+	}
+	if (dt.month <= 2) {
+		d1 = (int) (365.25 * (dt.year - 1));
+		d2 = (int) (30.6001 * (dt.month + 13));
+	} else {
+		d1 = (int) (365.25 * (dt.year));
+		d2 = (int) (30.6001 * (dt.month + 1));
+	}
+	jd1 = 1720994.5 + d1 + d2 + dt.day;
+	jd1 += 1.0 * dt.hour / 24;
+	jd1 += 1.0 * dt.min / 1440.0;
+	jd1 += 1.0 * dt.sec / 86400.0;
+	jd1 += 1.0 * dt.ms / 86400000.0;
+
+	if (before) {
+		if (dt.year < 0)
+			return jd1 - 1;
+		else
+			return jd1;
+	} else {
+		return jd1 + 2 - (dt.year / 100) + (dt.year / 400);
+	}
+}
+
+#ifdef WIN32
+int ListDirectoryContents(const char *sDir) {
+	WIN32_FIND_DATA fdFile;
+	HANDLE hFind = NULL;
+	const char *ext;
+	char sPath[2048];
+
+	//Specify a file mask. *.* = We want everything!
+	sprintf(sPath, "%s\\*.*", sDir);
+
+	if ((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE) {
+		printf("Path not found: [%s]\n", sDir);
+		return 1;
+	}
+
+	do {
+		//Find first file will always return "."
+		//    and ".." as the first two directories.
+		if (strcmp(fdFile.cFileName, ".") != 0
+				&& strcmp(fdFile.cFileName, "..") != 0) {
+			//Build up our file path using the passed in
+			//  [sDir] and the file/foldername we just found:
+			sprintf(sPath, "%s\\%s", sDir, fdFile.cFileName);
+
+			//Is the entity a File or Folder?
+			if (fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+				siril_log_color_message(_("Directory: %s\n"), "green",	fdFile.cFileName);
+			} else {
+				//printf("File: %s\n", sPath);
+				ext = get_filename_ext(fdFile.cFileName);
+				if (!ext)
+					continue;
+				image_type type = get_type_for_extension(ext);
+				if (type != TYPEUNDEF) {
+					if (type == TYPEAVI || type == TYPESER)
+						siril_log_color_message(_("Sequence: %s\n"), "salmon",
+								fdFile.cFileName);
+					else if (type == TYPEFITS)
+						siril_log_color_message(_("Image: %s\n"), "plum", fdFile.cFileName);
+					else
+						siril_log_color_message(_("Image: %s\n"), "red", fdFile.cFileName);
+				} else if (!strncmp(ext, "seq", 4))
+					siril_log_color_message(_("Sequence: %s\n"), "blue", fdFile.cFileName);
+			}
+		}
+	} while (FindNextFile(hFind, &fdFile)); //Find the next file.
+
+	FindClose(hFind);
+
+	return 0;
+}
+
+int ListSequences(const char *sDir, const char *sequence_name_to_select, GtkComboBoxText *seqcombo,
+		int *index_of_seq_to_load) {
+	WIN32_FIND_DATA fdFile;
+	HANDLE hFind = NULL;
+	char sPath[2048];
+	char filename[256];
+	int number_of_loaded_sequences = 0;
+
+	//Specify a file mask. *.* = We want everything!
+	sprintf(sPath, "%s\\*.*", sDir);
+
+	if ((hFind = FindFirstFile(sPath, &fdFile)) == INVALID_HANDLE_VALUE) {
+		printf("Path not found: [%s]\n", sDir);
+		return 1;
+	}
+
+	do {
+		//Find first file will always return "."
+		//    and ".." as the first two directories.
+		if (strcmp(fdFile.cFileName, ".") != 0
+				&& strcmp(fdFile.cFileName, "..") != 0) {
+			//Build up our file path using the passed in
+			//  [sDir] and the file/foldername we just found:
+			sprintf(sPath, "%s\\%s", sDir, fdFile.cFileName);
+
+			//Is the entity a File or Folder?
+			if (!(fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)) {
+				char *suf;
+
+				if ((suf = strstr(fdFile.cFileName, ".seq")) && strlen(suf) == 4) {
+					sequence *seq = readseqfile(fdFile.cFileName);
+					if (seq != NULL) {
+						strncpy(filename, fdFile.cFileName, 255);
+						free_sequence(seq, TRUE);
+						gtk_combo_box_text_append_text(seqcombo, filename);
+						if (sequence_name_to_select
+								&& !strncmp(filename, sequence_name_to_select,
+										strlen(filename))) {
+							*index_of_seq_to_load = number_of_loaded_sequences;
+						}
+						++number_of_loaded_sequences;
+					}
+				}
+			}
+		}
+	} while (FindNextFile(hFind, &fdFile)); //Find the next file.
+
+	FindClose(hFind);
+
+	return number_of_loaded_sequences;
+}
+#endif

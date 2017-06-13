@@ -27,6 +27,9 @@
 #ifdef MAC_INTEGRATION
 #include "gtkmacintegration/gtkosxapplication.h"
 #endif
+#ifdef WIN32
+#include <windows.h>
+#endif
 #include <unistd.h>
 #include <signal.h>
 #include <stdio.h>
@@ -41,6 +44,7 @@
 #include "core/siril.h"
 #include "core/proto.h"
 #include "core/initfile.h"
+#include "io/sequence.h"
 #include "io/conversion.h"
 #include "gui/callbacks.h"
 #include "registration/registration.h"
@@ -126,6 +130,7 @@ char *siril_sources[] = {
 
 void usage(const char *command) {
     printf("\nUsage:  %s [OPTIONS] [IMAGE_FILE_TO_OPEN]\n\n", command);
+    puts("-d                      Setting argument in cwd.");
     puts("-i                      With init file name in argument. Start Siril.");
     puts("-f (or --format)        Print all supported image file formats (depending on the libraries you've installed)");
     puts("-v (or --version)       Print program name and version and exit");
@@ -133,7 +138,7 @@ void usage(const char *command) {
 }
 
 void signal_handled(int s) {
-	//printf("Caught signal %d\n", s);
+	// printf("Caught signal %d\n", s);
 	undo_flush();
 	exit(EXIT_FAILURE);
 }
@@ -144,14 +149,19 @@ int main(int argc, char *argv[]) {
 	extern int opterr;
 	gchar *siril_path;
 	char *cwd_orig = NULL;
-	struct sigaction sigIntHandler;
+	gboolean forcecwd = FALSE;
+	char *cwd_forced = NULL;
 #if (defined(__APPLE__) && defined(__MACH__))
 	int ret;
 	pid_t pid;
 	char path[PROC_PIDPATHINFO_MAXSIZE];
 #endif
 	
+#ifdef WIN32
+	_putenv_s("LC_NUMERIC", "C");
+#else
 	setenv("LC_NUMERIC", "C", 1);		// avoid possible bugs using french separator ","
+#endif
 	opterr = 0;
 	memset(&com, 0, sizeof(struct cominf));	// needed?
 	com.initfile = NULL;
@@ -161,13 +171,10 @@ int main(int argc, char *argv[]) {
 	textdomain(PACKAGE);
 
 	/* Caught signals */
-	sigIntHandler.sa_handler = signal_handled;
-	sigemptyset(&sigIntHandler.sa_mask);
-	sigIntHandler.sa_flags = 0;
-	sigaction(SIGINT, &sigIntHandler, NULL);
+	signal(SIGINT, signal_handled);
 
 	while (1) {
-		signed char c = getopt(argc, argv, "i:hfv");
+		signed char c = getopt(argc, argv, "i:hfvd:");
 		if (c == '?') {
 			for (i = 1; i < argc; i++) {
 				if (argv[i][1] == '-') {
@@ -177,6 +184,8 @@ int main(int argc, char *argv[]) {
 						c = 'h';
 					else if (!strcmp(argv[i], "--format"))
 						c = 'f';
+					else if (!strcmp(argv[i], "--directory"))
+						c = 'd';
 					else {
 						usage(argv[0]);
 						exit(EXIT_FAILURE);
@@ -198,6 +207,10 @@ int main(int argc, char *argv[]) {
 		case 'f':
 			list_format_available();
 			exit(EXIT_SUCCESS);
+			break;
+		case 'd':
+			cwd_forced = optarg;
+			forcecwd = TRUE;
 			break;
 		default:
 			fprintf(stderr, _("unknown command line parameter '%c'\n"), argv[argc - 1][1]);
@@ -241,7 +254,7 @@ int main(int argc, char *argv[]) {
 			g_free(path);
 			break;
 		}
-		fprintf (stderr, _("Unable to read file: %s\n"), err->message);
+		fprintf (stderr, _("%s. Looking into another directory...\n"), err->message);
 		g_free(path);
 		g_error_free(err);
 		i++;
@@ -374,6 +387,7 @@ int main(int argc, char *argv[]) {
 #ifdef HAVE_LIBRAW
 	set_GUI_LIBRAW();
 #endif
+	set_GUI_photometry();
 	
 	/* Get CPU number and set the number of threads */
 	siril_log_message(_("Parallel processing %s: Using %d logical processor(s).\n"),
@@ -409,12 +423,20 @@ int main(int argc, char *argv[]) {
 		if (cwd_orig)
 			changedir(cwd_orig);
 		open_single_image(argv[optind]);
-		gchar *newpath = g_path_get_dirname(argv[optind]);
-		changedir(newpath);
-		g_free(newpath);
+		if (!forcecwd) {
+			gchar *newpath = g_path_get_dirname(argv[optind]);
+			changedir(newpath);
+			g_free(newpath);
+		}
 	}
+
+	if (forcecwd && cwd_forced) {
+		changedir(cwd_forced);
+	}
+
 	if (cwd_orig)
 		free(cwd_orig);
+
 	gtk_main();
 
 	/* quit Siril */
