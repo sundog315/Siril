@@ -94,15 +94,16 @@ void vips_reload() {
  * If gfit.data has moved or changed size, use vips_reload() instead. */
 void vips_remap(int vport, WORD lo, WORD hi, display_mode mode) {
 	int retval;
-	double scale, offset = 0.0;
+	double scale, offset;
 	scale = UCHAR_MAX_DOUBLE / (double) (hi - lo);
 
-	fprintf(stdout, "vips remap %d, lo: %hd, hi: %hd\n", vport, lo, hi);
+	fprintf(stdout, "vips remap %d, lo: %hu, hi: %hu\n", vport, lo, hi);
 
 	if (lo > hi) {
 		// negative display, scale is already negative
-		offset = UCHAR_MAX_DOUBLE;
+		offset = UCHAR_MAX_DOUBLE - (double)hi*scale;
 	}
+	else offset = -(double)lo*scale;
 
 	if (mapped_images[vport]) {
 		g_object_unref(mapped_images[vport]);
