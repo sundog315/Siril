@@ -24,6 +24,7 @@
 
 #include "vips_display.h"
 #include "gui/callbacks.h"
+#include "gui/vips_operations/siril_operations.h"
 #include "core/proto.h"
 
 /* This file contains all code interacting with vips, the fast rendering
@@ -95,27 +96,43 @@ void vips_reload() {
 void vips_remap(int vport, WORD lo, WORD hi, display_mode mode) {
 	int retval;
 	double scale, offset;
+	VipsImage *tmprgb[3];
 	scale = UCHAR_MAX_DOUBLE / (double) (hi - lo);
 
-	fprintf(stdout, "vips remap %d, lo: %hu, hi: %hu\n", vport, lo, hi);
-
-	if (lo > hi) {
-		// negative display, scale is already negative
-		offset = UCHAR_MAX_DOUBLE - (double)hi*scale;
-	}
-	else offset = -(double)lo*scale;
+	//fprintf(stdout, "vips remap %d, lo: %hu, hi: %hu\n", vport, lo, hi);
 
 	if (mapped_images[vport]) {
 		g_object_unref(mapped_images[vport]);
 		mapped_images[vport] = NULL;
 	}
 
-	/* only linear mapping for now */
-	VipsImage *tmprgb[3];
-	retval = vips_linear1( images[vport], &tmprgb[0], scale, offset, "uchar", TRUE, NULL );
-	if (retval) return;
+	switch (mode) {
+		case LINEAR_DISPLAY:
+			if (lo > hi) {
+				// negative display, scale is already negative
+				offset = UCHAR_MAX_DOUBLE - (double)hi*scale;
+			}
+			else offset = -(double)lo*scale;
+
+			/* only linear mapping for now */
+			retval = vips_linear1( images[vport], &tmprgb[0], scale, offset, "uchar", TRUE, NULL );
+			if (retval) return;
+			break;
+
+		case LOG_DISPLAY:
+			retval = siril_log_scaling( images[vport], &tmprgb[0], scale, NULL );
+			//retval = vips_call( "siril_log", images[vport], &tmprgb[0], scale, NULL );
+			if (retval) return;
+			break;
+
+		default:
+			fprintf(stderr, "OPERATION NOT YET SUPPORTED\n");
+			return;
+	}
+
 	mapped_images[vport] = tmprgb[0];
 
+	/* one channel to grey RGB */
 	retval = vips_copy(tmprgb[0], &tmprgb[1], NULL);
 	if (retval) return;
 	retval = vips_copy(tmprgb[0], &tmprgb[2], NULL);
@@ -183,7 +200,7 @@ void commit_rendering(int vport) {
 	VipsRegion *region = vips_region_new(display_images[vport]);
 	draw_callbacks[vport] = g_signal_connect(drawing_area[vport], "draw", 
 			G_CALLBACK( vipsdisp_draw ), region);
-	fprintf(stdout, "vips rendering updated\n");
+	//fprintf(stdout, "vips rendering updated\n");
 }
 
 typedef struct _Update {
@@ -232,9 +249,10 @@ vipsdisp_draw_rect( GtkWidget *drawing_area,
 	int x, y;
 	cairo_surface_t *surface;
 
-	printf( "vipsdisp_draw_rect: left = %d, top = %d, width = %d, height = %d\n",
+	/*printf( "vipsdisp_draw_rect: left = %d, top = %d, width = %d, height = %d\n",
 			expose->left, expose->top,
 			expose->width, expose->height );
+			*/
 
 	/* Clip against the image size ... we don't want to try painting 
 	 * outside the image area. */
@@ -284,7 +302,7 @@ vipsdisp_draw( GtkWidget *drawing_area, cairo_t *cr, VipsRegion *region )
 	cairo_rectangle_list_t *rectangle_list = 
 		cairo_copy_clip_rectangle_list( cr );
 
-	printf( "vipsdisp_draw\n" ); 
+	//printf( "vipsdisp_draw\n" ); 
 
 	if( rectangle_list->status == CAIRO_STATUS_SUCCESS ) { 
 		int i;

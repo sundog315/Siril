@@ -70,10 +70,10 @@ static gboolean is_shift_on = FALSE;
 
 layer_info predefined_layers_colors[] = {
 		/* name, lambda, lo, hi, c/over, c/under, mode */
-		{ "Luminance", 0.0, 0, 0, FALSE, FALSE, NORMAL_DISPLAY }, // no color, undefined value is <0
-		{ "Red", 650.0, 0, 0, FALSE, FALSE, NORMAL_DISPLAY }, // approx. of the middle of the color
-		{ "Green", 530.0, 0, 0, FALSE, FALSE, NORMAL_DISPLAY },	// approx. of the middle of the color
-		{ "Blue", 450.0, 0, 0, FALSE, FALSE, NORMAL_DISPLAY }// approx. of the middle of the color
+		{ "Luminance", 0.0, 0, 0, FALSE, FALSE, LINEAR_DISPLAY }, // no color, undefined value is <0
+		{ "Red", 650.0, 0, 0, FALSE, FALSE, LINEAR_DISPLAY }, // approx. of the middle of the color
+		{ "Green", 530.0, 0, 0, FALSE, FALSE, LINEAR_DISPLAY },	// approx. of the middle of the color
+		{ "Blue", 450.0, 0, 0, FALSE, FALSE, LINEAR_DISPLAY }// approx. of the middle of the color
 };
 
 /* remap index data, an index for each layer */
@@ -732,7 +732,7 @@ static int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
 
 	/* initialization of data required to build the remap_index */
 	switch (mode) {
-	case NORMAL_DISPLAY:
+	case LINEAR_DISPLAY:
 		pente = UCHAR_MAX_SINGLE / (float) (hi - lo);
 		break;
 	case LOG_DISPLAY:
@@ -792,7 +792,7 @@ static int make_index_for_current_display(display_mode mode, WORD lo, WORD hi,
 			// asinh(2.78*10^110) = 255
 			index[i] = round_to_BYTE(asinhf((float) i / 1000.f) * pente); //1000.f is arbitrary: good matching with ds9, could be asinhf(a*Q*i)/Q
 			break;
-		case NORMAL_DISPLAY:
+		case LINEAR_DISPLAY:
 			index[i] = round_to_BYTE((float) i * pente);
 			break;
 		case STF_DISPLAY:
@@ -1964,7 +1964,7 @@ int copy_rendering_settings_when_chained(gboolean from_GUI) {
 		int raw_mode = gtk_combo_box_get_active(modecombo);
 		/* update values in the layer_info for cvport */
 		layers[com.cvport].rendering_mode =
-				raw_mode >= 0 ? raw_mode : NORMAL_DISPLAY;
+				raw_mode >= 0 ? raw_mode : LINEAR_DISPLAY;
 		layers[com.cvport].lo = round_to_WORD(gtk_range_get_value(range_lo));
 		layers[com.cvport].hi = round_to_WORD(gtk_range_get_value(range_hi));
 		layers[com.cvport].cut_over = gtk_toggle_button_get_active(cutmax);
@@ -2609,7 +2609,7 @@ void initialize_display_mode() {
 	raw_mode = gtk_combo_box_get_active(modecombo);
 	/* Check if never initialized. In this case the mode is set to linear */
 	if (raw_mode == -1)
-		mode = NORMAL_DISPLAY;
+		mode = LINEAR_DISPLAY;
 	else
 		mode = raw_mode;
 	/* The mode is applyed for each layer */

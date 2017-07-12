@@ -12,6 +12,7 @@ siril_SOURCES = \
 	io/image_formats_libraries.c io/image_formats_internal.c io/image_format_fits.c \
 	io/sequence.c io/sequence.h io/seqfile.c io/single_image.c io/single_image.h \
 	io/mp4_output.h io/mp4_output.c \
+	gui/vips_operations/vips_siril_log.c gui/vips_operations/siril_operations.h \
 	gui/callbacks.c gui/callbacks.h gui/vips_display.c gui/vips_display.h gui/histogram.c gui/histogram.h \
 	gui/PSF_list.h gui/PSF_list.c gui/sequence_list.c gui/registration_preview.c \
 	gui/statistics_list.c \
