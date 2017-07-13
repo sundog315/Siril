@@ -27,13 +27,15 @@
 #include "gui/vips_operations/siril_operations.h"
 #include "core/proto.h"
 
-/* This file contains all code interacting with vips, the fast rendering
- * library. It consequently contains the code responsible for drawing images in
- * siril windows, the GTK+ `draw' callbacks for the drawing areas, the image
- * mapping functions for display purposes.
+/* This file contains most of the code interacting with vips, the fast rendering
+ * library. It contains the code responsible for drawing images in siril
+ * windows, the GTK+ `draw' callbacks for the drawing areas, the image mapping
+ * functions for display purposes.
+ * Some special scaling operations for image rendering are available in other
+ * files in src/gui/vips_operations/.
  */
 
-static VipsImage *images[MAXGRAYVPORT];		// raw monochrome images
+static VipsImage *images[MAXGRAYVPORT];		// gfit pdata as vips images
 static VipsImage *mapped_images[MAXGRAYVPORT];	// colour-mapped monochrome images
 static VipsImage *display_images[MAXVPORT];	// passing data from remap to display
                                                
@@ -50,6 +52,9 @@ static void release_data();
 void initialize_vips(const char *program_name) {
 	if( VIPS_INIT( program_name ) )
 		vips_error_exit( "unable to start VIPS" );
+
+	/* load siril-defined operations */
+	siril_log_get_type();
 
 	drawing_area[RED_VPORT] = lookup_widget("drawingarear");
 	drawing_area[GREEN_VPORT] = lookup_widget("drawingareag");
@@ -72,14 +77,16 @@ void vips_reload() {
 				gfit.rx, gfit.ry, 1, VIPS_FORMAT_USHORT);
 		if (!images[i]) {
 			g_object_unref(images[i]);
-			fprintf(stderr, "error creating vips image %d\n", i);
+			fprintf(stderr, "error creating vips image for channel %d: %s\n", i, vips_error_buffer());
+			vips_error_clear();
 			return;
 		}
 
 		VipsImage *x;
 		if (vips_flip(images[i], &x, VIPS_DIRECTION_VERTICAL, NULL)) {
 			g_object_unref(images[i]);
-			fprintf(stderr, "error flipping vips image %d\n", i);
+			fprintf(stderr, "error flipping vips image for channel %d: %s\n", i, vips_error_buffer());
+			vips_error_clear();
 			return;
 		}
 		g_object_unref(images[i]);
@@ -116,18 +123,22 @@ void vips_remap(int vport, WORD lo, WORD hi, display_mode mode) {
 
 			/* only linear mapping for now */
 			retval = vips_linear1( images[vport], &tmprgb[0], scale, offset, "uchar", TRUE, NULL );
-			if (retval) return;
 			break;
 
 		case LOG_DISPLAY:
 			retval = siril_log_scaling( images[vport], &tmprgb[0], scale, NULL );
 			//retval = vips_call( "siril_log", images[vport], &tmprgb[0], scale, NULL );
-			if (retval) return;
 			break;
 
 		default:
 			fprintf(stderr, "OPERATION NOT YET SUPPORTED\n");
 			return;
+	}
+
+	if (retval) {
+		fprintf(stderr, "VIPS error reported: %s\n", vips_error_buffer());
+		vips_error_clear();
+		return;
 	}
 
 	mapped_images[vport] = tmprgb[0];
@@ -139,7 +150,7 @@ void vips_remap(int vport, WORD lo, WORD hi, display_mode mode) {
 	if (retval) { g_object_unref(tmprgb[1]); return; }
 
 	retval = vips_bandjoin(tmprgb, &display_images[vport], 3, NULL);
-	//g_object_unref(tmprgb[0]);
+	//g_object_unref(tmprgb[0]);	// referenced in mapped_images
 	g_object_unref(tmprgb[1]);
 	g_object_unref(tmprgb[2]);
 	if (retval) return;
@@ -338,9 +349,9 @@ static void release_data() {
 	if (display_images[RGB_VPORT])
 		g_object_unref(display_images[RGB_VPORT]);
 
-	memset(images, 0, sizeof(VipsImage *) * MAXGRAYVPORT);
-	memset(mapped_images, 0, sizeof(VipsImage *) * MAXGRAYVPORT);
-	memset(display_images, 0, sizeof(VipsImage *) * MAXVPORT);
+	memset(images, 0, sizeof(images));
+	memset(mapped_images, 0, sizeof(mapped_images));
+	memset(display_images, 0, sizeof(display_images));
 }
 
 void uninitialize_vips() {

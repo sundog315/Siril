@@ -3,7 +3,7 @@
 
 #include <vips/vips.h>
 
-//extern GType siril_log_get_type( void );
+extern GType siril_log_get_type( void );
 
 int siril_log_scaling( VipsImage *in, VipsImage **out, ... );
 

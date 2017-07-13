@@ -1,5 +1,27 @@
+/*
+ * This file is part of Siril, an astronomy image processor.
+ * Copyright (C) 2005-2011 Francois Meyer (dulle at free.fr)
+ * Copyright (C) 2012-2017 team free-astro (see more in AUTHORS file)
+ * Reference site is https://free-astro.org/index.php/Siril
+ *
+ * Siril is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * Siril is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Siril. If not, see <http://www.gnu.org/licenses/>.
+*/
+
 /* This is the vips operation implementing the log scaling for display of images.
  * Input can be UCHAR, USHORT, FLOAT, DOUBLE; Output is always UCHAR.
+ * The input and ouput images should have only one band (channel). The output
+ * image is then used with other channels images to create the RGB view.
  *
  * The actual operation is: round_to_BYTE(logf((float) i / 10.f) * pente);
  * 10.f is arbitry: good matching with ds9
@@ -59,8 +81,8 @@ static unsigned char round_to_UCHAR(float x) {
 	unsigned char *q = (unsigned char *) VIPS_REGION_ADDR( or, r->left, r->top + y ); \
 	\
 	for( x = 0; x < line_size; x++ ) { \
-		/* q[x] = round_to_BYTE(logf((float)p[x] / 10.f) * pente); */ \
-		q[x] = round_to_UCHAR(logf((float)p[x] * PIXEL_VALUE_FACTOR) * siril_log->slope); \
+		/* q[x] = round_to_UCHAR(logf((float)p[x] * PIXEL_VALUE_FACTOR) * siril_log->slope); */ \
+		q[x] = round_to_UCHAR((float)p[x]); \
 	} \
 }
 
@@ -114,25 +136,30 @@ siril_log_build( VipsObject *object )
 	if( VIPS_OBJECT_CLASS( siril_log_parent_class )->build( object ) )
 		return( -1 );
 
+	VipsBandFormat fmt = vips_image_get_format( siril_log->in );
 	if( vips_check_uncoded( class->nickname, siril_log->in ) ||
-			(!vips_check_format( class->nickname, siril_log->in, VIPS_FORMAT_UCHAR ) &&
-			 !vips_check_format( class->nickname, siril_log->in, VIPS_FORMAT_USHORT ) &&
-			 !vips_check_format( class->nickname, siril_log->in, VIPS_FORMAT_FLOAT ) &&
-			 !vips_check_format( class->nickname, siril_log->in, VIPS_FORMAT_DOUBLE )) )
-		vips_error( "siril", "unknown image format in log scaling" );
+			( fmt != VIPS_FORMAT_UCHAR &&
+			  fmt != VIPS_FORMAT_USHORT &&
+			  fmt != VIPS_FORMAT_FLOAT &&
+			  fmt != VIPS_FORMAT_DOUBLE ) ) {
+		vips_error( "siril", "unsupported image format in log scaling %d", fmt );
 		return( -1 );
+	}
 
+	/* creating the output image: always 1 band and UCHAR */
 	g_object_set( object, "out", vips_image_new(), NULL ); 
+	siril_log->out->Bands = 1;
+	siril_log->out->BandFmt = VIPS_FORMAT_UCHAR;
 
-	if( vips_image_pipelinev( siril_log->out, 
+	if( vips_image_pipelinev( siril_log->out,
 				VIPS_DEMAND_STYLE_THINSTRIP, siril_log->in, NULL ) )
 		return( -1 );
 
-	if( vips_image_generate( siril_log->out, 
+	if( vips_image_generate(siril_log->out, 
 				vips_start_one, 
 				siril_log_generate, 
 				vips_stop_one, 
-				siril_log->in, siril_log ) )
+				siril_log->in, siril_log) )
 		return( -1 );
 
 	return( 0 );
